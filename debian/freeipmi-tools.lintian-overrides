@@ -1,0 +1,14 @@
+# Those 2 manpages are just troff way to link to other manpages
+# They are perfectly legal and whatis entry is irrelevant
+freeipmi-tools binary: manpage-has-bad-whatis-entry usr/share/man/man5/ipmiconsole.conf.5.gz
+freeipmi-tools binary: manpage-has-bad-whatis-entry usr/share/man/man5/ipmipower.conf.5.gz
+
+# Those 2 manpages refer to freeipmi.conf.5 which is shipped within
+# freeipmi-common on which freeipmi-tools depends on
+freeipmi-tools binary: manpage-has-errors-from-man usr/share/man/man5/ipmiconsole.conf.5.gz 28: can't open `man5/freeipmi.conf.5': No such file or directory
+freeipmi-tools binary: manpage-has-errors-from-man usr/share/man/man5/ipmipower.conf.5.gz 28: can't open `man5/freeipmi.conf.5': No such file or directory
+
+# Quite a few lines in freeipmi pages might not be hypened easily, e.g. like
+# .B Chassis_Front_Panel_Buttons:Enable_Power_Off_Button_For_Power_Off_Only
+freeipmi-tools binary: manpage-has-errors-from-man usr/share/man/man8/ipmi-chassis-config.8.gz 266: warning [p 4, 10.5i]: cannot adjust line
+

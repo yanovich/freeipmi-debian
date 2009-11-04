@@ -1,0 +1,4 @@
+etc/logrotate.d/freeipmi-bmc-watchdog
+etc/sysconfig/freeipmi-bmc-watchdog etc/default/
+usr/sbin/bmc-watchdog
+usr/share/man/man8/bmc-watchdog.8

@@ -1,0 +1,6 @@
+usr/sbin/ipmidetect
+usr/sbin/ipmidetectd
+usr/share/man/man8/ipmidetectd.8
+usr/share/man/man5/ipmidetectd.conf.5
+usr/share/man/man8/ipmidetect.8
+usr/share/man/man5/ipmidetect.conf.5

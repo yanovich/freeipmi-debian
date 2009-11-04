@@ -1,0 +1,26 @@
+Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=59
+Name: freeipmi
+Maintainer: Albert Chu <chu11@llnl.gov>
+Source: http://ftp.zresearch.com/pub/freeipmi
+
+Files: *
+Copyright: 2003-2009 FreeIPMI Core Team
+		   2004-2007 The Regents of the University of California.
+           2007-2009 Lawrence Livermore National Security, LLC
+License: GPL-2+
+ On Debian systems, the complete text of the GNU General
+ Public License can be found in `/usr/share/common-licenses/GPL'.
+
+Files: common/src/portability/freeipmi-argp*
+Copyright: 2003-2009 FreeIPMI Core Team
+License: LGPL-2+
+ On Debian systems, the complete text of the GNU Lesser General
+ Public License can be found in `/usr/share/common-licenses/LGPL'.
+
+Files: debian/*
+Copyright: Copyright 2007 Matthew Johnson <debian@matthew.ath.cx>
+Copyright: Copyright 2008 Jean Parpaillon <jean.parpaillon@kerlabs.com>
+Copyright: Copyright 2009 Yaroslav Halchenko <debian@onerussian.com>
+License: GPL-any
+ On Debian systems, the complete text of the GNU General
+ Public License can be found in `/usr/share/common-licenses/GPL'.

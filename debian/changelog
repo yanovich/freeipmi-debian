@@ -1,0 +1,44 @@
+freeipmi (0.7.15-1) unstable; urgency=low
+
+  * Initial Debian release (closes: #443212)
+  * Taking over ITP which had no activity/replies
+    - debian/control
+      + policy version boost to 3.8.3 from 3.8.0
+      + me in maintainer
+      + tune up descriptions to my liking
+      + added Homepage, Vcs- header fields
+      + freeipmi-common to contain common config file + info/man pages
+    - debian/copyright
+      + list proper copyright holders (not authors)
+    - debian/watch -- added
+    - debian/*.install -- reverted to install tools under /sbin: nothing
+      IPMI-related is destined from poor mortals
+    - abandoned quilt -- raw git for now
+    - Debian-specific init scripts
+  * Fix-up in few manpages (adopted upstream)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 03 Nov 2009 23:16:53 -0500
+
+freeipmi (0.7.9-1~yarik0) UNRELEASED; urgency=low
+
+  * New upstream release
+  * Disabling failing patch
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 08 Jun 2009 15:06:48 -0400
+
+freeipmi (0.6.5-1) UNRELEASED; urgency=low
+
+  * New Upstream Version: 0.6.5
+  * Add ipmi-oem and ipmi-sensors-config into freeipmi-tools package
+  * Remove ipmi-locate.8 patch which was included in upstream
+
+ -- Jean Parpaillon <jean.parpaillon@kerlabs.com>  Wed, 20 Aug 2008 15:53:06 +0200
+
+freeipmi (0.5.1-1) UNRELEASED; urgency=low
+
+  * Initial packaging
+  * Patch ipmi-locate.8 to have the correct section
+  * Depend on quilt for above
+  * Rewritten as per upstream's preferred package split
+
+ -- Matthew Johnson <mjj29@debian.org>  Sat, 12 Jul 2008 19:39:25 +0100

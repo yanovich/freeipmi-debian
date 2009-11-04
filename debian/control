@@ -1,0 +1,174 @@
+Source: freeipmi
+Section: admin
+Priority: extra
+Maintainer: Yaroslav Halchenko <debian@onerussian.com>
+Build-Depends: debhelper (>= 6.0.7~), autotools-dev, libreadline5-dev, libgcrypt11-dev, chrpath,
+ autoconf, automake, libtool, texinfo
+Standards-Version: 3.8.3
+Homepage: http://www.gnu.org/software/freeipmi/
+Vcs-Browser: http://git.onerussian.com/?p=deb/freeipmi.git
+Vcs-git: git://git.onerussian.com/deb/freeipmi.git
+
+Package: freeipmi-common
+Section: admin
+Architecture: all
+Depends: ${misc:Depends}, dpkg (>= 1.15.4) | install-info
+Suggests: freeipmi-tools
+Description: GNU implementation of the IPMI protocol - common files
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ This package provides configuration used by the rest of FreeIPMI
+ framework and generic documentation to orient the user.
+
+Package: freeipmi-tools
+Section: admin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: freeipmi-ipmidetect, freeipmi-bmc-watchdog
+Description: GNU implementation of the IPMI protocol - Tools
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ This package contains assorted IPMI-related tools:
+  * bmc-config - configure BMC values
+  * bmc-info - display BMC information
+  * ipmi-chassis - IPMI chassis management utility
+  * ipmi-fru - display FRU information
+  * ipmi-locate - IPMI probing utility
+  * ipmi-oem - IPMI OEM utility
+  * ipmi-raw - IPMI raw communication utility
+  * ipmi-sel - display SEL entries
+  * ipmi-sensors - display IPMI sensor information
+  * ipmi-sensors-config - configure sensors
+  * ipmiconsole - IPMI console utility
+  * ipmimonitoring - IPMI monitoring utility
+  * ipmiping - send IPMI Get Authentication Capabilitiy request
+  * ipmipower - IPMI power control utility
+  * pef-config - configure PEF values
+  * rmcpping - send RMCP Ping to network hosts
+
+Package: freeipmi-bmc-watchdog
+Section: admin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-tools
+Description: GNU implementation of the IPMI protocol - BMC watchdog
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ This package contains a watchdog daemon for hardware BMC watchdogs.
+
+Package: freeipmi-ipmidetect
+Section: admin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: GNU IPMI - IPMI node detection tool
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ This package contains a tool and a daemon for detecting IPMI nodes.
+
+Package: libfreeipmi6
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-common (= ${source:Version})
+Description: GNU IPMI - libraries
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ OpenIPMI, KCS, SMIC, SSIF, LAN drivers, and an IPMI API in a C Library.
+
+Package: libfreeipmi-dev
+Section: libdevel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfreeipmi6 (= ${binary:Version})
+Description: GNU IPMI - development package
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ This is the development package for libfreeipmi.
+
+Package: libipmidetect0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-common (= ${source:Version})
+Description: GNU IPMI - IPMI node detection library
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ A library for IPMI node detection.
+
+Package: libipmidetect-dev
+Section: libdevel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libipmidetect0 (= ${binary:Version})
+Description: GNU IPMI - ipmidetect development package
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ This is the development package for libipmidetect.
+
+Package: libipmimonitoring1
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: GNU IPMI - Sensor monitoring library
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ A library for sensor monitoring.
+
+Package: libipmimonitoring-dev
+Section: libdevel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libipmimonitoring1 (= ${binary:Version})
+Description: GNU IPMI - ipmimonitoring development package
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ This is the development package for libipmimonitoring.
+
+Package: libipmiconsole2
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: GNU IPMI - Serial-over-Lan library
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ A library for Serial-over-Lan (SOL).
+
+Package: libipmiconsole-dev
+Section: libdevel
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libipmiconsole2 (= ${binary:Version})
+Description: GNU IPMI - ipmiconsole development package
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ This is the development package for libipmiconsole.
+

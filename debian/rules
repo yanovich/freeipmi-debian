@@ -1,0 +1,191 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+#
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+#
+# Modified to make a template file for a multi-binary package with separated
+# build-arch and build-indep targets  by Bill Allombert 2001
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+# These are used for cross-compiling and for saving the configure script
+# from having to guess our platform (since we know it already)
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
+CROSS= --build $(DEB_BUILD_GNU_TYPE) --host $(DEB_HOST_GNU_TYPE)
+else
+CROSS= --build $(DEB_BUILD_GNU_TYPE)
+endif
+
+
+CFLAGS = -Wall -g
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+	CONFIGURE_FLAGS = --enable-debug
+else
+	CFLAGS += -O2
+	CONFIGURE_FLAGS =
+endif
+
+BUILDDIR=debian/build
+
+configure:
+	NOCONFIGURE=1 ./autogen.sh
+
+$(BUILDDIR)/config.status: configure
+	dh_testdir
+	# Add here commands to configure the package.
+	mkdir -p $(BUILDDIR)
+ifneq "$(wildcard /usr/share/misc/config.sub)" ""
+	cp -f /usr/share/misc/config.sub $(BUILDDIR)/config.sub
+endif
+ifneq "$(wildcard /usr/share/misc/config.guess)" ""
+	cp -f /usr/share/misc/config.guess $(BUILDDIR)/config.guess
+endif
+	cd $(BUILDDIR) && $(CURDIR)/configure $(CROSS) \
+	 --prefix=/usr --mandir=\$${prefix}/share/man \
+	 --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" \
+	 LDFLAGS="-Wl,-z,defs" --localstatedir=/var --sysconfdir=/etc \
+	 $(CONFIGURE_FLAGS)
+	# Breaks the build - fails to find built libraries from within
+	# other subdirs
+	# sed -i -r 's/(hardcode_into_libs=).*$$/\1no/' $(BUILDDIR)/libtool
+
+#Architecture
+build: build-arch build-indep
+
+build-arch: build-arch-stamp
+build-arch-stamp: $(BUILDDIR)/config.status
+	# Add here commands to compile the arch part of the package.
+	$(MAKE) -C $(BUILDDIR)
+	touch $@
+
+build-indep: build-indep-stamp
+build-indep-stamp: $(BUILDDIR)/config.status
+	# Add here commands to compile the indep part of the package.
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-arch-stamp build-indep-stamp install-common-stamp
+
+	[ ! -f Makefile ] || $(MAKE) maintainer-clean
+
+	# Clean up after the build process.
+	rm -rf $(BUILDDIR)
+	rm -f debian/freeipmi-ipmidetectd.debhelper.log
+
+	# Remove pulled in default file for watchdog
+	rm -f $(CURDIR)/debian/freeipmi-bcm-watchdog.bmc-watchdog.default
+
+	# Remove auto-tools generated files
+	find -iname \*.in | while read f; do rm -f $${f%\.in}; done
+	find -iname Makefile.in -delete
+	rm -f configure aclocal.m4
+	(cd config && rm -f config.sub config.guess \
+	 	config.h.in depcomp install-sh \
+	    ltmain.sh mdate-sh missing texinfo.tex)
+	# and some other generated files
+	rm -f doc/freeipmi-faq.info doc/stamp-vti doc/version-faq.texi
+	dh_clean
+
+install: install-indep install-arch
+
+install-common: install-common-stamp
+install-common-stamp: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+
+	# Install the arch part of the package into debian/tmp.
+	$(MAKE) -C $(BUILDDIR) DESTDIR=$(CURDIR)/debian/tmp install
+
+	# Fix badly installed upstream
+	mv $(CURDIR)/debian/tmpvar  $(CURDIR)/debian/tmp/var
+	chmod 644 $(CURDIR)/debian/tmp/etc/ipmi_monitoring_sensors.conf
+	# since it containts sensitive information
+	chmod 640 $(CURDIR)/debian/tmp/etc/freeipmi.conf
+	chown root.adm $(CURDIR)/debian/tmp/etc/freeipmi.conf
+	# Clean up duplicate/unneeded copyright/installation files
+	rm $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/COPYING*
+	rm $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/DISCLAIMER*
+	rm $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/INSTALL*
+	rm $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/ChangeLog*
+
+	# chrpath -- operate only on files (not on still dangling symlinks)
+	find  $(CURDIR)/debian/tmp/usr/sbin/* -type f | xargs chrpath -d
+
+	# assure no dir.gz
+	rm -f $(CURDIR)/debian/tmp/usr/share/info/dir
+
+	touch $@
+
+install-indep: install-common
+	dh_testdir
+	dh_testroot
+	dh_installdirs -i
+	dh_install -i --sourcedir=debian/tmp
+
+
+install-arch: install-common
+	dh_testdir
+	dh_testroot
+	dh_installdirs -s
+	dh_install -s --sourcedir=debian/tmp
+
+	# Copy default file for bmc-watchdog
+	cp $(CURDIR)/debian/tmp/etc/sysconfig/freeipmi-bmc-watchdog \
+		$(CURDIR)/debian/freeipmi-bcm-watchdog.bmc-watchdog.default
+
+	# Use Debian specific init files with "matching" names
+	dh_installinit -pfreeipmi-bmc-watchdog \
+	 --name=bmc-watchdog
+	dh_installinit -pfreeipmi-ipmidetect \
+	 --name=ipmidetectd
+
+# Must not depend on anything. This is to be called by
+# binary-arch/binary-indep
+# in another 'make' thread.
+binary-common:
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs ChangeLog ChangeLog.0
+	dh_lintian
+	dh_installdocs
+	#Unfortunately symlinking did not work out for some reason
+	#dh_installdocs --link-doc=freeipmi-common
+	dh_installlogrotate
+	dh_installinfo
+	dh_installman
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+# Build architecture independant packages using the common target.
+binary-indep: build-indep install-indep
+	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
+
+# Build architecture dependant packages using the common target.
+binary-arch: build-arch install-arch
+	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-common
+
+binary: binary-arch binary-indep
+.PHONY: build clean binary-indep binary-arch binary binary-common install install-indep install-arch install-common

@@ -1,0 +1,6 @@
+usr/lib/libipmidetect.a
+usr/lib/libipmidetect.la
+usr/lib/libipmidetect.so
+usr/share/man/man3/libipmidetect.3
+usr/include/ipmidetect.h
+usr/share/doc/freeipmi/freeipmi-libraries.txt usr/share/doc/libipmidetect-dev/

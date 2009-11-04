@@ -1,0 +1,5 @@
+etc/ipmi_monitoring_sensors.conf
+usr/share/man/man5/ipmi_monitoring_sensors.conf.5
+usr/lib/libipmimonitoring.so.?.*.*
+usr/lib/libipmimonitoring.so.?
+var/cache/ipmimonitoringsdrcache
