@@ -1,3 +1,11 @@
+freeipmi (0.7.15-2) unstable; urgency=low
+
+  * Merged upstream's 0.7.16beta1:
+    - Fix for FTBFS on kFreeBSD (closes: #557887). Kudos go
+      to Cyril Brulebois for the report and patch.
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Wed, 25 Nov 2009 20:18:38 -0500
+
 freeipmi (0.7.15-1) unstable; urgency=low
 
   * Initial Debian release (closes: #443212)
