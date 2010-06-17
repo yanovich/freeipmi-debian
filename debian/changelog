@@ -1,3 +1,11 @@
+freeipmi (0.7.17~beta2-1) unstable; urgency=low
+
+  * Fresh (as of 2009/12/07) upstream for 0.7 branch -- includes a few bugfixes
+    on top of 0.7.15-2.  This would be probably the last 0.7 release in Debian
+    sid (0.8 packaging is on the way).
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 17 Jun 2010 12:36:59 -0400
+
 freeipmi (0.7.15-2) unstable; urgency=low
 
   * Merged upstream's 0.7.16beta1:

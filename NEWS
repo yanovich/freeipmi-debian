@@ -1,6 +1,12 @@
-0.7.16 - xx/xx/xx
+0.7.17 - xx/xx/xx
+-----------------
+o Support workaround for Alert Policy config on Fujitsu motherboards.
+o Fix several memleaks.
+
+0.7.16 - 11/30/09
 -----------------
 o In ipmi-oem, add additional Fujitsu OEM support.
+o Fix portability to kfreebsd.
 
 0.7.15 - 11/19/09
 -----------------

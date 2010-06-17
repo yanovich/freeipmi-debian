@@ -1,3 +1,24 @@
+2009-12-09  Albert Chu <chu11@llnl.gov>
+
+	* common/src/: Fix various memleaks.
+
+2009-12-07  Albert Chu <chu11@llnl.gov>
+
+	* pef-config/: Fix backport bug.
+	
+2009-12-04  Albert Chu <chu11@llnl.gov>
+
+        * pef-config/: Support workaround for Alert Policy Config on
+        Fujitsu motherboards.
+	
+2009-11-30  Albert Chu <chu11@llnl.gov>
+	
+	* Tagged Release-0_7_16.
+
+2009-11-30  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/: Complete Fujitsu OEM commands.
+
 2009-11-25  Cyril Brulebois <kibi@debian.org>
 
         * Fix portability issue for kfreebsd.
