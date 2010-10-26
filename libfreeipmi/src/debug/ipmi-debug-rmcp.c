@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2008 FreeIPMI Core Team
+  Copyright (C) 2003-2010 FreeIPMI Core Team
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -32,25 +32,26 @@
 #include <errno.h>
 
 #include "freeipmi/debug/ipmi-debug.h"
+#include "freeipmi/fiid/fiid.h"
 #include "freeipmi/interface/rmcp-interface.h"
 
 #include "ipmi-debug-common.h"
 
-#include "libcommon/ipmi-err-wrappers.h"
-#include "libcommon/ipmi-fiid-wrappers.h"
+#include "libcommon/ipmi-fiid-util.h"
+#include "libcommon/ipmi-trace.h"
 
 #include "freeipmi-portability.h"
 
-int8_t 
-ipmi_dump_rmcp_packet (int fd, 
-                       const char *prefix, 
-                       const char *hdr, 
+int
+ipmi_dump_rmcp_packet (int fd,
+                       const char *prefix,
+                       const char *hdr,
                        const char *trlr,
-                       uint8_t *pkt,
-                       uint32_t pkt_len,
+                       const void *pkt,
+                       unsigned int pkt_len,
                        fiid_template_t tmpl_cmd)
 {
-  uint32_t indx = 0;
+  unsigned int indx = 0;
   char prefix_buf[IPMI_DEBUG_MAX_PREFIX_LEN];
   char *rmcp_hdr =
     "RMCP Header:\n"
@@ -64,61 +65,126 @@ ipmi_dump_rmcp_packet (int fd,
   fiid_obj_t obj_rmcp_hdr = NULL;
   fiid_obj_t obj_cmd = NULL;
   fiid_obj_t obj_unexpected_data = NULL;
-  int32_t len;
-  int8_t rv = -1;
+  int len, rv = -1;
 
-  ERR_EINVAL (pkt && tmpl_cmd);
+  if (!pkt || !tmpl_cmd)
+    {
+      SET_ERRNO (EINVAL);
+      return (-1);
+    }
 
-  ERR(!(ipmi_debug_set_prefix (prefix_buf, IPMI_DEBUG_MAX_PREFIX_LEN, prefix) < 0));
+  if (ipmi_debug_set_prefix (prefix_buf, IPMI_DEBUG_MAX_PREFIX_LEN, prefix) < 0)
+    {
+      ERRNO_TRACE (errno);
+      return (-1);
+    }
 
-  ERR(!(ipmi_debug_output_str (fd, prefix_buf, hdr) < 0));
+  if (ipmi_debug_output_str (fd, prefix_buf, hdr) < 0)
+    {
+      ERRNO_TRACE (errno);
+      return (-1);
+    }
 
   /* Dump rmcp header */
-  
-  FIID_OBJ_CREATE_CLEANUP (obj_rmcp_hdr, tmpl_rmcp_hdr);
-  
-  FIID_OBJ_SET_ALL_LEN_CLEANUP (len, obj_rmcp_hdr, pkt + indx, pkt_len - indx);
-  indx += len;
-  
-  ERR_CLEANUP (!(ipmi_obj_dump(fd, prefix, rmcp_hdr, NULL, obj_rmcp_hdr) < 0));
-  
-  if (pkt_len <= indx)
-    {
-      rv = 0;
-      goto cleanup;
-    }
-  
-  /* Dump command data */
-  
-  FIID_OBJ_CREATE_CLEANUP (obj_cmd, tmpl_cmd);
-  
-  FIID_OBJ_SET_ALL_LEN_CLEANUP (len, obj_cmd, pkt + indx, pkt_len - indx);
-  indx += len;
-  
-  ERR_CLEANUP (!(ipmi_obj_dump(fd, prefix, rmcp_cmd, NULL, obj_cmd) < 0));
-  
-  if (pkt_len <= indx)
-    {
-      rv = 0;
-      goto cleanup;
-    }
-  
-  /* Dump unexpected stuff */
-  
-  FIID_OBJ_CREATE_CLEANUP (obj_unexpected_data, tmpl_unexpected_data);
-  
-  FIID_OBJ_SET_ALL_LEN_CLEANUP (len, obj_unexpected_data, pkt + indx, pkt_len - indx);
-  indx += len;
-  
-  ERR_CLEANUP (!(ipmi_obj_dump(fd, prefix, unexpected_hdr, NULL, obj_unexpected_data) < 0));
-  
-  ERR_CLEANUP (!(ipmi_debug_output_str(fd, prefix_buf, trlr) < 0));
 
+  if (!(obj_rmcp_hdr = fiid_obj_create (tmpl_rmcp_hdr)))
+    {
+      ERRNO_TRACE (errno);
+      goto cleanup;
+    }
+
+  if ((len = fiid_obj_set_all (obj_rmcp_hdr, pkt + indx, pkt_len - indx)) < 0)
+    {
+      FIID_OBJECT_ERROR_TO_ERRNO (obj_rmcp_hdr);
+      goto cleanup;
+    }
+  indx += len;
+
+  if (ipmi_obj_dump (fd, prefix, rmcp_hdr, NULL, obj_rmcp_hdr) < 0)
+    {
+      ERRNO_TRACE (errno);
+      goto cleanup;
+    }
+
+  if (pkt_len <= indx)
+    {
+      rv = 0;
+      goto cleanup;
+    }
+
+  /* Dump command data */
+
+  if (!(obj_cmd = fiid_obj_create (tmpl_cmd)))
+    {
+      ERRNO_TRACE (errno);
+      goto cleanup;
+    }
+
+  if ((len = fiid_obj_set_all (obj_cmd, pkt + indx, pkt_len - indx)) < 0)
+    {
+      FIID_OBJECT_ERROR_TO_ERRNO (obj_cmd);
+      goto cleanup;
+    }
+  indx += len;
+
+  if (ipmi_obj_dump (fd, prefix, rmcp_cmd, NULL, obj_cmd) < 0)
+    {
+      ERRNO_TRACE (errno);
+      goto cleanup;
+    }
+
+  /* Dump unexpected stuff */
+
+  if ((pkt_len - indx) > 0)
+    {
+      if (!(obj_unexpected_data = fiid_obj_create (tmpl_unexpected_data)))
+        {
+          ERRNO_TRACE (errno);
+          goto cleanup;
+        }
+      
+      if ((len = fiid_obj_set_all (obj_unexpected_data, pkt + indx, pkt_len - indx)) < 0)
+        {
+          FIID_OBJECT_ERROR_TO_ERRNO (obj_unexpected_data);
+          goto cleanup;
+        }
+      indx += len;
+      
+      if (ipmi_obj_dump (fd, prefix, unexpected_hdr, NULL, obj_unexpected_data) < 0)
+        {
+          ERRNO_TRACE (errno);
+          goto cleanup;
+        }
+    }
+
+  if (ipmi_debug_output_str (fd, prefix_buf, trlr) < 0)
+    {
+      ERRNO_TRACE (errno);
+      goto cleanup;
+    }
+
+
+#if WITH_RAWDUMPS
+  /* For those vendors that get confused when they see the nice output
+   * and want the hex output
+   */
+  if (ipmi_dump_hex (fd,
+                     prefix,
+                     hdr,
+		     trlr,
+		     pkt,
+		     pkt_len) < 0)
+    {
+      ERRNO_TRACE (errno);
+      goto cleanup;
+    }
+#endif
+  
   rv = 0;
  cleanup:
-  FIID_OBJ_DESTROY(obj_rmcp_hdr);
-  FIID_OBJ_DESTROY(obj_cmd);
-  FIID_OBJ_DESTROY(obj_unexpected_data);
+  fiid_obj_destroy (obj_rmcp_hdr);
+  fiid_obj_destroy (obj_cmd);
+  fiid_obj_destroy (obj_unexpected_data);
   return (rv);
 }
 

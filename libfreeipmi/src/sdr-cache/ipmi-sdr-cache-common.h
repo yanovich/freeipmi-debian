@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: ipmi-sdr-cache-common.h,v 1.4 2008/03/28 00:15:05 chu11 Exp $
+ *  $Id: ipmi-sdr-cache-common.h,v 1.6.8.1 2009-12-23 21:24:23 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -35,17 +35,17 @@
 
 #define IPMI_SDR_CACHE_DEBUG_BUFLEN 256
 
-void ipmi_sdr_cache_init_ctx(ipmi_sdr_cache_ctx_t ctx);
+void ipmi_sdr_cache_init_ctx (ipmi_sdr_cache_ctx_t ctx);
 
-int ipmi_sdr_cache_info(ipmi_sdr_cache_ctx_t ctx,
-                        ipmi_ctx_t ipmi_ctx,
-                        uint8_t *sdr_version,
-                        uint16_t *record_count,
-                        uint32_t *most_recent_addition_timestamp,
-                        uint32_t *most_recent_erase_timestamp);
+int ipmi_sdr_cache_info (ipmi_sdr_cache_ctx_t ctx,
+                         ipmi_ctx_t ipmi_ctx,
+                         uint8_t *sdr_version,
+                         uint16_t *record_count,
+                         uint32_t *most_recent_addition_timestamp,
+                         uint32_t *most_recent_erase_timestamp);
 
-const char *ipmi_sdr_cache_record_type_str(ipmi_sdr_cache_ctx_t ctx,
-					   uint8_t *sdr_record,
-					   unsigned int sdr_record_len);
+const char *ipmi_sdr_cache_record_type_str (ipmi_sdr_cache_ctx_t ctx,
+                                            uint8_t *sdr_record,
+                                            unsigned int sdr_record_len);
 
 #endif /* _IPMI_SDR_CACHE_COMMON_H */

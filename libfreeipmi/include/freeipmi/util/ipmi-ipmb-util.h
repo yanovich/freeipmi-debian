@@ -1,5 +1,5 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+   Copyright (C) 2003-2010 FreeIPMI Core Team
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,11 +13,11 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
-*/
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+ */
 
 #ifndef _IPMI_IPMB_UTIL_H
-#define	_IPMI_IPMB_UTIL_H	1
+#define _IPMI_IPMB_UTIL_H       1
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,13 +26,15 @@ extern "C" {
 #include <stdint.h>
 #include <freeipmi/fiid/fiid.h>
 
-int8_t ipmi_ipmb_check_rq_seq (fiid_obj_t obj_ipmb_msg_hdr, uint8_t rq_seq);
+/* returns 1 on pass, 0 on fail, -1 on error */
+int ipmi_ipmb_check_rq_seq (fiid_obj_t obj_ipmb_msg_hdr, uint8_t rq_seq);
 
-int8_t ipmi_ipmb_check_checksum (uint8_t rq_addr,
-				 fiid_obj_t obj_ipmb_msg_hdr,
-				 fiid_obj_t obj_cmd,
-				 fiid_obj_t obj_ipmb_msg_trlr);
- 
+/* returns 1 on pass, 0 on fail, -1 on error */
+int ipmi_ipmb_check_checksum (uint8_t rq_addr,
+                              fiid_obj_t obj_ipmb_msg_hdr,
+                              fiid_obj_t obj_cmd,
+                              fiid_obj_t obj_ipmb_msg_trlr);
+
 #ifdef __cplusplus
 }
 #endif

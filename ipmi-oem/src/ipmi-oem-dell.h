@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2008-2009 FreeIPMI Core Team
+  Copyright (C) 2008-2010 FreeIPMI Core Team
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -24,39 +24,48 @@
 int ipmi_oem_dell_get_system_info (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_dell_get_nic_selection (ipmi_oem_state_data_t *state_data);
-
 int ipmi_oem_dell_set_nic_selection (ipmi_oem_state_data_t *state_data);
 
-int ipmi_oem_dell_get_ssh_config (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_dell_get_active_lom_status (ipmi_oem_state_data_t *state_data);
 
+int ipmi_oem_dell_get_ssh_config (ipmi_oem_state_data_t *state_data);
 int ipmi_oem_dell_set_ssh_config (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_dell_get_telnet_config (ipmi_oem_state_data_t *state_data);
-
 int ipmi_oem_dell_set_telnet_config (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_dell_get_web_server_config (ipmi_oem_state_data_t *state_data);
-
 int ipmi_oem_dell_set_web_server_config (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_dell_get_active_directory_config (ipmi_oem_state_data_t *state_data);
-
 int ipmi_oem_dell_set_active_directory_config (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_dell_reset_to_defaults (ipmi_oem_state_data_t *state_data);
 
-int ipmi_oem_dell_get_power_info (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_dell_get_power_consumption_data (ipmi_oem_state_data_t *state_data);
 
-int ipmi_oem_dell_reset_power_info (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_dell_reset_power_consumption_data (ipmi_oem_state_data_t *state_data);
 
-int ipmi_oem_dell_get_instantaneous_power_consumption_info (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_dell_power_supply_info (ipmi_oem_state_data_t *state_data);
 
-int ipmi_oem_dell_get_power_headroom_info (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_dell_get_instantaneous_power_consumption_data (ipmi_oem_state_data_t *state_data);
 
+int ipmi_oem_dell_get_power_head_room (ipmi_oem_state_data_t *state_data);
+
+int ipmi_oem_dell_get_power_consumption_statistics (ipmi_oem_state_data_t *state_data);
+
+/* legacy */
 int ipmi_oem_dell_get_average_power_history (ipmi_oem_state_data_t *state_data);
 
+/* legacy */
 int ipmi_oem_dell_get_peak_power_history (ipmi_oem_state_data_t *state_data);
 
-int ipmi_oem_dell_get_fcb_version (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_dell_get_power_capacity (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_dell_set_power_capacity (ipmi_oem_state_data_t *state_data);
+
+int ipmi_oem_dell_get_power_capacity_status (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_dell_set_power_capacity_status (ipmi_oem_state_data_t *state_data);
+
+int ipmi_oem_dell_get_chassis_identify_status (ipmi_oem_state_data_t *state_data);
 
 #endif

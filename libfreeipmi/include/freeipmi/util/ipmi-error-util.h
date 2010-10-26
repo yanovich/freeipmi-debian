@@ -1,5 +1,5 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+   Copyright (C) 2003-2010 FreeIPMI Core Team
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,13 +13,12 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
-
-*/
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+ */
 
 
 #ifndef _IPMI_ERROR_UTIL_H
-#define	_IPMI_ERROR_UTIL_H
+#define _IPMI_ERROR_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,20 +30,23 @@ extern "C" {
 
 #define IPMI_ERR_STR_MAX_LEN                 2048
 
-int8_t ipmi_completion_code_strerror_r (uint8_t cmd, 
-                                        uint8_t netfn,
-                                        uint8_t comp_code, 
-                                        char *errstr, 
-                                        size_t len);
+/* returns 0 on success, -1 on error */
+int ipmi_completion_code_strerror_r (uint8_t cmd,
+                                     uint8_t netfn,
+                                     uint8_t comp_code,
+                                     char *errstr,
+                                     size_t len);
 
-int8_t ipmi_completion_code_strerror_cmd_r (fiid_obj_t obj_cmd, 
-                                            uint8_t netfn,
-                                            char *errstr, 
-                                            size_t len);
+/* returns 0 on success, -1 on error */
+int ipmi_completion_code_strerror_cmd_r (fiid_obj_t obj_cmd,
+                                         uint8_t netfn,
+                                         char *errstr,
+                                         size_t len);
 
-int8_t ipmi_rmcpplus_status_strerror_r(uint8_t rmcpplus_status_code,
-                                       char *errstr,
-                                       size_t len);
+/* returns 0 on success, -1 on error */
+int ipmi_rmcpplus_status_strerror_r (uint8_t rmcpplus_status_code,
+                                     char *errstr,
+                                     size_t len);
 
 #ifdef __cplusplus
 }

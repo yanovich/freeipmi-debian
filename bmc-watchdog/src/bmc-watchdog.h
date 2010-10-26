@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: bmc-watchdog.h,v 1.2 2008/09/24 04:00:24 chu11 Exp $
+ *  $Id: bmc-watchdog.h,v 1.7.4.2 2010-06-17 20:50:34 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2004-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -32,17 +32,9 @@
 
 #include "tool-cmdline-common.h"
 
-/* Pre Timeout Interval is 1 byte */
-#define IPMI_BMC_WATCHDOG_TIMER_PRE_TIMEOUT_INTERVAL_MIN_SECS  0
-#define IPMI_BMC_WATCHDOG_TIMER_PRE_TIMEOUT_INTERVAL_MAX_SECS  255
-
-/* Countdown Seconds is 2 bytes of 100 millisecond chunks */
-#define IPMI_BMC_WATCHDOG_TIMER_INITIAL_COUNTDOWN_MIN_SECS     0
-#define IPMI_BMC_WATCHDOG_TIMER_INITIAL_COUNTDOWN_MAX_SECS     6553
-
 enum bmc_watchdog_argp_option_keys
   {
-    SET_KEY = 's', 
+    SET_KEY = 's',
     GET_KEY = 'g',
     RESET_KEY = 'r',
     START_KEY = 't',
@@ -71,15 +63,9 @@ enum bmc_watchdog_argp_option_keys
     ARP_RESPONSE_KEY = 'A',
     RESET_PERIOD_KEY = 'e',
     HELP_KEY = '?',
-    HELP2_KEY = 'h',             /* legacy */
-    HELP3_KEY = 'H',             /* legacy */
+    VERSION_KEY = 'V',
   };
 
-/* achu
- *
- * many of the fields can be '0', so there are various "_val" to store
- * the actual value.
- */
 struct bmc_watchdog_arguments
 {
   struct common_cmd_args common;
@@ -93,35 +79,36 @@ struct bmc_watchdog_arguments
   char *logfile;
   int no_logging;
   int timer_use;
-  uint8_t timer_use_val;
+  uint8_t timer_use_arg;
   int stop_timer;
-  uint8_t stop_timer_val;
+  uint8_t stop_timer_arg;
   int log;
-  uint8_t log_val;
+  uint8_t log_arg;
   int timeout_action;
-  uint8_t timeout_action_val;
+  uint8_t timeout_action_arg;
   int pre_timeout_interrupt;
-  uint8_t pre_timeout_interrupt_val;
+  uint8_t pre_timeout_interrupt_arg;
   int pre_timeout_interval;
-  uint8_t pre_timeout_interval_val;
+  uint8_t pre_timeout_interval_arg;
   int clear_bios_frb2;
   int clear_bios_post;
   int clear_os_load;
   int clear_sms_os;
   int clear_oem;
   int initial_countdown_seconds;
-  uint16_t initial_countdown_seconds_val;
+  uint16_t initial_countdown_seconds_arg;
   int start_after_set;
   int reset_after_set;
   int start_if_stopped;
   int reset_if_running;
   int gratuitous_arp;
-  uint8_t gratuitous_arp_val;
+  uint8_t gratuitous_arp_arg;
   int arp_response;
-  uint8_t arp_response_val;
+  uint8_t arp_response_arg;
   int reset_period;
-  uint32_t reset_period_val;
+  uint32_t reset_period_arg;
   int help;
+  int version;
 };
 
 #endif

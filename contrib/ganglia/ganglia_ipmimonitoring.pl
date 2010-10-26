@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #############################################################################
-# Copyright (C) 2003-2008 FreeIPMI Core Team
+# Copyright (C) 2003-2009 FreeIPMI Core Team
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -68,8 +68,8 @@
 # only to monitor the local node, do not specify an ipmi host.  The
 # input to the -h option is passed directly to ipmimonitoring.  So you
 # may specify anything the ipmimonitoring tool accepts including
-# hostranged (i.e. foo[0-127]) or comma separated
-# (i.e. foo0,foo1,foo2,foo3) inputs.  If you wish to monitor both
+# hostranged (e.g. foo[0-127]) or comma separated
+# (e.g. foo0,foo1,foo2,foo3) inputs.  If you wish to monitor both
 # remote and local system, remember to specify one of the hosts as
 # "localhost".
 #
@@ -84,7 +84,7 @@
 # In order to specify non-defaults for ipmimonitoring use the -m
 # argument or IPMIMONITORING_ARGS environment variable.  Typically,
 # this option is necessary for non-default communication information
-# or authentication information (i.e. driver path, driver type,
+# or authentication information (e.g. driver path, driver type,
 # username, password, etc.).  Non-default communication information
 # can also be stored in the FreeIPMI configuration file.  This is the
 # suggested method because passwords and other sensitive information
@@ -238,13 +238,14 @@ if (!$no_ganglia)
     }
 }
 
+# note, don't need --ignore-non-interpretable-sensors, legacy output handles it
 if ($IPMI_HOSTS)
 {
-    $cmd = "$IPMIMONITORING_PATH $IPMIMONITORING_ARGS -h $IPMI_HOSTS --quiet-cache --sdr-cache-recreate --always-prefix";
+    $cmd = "$IPMIMONITORING_PATH $IPMIMONITORING_ARGS -h $IPMI_HOSTS --quiet-cache --sdr-cache-recreate --always-prefix --legacy-output";
 }
 else
 {
-    $cmd = "$IPMIMONITORING_PATH $IPMIMONITORING_ARGS --quiet-cache --sdr-cache-recreate --always-prefix"
+    $cmd = "$IPMIMONITORING_PATH $IPMIMONITORING_ARGS --quiet-cache --sdr-cache-recreate --always-prefix --legacy-output"
 }
 
 if ($debug)
@@ -277,7 +278,8 @@ foreach $line (@IPMIMONITORING_OUTPUT_LINES)
     my $cmd_reading;
 
     # skip header line
-    if ($line =~ "Record_ID")
+    if ($line =~ "Record_ID" 
+        || $line =~ "Record ID")
     {
         next;
     }

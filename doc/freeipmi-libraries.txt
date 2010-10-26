@@ -46,6 +46,9 @@ issues are handled within 'fiid'.  Fiid objects are used throughout
 libfreeipmi, including the 'api' sub-section, 'cmds' sub-sections,
 and various tools.
 
+fru-parse - Provides an API for parsing Field Replaceable Unit (FRU)
+records.  Utilized by tools such as ipmi-fru(8).
+
 interface - Provides 'assemble' and 'disassemble' functions for
 building packets for individual in-band or out-of-band protocols.
 Also provides all necessary fiid templates, 'fill' functions, and
@@ -63,7 +66,16 @@ tools like ipmi-sensors(8).
 
 sdr-cache - Provides an API for creating, caching, reading, and
 parsing a sensor data repository (SDR).  Utilized by tools such as
-ipmi-sensors(8) and ipmimonitoring(8).
+ipmi-fru(8), ipmi-sensors(8) and ipmimonitoring(8).
+
+sdr-parse - Provides an API for parsing SDR records.  Utilized by
+tools such as ipmi-fru(8) and ipmi-sensors(8).
+
+sel-parse - Provides an API for reading and parsing System Event Log
+(SEL) entries.  Utilized by tools such as ipmi-sel(8).
+
+sensor-read - Provides an API for reading a sensor.  Utilized by tools
+such as ipmi-sensors(8).
 
 spec - Provides macros and arrays for various other definitions and
 tables in IPMI.  Utilized by tools such as ipmi-sensors(8).

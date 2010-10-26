@@ -1,19 +1,19 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+  Copyright (C) 2003-2010 FreeIPMI Core Team
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 */
 
 #if HAVE_CONFIG_H
@@ -38,16 +38,16 @@
 #include "tool-cmdline-common.h"
 #include "tool-config-file-common.h"
 
-const char *argp_program_version = 
+const char *argp_program_version =
   "bmc-config - " PACKAGE_VERSION "\n"
-  "Copyright (C) 2003-2008 FreeIPMI Core Team\n"
+  "Copyright (C) 2003-2010 FreeIPMI Core Team\n"
   "This program is free software; you may redistribute it under the terms of\n"
   "the GNU General Public License.  This program has absolutely no warranty.";
 
-const char *argp_program_bug_address = 
+const char *argp_program_bug_address =
   "<" PACKAGE_BUGREPORT ">";
 
-static char cmdline_doc[] =  
+static char cmdline_doc[] =
   "bmc-config - configure BMC values";
 
 static char cmdline_args_doc[] = "";
@@ -56,23 +56,23 @@ static char cmdline_args_doc[] = "";
 static struct argp_option cmdline_options[] = {
   ARGP_COMMON_OPTIONS_DRIVER,
   ARGP_COMMON_OPTIONS_INBAND,
-  ARGP_COMMON_OPTIONS_OUTOFBAND,
+  ARGP_COMMON_OPTIONS_OUTOFBAND_HOSTRANGED,
   ARGP_COMMON_OPTIONS_AUTHENTICATION_TYPE,
-  ARGP_COMMON_OPTIONS_PRIVILEGE_LEVEL_ADMIN,
+  ARGP_COMMON_OPTIONS_PRIVILEGE_LEVEL,
   ARGP_COMMON_OPTIONS_CONFIG_FILE,
   ARGP_COMMON_OPTIONS_WORKAROUND_FLAGS,
   ARGP_COMMON_HOSTRANGED_OPTIONS,
   ARGP_COMMON_OPTIONS_DEBUG,
   CONFIG_ARGP_COMMON_OPTIONS,
   CONFIG_ARGP_COMMON_OPTIONS_LEGACY,
-  { 0, }
+  { NULL, 0, NULL, 0, NULL, 0}
 };
 
 static error_t cmdline_parse (int key, char *arg, struct argp_state *state);
 
-static struct argp cmdline_argp = { cmdline_options, 
-                                    cmdline_parse, 
-                                    cmdline_args_doc, 
+static struct argp cmdline_argp = { cmdline_options,
+                                    cmdline_parse,
+                                    cmdline_args_doc,
                                     cmdline_doc};
 
 static struct argp cmdline_config_file_argp = { cmdline_options,
@@ -99,19 +99,25 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
       key = CONFIG_ARGP_FILENAME_KEY;
       /* fall through */
     default:
-      ret = config_parse_opt (key, arg, state, &cmd_args->config_args);
+      ret = config_parse_opt (key, arg, &cmd_args->config_args);
       if (ret == ARGP_ERR_UNKNOWN)
-        ret = common_parse_opt (key, arg, state, &cmd_args->config_args.common);
+        ret = common_parse_opt (key, arg, &cmd_args->config_args.common);
       if (ret == ARGP_ERR_UNKNOWN)
-        ret = hostrange_parse_opt (key, arg, state, &(cmd_args->config_args.hostrange));
-      return ret;
+        ret = hostrange_parse_opt (key, arg, &(cmd_args->config_args.hostrange));
+      return (ret);
     }
-  return 0;
+  return (0);
 }
 
 static void
-_bmc_config_config_file_parse(struct bmc_config_arguments *cmd_args)
+_bmc_config_config_file_parse (struct bmc_config_arguments *cmd_args)
 {
+  struct config_file_data_bmc_config config_file_data;
+  
+  memset (&config_file_data,
+          '\0',
+          sizeof (struct config_file_data_bmc_config));
+  
   if (config_file_parse (cmd_args->config_args.common.config_file,
                          0,
                          &(cmd_args->config_args.common),
@@ -119,24 +125,27 @@ _bmc_config_config_file_parse(struct bmc_config_arguments *cmd_args)
                          &(cmd_args->config_args.hostrange),
                          CONFIG_FILE_INBAND | CONFIG_FILE_OUTOFBAND | CONFIG_FILE_HOSTRANGE,
                          CONFIG_FILE_TOOL_BMC_CONFIG,
-                         NULL) < 0)
+                         &config_file_data) < 0)
     {
-      fprintf(stderr, "config_file_parse: %s\n", strerror(errno));
-      exit(1);
+      fprintf (stderr, "config_file_parse: %s\n", strerror (errno));
+      exit (1);
     }
+
+  if (config_file_data.verbose_count_count)
+    cmd_args->config_args.verbose_count = config_file_data.verbose_count;
 }
 
-void
+static void
 _bmc_config_args_validate (struct bmc_config_arguments *cmd_args)
 {
   if (!cmd_args->config_args.action || cmd_args->config_args.action == -1)
     {
       fprintf (stderr,
                "Exactly one of --checkout, --commit, --diff, or --listsections MUST be given\n");
-      exit(1);
+      exit (1);
     }
 
-  config_args_validate(&(cmd_args->config_args));
+  config_args_validate (&(cmd_args->config_args));
 }
 
 
@@ -147,11 +156,22 @@ bmc_config_argp_parse (int argc, char *argv[], struct bmc_config_arguments *cmd_
   init_common_cmd_args_admin (&(cmd_args->config_args.common));
   init_hostrange_cmd_args (&(cmd_args->config_args.hostrange));
 
-  argp_parse (&cmdline_config_file_argp, argc, argv, ARGP_IN_ORDER, NULL, &(cmd_args->config_args.common));
+  argp_parse (&cmdline_config_file_argp,
+              argc,
+              argv,
+              ARGP_IN_ORDER,
+              NULL,
+              &(cmd_args->config_args.common));
 
-  _bmc_config_config_file_parse(cmd_args);
+  _bmc_config_config_file_parse (cmd_args);
 
-  argp_parse (&cmdline_argp, argc, argv, ARGP_IN_ORDER, NULL, cmd_args);
+  argp_parse (&cmdline_argp,
+              argc,
+              argv,
+              ARGP_IN_ORDER,
+              NULL,
+              cmd_args);
+
   verify_common_cmd_args (&(cmd_args->config_args.common));
   _bmc_config_args_validate (cmd_args);
 }

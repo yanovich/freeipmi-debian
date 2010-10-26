@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([freeipmi],[0.7.17.beta2],[freeipmi-devel@gnu.org])
-AC_REVISION([$Id: configure.ac,v 1.154.2.65 2009/12/07 18:07:26 chu11 Exp $])
+AC_INIT([freeipmi],[0.8.10],[freeipmi-devel@gnu.org])
+AC_REVISION([$Id: configure.ac,v 1.185.2.30 2010-08-06 17:06:38 chu11 Exp $])
 
 dnl We require a modern autoconf and automake
 AC_PREREQ([2.57])
@@ -33,6 +33,9 @@ AC_CONFIG_FILES([
         common/src/portability/Makefile
         common/src/toolcommon/Makefile
         common/src/toolhostrange/Makefile
+        common/src/tooloem/Makefile
+        common/src/toolsdr/Makefile
+        common/src/toolsensor/Makefile
         contrib/Makefile
         contrib/ganglia/Makefile
         contrib/nagios/Makefile
@@ -45,11 +48,15 @@ AC_CONFIG_FILES([
         libfreeipmi/src/debug/Makefile
         libfreeipmi/src/driver/Makefile
         libfreeipmi/src/fiid/Makefile
+        libfreeipmi/src/fru-parse/Makefile
         libfreeipmi/src/interface/Makefile
         libfreeipmi/src/libcommon/Makefile
         libfreeipmi/src/locate/Makefile
         libfreeipmi/src/record-format/Makefile
         libfreeipmi/src/sdr-cache/Makefile
+        libfreeipmi/src/sdr-parse/Makefile
+        libfreeipmi/src/sel-parse/Makefile
+        libfreeipmi/src/sensor-read/Makefile
         libfreeipmi/src/spec/Makefile
         libfreeipmi/src/util/Makefile
 	bmc-config/Makefile 
@@ -71,6 +78,9 @@ AC_CONFIG_FILES([
         ipmi-chassis-config/Makefile 
 	ipmi-chassis-config/ipmi-chassis-config.8.pre
         ipmi-chassis-config/src/Makefile 
+	ipmi-dcmi/Makefile
+	ipmi-dcmi/ipmi-dcmi.8.pre
+	ipmi-dcmi/src/Makefile
         ipmi-fru/Makefile 
 	ipmi-fru/ipmi-fru.8.pre
         ipmi-fru/src/Makefile
@@ -80,6 +90,9 @@ AC_CONFIG_FILES([
         ipmi-oem/Makefile 
 	ipmi-oem/ipmi-oem.8.pre
         ipmi-oem/src/Makefile 
+        ipmi-pef-config/Makefile
+	ipmi-pef-config/ipmi-pef-config.8.pre
+        ipmi-pef-config/src/Makefile 
         ipmi-raw/Makefile 
 	ipmi-raw/ipmi-raw.8.pre
         ipmi-raw/src/Makefile 
@@ -126,9 +139,6 @@ AC_CONFIG_FILES([
         ipmipower/ipmipower.8.pre
         ipmipower/ipmipower.conf.5.pre
         ipmipower/src/Makefile
-        pef-config/Makefile
-	pef-config/pef-config.8.pre
-        pef-config/src/Makefile 
         rmcpping/Makefile 
         rmcpping/rmcpping.8.pre
         rmcpping/src/Makefile
@@ -149,9 +159,9 @@ AC_SUBST([ISODATE])
 #
 # If any interfaces have been removed, set age = 0
 #
-LIBFREEIPMI_CURRENT=9
-LIBFREEIPMI_REVISION=0
-LIBFREEIPMI_AGE=3
+LIBFREEIPMI_CURRENT=10
+LIBFREEIPMI_REVISION=4
+LIBFREEIPMI_AGE=0
 
 LIBFREEIPMI_VERSION=$LIBFREEIPMI_CURRENT.$LIBFREEIPMI_REVISION.$LIBFREEIPMI_AGE
 AC_SUBST([LIBFREEIPMI_VERSION])
@@ -170,9 +180,9 @@ AC_SUBST([LIBFREEIPMI_VERSION_INFO])
 #
 # If any interfaces have been removed, set age = 0
 #
-LIBIPMICONSOLE_CURRENT=2
-LIBIPMICONSOLE_REVISION=5
-LIBIPMICONSOLE_AGE=0
+LIBIPMICONSOLE_CURRENT=3
+LIBIPMICONSOLE_REVISION=1
+LIBIPMICONSOLE_AGE=1
 LIBIPMICONSOLE_VERSION_INFO=$LIBIPMICONSOLE_CURRENT:$LIBIPMICONSOLE_REVISION:$LIBIPMICONSOLE_AGE
 AC_SUBST([LIBIPMICONSOLE_VERSION_INFO])
 
@@ -188,9 +198,9 @@ AC_SUBST([LIBIPMICONSOLE_VERSION_INFO])
 #
 # If any interfaces have been removed, set age = 0
 #
-LIBIPMIMONITORING_CURRENT=2
-LIBIPMIMONITORING_REVISION=4
-LIBIPMIMONITORING_AGE=1
+LIBIPMIMONITORING_CURRENT=4
+LIBIPMIMONITORING_REVISION=1
+LIBIPMIMONITORING_AGE=0
 LIBIPMIMONITORING_VERSION_INFO=$LIBIPMIMONITORING_CURRENT:$LIBIPMIMONITORING_REVISION:$LIBIPMIMONITORING_AGE
 AC_SUBST([LIBIPMIMONITORING_VERSION_INFO])
 
@@ -224,6 +234,7 @@ if test -z "${CPP}"; then
 fi
 AM_CONDITIONAL(WITH_GNU_LD, test "$with_gnu_ld" = "yes")
 AC_PROG_MAKE_SET
+AC_PROG_LN_S
 
 dnl Enable error tracing. Lower level calls will spit error messages
 dnl on to the console
@@ -253,6 +264,13 @@ else
    WITH_DEBUG=0
 fi
 AC_SUBST(WITH_DEBUG)
+
+dnl Allow advanced developers to compile with raw dumping
+AC_ARG_ENABLE(rawdumps,
+	      AC_HELP_STRING([--enable-rawdumps], [output raw packet dumps when debugging]))
+if test "x${enable_rawdumps}" = "xyes"; then
+   AC_DEFINE([WITH_RAWDUMPS], [1], [Define if you want raw dumps])
+fi
 
 dnl Option to disable installing init.d scripts
 AC_ARG_ENABLE(init-scripts,
@@ -360,7 +378,7 @@ AC_HEADER_TIME
 AC_HEADER_SYS_WAIT
 dnl achu: note "strings.h" plural
 AC_CHECK_HEADERS([unistd.h fcntl.h getopt.h pthread.h strings.h])
-AC_CHECK_HEADERS([linux/types.h error.h sys/io.h sys/sockio.h asm/io.h sys/ioccom.h])
+AC_CHECK_HEADERS([linux/types.h error.h netdb.h sys/io.h sys/sockio.h asm/io.h sys/ioccom.h])
 AC_CHECK_HEADERS([linux/ipmi_msgdefs.h])
 AC_CHECK_HEADERS([linux/compiler.h])
 AC_CHECK_HEADERS([stropts.h sys/stropts.h])
@@ -374,7 +392,7 @@ AC_CHECK_HEADERS([linux/ipmi.h], [], [],
 ])
 AC_CHECK_HEADERS([sys/ipmi.h])
 AC_CHECK_HEADERS([sys/int_types.h])
-AC_CHECK_HEADERS([bmc_intf.h],, AC_MSG_WARN([cannot build sunbmc driver]))
+AC_CHECK_HEADERS([bmc_intf.h])
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
@@ -616,7 +634,26 @@ dnl Check for variables
 dnl Macro definitions
 
 dnl Check for random number paths
-AC_CHECK_FILE([/dev/urandom], AC_DEFINE([HAVE_DEVURANDOM], [1], [Define that you found /dev/urandom]))
-AC_CHECK_FILE([/dev/random], AC_DEFINE([HAVE_DEVRANDOM], [1], [Define that you found /dev/urandom]))
+
+dnl Option to disable checking for /dev/urandom and /dev/random
+dnl
+dnl May be useful for cross compile distros where checking for
+dnl specific files is illegal.
+dnl
+AC_MSG_CHECKING([for random device support])
+AC_ARG_WITH([random-device],
+           AC_HELP_STRING([--without-random-device], [don't support random devices like /dev/urandom]),
+           [ case "$withval" in
+             no)  ac_with_random_device=no ;;
+             yes) ac_with_random_device=yes ;;
+             *)   ac_with_random_device=yes ;;
+           esac
+           ])
+AC_MSG_RESULT([${ac_with_random_device=yes}])
+
+if test x"${ac_with_random_device}" = xyes; then
+   AC_CHECK_FILE([/dev/urandom], AC_DEFINE([HAVE_DEVURANDOM], [1], [Define that you found /dev/urandom]))
+   AC_CHECK_FILE([/dev/random], AC_DEFINE([HAVE_DEVRANDOM], [1], [Define that you found /dev/urandom]))
+fi
 
 AC_OUTPUT

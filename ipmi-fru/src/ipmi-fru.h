@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: ipmi-fru.h,v 1.10 2008/05/21 16:48:31 chu11 Exp $
+ *  $Id: ipmi-fru.h,v 1.14.4.2 2009-12-23 21:24:05 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -28,25 +28,19 @@
 #ifndef _IPMI_FRU_H
 #define _IPMI_FRU_H
 
+#include <stdint.h>
 #include <freeipmi/freeipmi.h>
 
 #include "tool-cmdline-common.h"
+#include "tool-oem-common.h"
 #include "pstdout.h"
-
-#define FRU_BUF_LEN 2048
-
-typedef enum
-  {
-    FRU_ERR_FATAL_ERROR = -2,
-    FRU_ERR_NON_FATAL_ERROR = -1,
-    FRU_ERR_SUCCESS = 0,
-  } fru_err_t;
 
 enum ipmi_sel_argp_option_keys
   {
     DEVICE_ID_KEY = 'e',
     VERBOSE_KEY = 'v',
-    SKIP_CHECKS_KEY = 's'
+    SKIP_CHECKS_KEY = 's',
+    INTERPRET_OEM_DATA = 160,
   };
 
 struct ipmi_fru_arguments
@@ -54,10 +48,11 @@ struct ipmi_fru_arguments
   struct common_cmd_args common;
   struct sdr_cmd_args sdr;
   struct hostrange_cmd_args hostrange;
-  int device_id;
+  uint8_t device_id;
   int device_id_set;
   int verbose_count;
   int skip_checks;
+  int interpret_oem_data;
 };
 
 typedef struct ipmi_fru_prog_data
@@ -72,8 +67,10 @@ typedef struct ipmi_fru_state_data
   ipmi_ctx_t ipmi_ctx;
   pstdout_state_t pstate;
   char *hostname;
-  ipmi_sdr_cache_ctx_t ipmi_sdr_cache_ctx;
-  uint64_t fru_inventory_area_size;
+  ipmi_fru_parse_ctx_t fru_parse_ctx;
+  ipmi_sdr_cache_ctx_t sdr_cache_ctx;
+  ipmi_sdr_parse_ctx_t sdr_parse_ctx;
+  struct ipmi_oem_data oem_data;
 } ipmi_fru_state_data_t;
 
 #endif

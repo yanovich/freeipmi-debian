@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: ipmi_monitoring_sensor_config.h,v 1.12.2.8 2008/12/09 18:42:15 chu11 Exp $
+ *  $Id: ipmi_monitoring_sensor_config.h,v 1.23.4.1 2009-12-23 21:24:12 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -33,21 +33,21 @@ extern struct ipmi_sensor_config ipmi_threshold_sensor_config[];
 
 extern struct ipmi_sensor_config ipmi_voltage_state_config[];
 extern struct ipmi_sensor_config ipmi_voltage_performance_config[];
-extern struct ipmi_sensor_config ipmi_fan_device_install_config[];
+extern struct ipmi_sensor_config ipmi_fan_device_present_config[];
 extern struct ipmi_sensor_config ipmi_fan_transition_availability_config[];
 extern struct ipmi_sensor_config ipmi_fan_redundancy_config[];
 extern struct ipmi_sensor_config ipmi_processor_state_config[];
 extern struct ipmi_sensor_config ipmi_power_supply_state_config[];
 extern struct ipmi_sensor_config ipmi_power_supply_redundancy_config[];
-extern struct ipmi_sensor_config ipmi_power_unit_device_install_config[];
+extern struct ipmi_sensor_config ipmi_power_unit_device_present_config[];
 extern struct ipmi_sensor_config ipmi_power_unit_redundancy_config[];
 extern struct ipmi_sensor_config ipmi_module_board_state_config[];
-extern struct ipmi_sensor_config ipmi_module_board_device_install_config[];
+extern struct ipmi_sensor_config ipmi_module_board_device_present_config[];
 extern struct ipmi_sensor_config ipmi_drive_slot_state_config[];
 extern struct ipmi_sensor_config ipmi_drive_slot_predictive_failure_config[];
-extern struct ipmi_sensor_config ipmi_drive_slot_device_install_config[];
+extern struct ipmi_sensor_config ipmi_drive_slot_device_present_config[];
 extern struct ipmi_sensor_config ipmi_button_switch_state_config[];
-extern struct ipmi_sensor_config ipmi_entity_presence_device_install_config[];
+extern struct ipmi_sensor_config ipmi_entity_presence_device_present_config[];
 
 extern struct ipmi_sensor_config ipmi_physical_security_config[];
 extern struct ipmi_sensor_config ipmi_platform_security_violation_attempt_config[];
@@ -71,6 +71,6 @@ extern struct ipmi_sensor_config ipmi_boot_error_config[];
 extern struct ipmi_sensor_config ipmi_button_switch_config[];
 extern struct ipmi_sensor_config ipmi_system_acpi_power_state_config[];
 
-int ipmi_monitoring_sensor_config(int *errnum);
+int ipmi_monitoring_sensor_config (int *errnum);
 
 #endif /* _IPMI_MONITORING_SENSOR_CONFIG_H */

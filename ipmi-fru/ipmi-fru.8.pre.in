@@ -1,7 +1,7 @@
 .\"#############################################################################
-.\"$Id: ipmi-fru.8.pre.in,v 1.34 2008/08/12 18:14:36 chu11 Exp $
+.\"$Id: ipmi-fru.8.pre.in,v 1.42.4.3 2010-04-27 20:59:28 chu11 Exp $
 .\"#############################################################################
-.\"  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+.\"  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
 .\"  Copyright (C) 2007 The Regents of the University of California.
 .\"  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
 .\"  Written by Albert Chu <chu11@llnl.gov>
@@ -33,6 +33,7 @@ ipmi-fru \- display FRU information
 .SH "DESCRIPTION"
 .B Ipmi-fru
 displays Field Replaceable Unit (FRU) Information.
+#include <@top_srcdir@/common/man/manpage-common-table-of-contents.man>
 #include <@top_srcdir@/common/man/manpage-common-general-options-header.man>
 #include <@top_srcdir@/common/man/manpage-common-driver.man>
 #include <@top_srcdir@/common/man/manpage-common-inband.man>
@@ -58,15 +59,15 @@ The following options are specific to
 Specify a specific FRU device ID.
 .TP
 \fB\-v\fR, \fB\-\-verbose\fR
-Increase verbosity in output to include additional error output.
-.TP
-\fB\-vv\fR, \fB\-\-verbose\fR
-Increase verbosity more in output to include detailed FRU parsing information.
+Increase verbosity in output to include additional output.
 .TP
 \fB\-s\fR, \fB\-\-skip-checks\fR
 Skip FRU checksum checks. Some FRUs have incorrect checksums, but the
 FRU data is correct.  Use this option to skip the checks checksum.
-Output may be unknown, pray for the best.
+Output may be unknown, pray for the best.  This option is confirmed to
+work around compliances issues on Inventec 5441/Dell Xanadu II, Dell
+Poweredge R610, and Dell Poweredge R710 motherboards.
+#include <@top_srcdir@/common/man/manpage-common-interpret-oem-data.man>
 #include <@top_srcdir@/common/man/manpage-common-sdr-options.man>
 #include <@top_srcdir@/common/man/manpage-common-ignore-sdr-cache.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-options-header.man>
@@ -76,12 +77,23 @@ Output may be unknown, pray for the best.
 #include <@top_srcdir@/common/man/manpage-common-hostranged-eliminate.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-always-prefix.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-main.man>
-#include <@top_srcdir@/common/man/manpage-common-hostranged-text-shell.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-threads.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-options.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-localhost.man>
 #include <@top_srcdir@/common/man/manpage-common-troubleshooting.man>
 #include <@top_srcdir@/common/man/manpage-common-workaround-heading-text.man>
-#include <@top_srcdir@/common/man/manpage-common-workaround-text.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-inband-text.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-outofband-text.man>
+.LP
+"skipchecks" - This workaround option will skip FRU checksum checks.
+Some FRUs have incorrect checksums, but the FRU data is correct.
+Output may be unknown, pray for the best.  This option is confirmed to
+work around compliances issues on Inventec 5441/Dell Xanadu II, Dell
+Poweredge R610, and Dell Poweredge R710 motherboards.  This option is
+identical to using the \fB\-\-skip\-checks\fR option above.
+#include <@top_srcdir@/common/man/manpage-common-oem-interpretation.man>
+.LP
+Currently None
 .SH "EXAMPLES"
 .B # ipmi-fru 
 .PP
@@ -99,10 +111,15 @@ Get FRU information of a remote machine using IPMI over LAN.
 .PP
 Get FRU information across a cluster using IPMI over LAN.
 .PP
+.SH "IPMI-FRU KNOWN ISSUES"
+Not all language codes are supported in 
+.B ipmi-fru.
+If additional language code support is required please contact the
+FreeIPMI maintainers.
 #include <@top_srcdir@/common/man/manpage-common-known-issues.man>
 #include <@top_srcdir@/common/man/manpage-common-reporting-bugs.man>
 .SH COPYRIGHT
-Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
 .br
 Copyright (C) 2007 The Regents of the University of California.
 #include <@top_srcdir@/common/man/manpage-common-gpl-program-text.man>

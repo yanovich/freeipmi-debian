@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: ipmi-fru-argp.h,v 1.6 2008/03/28 00:14:34 chu11 Exp $
+ *  $Id: ipmi-fru-argp.h,v 1.8.4.1 2009-12-23 21:24:05 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -27,6 +27,8 @@
 
 #ifndef _IPMI_FRU_ARGP_H
 #define _IPMI_FRU_ARGP_H
+
+#include "ipmi-fru.h"
 
 void ipmi_fru_argp_parse (int argc, char **argv, struct ipmi_fru_arguments *cmd_args);
 

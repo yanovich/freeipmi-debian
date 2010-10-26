@@ -7,6 +7,7 @@ ipmi-raw \- execute IPMI commands by hex values
 .SH "DESCRIPTION"
 .B Ipmi-raw
 is used to execute IPMI commands by hex values.
+#include <@top_srcdir@/common/man/manpage-common-table-of-contents.man>
 #include <@top_srcdir@/common/man/manpage-common-general-options-header.man>
 #include <@top_srcdir@/common/man/manpage-common-driver.man>
 #include <@top_srcdir@/common/man/manpage-common-inband.man>
@@ -23,7 +24,7 @@ required user privilege will depend on the raw commands executed.
 #include <@top_srcdir@/common/man/manpage-common-authentication-type.man>
 #include <@top_srcdir@/common/man/manpage-common-cipher-suite-id-main.man>
 #include <@top_srcdir@/common/man/manpage-common-cipher-suite-id-details.man>
-#include <@top_srcdir@/common/man/manpage-common-privilege-level-user.man>
+#include <@top_srcdir@/common/man/manpage-common-privilege-level-admin.man>
 #include <@top_srcdir@/common/man/manpage-common-config-file.man>
 #include <@top_srcdir@/common/man/manpage-common-workaround-flags.man>
 #include <@top_srcdir@/common/man/manpage-common-debug.man>
@@ -32,7 +33,17 @@ required user privilege will depend on the raw commands executed.
 The following options are specific to
 .B Ipmi-raw.
 .TP
-\fB\-f\fR, \fB\-\-file\fR=\fICMD\-FILE\fR
+\fB\-\-channel\-number\fR=\fInumber\fR
+Specify an alternate channel number to bridge raw commands to.  You
+must also specify the \fIslave-address\fR below if you use this
+option.
+.TP
+\fB\-\-slave\-address\fR=\fIaddress\fR
+Specify an alternate slave address to bridge raw commands to.  You
+must also specify the \fIchannel-number\fR above if you use this
+option.
+.TP
+\fB\-\-file\fR=\fICMD\-FILE\fR
 Specify a file to read command requests from.
 #include <@top_srcdir@/common/man/manpage-common-hostranged-options-header.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-buffer.man>
@@ -41,12 +52,13 @@ Specify a file to read command requests from.
 #include <@top_srcdir@/common/man/manpage-common-hostranged-eliminate.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-always-prefix.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-main.man>
-#include <@top_srcdir@/common/man/manpage-common-hostranged-text-shell.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-threads.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-options.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-localhost.man>
 #include <@top_srcdir@/common/man/manpage-common-troubleshooting.man>
 #include <@top_srcdir@/common/man/manpage-common-workaround-heading-text.man>
-#include <@top_srcdir@/common/man/manpage-common-workaround-text.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-inband-text.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-outofband-text.man>
 .SH "EXAMPLES"
 .B # ipmi-raw 0 6 01
 .PP 
@@ -75,7 +87,7 @@ Read LUN, NETFN, command and request data from file as standard input.
 #include <@top_srcdir@/common/man/manpage-common-known-issues.man>
 #include <@top_srcdir@/common/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright \(co 2005-2008 FreeIPMI Core Team
+Copyright \(co 2005-2010 FreeIPMI Core Team
 #include <@top_srcdir@/common/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
 freeipmi.conf(5), freeipmi(7), bmc-config(8), ipmi-oem(8)

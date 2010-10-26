@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2008-2009 FreeIPMI Core Team
+  Copyright (C) 2008-2010 FreeIPMI Core Team
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -34,23 +34,32 @@
 #include "ipmi-oem-common.h"
 #include "ipmi-oem-dell.h"
 #include "ipmi-oem-fujitsu.h"
+#include "ipmi-oem-ibm.h"
+#include "ipmi-oem-intel.h"
 #include "ipmi-oem-inventec.h"
+#include "ipmi-oem-quanta.h"
+#include "ipmi-oem-sun.h"
 #include "ipmi-oem-supermicro.h"
 
 #include "freeipmi-portability.h"
 #include "pstdout.h"
 #include "tool-common.h"
 #include "tool-cmdline-common.h"
+#include "tool-sdr-cache-common.h"
 #include "tool-hostrange-common.h"
 
 typedef int (*oem_callback)(ipmi_oem_state_data_t *);
+
+#define IPMI_OEM_COMMAND_FLAGS_DEFAULT                0x0000
+#define IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE 0x0001
+#define IPMI_OEM_COMMAND_FLAGS_HIDDEN                 0x0100
 
 struct ipmi_oem_command
 {
   char *oem_command;
   char *command_options;
   int required_oem_options;
-  int oem_options_count_variable;
+  unsigned int flags;
   oem_callback func;
 };
 
@@ -64,142 +73,281 @@ struct ipmi_oem_command oem_dell[] =
   {
     {
       "get-system-info",
-      "<asset-tag|service-tag|product-name|mac-addresses>",
-      1,
+      "<KEY>",
       0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
       ipmi_oem_dell_get_system_info
     },
     {
       "get-nic-selection",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_dell_get_nic_selection
     },
     {
       "set-nic-selection",
       "<dedicated|shared|shared_failover_nic2|shared_failover_all>",
       1,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_dell_set_nic_selection
+    },
+    {
+      "get-active-lom-status",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_get_active_lom_status
     },
     {
       "get-ssh-config",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_dell_get_ssh_config
     },
     {
       "set-ssh-config",
       "KEY=VALUE ...",
-      1,
-      1,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
       ipmi_oem_dell_set_ssh_config
     },
     {
       "get-telnet-config",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_dell_get_telnet_config
     },
     {
       "set-telnet-config",
       "KEY=VALUE ...",
-      1,
-      1,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
       ipmi_oem_dell_set_telnet_config
     },
     {
       "get-web-server-config",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_dell_get_web_server_config
     },
     {
       "set-web-server-config",
       "KEY=VALUE ...",
-      1,
-      1,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
       ipmi_oem_dell_set_web_server_config
     },
     {
       "get-active-directory-config",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_dell_get_active_directory_config
     },
     {
       "set-active-directory-config",
       "KEY=VALUE ...",
       1,
-      1,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
       ipmi_oem_dell_set_active_directory_config
     },
     {
       "reset-to-defaults",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_dell_reset_to_defaults
     },
+    {
+      "get-power-consumption-data",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_get_power_consumption_data
+    },
+    /* legacy */
     {
       "get-power-info",
       NULL,
       0,
-      0,
-      ipmi_oem_dell_get_power_info
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
+      ipmi_oem_dell_get_power_consumption_data
     },
+    /* legacy */
     {
       "reset-power-info",
       "<cumulative|peak>",
       1,
-      0,
-      ipmi_oem_dell_reset_power_info
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
+      ipmi_oem_dell_reset_power_consumption_data
     },
     {
-      "get-instantaneous-power-consumption-info",
+      "reset-power-consumption-data",
+      "<cumulative|peak>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_reset_power_consumption_data
+    },
+    /* legacy */
+    {
+      "get-power-supply-info",
       NULL,
       0,
-      0,
-      ipmi_oem_dell_get_instantaneous_power_consumption_info
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
+      ipmi_oem_dell_power_supply_info
     },
+    {
+      "power-supply-info",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_power_supply_info
+    },
+    /* legacy */
+    {
+      "get-instantaneous-power-consumption-info",
+      "[power_supply_instance]",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN | IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_dell_get_instantaneous_power_consumption_data
+    },
+    {
+      "get-instantaneous-power-consumption-data",
+      "[power_supply_instance]",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_dell_get_instantaneous_power_consumption_data
+    },
+    /* legacy */
     {
       "get-power-headroom-info",
       NULL,
       0,
-      0,
-      ipmi_oem_dell_get_power_headroom_info
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN | IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_dell_get_power_head_room
     },
+    {
+      "get-power-head-room",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_get_power_head_room
+    },
+    {
+      "get-power-consumption-statistics",
+      "<average|max|min>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_get_power_consumption_statistics
+    },
+    /* legacy */
     {
       "get-average-power-history",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
       ipmi_oem_dell_get_average_power_history
     },
+    /* legacy */
     {
       "get-peak-power-history",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
       ipmi_oem_dell_get_peak_power_history
     },
+    {
+      "get-power-capacity",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_get_power_capacity
+    },
+    {
+      "set-power-capacity",
+      "<power-capacity>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_set_power_capacity
+    },
+    {
+      "get-power-capacity-status",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_get_power_capacity_status
+    },
+    {
+      "set-power-capacity-status",
+      "<enable|disable>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_set_power_capacity_status
+    },
+    {
+      "get-chassis-identify-status",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_get_chassis_identify_status,
+    },
+    /* legacy */
+    {
+      "get-board-id",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
+      ipmi_oem_inventec_get_board_id
+    },
+    /* legacy */
+    {
+      "set-board-id",
+      "<boardid>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
+      ipmi_oem_inventec_set_board_id
+    },
+    /* legacy */
     {
       "get-fcb-version",
       NULL,
       0,
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
+      ipmi_oem_inventec_get_fcb_version
+    },
+    /* legacy */
+    {
+      "set-fcb-version",
+      "<majorversion> <minorversion>",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
+      ipmi_oem_inventec_set_fcb_version
+    },
+    /* legacy */
+    {
+      "get-sol-inactivity-timeout",
+      NULL,
       0,
-      ipmi_oem_dell_get_fcb_version
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
+      ipmi_oem_inventec_get_sol_inactivity_timeout
+    },
+    /* legacy */
+    {
+      "set-sol-inactivity-timeout",
+      "<inactivity-timeout>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
+      ipmi_oem_inventec_set_sol_inactivity_timeout
     },
     {
       NULL,
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       NULL
     },
   };
@@ -210,130 +358,572 @@ struct ipmi_oem_command oem_fujitsu[] =
       "get-power-on-source",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_fujitsu_get_power_on_source
     },
     {
       "get-power-off-source",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_fujitsu_get_power_off_source
     },
     {
       "get-remote-storage-status",
       "<connection_number>",
       1,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_fujitsu_get_remote_storage_status
     },
     {
       "get-system-status",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_fujitsu_get_system_status
     },
     {
       "get-eeprom-version-info",
       "<eeprom_number>",
       1,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_fujitsu_get_eeprom_version_info
     },
     {
       "get-identify-led",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_fujitsu_get_identify_led
     },
     {
       "set-identify-led",
       "<on|off>",
       1,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_fujitsu_set_identify_led
     },
     {
       "get-error-led",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_fujitsu_get_error_led
+    },
+    {
+      "get-sel-entry-long-text",
+      "<sel_record_id>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_fujitsu_get_sel_entry_long_text
     },
     {
       NULL,
       NULL,
       0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      NULL
+    },
+  };
+
+struct ipmi_oem_command oem_ibm[] =
+  {
+    {
+      "get-led",
+      NULL,
       0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_ibm_get_led
+    },
+    {
+      NULL,
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      NULL
+    },
+  };
+
+struct ipmi_oem_command oem_intel[] =
+  {
+    {
+      "restore-configuration",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_intel_restore_configuration
+    },
+    {
+      NULL,
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       NULL
     },
   };
 
 struct ipmi_oem_command oem_inventec[] =
   {
+    /* legacy */
     {
       "get-nic-status",
       NULL,
       0,
-      0,
-      ipmi_oem_inventec_get_nic_status
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
+      ipmi_oem_inventec_get_nic_mode
     },
+    /* legacy */
     {
       "set-nic-status",
       "<dedicated|shared>",
       1,
+      IPMI_OEM_COMMAND_FLAGS_HIDDEN,
+      ipmi_oem_inventec_set_nic_mode
+    },
+    {
+      "get-nic-mode",
+      NULL,
       0,
-      ipmi_oem_inventec_set_nic_status
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_nic_mode
+    },
+    {
+      "set-nic-mode",
+      "<dedicated|shared>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_set_nic_mode
     },
     {
       "get-mac-address",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_inventec_get_mac_address
     },
     {
       "set-mac-address",
       "<dedicated|shared> <MACADDRESS>",
       2,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_inventec_set_mac_address
     },
     {
       "get-bmc-services",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_inventec_get_bmc_services
     },
     {
       "set-bmc-services",
       "<enable|disable> <all|kvm|http|ssh>",
       2,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_inventec_set_bmc_services
     },
+    {
+      "get-authentication-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_authentication_config
+    },
+    {
+      "set-authentication-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_inventec_set_authentication_config
+    },
+    {
+      "get-account-status",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_account_status
+    },
+    {
+      "get-dns-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_dns_config
+    },
+    {
+      "set-dns-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_inventec_set_dns_config
+    },
+    {
+      "get-web-server-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_web_server_config
+    },
+    {
+      "set-web-server-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_inventec_set_web_server_config
+    },
+    {
+      "get-power-management-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_power_management_config
+    },
+    {
+      "set-power-management-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_inventec_set_power_management_config
+    },
+    {
+      "get-sol-idle-timeout",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_sol_idle_timeout
+    },
+    {
+      "set-sol-idle-timeout",
+      "<idle-timeout>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_set_sol_idle_timeout
+    },
+    {
+      "get-telnet-ssh-redirect-status",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_telnet_ssh_redirect_status
+    },
+    {
+      "set-telnet-ssh-redirect-status",
+      "<enable|disable>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_set_telnet_ssh_redirect_status
+    },
+#if 0
+    /* waiting for verification from Dell */
+    {
+      "get-firmware-update-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_firmware_update_config
+    },
+    {
+      "set-firmware-update-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_inventec_set_firmware_update_config
+    },
+#endif
+#if 0
+    /* cannot verify */
+    {
+      "get-firmware-information",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_firmware_information
+    },
+#endif
+#if 0
+    /* waiting for verification from Dell */
+    {
+      "update-firmware",
+      "<tftp|ftp|http> [config=preserve|nopreserve]",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_inventec_update_firmware
+    },
+#endif
+    {
+      "get-board-id",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_board_id
+    },
+    {
+      "set-board-id",
+      "<boardid>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_set_board_id
+    },
+    {
+      "get-fcb-version",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_fcb_version
+    },
+    {
+      "set-fcb-version",
+      "<majorversion> <minorversion>",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_set_fcb_version
+    },
+#if 0
+    /* cannot verify */
+    {
+      "set-asset-tag",
+      "<asset-tag>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_set_asset_tag
+    },
+#endif
+#if 0
+    /* cannot verify */
+    {
+      "get-dhcp-retry",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_dhcp_retry
+    },
+    {
+      "set-dhcp-retry",
+      "<retry-count> <retry-interval> <retry-timeout>",
+      3,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_set_dhcp_retry
+    },
+#endif
+    {
+      "get-sol-inactivity-timeout",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_get_sol_inactivity_timeout
+    },
+    {
+      "set-sol-inactivity-timeout",
+      "<inactivity-timeout>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_set_sol_inactivity_timeout
+    },
+    {
+      "restore-to-defaults",
+      "<all|user|lan|sol|serial|pef>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_restore_to_defaults
+    },
+#if 0
+    /* cannot verify */
+    {
+      "set-system-guid",
+      "<system_guid>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_inventec_set_system_guid
+    },
+#endif
     {
       "read-eeprom",
       "<at24c256n>",
       1,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_inventec_read_eeprom
     },
     {
       "clear-eeprom",
       "<at24c256n>",
       1,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_inventec_clear_eeprom
     },
     {
       NULL,
       NULL,
       0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      NULL
+    },
+  };
+
+struct ipmi_oem_command oem_sun[] =
+  {
+    {
+      "get-led",
+      NULL,
       0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_sun_get_led
+    },
+    {
+      "set-led",
+      "<record_id> <off|on|standby|slow|fast>",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_sun_set_led
+    },
+    {
+      NULL,
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      NULL
+    },
+  };
+
+struct ipmi_oem_command oem_quanta[] =
+  {
+    {
+      "get-nic-mode",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_get_nic_mode
+    },
+    {
+      "set-nic-mode",
+      "<dedicated|shared>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_set_nic_mode
+    },
+    {
+      "get-bmc-services",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_get_bmc_services
+    },
+    {
+      "set-bmc-services",
+      "<enable|disable> <all|kvm|http|ssh>",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_set_bmc_services
+    },
+    {
+      "get-account-status",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_get_account_status
+    },
+    {
+      "get-dns-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_get_dns_config
+    },
+    {
+      "set-dns-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_quanta_set_dns_config
+    },
+    {
+      "get-web-server-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_get_web_server_config
+    },
+    {
+      "set-web-server-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_quanta_set_web_server_config
+    },
+    {
+      "get-power-management-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_get_power_management_config
+    },
+    {
+      "set-power-management-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_quanta_set_power_management_config
+    },
+    {
+      "get-sol-idle-timeout",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_get_sol_idle_timeout
+    },
+    {
+      "set-sol-idle-timeout",
+      "<idle-timeout>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_set_sol_idle_timeout
+    },
+    {
+      "get-telnet-ssh-redirect-status",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_get_telnet_ssh_redirect_status
+    },
+    {
+      "set-telnet-ssh-redirect-status",
+      "<enable|disable>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_set_telnet_ssh_redirect_status
+    },
+    {
+      "reset-to-defaults",
+      "<all|user|lan|sol|serial|pef>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_reset_to_defaults
+    },
+    {
+      "get-processor-information",
+      "[processor-index]",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_quanta_get_processor_information
+    },
+    {
+      "read-mac-address",
+      "<s99q> <dedicated|shared>",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_read_mac_address
+    },
+    {
+      "write-mac-address",
+      "<s99q> <dedicated|shared> <MACADDRESS>",
+      3,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_quanta_write_mac_address
+    },
+    {
+      NULL,
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       NULL
     },
   };
@@ -344,21 +934,35 @@ struct ipmi_oem_command oem_supermicro[] =
       "extra-firmware-info",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_supermicro_extra_firmware_info
     },
     {
       "reset-intrusion",
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_supermicro_reset_intrusion
+    },
+    {
+      "get-bmc-services-status",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_supermicro_get_bmc_services_status
+    },
+    {
+      "set-bmc-services-status",
+      "<enable|disable>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_supermicro_set_bmc_services_status
     },
     {
       NULL,
       NULL,
       0,
-      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       NULL
     },
   };
@@ -366,19 +970,35 @@ struct ipmi_oem_command oem_supermicro[] =
 struct ipmi_oem_id oem_cb[] =
   {
     {
-      "dell",
+      "Dell",
       oem_dell
     },
     {
-      "fujitsu",
+      "Fujitsu",
       oem_fujitsu
     },
     {
-      "inventec",
+      "IBM",
+      oem_ibm
+    },
+    {
+      "Intel",
+      oem_intel
+    },
+    {
+      "Inventec",
       oem_inventec
     },
     {
-      "supermicro",
+      "Quanta",
+      oem_quanta
+    },
+    {
+      "Sun",
+      oem_sun
+    },
+    {
+      "Supermicro",
       oem_supermicro
     },
     {
@@ -400,13 +1020,16 @@ _list (void)
 
       while (oem_cmd && oem_cmd->oem_command)
         {
-          if (oem_cmd->command_options)
-            printf ("    Command: %s %s\n",
-                    oem_cmd->oem_command,
-                    oem_cmd->command_options);
-          else
-            printf ("    Command: %s\n",
-                    oem_cmd->oem_command);
+          if (!(oem_cmd->flags & IPMI_OEM_COMMAND_FLAGS_HIDDEN))
+            {
+              if (oem_cmd->command_options)
+                printf ("    Command: %s %s\n",
+                        oem_cmd->oem_command,
+                        oem_cmd->command_options);
+              else
+                printf ("    Command: %s\n",
+                        oem_cmd->oem_command);
+            }
           oem_cmd++;
         }
 
@@ -414,6 +1037,21 @@ _list (void)
       oem_id++;
     }
 
+  return (0);
+}
+
+static int
+_flush_cache (ipmi_oem_state_data_t *state_data)
+{
+  assert (state_data);
+  
+  if (sdr_cache_flush_cache (state_data->sdr_cache_ctx,
+                             state_data->pstate,
+                             state_data->prog_data->args->sdr.quiet_cache,
+                             state_data->hostname,
+                             state_data->prog_data->args->sdr.sdr_cache_directory) < 0)
+    return (-1);
+  
   return (0);
 }
 
@@ -438,6 +1076,31 @@ _run_oem_cmd (ipmi_oem_state_data_t *state_data)
 
           id_found++;
 
+	  /* offer "help" as well as list, for those used to ipmitool */
+          if (!args->oem_command
+              || !strcasecmp (args->oem_command, "list")
+	      || !strcasecmp (args->oem_command, "help"))
+            {
+              while (oem_cmd && oem_cmd->oem_command)
+                {
+                  if (!(oem_cmd->flags & IPMI_OEM_COMMAND_FLAGS_HIDDEN))
+                    {
+                      if (oem_cmd->command_options)
+                        printf ("%s Command: %s %s\n",
+                                oem_id->oem_id,
+                                oem_cmd->oem_command,
+                                oem_cmd->command_options);
+                      else
+                        printf ("%s Command: %s\n",
+                                oem_id->oem_id,
+                                oem_cmd->oem_command);
+                    }
+                  oem_cmd++;
+                }
+
+              break;
+            }
+
           while (oem_cmd && oem_cmd->oem_command)
             {
               if (!strcasecmp (oem_cmd->oem_command,
@@ -445,10 +1108,9 @@ _run_oem_cmd (ipmi_oem_state_data_t *state_data)
                 {
                   cmd_found++;
 
-                  if ((oem_cmd->oem_options_count_variable
-		       && state_data->prog_data->args->oem_options_count
+                  if ((oem_cmd->flags & IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE
 		       && state_data->prog_data->args->oem_options_count < oem_cmd->required_oem_options)
-		      || (!oem_cmd->oem_options_count_variable
+		      || (!(oem_cmd->flags & IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE)
 			  && state_data->prog_data->args->oem_options_count != oem_cmd->required_oem_options))
                     {
                       pstdout_fprintf (state_data->pstate,
@@ -512,22 +1174,12 @@ run_cmd_args (ipmi_oem_state_data_t *state_data)
    * exitted
    */
   assert (!args->list);
+  assert (args->oem_id);
+  assert (strcasecmp (args->oem_id, "list"));
+  assert (strcasecmp (args->oem_id, "help"));
 
-  if (!args->oem_id)
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "OEM Id not specified\n");
-      goto cleanup;
-    }
-
-  if (!args->oem_command)
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "OEM Command not specified\n");
-      goto cleanup;
-    }
+  if (args->sdr.flush_cache)
+    return (_flush_cache (state_data));
 
   if (_run_oem_cmd (state_data) < 0)
     goto cleanup;
@@ -552,29 +1204,75 @@ _ipmi_oem (pstdout_state_t pstate,
 
   state_data.prog_data = prog_data;
   state_data.pstate = pstate;
+  state_data.hostname = (char *)hostname;
 
-  if (!(state_data.ipmi_ctx = ipmi_open (prog_data->progname,
-                                         hostname,
-                                         &(prog_data->args->common),
-                                         errmsg,
-                                         IPMI_OPEN_ERRMSGLEN)))
+  /* Special case, just flush, don't do an IPMI connection */
+  /* Special case, we're going to output help info, don't do an IPMI connection */
+  if (!prog_data->args->sdr.flush_cache
+      && prog_data->args->oem_command)
     {
-      pstdout_fprintf (pstate,
-                       stderr,
-                       "%s\n",
-                       errmsg);
+      if (!(state_data.ipmi_ctx = ipmi_open (prog_data->progname,
+					     hostname,
+					     &(prog_data->args->common),
+					     errmsg,
+					     IPMI_OPEN_ERRMSGLEN)))
+	{
+	  pstdout_fprintf (pstate,
+			   stderr,
+			   "%s\n",
+			   errmsg);
+	  exit_code = EXIT_FAILURE;
+	  goto cleanup;
+	}
+    }
+
+  if (!(state_data.sdr_cache_ctx = ipmi_sdr_cache_ctx_create ()))
+    {
+      pstdout_perror (pstate, "ipmi_sdr_cache_ctx_create()");
       exit_code = EXIT_FAILURE;
       goto cleanup;
     }
 
+  if (state_data.prog_data->args->common.debug)
+    {
+      /* Don't error out, if this fails we can still continue */
+      if (ipmi_sdr_cache_ctx_set_flags (state_data.sdr_cache_ctx,
+                                        IPMI_SDR_CACHE_FLAGS_DEBUG_DUMP) < 0)
+        pstdout_fprintf (pstate,
+                         stderr,
+                         "ipmi_sdr_cache_ctx_set_flags: %s\n",
+                         ipmi_sdr_cache_ctx_strerror (ipmi_sdr_cache_ctx_errnum (state_data.sdr_cache_ctx)));
+      
+      if (hostname)
+        {
+          if (ipmi_sdr_cache_ctx_set_debug_prefix (state_data.sdr_cache_ctx,
+                                                   hostname) < 0)
+            pstdout_fprintf (pstate,
+                             stderr,
+                             "ipmi_sdr_cache_ctx_set_debug_prefix: %s\n",
+                             ipmi_sdr_cache_ctx_strerror (ipmi_sdr_cache_ctx_errnum (state_data.sdr_cache_ctx)));
+        }
+    }
+  
+  if (!(state_data.sdr_parse_ctx = ipmi_sdr_parse_ctx_create ()))
+    {
+      pstdout_perror (pstate, "ipmi_sdr_parse_ctx_create()");
+      exit_code = EXIT_FAILURE;
+      goto cleanup;
+    }
+ 
   if (run_cmd_args (&state_data) < 0)
     {
       exit_code = EXIT_FAILURE;
       goto cleanup;
     }
-
+  
   exit_code = 0;
  cleanup:
+  if (state_data.sdr_cache_ctx)
+    ipmi_sdr_cache_ctx_destroy (state_data.sdr_cache_ctx);
+  if (state_data.sdr_parse_ctx)
+    ipmi_sdr_parse_ctx_destroy (state_data.sdr_parse_ctx);
   if (state_data.ipmi_ctx)
     {
       ipmi_ctx_close (state_data.ipmi_ctx);
@@ -589,6 +1287,7 @@ main (int argc, char **argv)
   ipmi_oem_prog_data_t prog_data;
   struct ipmi_oem_arguments cmd_args;
   int exit_code;
+  int hosts_count;
   int rv;
 
   ipmi_disable_coredump ();
@@ -599,7 +1298,11 @@ main (int argc, char **argv)
   prog_data.args = &cmd_args;
 
   /* Special case, just output list, don't do anything else */
-  if (cmd_args.list)
+  /* offer "help" as well as list, for those used to ipmitool */
+  if (!cmd_args.oem_id
+      || !strcasecmp (cmd_args.oem_id, "list")
+      || !strcasecmp (cmd_args.oem_id, "help")
+      || cmd_args.list)
     {
       if (_list () < 0)
         {
@@ -610,14 +1313,20 @@ main (int argc, char **argv)
       goto cleanup;
     }
 
-  if (pstdout_setup (&(prog_data.args->common.hostname),
-                     prog_data.args->hostrange.buffer_output,
-                     prog_data.args->hostrange.consolidate_output,
-                     prog_data.args->hostrange.fanout,
-                     prog_data.args->hostrange.eliminate,
-                     prog_data.args->hostrange.always_prefix) < 0)
+  if ((hosts_count = pstdout_setup (&(prog_data.args->common.hostname),
+                                    prog_data.args->hostrange.buffer_output,
+                                    prog_data.args->hostrange.consolidate_output,
+                                    prog_data.args->hostrange.fanout,
+                                    prog_data.args->hostrange.eliminate,
+                                    prog_data.args->hostrange.always_prefix)) < 0)
     {
       exit_code = EXIT_FAILURE;
+      goto cleanup;
+    }
+
+  if (!hosts_count)
+    {
+      exit_code = EXIT_SUCCESS;
       goto cleanup;
     }
 

@@ -1,5 +1,5 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+   Copyright (C) 2003-2010 FreeIPMI Core Team
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,13 +13,13 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 
-*/
+ */
 
 
 #ifndef _RMCP_CMDS_H
-#define	_RMCP_CMDS_H	1
+#define _RMCP_CMDS_H    1
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +27,15 @@ extern "C" {
 
 #include <stdint.h>
 #include <freeipmi/fiid/fiid.h>
+
+/* 
+ * fill* functions return 0 on success, -1 on error.
+ *
+ * obj_cmd_rq must be for the fill function's respective fiid
+ * template request.
+ *
+ * see freeipmi/templates/ for template definitions 
+ */
 
 extern fiid_template_t tmpl_cmd_asf_presence_ping;
 extern fiid_template_t tmpl_cmd_asf_presence_pong;
@@ -36,7 +45,7 @@ extern fiid_template_t tmpl_cmd_asf_presence_pong;
    ranging from 0x00 to 0xFE.  This is because the RMCP consumers may
    optionally discard duplicate messages.  */
 
-int8_t fill_cmd_asf_presence_ping(uint8_t message_tag, fiid_obj_t obj_cmd);
+int fill_cmd_asf_presence_ping (uint8_t message_tag, fiid_obj_t obj_cmd);
 
 #ifdef __cplusplus
 }

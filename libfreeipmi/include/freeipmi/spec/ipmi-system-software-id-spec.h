@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+   Copyright (C) 2003-2010 FreeIPMI Core Team
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -14,10 +14,10 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ */
 
 #ifndef _IPMI_SYSTEM_SOFTWARE_ID_SPEC_H
-#define	_IPMI_SYSTEM_SOFTWARE_ID_SPEC_H
+#define _IPMI_SYSTEM_SOFTWARE_ID_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,32 +25,51 @@ extern "C" {
 
 /* Table 5-4 */
 
-/* To avoid gcc warnings, added +1 and -1 in comparison */
+#define IPMI_SYSTEM_SOFTWARE_TYPE_BIOS_MIN 0x01
+#define IPMI_SYSTEM_SOFTWARE_TYPE_BIOS_MAX 0x0F
+
+#define IPMI_SYSTEM_SOFTWARE_TYPE_SMI_HANDLER_MIN 0x10
+#define IPMI_SYSTEM_SOFTWARE_TYPE_SMI_HANDLER_MAX 0x1F
+
+#define IPMI_SYSTEM_SOFTWARE_TYPE_SYSTEM_MANAGEMENT_SOFTWARE_MIN 0x20
+#define IPMI_SYSTEM_SOFTWARE_TYPE_SYSTEM_MANAGEMENT_SOFTWARE_MAX 0x2F
+
+#define IPMI_SYSTEM_SOFTWARE_TYPE_OEM_MIN 0x30
+#define IPMI_SYSTEM_SOFTWARE_TYPE_OEM_MAX 0x3F
+
+#define IPMI_SYSTEM_SOFTWARE_TYPE_REMOTE_CONSOLE_SOFTWARE_MIN 0x40
+#define IPMI_SYSTEM_SOFTWARE_TYPE_REMOTE_CONSOLE_SOFTWARE_MAX 0x46
+
+#define IPMI_SYSTEM_SOFTWARE_TYPE_TERMINAL_MODE_REMOTE_CONSOLE_SOFTWARE 0x47
+
+#define IPMI_SYSTEM_SOFTWARE_TYPE_RESERVED_MIN 0x48
+
+/* To avoid gcc warnings, add +1 in comparison */
 #define IPMI_SYSTEM_SOFTWARE_TYPE_IS_BIOS(__val) \
-        (((__val + 1) >= 0x01  \
-          && (__val - 1) <= 0x0E) ? 1 : 0)
+  (((__val + 1) >= IPMI_SYSTEM_SOFTWARE_TYPE_BIOS_MIN \
+    && (__val) <= IPMI_SYSTEM_SOFTWARE_TYPE_BIOS_MAX) ? 1 : 0)
 
 #define IPMI_SYSTEM_SOFTWARE_TYPE_IS_SMI_HANDLER(__val) \
-        (((__val) >= 0x10  \
-          && (__val) <= 0x1F) ? 1 : 0)
+  (((__val) >= IPMI_SYSTEM_SOFTWARE_TYPE_SMI_HANDLER_MIN \
+    && (__val) <= IPMI_SYSTEM_SOFTWARE_TYPE_SMI_HANDLER_MAX) ? 1 : 0)
 
 #define IPMI_SYSTEM_SOFTWARE_TYPE_IS_SYSTEM_MANAGEMENT_SOFTWARE(__val) \
-        (((__val) >= 0x20  \
-          && (__val) <= 0x2F) ? 1 : 0)
+  (((__val) >= IPMI_SYSTEM_SOFTWARE_TYPE_SYSTEM_MANAGEMENT_SOFTWARE_MIN \
+    && (__val) <= IPMI_SYSTEM_SOFTWARE_TYPE_SYSTEM_MANAGEMENT_SOFTWARE_MAX) ? 1 : 0)
 
 #define IPMI_SYSTEM_SOFTWARE_TYPE_IS_OEM(__val) \
-        (((__val) >= 0x30  \
-          && (__val) <= 0x3F) ? 1 : 0)
+  (((__val) >= IPMI_SYSTEM_SOFTWARE_TYPE_OEM_MIN \
+    && (__val) <= IPMI_SYSTEM_SOFTWARE_TYPE_OEM_MAX) ? 1 : 0)
 
 #define IPMI_SYSTEM_SOFTWARE_TYPE_IS_REMOTE_CONSOLE_SOFTWARE(__val) \
-        (((__val) >= 0x40  \
-          && (__val) <= 0x46) ? 1 : 0)
+  (((__val) >= IPMI_SYSTEM_SOFTWARE_TYPE_REMOTE_CONSOLE_SOFTWARE_MIN \
+    && (__val) <= IPMI_SYSTEM_SOFTWARE_TYPE_REMOTE_CONSOLE_SOFTWARE_MAX) ? 1 : 0)
 
 #define IPMI_SYSTEM_SOFTWARE_TYPE_IS_TERMINAL_MODE_REMOTE_CONSOLE_SOFTWARE(__val) \
-        (((__val) == 0x47)) ? 1 : 0)
+  (((__val) == IPMI_SYSTEM_SOFTWARE_TYPE_TERMINAL_MODE_REMOTE_CONSOLE_SOFTWARE)) ? 1 : 0)
 
 #define IPMI_SYSTEM_SOFTWARE_TYPE_IS_RESERVED(__val) \
-        (((__val) > 0x47) ? 1 : 0)
+  (((__val) >= IPMI_SYSTEM_SOFTWARE_TYPE_RESERVED_MIN) ? 1 : 0)
 
 #ifdef __cplusplus
 }

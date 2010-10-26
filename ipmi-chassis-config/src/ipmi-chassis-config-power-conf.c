@@ -1,19 +1,19 @@
-/* 
-   Copyright (C) 2008 FreeIPMI Core Team
+/*
+  Copyright (C) 2008-2010 FreeIPMI Core Team
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 */
 
 #if HAVE_CONFIG_H
@@ -33,7 +33,6 @@
 
 #include "freeipmi-portability.h"
 #include "pstdout.h"
-#include "tool-fiid-wrappers.h"
 
 static config_err_t
 power_restore_policy_checkout (const char *section_name,
@@ -43,32 +42,54 @@ power_restore_policy_checkout (const char *section_name,
   ipmi_chassis_config_state_data_t *state_data = (ipmi_chassis_config_state_data_t *)arg;
   fiid_obj_t obj_cmd_rs = NULL;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
+  uint8_t power_restore_policy;
   uint64_t val;
-  
-  _FIID_OBJ_CREATE(obj_cmd_rs, tmpl_cmd_get_chassis_status_rs);
-  
-  if (ipmi_cmd_get_chassis_status (state_data->ipmi_ctx, obj_cmd_rs) < 0)
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_get_chassis_status_rs)))
     {
-      if (state_data->prog_data->args->config_args.common.debug)
-        pstdout_fprintf(state_data->pstate,
-                        stderr,
-                        "ipmi_cmd_get_chassis_status: %s\n",
-                        ipmi_ctx_strerror(ipmi_ctx_errnum(state_data->ipmi_ctx)));
-      if (!IPMI_CTX_ERRNUM_IS_FATAL_ERROR(state_data->ipmi_ctx))
-        rv = CONFIG_ERR_NON_FATAL_ERROR;
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
       goto cleanup;
     }
-  
-  _FIID_OBJ_GET (obj_cmd_rs, "current_power_state.power_restore_policy", &val);
-  
-  if (config_section_update_keyvalue_output(state_data->pstate,
-                                            kv,
-                                            power_restore_policy_string ((uint8_t)val)) < 0)
-    return CONFIG_ERR_FATAL_ERROR;
-  
+
+  if (ipmi_cmd_get_chassis_status (state_data->ipmi_ctx, obj_cmd_rs) < 0)
+    {
+      config_err_t ret;
+
+      if (state_data->prog_data->args->config_args.common.debug)
+        pstdout_fprintf (state_data->pstate,
+                         stderr,
+                         "ipmi_cmd_get_chassis_status: %s\n",
+                         ipmi_ctx_errormsg (state_data->ipmi_ctx));
+
+      if (config_is_non_fatal_error (state_data->ipmi_ctx,
+                                     obj_cmd_rs,
+                                     &ret))
+        rv = ret;
+
+      goto cleanup;
+    }
+
+  if (FIID_OBJ_GET (obj_cmd_rs, "current_power_state.power_restore_policy", &val) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_get: 'current_power_state.power_restore_policy': %s\n",
+                       fiid_obj_errormsg (obj_cmd_rs));
+      goto cleanup;
+    }
+  power_restore_policy = val;
+
+  if (config_section_update_keyvalue_output (state_data->pstate,
+                                             kv,
+                                             power_restore_policy_string (power_restore_policy)) < 0)
+    return (CONFIG_ERR_FATAL_ERROR);
+
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
-  _FIID_OBJ_DESTROY(obj_cmd_rs);
+  fiid_obj_destroy (obj_cmd_rs);
   return (rv);
 }
 
@@ -80,26 +101,39 @@ power_restore_policy_commit (const char *section_name,
   ipmi_chassis_config_state_data_t *state_data = (ipmi_chassis_config_state_data_t *)arg;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   fiid_obj_t obj_cmd_rs = NULL;
-  
-  _FIID_OBJ_CREATE(obj_cmd_rs, tmpl_cmd_set_power_restore_policy_rs);
-  
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_power_restore_policy_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
+
   if (ipmi_cmd_set_power_restore_policy (state_data->ipmi_ctx,
                                          power_restore_policy_number (kv->value_input),
                                          obj_cmd_rs) < 0)
     {
+      config_err_t ret;
+
       if (state_data->prog_data->args->config_args.common.debug)
-        pstdout_fprintf(state_data->pstate,
-                        stderr,
-                        "ipmi_cmd_set_power_restore_policy: %s\n",
-                        ipmi_ctx_strerror(ipmi_ctx_errnum(state_data->ipmi_ctx)));
-      if (!IPMI_CTX_ERRNUM_IS_FATAL_ERROR(state_data->ipmi_ctx))
-        rv = CONFIG_ERR_NON_FATAL_ERROR;
+        pstdout_fprintf (state_data->pstate,
+                         stderr,
+                         "ipmi_cmd_set_power_restore_policy: %s\n",
+                         ipmi_ctx_errormsg (state_data->ipmi_ctx));
+
+      if (config_is_non_fatal_error (state_data->ipmi_ctx,
+                                     obj_cmd_rs,
+                                     &ret))
+        rv = ret;
+
       goto cleanup;
     }
 
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
-  _FIID_OBJ_DESTROY(obj_cmd_rs);
+  fiid_obj_destroy (obj_cmd_rs);
   return (rv);
 }
 
@@ -111,12 +145,12 @@ power_cycle_interval_checkout (const char *section_name,
   ipmi_chassis_config_state_data_t *state_data = (ipmi_chassis_config_state_data_t *)arg;
 
   /* achu: value cannot be checked out */
-  if (config_section_update_keyvalue_output(state_data->pstate,
-                                            kv,
-                                            "") < 0)
-    return CONFIG_ERR_FATAL_ERROR;
-  
-  return CONFIG_ERR_SUCCESS;
+  if (config_section_update_keyvalue_output (state_data->pstate,
+                                             kv,
+                                             "") < 0)
+    return (CONFIG_ERR_FATAL_ERROR);
+
+  return (CONFIG_ERR_SUCCESS);
 }
 
 static config_err_t
@@ -127,26 +161,33 @@ power_cycle_interval_commit (const char *section_name,
   ipmi_chassis_config_state_data_t *state_data = (ipmi_chassis_config_state_data_t *)arg;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   fiid_obj_t obj_cmd_rs = NULL;
-  
-  _FIID_OBJ_CREATE(obj_cmd_rs, tmpl_cmd_set_power_cycle_interval_rs);
-  
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_power_cycle_interval_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
+
   if (ipmi_cmd_set_power_cycle_interval (state_data->ipmi_ctx,
                                          atoi (kv->value_input),
                                          obj_cmd_rs) < 0)
     {
       if (state_data->prog_data->args->config_args.common.debug)
-        pstdout_fprintf(state_data->pstate,
-                        stderr,
-                        "ipmi_cmd_set_power_cycle_interval: %s\n",
-                        ipmi_ctx_strerror(ipmi_ctx_errnum(state_data->ipmi_ctx)));
-      if (!IPMI_CTX_ERRNUM_IS_FATAL_ERROR(state_data->ipmi_ctx))
+        pstdout_fprintf (state_data->pstate,
+                         stderr,
+                         "ipmi_cmd_set_power_cycle_interval: %s\n",
+                         ipmi_ctx_errormsg (state_data->ipmi_ctx));
+      if (!IPMI_ERRNUM_IS_FATAL_ERROR (state_data->ipmi_ctx))
         rv = CONFIG_ERR_NON_FATAL_ERROR;
       goto cleanup;
     }
-  
+
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
-  _FIID_OBJ_DESTROY(obj_cmd_rs);
+  fiid_obj_destroy (obj_cmd_rs);
   return (rv);
 }
 
@@ -154,7 +195,7 @@ struct config_section *
 ipmi_chassis_config_power_conf_get (ipmi_chassis_config_state_data_t *state_data)
 {
   struct config_section *section = NULL;
-  char *section_comment = 
+  char *section_comment =
     "The following configuration options are for configuring "
     "chassis power behavior."
     "\n"
@@ -196,10 +237,10 @@ ipmi_chassis_config_power_conf_get (ipmi_chassis_config_state_data_t *state_data
                               config_number_range_one_byte_non_zero) < 0)
     goto cleanup;
 
-  return section;
+  return (section);
 
  cleanup:
   if (section)
-    config_section_destroy(state_data->pstate, section);
-  return NULL;
+    config_section_destroy (section);
+  return (NULL);
 }

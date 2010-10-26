@@ -1,5 +1,5 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+   Copyright (C) 2003-2010 FreeIPMI Core Team
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,9 +13,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 
-*/
+ */
 
 #ifndef _IPMI_SOL_PARAMETER_SPEC_H
 #define _IPMI_SOL_PARAMETER_SPEC_H
@@ -30,9 +30,21 @@ extern "C" {
 #define IPMI_SOL_PARAMETER_CHARACTER_ACCUMULATE_INTERVAL_AND_SEND_THRESHOLD 3
 #define IPMI_SOL_PARAMETER_SOL_RETRY                                        4
 #define IPMI_SOL_PARAMETER_SOL_NON_VOLATILE_BIT_RATE                        5
-#define IPMI_SOL_PARAMETER_SOL_VOLATILE_BIT_RATE                            6 
+#define IPMI_SOL_PARAMETER_SOL_VOLATILE_BIT_RATE                            6
 #define IPMI_SOL_PARAMETER_SOL_PAYLOAD_CHANNEL                              7
 #define IPMI_SOL_PARAMETER_SOL_PAYLOAD_PORT_NUMBER                          8
+#define IPMI_SOL_PARAMETER_OEM_MIN                                          192
+#define IPMI_SOL_PARAMETER_OEM_MAX                                          255
+
+/* To avoid gcc warnings, add +1 in comparison */
+#define IPMI_SOL_PARAMETER_SELECTOR_VALID(__parameter_selector) \
+  ((((__parameter_selector) + 1) > (IPMI_SOL_PARAMETER_SET_IN_PROGRESS + 1) \
+    && (__parameter_selector) <= IPMI_SOL_PARAMETER_SOL_PAYLOAD_PORT_NUMBER) ? 1 : 0)
+
+/* To avoid gcc warnings, subtract -1 in comparison */
+#define IPMI_SOL_PARAMETER_SELECTOR_IS_OEM(__parameter_selector) \
+  (((__parameter_selector) >= IPMI_SOL_PARAMETER_OEM_MIN \
+    && ((__parameter_selector) - 1) <= (IPMI_SOL_PARAMETER_OEM_MAX - 1)) ? 1 : 0)
 
 #ifdef __cplusplus
 }

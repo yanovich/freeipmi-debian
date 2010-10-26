@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2003-2008 FreeIPMI Core Team
+# Copyright (c) 2003-2010 FreeIPMI Core Team
 #
 
 %define name @PACKAGE@
@@ -78,8 +78,8 @@ mkdir -p $RPM_BUILD_ROOT/%{_initrddir}/
 # if check needed for SLES systems
 if [[ "%{_sysconfdir}/init.d" != "%{_initrddir}" ]]
 then
-mv $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/freeipmi-bmc-watchdog $RPM_BUILD_ROOT/%{_initrddir}/freeipmi-bmc-watchdog
-mv $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/freeipmi-ipmidetectd $RPM_BUILD_ROOT/%{_initrddir}/freeipmi-ipmidetectd
+mv $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/bmc-watchdog $RPM_BUILD_ROOT/%{_initrddir}/bmc-watchdog
+mv $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/ipmidetectd $RPM_BUILD_ROOT/%{_initrddir}/ipmidetectd
 fi
 rm -f %{buildroot}%{_infodir}/dir
 # kludge to get around rpmlint complaining about 0 length semephore file
@@ -109,17 +109,17 @@ fi
 
 %post bmc-watchdog
 if [ "$1" = 1 ]; then
-   if [ -x %{_initrddir}/freeipmi-bmc-watchdog ]; then
-      /sbin/chkconfig --add freeipmi-bmc-watchdog
-      /sbin/chkconfig freeipmi-bmc-watchdog off
+   if [ -x %{_initrddir}/bmc-watchdog ]; then
+      /sbin/chkconfig --add bmc-watchdog
+      /sbin/chkconfig bmc-watchdog off
    fi
 fi
 if [ $1 -ge 1 ]; then
-   if [ -x %{_initrddir}/freeipmi-bmc-watchdog ]; then
-      if %{_initrddir}/freeipmi-bmc-watchdog status | grep -q running; then
-         %{_initrddir}/freeipmi-bmc-watchdog restart
+   if [ -x %{_initrddir}/bmc-watchdog ]; then
+      if %{_initrddir}/bmc-watchdog status | grep -q running; then
+         %{_initrddir}/bmc-watchdog restart
       else
-         %{_initrddir}/freeipmi-bmc-watchdog condrestart
+         %{_initrddir}/bmc-watchdog condrestart
       fi
    fi
 fi
@@ -129,27 +129,27 @@ fi
 # Stop bmc-watchdog if it is running 
 #
 if [ "$1" = 0 ]; then
-    if [ -x %{_initrddir}/freeipmi-bmc-watchdog ]; then
-       if %{_initrddir}/freeipmi-bmc-watchdog status | grep -q running; then
-          %{_initrddir}/freeipmi-bmc-watchdog stop
+    if [ -x %{_initrddir}/bmc-watchdog ]; then
+       if %{_initrddir}/bmc-watchdog status | grep -q running; then
+          %{_initrddir}/bmc-watchdog stop
        fi
-       /sbin/chkconfig --del freeipmi-bmc-watchdog
+       /sbin/chkconfig --del bmc-watchdog
     fi
 fi
 
 %post ipmidetectd
 if [ "$1" = 1 ]; then
-   if [ -x %{_initrddir}/freeipmi-ipmidetectd ]; then
-      /sbin/chkconfig --add freeipmi-ipmidetectd
-      /sbin/chkconfig freeipmi-ipmidetectd off
+   if [ -x %{_initrddir}/ipmidetectd ]; then
+      /sbin/chkconfig --add ipmidetectd
+      /sbin/chkconfig ipmidetectd off
    fi
 fi
 if [ $1 -ge 1 ]; then
-   if [ -x %{_initrddir}/freeipmi-ipmidetectd ]; then
-      if %{_initrddir}/freeipmi-ipmidetectd status | grep -q running; then
-         %{_initrddir}/freeipmi-ipmidetectd restart
+   if [ -x %{_initrddir}/ipmidetectd ]; then
+      if %{_initrddir}/ipmidetectd status | grep -q running; then
+         %{_initrddir}/ipmidetectd restart
       else
-         %{_initrddir}/freeipmi-ipmidetectd condrestart
+         %{_initrddir}/ipmidetectd condrestart
       fi
    fi
 fi
@@ -159,11 +159,11 @@ fi
 # Stop ipmidetectd if it is running 
 #
 if [ "$1" = 0 ]; then
-    if [ -x %{_initrddir}/freeipmi-ipmidetectd ]; then
-       if %{_initrddir}/freeipmi-ipmidetectd status | grep -q running; then
-          %{_initrddir}/freeipmi-ipmidetectd stop
+    if [ -x %{_initrddir}/ipmidetectd ]; then
+       if %{_initrddir}/ipmidetectd status | grep -q running; then
+          %{_initrddir}/ipmidetectd stop
        fi
-       /sbin/chkconfig --del freeipmi-ipmidetectd
+       /sbin/chkconfig --del ipmidetectd
     fi
 fi
 
@@ -180,7 +180,7 @@ fi
 %doc %{_datadir}/doc/%{name}/README
 %doc %{_datadir}/doc/%{name}/README.argp
 %doc %{_datadir}/doc/%{name}/README.build
-%doc %{_datadir}/doc/%{name}/README.sunbmc
+%doc %{_datadir}/doc/%{name}/README.openipmi
 %doc %{_datadir}/doc/%{name}/TODO
 %doc %{_infodir}/*
 %doc %{_datadir}/doc/%{name}/COPYING.ipmiping
@@ -191,6 +191,8 @@ fi
 %doc %{_datadir}/doc/%{name}/COPYING.pstdout
 %doc %{_datadir}/doc/%{name}/COPYING.ipmidetect
 %doc %{_datadir}/doc/%{name}/COPYING.ipmi-fru
+%doc %{_datadir}/doc/%{name}/COPYING.ipmi-dcmi
+%doc %{_datadir}/doc/%{name}/COPYING.sunbmc
 %doc %{_datadir}/doc/%{name}/COPYING.ZRESEARCH
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmiping
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmipower
@@ -200,6 +202,7 @@ fi
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.pstdout
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmidetect
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmi-fru
+%doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmi-dcmi
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmiping.UC
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmipower.UC
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.rmcpping.UC
@@ -211,7 +214,9 @@ fi
 %doc %{_datadir}/doc/%{name}/freeipmi-coding.txt
 %doc %{_datadir}/doc/%{name}/freeipmi-hostrange.txt
 %doc %{_datadir}/doc/%{name}/freeipmi-libraries.txt
-%doc %{_datadir}/doc/%{name}/freeipmi-bugs-and-workarounds.txt
+%doc %{_datadir}/doc/%{name}/freeipmi-bugs-issues-and-workarounds.txt
+%doc %{_datadir}/doc/%{name}/freeipmi-testing.txt
+%doc %{_datadir}/doc/%{name}/freeipmi-oem-documentation-requirements.txt
 %dir %{_datadir}/doc/%{name}
 %{_libdir}/libipmiconsole*so.*
 %{_libdir}/libfreeipmi*so.*
@@ -223,8 +228,9 @@ fi
 %{_sbindir}/bmc-device
 %{_sbindir}/ipmi-fru
 %{_sbindir}/ipmi-locate
-%{_sbindir}/pef-config
 %{_sbindir}/ipmi-oem
+%{_sbindir}/ipmi-pef-config
+%{_sbindir}/pef-config
 %{_sbindir}/ipmi-raw
 %{_sbindir}/ipmi-sel
 %{_sbindir}/ipmi-sensors
@@ -236,6 +242,7 @@ fi
 %{_sbindir}/ipmimonitoring
 %{_sbindir}/ipmi-chassis
 %{_sbindir}/ipmi-chassis-config
+%{_sbindir}/ipmi-dcmi
 %{_sbindir}/ipmidetect
 %{_mandir}/man8/bmc-config.8*
 %{_mandir}/man5/bmc-config.conf.5*
@@ -243,8 +250,9 @@ fi
 %{_mandir}/man8/bmc-device.8*
 %{_mandir}/man8/ipmi-fru.8*
 %{_mandir}/man8/ipmi-locate.8*
-%{_mandir}/man8/pef-config.8*
 %{_mandir}/man8/ipmi-oem.8*
+%{_mandir}/man8/ipmi-pef-config.8*
+%{_mandir}/man8/pef-config.8*
 %{_mandir}/man8/ipmi-raw.8*
 %{_mandir}/man8/ipmi-sel.8*
 %{_mandir}/man8/ipmi-sensors.8*
@@ -262,6 +270,7 @@ fi
 %{_mandir}/man5/libipmimonitoring.conf.5*
 %{_mandir}/man8/ipmi-chassis.8*
 %{_mandir}/man8/ipmi-chassis-config.8*
+%{_mandir}/man8/ipmi-dcmi.8*
 %{_mandir}/man8/ipmidetect.8*
 %{_mandir}/man5/freeipmi.conf.5*
 %{_mandir}/man5/ipmidetect.conf.5*
@@ -280,11 +289,16 @@ fi
 %dir %{_includedir}/freeipmi/debug
 %dir %{_includedir}/freeipmi/driver
 %dir %{_includedir}/freeipmi/fiid
+%dir %{_includedir}/freeipmi/fru-parse
 %dir %{_includedir}/freeipmi/interface
 %dir %{_includedir}/freeipmi/locate
 %dir %{_includedir}/freeipmi/record-format
 %dir %{_includedir}/freeipmi/sdr-cache
+%dir %{_includedir}/freeipmi/sdr-parse
+%dir %{_includedir}/freeipmi/sel-parse
+%dir %{_includedir}/freeipmi/sensor-read
 %dir %{_includedir}/freeipmi/spec
+%dir %{_includedir}/freeipmi/templates
 %dir %{_includedir}/freeipmi/util
 %{_includedir}/ipmiconsole.h
 %{_includedir}/ipmidetect.h
@@ -295,11 +309,16 @@ fi
 %{_includedir}/freeipmi/debug/*.h
 %{_includedir}/freeipmi/driver/*.h
 %{_includedir}/freeipmi/fiid/*.h
+%{_includedir}/freeipmi/fru-parse/*.h
 %{_includedir}/freeipmi/interface/*.h
 %{_includedir}/freeipmi/locate/*.h
 %{_includedir}/freeipmi/record-format/*.h
 %{_includedir}/freeipmi/sdr-cache/*.h
+%{_includedir}/freeipmi/sdr-parse/*.h
+%{_includedir}/freeipmi/sel-parse/*.h
+%{_includedir}/freeipmi/sensor-read/*.h
 %{_includedir}/freeipmi/spec/*.h
+%{_includedir}/freeipmi/templates/*.h
 %{_includedir}/freeipmi/util/*.h
 %{_mandir}/man3/*
 
@@ -308,23 +327,28 @@ fi
 %doc %{_datadir}/doc/%{name}/COPYING.bmc-watchdog
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.bmc-watchdog
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.bmc-watchdog.UC
-%config(noreplace) %{_initrddir}/freeipmi-bmc-watchdog
-%config(noreplace) %{_sysconfdir}/sysconfig/freeipmi-bmc-watchdog
-%config(noreplace) %{_sysconfdir}/logrotate.d/freeipmi-bmc-watchdog
+%config(noreplace) %{_initrddir}/bmc-watchdog
+%config(noreplace) %{_sysconfdir}/sysconfig/bmc-watchdog
+%config(noreplace) %{_sysconfdir}/logrotate.d/bmc-watchdog
 %{_sbindir}/bmc-watchdog
 %{_mandir}/man8/bmc-watchdog.8*
 %dir %{_localstatedir}/log/freeipmi
 
 %files ipmidetectd
 %defattr(-,root,root)
-%config(noreplace) %{_initrddir}/freeipmi-ipmidetectd
+%config(noreplace) %{_initrddir}/ipmidetectd
+%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ipmidetectd.conf
 %{_sbindir}/ipmidetectd
 %{_mandir}/man5/ipmidetectd.conf.5*
 %{_mandir}/man8/ipmidetectd.8*
 
 %changelog
-* Tue Nov 25 2008 Albert Chu <chu11@llnl.gov> 0.8.0
+* Wed Sep 30 2009 Albert Chu <chu11@llnl.gov> 0.8.0
+- Update for dcmi.
+- Update for renaming of pef-config.
+- Update for new .h files.
 - Add new ipmimonitoring config manpages.
+- Add ipmidetectd.conf
 
 * Tue Sep 29 2008 Albert Chu <chu11@llnl.gov> 0.7.0
 - Add README.build

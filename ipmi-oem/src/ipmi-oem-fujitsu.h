@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2008-2009 FreeIPMI Core Team
+  Copyright (C) 2008-2010 FreeIPMI Core Team
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -35,5 +35,7 @@ int ipmi_oem_fujitsu_get_identify_led (ipmi_oem_state_data_t *state_data);
 int ipmi_oem_fujitsu_set_identify_led (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_fujitsu_get_error_led (ipmi_oem_state_data_t *state_data);
+
+int ipmi_oem_fujitsu_get_sel_entry_long_text (ipmi_oem_state_data_t *state_data);
 
 #endif
