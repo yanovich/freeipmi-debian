@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+   Copyright (C) 2003-2010 FreeIPMI Core Team
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -14,10 +14,10 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ */
 
 #ifndef _IPMI_EVENT_CMDS_H
-#define	_IPMI_EVENT_CMDS_H
+#define _IPMI_EVENT_CMDS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +25,15 @@ extern "C" {
 
 #include <stdint.h>
 #include <freeipmi/fiid/fiid.h>
+
+/* 
+ * fill* functions return 0 on success, -1 on error.
+ *
+ * obj_cmd_rq must be for the fill function's respective fiid
+ * template request.
+ *
+ * see freeipmi/templates/ for template definitions 
+ */
 
 extern fiid_template_t tmpl_cmd_set_event_receiver_rq;
 extern fiid_template_t tmpl_cmd_set_event_receiver_rs;
@@ -35,23 +44,23 @@ extern fiid_template_t tmpl_cmd_get_event_receiver_rs;
 extern fiid_template_t tmpl_cmd_platform_event_rq;
 extern fiid_template_t tmpl_cmd_platform_event_rs;
 
-int8_t fill_cmd_set_event_receiver (uint8_t event_receiver_slave_address,
-                                    uint8_t event_receiver_lun,
-                                    fiid_obj_t obj_cmd_rq);
+int fill_cmd_set_event_receiver (uint8_t event_receiver_slave_address,
+                                 uint8_t event_receiver_lun,
+                                 fiid_obj_t obj_cmd_rq);
 
-int8_t fill_cmd_get_event_receiver (fiid_obj_t obj_cmd_rq);
+int fill_cmd_get_event_receiver (fiid_obj_t obj_cmd_rq);
 
 /* generator_id is optional */
-int8_t fill_cmd_platform_event (uint8_t *generator_id,
-                                uint8_t event_message_format_version,
-                                uint8_t sensor_type,
-                                uint8_t sensor_number,
-                                uint8_t event_type_code,
-                                uint8_t event_dir,
-                                uint8_t event_data1,
-                                uint8_t event_data2,
-                                uint8_t event_data3,
-                                fiid_obj_t obj_cmd_rq);
+int fill_cmd_platform_event (uint8_t *generator_id,
+                             uint8_t event_message_format_version,
+                             uint8_t sensor_type,
+                             uint8_t sensor_number,
+                             uint8_t event_type_code,
+                             uint8_t event_dir,
+                             uint8_t event_data1,
+                             uint8_t event_data2,
+                             uint8_t event_data3,
+                             fiid_obj_t obj_cmd_rq);
 
 #ifdef __cplusplus
 }

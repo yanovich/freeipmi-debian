@@ -1,7 +1,22 @@
+/*
+   Copyright (C) 2003-2010 FreeIPMI Core Team
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation,
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+*/
 /*****************************************************************************\
- *  $Id: ipmi-fru-information-record-format.h,v 1.4 2008/05/13 16:56:39 chu11 Exp $
- *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -27,7 +42,7 @@
 \*****************************************************************************/
 
 #ifndef _IPMI_FRU_INFORMATION_RECORD_FORMAT_H
-#define	_IPMI_FRU_INFORMATION_RECORD_FORMAT_H
+#define _IPMI_FRU_INFORMATION_RECORD_FORMAT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,7 +61,7 @@ extern "C" {
 #define IPMI_FRU_CHASSIS_INFO_AREA_FORMAT_VERSION     0x01
 #define IPMI_FRU_BOARD_INFO_AREA_FORMAT_VERSION       0x01
 #define IPMI_FRU_PRODUCT_INFO_AREA_FORMAT_VERSION     0x01
-#define IPMI_FRU_MULTIRECORD_INFO_AREA_FORMAT_VERSION 0x02
+#define IPMI_FRU_MULTIRECORD_AREA_FORMAT_VERSION      0x02
 
 #define IPMI_FRU_MULTIRECORD_AREA_TYPE_POWER_SUPPLY_INFORMATION       0x00
 #define IPMI_FRU_MULTIRECORD_AREA_TYPE_DC_OUTPUT                      0x01
@@ -57,13 +72,13 @@ extern "C" {
 #define IPMI_FRU_MULTIRECORD_AREA_TYPE_OEM_MIN                        0xC0
 #define IPMI_FRU_MULTIRECORD_AREA_TYPE_OEM_MAX                        0xFF
 
-#define IPMI_FRU_MULTIRECORD_AREA_TYPE_VALID(__multirecord_area_type) \
-        (((__multirecord_area_type) >= IPMI_FRU_MULTIRECORD_AREA_TYPE_POWER_SUPPLY_INFORMATION \
-          && (__multirecord_area_type) <= IPMI_FRU_MULTIRECORD_AREA_TYPE_EXTENDED_COMPATIBILITY_RECORD) ? 1 : 0)
+#define IPMI_FRU_MULTIRECORD_AREA_TYPE_VALID(__multirecord_area_type)                    \
+  (((__multirecord_area_type) >= IPMI_FRU_MULTIRECORD_AREA_TYPE_POWER_SUPPLY_INFORMATION \
+    && (__multirecord_area_type) <= IPMI_FRU_MULTIRECORD_AREA_TYPE_EXTENDED_COMPATIBILITY_RECORD) ? 1 : 0)
 
-#define IPMI_FRU_MULTIRECORD_AREA_TYPE_IS_OEM(__multirecord_area_type) \
-        (((__multirecord_area_type) >= IPMI_FRU_MULTIRECORD_AREA_TYPE_OEM_MIN \
-          && (__multirecord_area_type) <= IPMI_FRU_MULTIRECORD_AREA_TYPE_OEM_MAX) ? 1 : 0)
+#define IPMI_FRU_MULTIRECORD_AREA_TYPE_IS_OEM(__multirecord_area_type)  \
+  (((__multirecord_area_type) >= IPMI_FRU_MULTIRECORD_AREA_TYPE_OEM_MIN \
+    && (__multirecord_area_type) <= IPMI_FRU_MULTIRECORD_AREA_TYPE_OEM_MAX) ? 1 : 0)
 
 #define IPMI_FRU_ONE_PULSE_PER_ROTATION  0x0
 #define IPMI_FRU_TWO_PULSES_PER_ROTATION 0x1
@@ -83,15 +98,16 @@ extern "C" {
 #define IPMI_FRU_SUB_RECORD_TYPE_COMPONENT_PING_ADDRESS    0x06
 #define IPMI_FRU_SUB_RECORD_TYPE_SYSTEM_UNIQUE_ID          0x07
 
-#define IPMI_FRU_SUB_RECORD_TYPE_VALID(__sub_record_type) \
-        (((__sub_record_type) >= IPMI_FRU_SUB_RECORD_TYPE_SYSTEM_MANAGEMENT_URL \
-          && (__sub_record_type) <= IPMI_FRU_SUB_RECORD_TYPE_SYSTEM_UNIQUE_ID) ? 1 : 0)
+#define IPMI_FRU_SUB_RECORD_TYPE_VALID(__sub_record_type)                 \
+  (((__sub_record_type) >= IPMI_FRU_SUB_RECORD_TYPE_SYSTEM_MANAGEMENT_URL \
+    && (__sub_record_type) <= IPMI_FRU_SUB_RECORD_TYPE_SYSTEM_UNIQUE_ID) ? 1 : 0)
 
 #define IPMI_FRU_TYPE_LENGTH_TYPE_CODE_BINARY          0x00
-#define IPMI_FRU_TYPE_LENGTH_TYPE_CODE_BCD             0x40
-#define IPMI_FRU_TYPE_LENGTH_TYPE_CODE_SIXBIT_ASCII    0x80
-#define IPMI_FRU_TYPE_LENGTH_TYPE_CODE_LANGUAGE_CODE   0xC0
+#define IPMI_FRU_TYPE_LENGTH_TYPE_CODE_BCD             0x01
+#define IPMI_FRU_TYPE_LENGTH_TYPE_CODE_SIXBIT_ASCII    0x02
+#define IPMI_FRU_TYPE_LENGTH_TYPE_CODE_LANGUAGE_CODE   0x03
 #define IPMI_FRU_TYPE_LENGTH_TYPE_CODE_MASK            0xC0
+#define IPMI_FRU_TYPE_LENGTH_TYPE_CODE_SHIFT           0x06
 #define IPMI_FRU_TYPE_LENGTH_NUMBER_OF_DATA_BYTES_MASK 0x3F
 
 #define IPMI_FRU_BCD_DIGIT_MIN                         0x0
@@ -101,6 +117,10 @@ extern "C" {
 #define IPMI_FRU_BCD_PERIOD                            0xC
 
 #define IPMI_FRU_SENTINEL_VALUE                        0xC1
+
+/* 
+ * see freeipmi/templates/ for template definitions 
+ */
 
 extern fiid_template_t tmpl_fru_common_header;
 extern fiid_template_t tmpl_fru_info_area_header;

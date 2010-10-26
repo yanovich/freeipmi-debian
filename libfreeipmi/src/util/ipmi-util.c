@@ -1,25 +1,25 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+  Copyright (C) 2003-2010 FreeIPMI Core Team
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 
 */
 
 /* 2's complement checksum of preceding bytes in the connection header
    or between the previous checksum. 8-bit checksum algorithm:
-   Initialize checksum to 0. 
+   Initialize checksum to 0.
    For each byte, checksum = (checksum + byte) modulo 256. Then find
    1's compliment of checksum and add one to it.
    To verify add all the bytes and the checksum and then % 256 should
@@ -56,96 +56,124 @@
 #include "freeipmi/spec/ipmi-comp-code-spec.h"
 #include "freeipmi/spec/ipmi-netfn-spec.h"
 
-#include "libcommon/ipmi-err-wrappers.h"
-#include "libcommon/ipmi-fiid-wrappers.h"
+#include "libcommon/ipmi-fiid-util.h"
+#include "libcommon/ipmi-trace.h"
 
 #include "freeipmi-portability.h"
 
+#define IPMI_SEQUENCE_NUMBER_MAX            0xFFFFFFFF
+#define IPMI_SEQUENCE_NUMBER_WINDOW_DEFAULT          8
+#define IPMI_SEQUENCE_NUMBER_WINDOW_MAX             32
+#define IPMI_SEQUENCE_NUMBER_WINDOW_MIN              1
+
 uint8_t
-ipmi_checksum (uint8_t *buf, uint64_t len)
+ipmi_checksum (const void *buf, unsigned int buflen)
 {
-  register uint64_t i = 0;
+  register unsigned int i = 0;
   register int8_t checksum = 0;
- 
-  if (buf == NULL || len == 0)
+
+  if (buf == NULL || buflen == 0)
     return (checksum);
 
-  for (; i < len; i++)
-    checksum = (checksum + buf[i]) % 256;
+  for (; i < buflen; i++)
+    checksum = (checksum + ((uint8_t *)buf)[i]) % 256;
 
   return (-checksum);
 }
 
-int8_t
-ipmi_check_cmd(fiid_obj_t obj_cmd, uint8_t cmd)
+int
+ipmi_check_cmd (fiid_obj_t obj_cmd, uint8_t cmd)
 {
-  uint64_t cmd_recv;
-  int32_t len;
+  uint8_t cmd_recv;
+  uint64_t val;
 
-  ERR_EINVAL (fiid_obj_valid(obj_cmd));
+  if (!fiid_obj_valid (obj_cmd))
+    {
+      SET_ERRNO (EINVAL);
+      return (-1);
+    }
 
-  FIID_OBJ_FIELD_LOOKUP (obj_cmd, "cmd");
+  if (FIID_OBJ_FIELD_LOOKUP (obj_cmd, "cmd") < 0)
+    {
+      FIID_OBJECT_ERROR_TO_ERRNO (obj_cmd);
+      return (-1);
+    }
 
-  FIID_OBJ_FIELD_LEN (len, obj_cmd, "cmd");
+  if (FIID_OBJ_GET (obj_cmd, "cmd", &val) < 0)
+    {
+      FIID_OBJECT_ERROR_TO_ERRNO (obj_cmd);
+      return (-1);
+    }
+  cmd_recv = val;
 
-  ERR_EINVAL (len);
-
-  FIID_OBJ_GET(obj_cmd, "cmd", &cmd_recv);
-
-  return ((((uint8_t)cmd_recv) == cmd) ? 1 : 0);
-}
-
-int8_t
-ipmi_check_completion_code(fiid_obj_t obj_cmd, uint8_t completion_code)
-{
-  uint64_t completion_code_recv;
-  int32_t len;
-
-  ERR_EINVAL (fiid_obj_valid(obj_cmd));
-
-  FIID_OBJ_FIELD_LOOKUP (obj_cmd, "comp_code");
-
-  FIID_OBJ_FIELD_LEN (len, obj_cmd, "comp_code");
-
-  ERR_EINVAL (len);
-
-  FIID_OBJ_GET(obj_cmd, "comp_code", &completion_code_recv);
-
-  return ((((uint8_t)completion_code_recv) == completion_code) ? 1 : 0);
-}
-
-int8_t 
-ipmi_check_completion_code_success (fiid_obj_t obj_cmd)
-{
-  return ipmi_check_completion_code(obj_cmd, IPMI_COMP_CODE_COMMAND_SUCCESS);
+  return ((cmd_recv == cmd) ? 1 : 0);
 }
 
 int
-ipmi_get_random(uint8_t *buf, uint32_t buflen)
+ipmi_check_completion_code (fiid_obj_t obj_cmd, uint8_t completion_code)
+{
+  uint8_t completion_code_recv;
+  uint64_t val;
+
+  if (!fiid_obj_valid (obj_cmd))
+    {
+      SET_ERRNO (EINVAL);
+      return (-1);
+    }
+
+  if (FIID_OBJ_FIELD_LOOKUP (obj_cmd, "comp_code") < 0)
+    {
+      FIID_OBJECT_ERROR_TO_ERRNO (obj_cmd);
+      return (-1);
+    }
+
+  if (FIID_OBJ_GET (obj_cmd, "comp_code", &val) < 0)
+    {
+      FIID_OBJECT_ERROR_TO_ERRNO (obj_cmd);
+      return (-1);
+    }
+  completion_code_recv = val;
+
+  return ((completion_code_recv == completion_code) ? 1 : 0);
+}
+
+int
+ipmi_check_completion_code_success (fiid_obj_t obj_cmd)
+{
+  return (ipmi_check_completion_code (obj_cmd, IPMI_COMP_CODE_COMMAND_SUCCESS));
+}
+
+int
+ipmi_get_random (void *buf, unsigned int buflen)
 {
 #if (HAVE_DEVURANDOM || HAVE_DEVRANDOM)
   int fd, rv;
 #endif /* !(HAVE_DEVURANDOM || HAVE_DEVRANDOM) */
 
-  ERR_EINVAL (buf);
-  
+  if (!buf)
+    {
+      SET_ERRNO (EINVAL);
+      return (-1);
+    }
+
   if (!buflen)
     return (0);
-  
+
 #if (HAVE_DEVURANDOM || HAVE_DEVRANDOM)
 #if HAVE_DEVURANDOM
-  if ((fd = open("/dev/urandom", O_RDONLY)) < 0)
+  if ((fd = open ("/dev/urandom", O_RDONLY)) < 0)
     goto gcrypt_rand;
 #else  /* !HAVE_DEVURANDOM */
   if ((fd = open ("/dev/random", O_RDONLY)) < 0)
     goto gcrypt_rand;
 #endif /* !HAVE_DEVURANDOM */
 
-  if ((rv = read(fd, (void *)buf, buflen)) < buflen)
+  if ((rv = read (fd, buf, buflen)) < buflen)
     goto gcrypt_rand;
 
-  close(fd);
-  return rv;
+  /* ignore potential error, cleanup path */
+  close (fd);
+  return (rv);
 #endif /* !(HAVE_DEVURANDOM || HAVE_DEVRANDOM) */
 
  gcrypt_rand:
@@ -153,45 +181,16 @@ ipmi_get_random(uint8_t *buf, uint32_t buflen)
  * hopefully the user has /dev/random or /dev/urandom.
  */
 #ifdef WITH_ENCRYPTION
-  gcry_randomize((unsigned char *)buf, buflen, GCRY_STRONG_RANDOM);
-  return buflen;
+  gcry_randomize ((unsigned char *)buf, buflen, GCRY_STRONG_RANDOM);
+  return (buflen);
 #else /* !WITH_ENCRYPTION */
-  ERR_EPERM(0);
+  SET_ERRNO (EPERM);
+  return (-1);
 #endif /* !WITH_ENCRYPTION */
 }
 
-int8_t
-ipmi_is_ipmi_1_5_packet(uint8_t *pkt, uint32_t pkt_len)
-{
-  int32_t rmcp_hdr_len;
-  uint8_t auth_type;
-
-  FIID_TEMPLATE_LEN_BYTES(rmcp_hdr_len, tmpl_rmcp_hdr);
-
-  ERR_EINVAL (!(pkt_len <= rmcp_hdr_len));
-
-  auth_type = *(pkt + rmcp_hdr_len);
-  auth_type &= 0x0F;
-  return ((auth_type != IPMI_AUTHENTICATION_TYPE_RMCPPLUS) ? 1 : 0);
-}
-
-int8_t
-ipmi_is_ipmi_2_0_packet(uint8_t *pkt, uint32_t pkt_len)
-{
-  int32_t rmcp_hdr_len;
-  uint8_t auth_type;
-
-  FIID_TEMPLATE_LEN_BYTES(rmcp_hdr_len, tmpl_rmcp_hdr);
-
-  ERR_EINVAL (!(pkt_len <= rmcp_hdr_len));
-
-  auth_type = *(pkt + rmcp_hdr_len);
-  auth_type &= 0x0F;
-  return ((auth_type == IPMI_AUTHENTICATION_TYPE_RMCPPLUS) ? 1 : 0);
-}
-
 const char *
-ipmi_cmd_str(uint8_t net_fn, uint8_t cmd)
+ipmi_cmd_str (uint8_t net_fn, uint8_t cmd)
 {
   switch (net_fn)
     {
@@ -446,7 +445,7 @@ ipmi_cmd_str(uint8_t net_fn, uint8_t cmd)
         case IPMI_CMD_GET_USER_ACCESS_COMMAND:
           return "Get User Access Command";
         case IPMI_CMD_SET_USER_NAME:
-          return "Set User Name";
+          return "Set User Name Command"; /* 'Set User Name' in table, added 'Command' for consistency */
         case IPMI_CMD_GET_USER_NAME_COMMAND:
           return "Get User Name Command";
         case IPMI_CMD_SET_USER_PASSWORD_COMMAND:

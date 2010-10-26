@@ -20,8 +20,10 @@ EXTRA_DIST = \
 	manpage-common-config-file.man \
 	manpage-common-workaround-flags.man \
 	manpage-common-workaround-heading-text.man \
-	manpage-common-workaround-text.man \
+	manpage-common-workaround-inband-text.man \
+	manpage-common-workaround-outofband-text.man \
 	manpage-common-workaround-sol-only-text.man \
+	manpage-common-workaround-config-tool.man \
 	manpage-common-debug.man \
 	manpage-common-misc.man \
 	manpage-common-hostranged-options-header.man \
@@ -31,14 +33,15 @@ EXTRA_DIST = \
 	manpage-common-hostranged-eliminate.man \
 	manpage-common-hostranged-always-prefix.man \
 	manpage-common-hostranged-text-main.man \
-	manpage-common-hostranged-text-shell.man \
 	manpage-common-hostranged-text-options.man \
 	manpage-common-hostranged-text-localhost.man \
+	manpage-common-hostranged-text-threads.man \
 	manpage-common-sdr-options.man \
 	manpage-common-ignore-sdr-cache.man \
 	manpage-common-config-tool-options.man \
 	manpage-common-config-tool-general-use.man \
 	manpage-common-troubleshooting.man \
+	manpage-common-troubleshooting-lan-only.man \
 	manpage-common-known-issues.man \
 	manpage-common-known-issues-ping.man \
 	manpage-common-reporting-bugs.man \
@@ -46,4 +49,14 @@ EXTRA_DIST = \
 	manpage-common-gpl-program-text.man \
 	manpage-common-ping-options.man \
 	manpage-common-ping-origin.man \
-	manpage-common-homepage.man
+	manpage-common-table-of-contents.man \
+	manpage-common-homepage.man \
+	manpage-common-sensor-common.man \
+	manpage-common-interpret-oem-data.man \
+	manpage-common-oem-interpretation.man \
+	manpage-common-entity-sensor-names.man \
+	manpage-common-no-sensor-type-output.man \
+	manpage-common-comma-separated-output.man \
+	manpage-common-no-header-output.man \
+	manpage-common-non-abbreviated-units.man \
+	manpage-common-legacy-output.man

@@ -1,19 +1,19 @@
 /*
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+  Copyright (C) 2003-2010 FreeIPMI Core Team
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 */
 
 #ifndef _TOOL_CONFIG_FILE_COMMON_H
@@ -35,26 +35,52 @@
 #define CONFIG_FILE_TOOL_NONE                0x00000000
 #define CONFIG_FILE_TOOL_BMC_CONFIG          0x00000001
 #define CONFIG_FILE_TOOL_BMC_DEVICE          0x00000002
-#define CONFIG_FILE_TOOL_BMC_INFO            0x00000004 
+#define CONFIG_FILE_TOOL_BMC_INFO            0x00000004
 #define CONFIG_FILE_TOOL_BMC_WATCHDOG        0x00000008
 #define CONFIG_FILE_TOOL_IPMI_CHASSIS        0x00000010
 #define CONFIG_FILE_TOOL_IPMI_CHASSIS_CONFIG 0x00000020
-#define CONFIG_FILE_TOOL_IPMI_FRU            0x00000040
-#define CONFIG_FILE_TOOL_IPMI_OEM            0x00000080
-#define CONFIG_FILE_TOOL_IPMI_RAW            0x00000100
-#define CONFIG_FILE_TOOL_IPMI_SEL            0x00000200
-#define CONFIG_FILE_TOOL_IPMI_SENSORS        0x00000400
-#define CONFIG_FILE_TOOL_IPMI_SENSORS_CONFIG 0x00000800
-#define CONFIG_FILE_TOOL_IPMICONSOLE         0x00001000
-#define CONFIG_FILE_TOOL_IPMIMONITORING      0x00002000
-#define CONFIG_FILE_TOOL_IPMIPOWER           0x00004000
-#define CONFIG_FILE_TOOL_PEF_CONFIG          0x00008000
+#define CONFIG_FILE_TOOL_IPMI_DCMI           0x00000040
+#define CONFIG_FILE_TOOL_IPMI_FRU            0x00000080
+#define CONFIG_FILE_TOOL_IPMI_OEM            0x00000100
+#define CONFIG_FILE_TOOL_IPMI_PEF_CONFIG     0x00000200
+#define CONFIG_FILE_TOOL_IPMI_RAW            0x00000400
+#define CONFIG_FILE_TOOL_IPMI_SEL            0x00000800
+#define CONFIG_FILE_TOOL_IPMI_SENSORS        0x00001000
+#define CONFIG_FILE_TOOL_IPMI_SENSORS_CONFIG 0x00002000
+#define CONFIG_FILE_TOOL_IPMICONSOLE         0x00004000
+#define CONFIG_FILE_TOOL_IPMIMONITORING      0x00008000
+#define CONFIG_FILE_TOOL_IPMIPOWER           0x00010000
 
-#define CONFIG_FILE_IPMI_SENSORS_MAX_GROUPS               256
-#define CONFIG_FILE_IPMI_SENSORS_MAX_GROUPS_STRING_LENGTH 256
+/* achu:
+ *
+ * The stack on cygwin is smaller than on unixes, and the ability for
+ * me to get a bigger stack in cygwin is difficult.  The normal unix
+ * ways (i.e. ulimit -s unlimited) don't work.  Some posts online
+ * indicate it's b/c of the way windows works with stack limits.
+ *
+ * So we're just going to use smaller values to deal with the problem.
+ */
+#ifdef __CYGWIN__
+#define CONFIG_FILE_MAX_SENSOR_RECORD_IDS           128
+#define CONFIG_FILE_MAX_SENSOR_TYPES                16
+#else /* !__CYGWIN__ */
+/* record id is 16 bits - 65536 */
+#define CONFIG_FILE_MAX_SENSOR_RECORD_IDS           65536
+#define CONFIG_FILE_MAX_SENSOR_TYPES                256
+#endif /* !__CYGWIN__ */
+#define CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH  256
 
-#define CONFIG_FILE_IPMIMONITORING_MAX_GROUPS               256
-#define CONFIG_FILE_IPMIMONITORING_MAX_GROUPS_STRING_LENGTH 256
+struct config_file_data_bmc_config
+{
+  int verbose_count;
+  int verbose_count_count;
+};
+
+struct config_file_data_bmc_info
+{
+  int interpret_oem_data;
+  int interpret_oem_data_count;
+};
 
 struct config_file_data_bmc_watchdog
 {
@@ -64,21 +90,110 @@ struct config_file_data_bmc_watchdog
   int no_logging_count;
 };
 
+struct config_file_data_ipmi_chassis_config
+{
+  int verbose_count;
+  int verbose_count_count;
+};
+
+struct config_file_data_ipmi_dcmi
+{
+  int interpret_oem_data;
+  int interpret_oem_data_count;
+};
+
 struct config_file_data_ipmi_fru
 {
+  int verbose_count;
+  int verbose_count_count;
   int skip_checks;
   int skip_checks_count;
+  int interpret_oem_data;
+  int interpret_oem_data_count;
+};
+
+struct config_file_data_ipmi_oem
+{
+  int verbose_count;
+  int verbose_count_count;
+};
+
+struct config_file_data_ipmi_pef_config
+{
+  int verbose_count;
+  int verbose_count_count;
+};
+
+struct config_file_data_ipmi_sel
+{
+  int verbose_count;
+  int verbose_count_count;
+  int system_event_only;
+  int system_event_only_count;
+  int oem_event_only;
+  int oem_event_only_count;
+  int assume_system_event_records;
+  int assume_system_event_records_count;
+  int interpret_oem_data;
+  int interpret_oem_data_count;
+  int entity_sensor_names;
+  int entity_sensor_names_count;
+  int no_sensor_type_output;
+  int no_sensor_type_output_count;
+  int comma_separated_output;
+  int comma_separated_output_count;
+  int no_header_output;
+  int no_header_output_count;
+  int non_abbreviated_units;
+  int non_abbreviated_units_count;
+  int legacy_output;
+  int legacy_output_count;
 };
 
 struct config_file_data_ipmi_sensors
 {
+  int verbose_count;
+  int verbose_count_count;
   int quiet_readings;
   int quiet_readings_count;
-  char groups[CONFIG_FILE_IPMI_SENSORS_MAX_GROUPS][CONFIG_FILE_IPMI_SENSORS_MAX_GROUPS_STRING_LENGTH+1];
-  unsigned int groups_length;
-  int groups_count;
+  unsigned int record_ids[CONFIG_FILE_MAX_SENSOR_RECORD_IDS];
+  unsigned int record_ids_length;
+  int record_ids_count;
+  unsigned int exclude_record_ids[CONFIG_FILE_MAX_SENSOR_RECORD_IDS];
+  unsigned int exclude_record_ids_length;
+  int exclude_record_ids_count;
+  char sensor_types[CONFIG_FILE_MAX_SENSOR_TYPES][CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH+1];
+  unsigned int sensor_types_length;
+  int sensor_types_count;
+  char exclude_sensor_types[CONFIG_FILE_MAX_SENSOR_TYPES][CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH+1];
+  unsigned int exclude_sensor_types_length;
+  int exclude_sensor_types_count;
   int bridge_sensors;
   int bridge_sensors_count;
+  int shared_sensors;
+  int shared_sensors_count;
+  int interpret_oem_data;
+  int interpret_oem_data_count;
+  int ignore_not_available_sensors;
+  int ignore_not_available_sensors_count;
+  int entity_sensor_names;
+  int entity_sensor_names_count;
+  int no_sensor_type_output;
+  int no_sensor_type_output_count;
+  int comma_separated_output_count;
+  int comma_separated_output;
+  int no_header_output;
+  int no_header_output_count;
+  int non_abbreviated_units;
+  int non_abbreviated_units_count;
+  int legacy_output;
+  int legacy_output_count;
+};
+
+struct config_file_data_ipmi_sensors_config
+{
+  int verbose_count;
+  int verbose_count_count;
 };
 
 struct config_file_data_ipmiconsole
@@ -93,13 +208,42 @@ struct config_file_data_ipmiconsole
 
 struct config_file_data_ipmimonitoring
 {
+  int verbose_count;
+  int verbose_count_count;
   int quiet_readings;
   int quiet_readings_count;
-  char groups[CONFIG_FILE_IPMIMONITORING_MAX_GROUPS][CONFIG_FILE_IPMIMONITORING_MAX_GROUPS_STRING_LENGTH+1];
-  unsigned int groups_length;
-  int groups_count;
+  unsigned int record_ids[CONFIG_FILE_MAX_SENSOR_RECORD_IDS];
+  unsigned int record_ids_length;
+  int record_ids_count;
+  unsigned int exclude_record_ids[CONFIG_FILE_MAX_SENSOR_RECORD_IDS];
+  unsigned int exclude_record_ids_length;
+  int exclude_record_ids_count;
+  char sensor_types[CONFIG_FILE_MAX_SENSOR_TYPES][CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH+1];
+  unsigned int sensor_types_length;
+  int sensor_types_count;
+  char exclude_sensor_types[CONFIG_FILE_MAX_SENSOR_TYPES][CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH+1];
+  unsigned int exclude_sensor_types_length;
+  int exclude_sensor_types_count;
   int bridge_sensors;
   int bridge_sensors_count;
+  int shared_sensors;
+  int shared_sensors_count;
+  int interpret_oem_data;
+  int interpret_oem_data_count;
+  int ignore_non_interpretable_sensors;
+  int ignore_non_interpretable_sensors_count;
+  int entity_sensor_names;
+  int entity_sensor_names_count;
+  int no_sensor_type_output;
+  int no_sensor_type_output_count;
+  int comma_separated_output_count;
+  int comma_separated_output;
+  int no_header_output;
+  int no_header_output_count;
+  int non_abbreviated_units;
+  int non_abbreviated_units_count;
+  int legacy_output;
+  int legacy_output_count;
   char *sensor_config_file;
   int sensor_config_file_count;
 };
@@ -129,13 +273,13 @@ struct config_file_data_ipmipower
   int ping_consec_count_count;
 };
 
-int config_file_parse(const char *filename,
-                      int no_error_if_not_found,
-                      struct common_cmd_args *cmd_args, 
-                      struct sdr_cmd_args *sdr_args, 
-                      struct hostrange_cmd_args *hostrange_args, 
-                      unsigned int support,
-                      unsigned int tool_support,
-                      void *tool_data);
+int config_file_parse (const char *filename,
+                       int no_error_if_not_found,
+                       struct common_cmd_args *cmd_args,
+                       struct sdr_cmd_args *sdr_args,
+                       struct hostrange_cmd_args *hostrange_args,
+                       unsigned int support,
+                       unsigned int tool_support,
+                       void *tool_data);
 
 #endif

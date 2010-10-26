@@ -4,11 +4,15 @@ SUBDIRS = \
 	debug \
 	driver \
 	fiid \
+	fru-parse \
 	interface \
 	libcommon \
 	locate \
 	record-format \
 	sdr-cache \
+	sdr-parse \
+	sel-parse \
+	sensor-read \
 	spec \
 	util
 
@@ -38,11 +42,15 @@ libfreeipmi_la_LIBADD = \
 	$(top_builddir)/libfreeipmi/src/debug/libdebug.la \
 	$(top_builddir)/libfreeipmi/src/driver/libdriver.la \
 	$(top_builddir)/libfreeipmi/src/fiid/libfiid.la \
+	$(top_builddir)/libfreeipmi/src/fru-parse/libfruparse.la \
 	$(top_builddir)/libfreeipmi/src/interface/libinterface.la \
 	$(top_builddir)/libfreeipmi/src/libcommon/libcommon.la \
 	$(top_builddir)/libfreeipmi/src/locate/liblocate.la \
 	$(top_builddir)/libfreeipmi/src/record-format/librecordformat.la \
 	$(top_builddir)/libfreeipmi/src/sdr-cache/libsdrcache.la \
+	$(top_builddir)/libfreeipmi/src/sdr-parse/libsdrparse.la \
+	$(top_builddir)/libfreeipmi/src/sel-parse/libselparse.la \
+	$(top_builddir)/libfreeipmi/src/sensor-read/libsensorread.la \
 	$(top_builddir)/libfreeipmi/src/spec/libspec.la \
 	$(top_builddir)/libfreeipmi/src/util/libutil.la
 
@@ -70,6 +78,9 @@ $(top_builddir)/libfreeipmi/src/driver/libdriver.la : force-dependency-check
 $(top_builddir)/libfreeipmi/src/fiid/libfiid.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
+$(top_builddir)/libfreeipmi/src/fru-parse/libfruparse.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
 $(top_builddir)/libfreeipmi/src/interface/libinterface.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
@@ -83,6 +94,15 @@ $(top_builddir)/libfreeipmi/src/record-format/librecordformat.la : force-depende
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/libfreeipmi/src/sdr-cache/libsdrcache.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/libfreeipmi/src/sdr-parse/libsdrparse.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/libfreeipmi/src/sel-parse/libselparse.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/libfreeipmi/src/sensor-read/libsensorread.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/libfreeipmi/src/spec/libspec.la : force-dependency-check

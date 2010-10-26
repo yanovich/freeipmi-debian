@@ -10,7 +10,7 @@
 
 @copying
 This manual is for FreeIPMI (version @value{VERSION}, @value{UPDATED}).
-Copyright @copyright{} 2006-2008 FreeIPMI Core Team
+Copyright @copyright{} 2006-2010 FreeIPMI Core Team
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -26,7 +26,7 @@ Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 @end direntry
 
 @ifinfo
-Copyright @copyright{} 2003-2008 FreeIPMI Core Team.
+Copyright @copyright{} 2003-2010 FreeIPMI Core Team.
 
 
 @end ifinfo
@@ -40,7 +40,7 @@ Copyright @copyright{} 2003-2008 FreeIPMI Core Team.
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2003-2008 FreeIPMI Core Team
+Copyright @copyright{} 2003-2010 FreeIPMI Core Team
 
 @insertcopying
 @end titlepage
@@ -57,13 +57,14 @@ release @value{VERSION} of the FreeIPMI.
 @menu
 * What is IPMI::                
 * What is FreeIPMI?::       
-* How did it start?::           
-* Who maintains FreeIPMI?::
+* How did FreeIPMI start?::           
+* What operating systems does FreeIPMI run on?::
 * FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil::  
 * What is special about FreeIPMI::  
+* Serial Over LAN (SOL) / Ipmiconsole Setup::
 * SSIF Driver Configuration::   
 * x86-64 Compilation::          
-* SUNBMC Driver Compilation::
+* libgcrypt requirement::          
 * Installing FreeIPMI on FreeBSD::
 @end menu
 
@@ -90,7 +91,7 @@ conditions for later examination and alerting where the platform
 issues the alert without aid of run-time software.  Lastly it includes
 inventory information that can help identify a failed hardware unit.
 
-@node What is FreeIPMI?, How did it start?, What is IPMI, Top
+@node What is FreeIPMI?, How did FreeIPMI start?, What is IPMI, Top
 @section What is FreeIPMI?
 
 FreeIPMI is a collection of Intelligent Platform Management
@@ -99,8 +100,8 @@ software and a development library conforming to the Intelligent
 Platform Management Interface (@acronym{IPMI} v1.5 and v2.0)
 standards.
 
-@node How did it start?, Who maintains FreeIPMI?, What is FreeIPMI?, Top
-@section How did it start?
+@node How did FreeIPMI start?, What operating systems does FreeIPMI run on?, What is FreeIPMI?, Top
+@section How did FreeIPMI start?
 
 In October 2003, California Digital Corp. (CDC) was contracted by
 Lawrence Livermore National Laboratory (LLNL) for the assembly of
@@ -116,122 +117,122 @@ libfreeipmi, and ipmi support in Powerman.  In October 2004, FreeIPMI
 0.1.0 was officially released.
 
 Since the 0.1.0 release, Z Research developers have contributed
-ipmi-chassis, ipmi-raw, ipmi-locate, and portions of pef-config.  LLNL
-has contributed IPMI 2.0 support, hostrange support, ipmiconsole,
+ipmi-chassis, ipmi-raw, ipmi-locate, and portions of ipmi-pef-config.
+LLNL has contributed IPMI 2.0 support, hostrange support, ipmiconsole,
 ipmimonitoring, ipmidetect, ipmi-sensors-config, ipmi-chassis-config,
-bmc-device, ipmi-oem, and portions of pef-config.
+bmc-device, ipmi-oem, ipmi-dcmi, and portions of ipmi-pef-config.
 
 (Note: The original FreeIPMI developers from California Digital
 Corp. are now at Zresearch Inc.)
 
-@node Who maintains FreeIPMI?, FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil, How did it start?, Top
-@section Who maintains FreeIPMI?
+@node What operating systems does FreeIPMI run on?, FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil, How did FreeIPMI start?, Top
+@section What operating systems does FreeIPMI run on?
 
-Primary maintenance of FreeIPMI is currently managed by Lawrence
-Livermore National Laboratory (LLNL).  Overall maintenance of FreeIPMI
-has been handled by staff at CDC, Zresearch, and LLNL during the
-lifetime of FreeIPMI.
+FreeIPMI was originally developed on GNU/Linux.  It has been confirmed
+to be built on most major GNU/Linux distributions such as Redhat,
+Fedora, Suse, and Debian.  FreeIPMI has been ported and confirmed to
+work on atleast FreeBSD, OpenBSD, Solaris, OpenSolaris, and Windows
+via Cygwin.  We imagine it would build cleanly on other operating
+systems.  If it doesn't, it should be easily portable to them.
 
-@node FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil, What is special about FreeIPMI, Who maintains FreeIPMI?, Top
-@section What is the relationship between FreeIPMI, OpenIPMI, Ipmitool, and Ipmiutil? 
+@node FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil, What is special about FreeIPMI, What operating systems does FreeIPMI run on?, Top
+@section What are the differences between FreeIPMI, OpenIPMI, Ipmitool, and Ipmiutil? 
 There are multiple implementations, APIs, interfaces, end user
 requirements, etc. that one can choose when developing IPMI drivers,
-libraries, and tools.  FreeIPMI has taken some different
-approaches than other open-source projects.
+libraries, and tools.  FreeIPMI has taken some different approaches
+than other open-source projects.
 
-@node What is special about FreeIPMI, SSIF Driver Configuration, FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil, Top
+The section below points out a number of the reasons why we feel
+FreeIPMI is particularly special compared to the other projects.
+
+The Ipmiutil project has a good chart describing many of the
+differences between the projects:
+@uref{http://ipmiutil.sourceforge.net/docs/ipmisw-compare.htm}.
+
+@node What is special about FreeIPMI, Serial Over LAN (SOL) / Ipmiconsole Setup, FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil, Top
 @section What is special about FreeIPMI compared to other open source IPMI projects?
 
 In our eyes, there are several reasons why FreeIPMI is particularly special.
 
-1) Support for HPC
+1) Support for HPC and large data centers
 
-A number of HPC aspects have been added to the tools and/or are
-supported by other HPC software due to the need for FreeIPMI to work
-on LLNL's Linux clusters.
+A number of features have been added into the tools to support HPC
+and/or large data centers.  Much of this original support was added to
+support the large cluster environments at Lawrence Livermore National
+Laboratory (LLNL).
 
-Ipmipower is capable of scaling to large nodes for cluster support.
-It is supported by Powerman (@uref{http://sourceforge.net/projects/powerman})
-for scalable power management.  At LLNL, in conjunction with Powerman,
-ipmipower is used for power control on clusters ranging from sizes of
-4 to 1152.  It is capable of power controlling all of the nodes in the
-largest clusters in under a second.
-
-Ipmiconsole is currently supported by Conman
-(@uref{http://home.gna.org/conman/}) for scalable console management.
-
-Scalable parallel execution of many FreeIPMI tools (i.e. ipmi-sensors,
+Scalable parallel execution of many FreeIPMI tools (ipmi-sensors,
 ipmi-sel, bmc-info, ipmimonitoring, etc.) across a cluster is
 supported through hostranged input and output.  For example:
 
 @example
-# > bmc-info -h "pwopr[0-5]" -u XXX -p XXX -C
+# > bmc-info -h "pwopr[0-5]" -u XXX -p XXX --get-device-id -C
 ----------------
 pwopr[0-1,5]
 ----------------
-Device ID:         22
-Device Revision:   1
-Firmware Revision: 1.12
-                   [Device Available (normal operation)]
-IPMI Version:      2.0
-Additional Device Support:
-                   [Sensor Device]
-                   [SDR Repository Device]
-                   [SEL Device]
-                   [FRU Inventory Device]
-                   [Chassis Device]
-Manufacturer ID:   28C5h
-Product ID:        4h
-Aux Firmware Revision Info: 38420000h
-Channel Information:
-       Channel No: 1
-      Medium Type: 802.3 LAN
-    Protocol Type: IPMB-1.0
-       Channel No: 5
-      Medium Type: Asynch. Serial/Modem (RS-232)
-    Protocol Type: IPMB-1.0
+Device ID             : 34
+Device Revision       : 1
+Device SDRs           : unsupported
+Firmware Revision     : 1.0c
+Device Available      : yes (normal operation)
+IPMI Version          : 2.0
+Sensor Device         : supported
+SDR Repository Device : supported
+SEL Device            : supported
+FRU Inventory Device  : supported
+IPMB Event Receiver   : unsupported
+IPMB Event Generator  : unsupported
+Bridge                : unsupported
+Chassis Device        : supported
+Manufacturer ID       : Peppercon AG (10437)
+Product ID            : 4
+Auxiliary Firmware Revision Information : 38420000h
 ----------------
 pwopr[2-4]
 ----------------
-Device ID:         22
-Device Revision:   1
-Firmware Revision: 1.23
-                   [Device Available (normal operation)]
-IPMI Version:      2.0
-Additional Device Support:
-                   [Sensor Device]
-                   [SDR Repository Device]
-                   [SEL Device]
-                   [FRU Inventory Device]
-                   [Chassis Device]
-Manufacturer ID:   28C5h
-Product ID:        4h
-Aux Firmware Revision Info: 38420000h
-Channel Information:
-       Channel No: 1
-      Medium Type: 802.3 LAN
-    Protocol Type: IPMB-1.0
-       Channel No: 5
-      Medium Type: Asynch. Serial/Modem (RS-232)
-    Protocol Type: IPMB-1.0
+Device ID             : 34
+Device Revision       : 1
+Device SDRs           : unsupported
+Firmware Revision     : 1.17
+Device Available      : yes (normal operation)
+IPMI Version          : 2.0
+Sensor Device         : supported
+SDR Repository Device : supported
+SEL Device            : supported
+FRU Inventory Device  : supported
+IPMB Event Receiver   : unsupported
+IPMB Event Generator  : unsupported
+Bridge                : unsupported
+Chassis Device        : supported
+Manufacturer ID       : Peppercon AG (10437)
+Product ID            : 4
+Auxiliary Firmware Revision Information : 38420000h
 @end example
 
 In the above example, its clear to see that pwopr[2-4] have different
 firmware than pwopr[0-1,5].  More information about hostrange support
-can be found in the document freeipmi-hostrange.txt.
+can be found in the document freeipmi-hostrange.txt
+(@uref{http://www.gnu.org/software/freeipmi/freeipmi-hostrange.txt}).
 
-Ipmidetect can be used to enhance the efficiency of the hostranged
-input by eliminating those nodes in the cluster that have been
-temporarily removed for servicing.
+Ipmipower is capable of scaling to large nodes for cluster support and
+is supported by Powerman
+(@uref{http://sourceforge.net/projects/powerman}) for scalable power
+management.  At LLNL, in conjunction with Powerman, ipmipower is used
+for power control on clusters ranging from sizes of 4 to 2000.  It has
+been used to determine power status or power control LLNL's largest
+clusters in under a second.
+
+Ipmiconsole is currently supported by Conman
+(@uref{http://conman.googlecode.com/}) for scalable console management.
 
 Ipmimonitoring interprets sensor readings as well as just reporting
 them.  It can be used for host monitoring IPMI on a cluster.  By
 mapping sensor readings into NOMINAL, WARNING, or CRITICAL states, it
 makes monitoring sensors easier across large numbers of nodes.
 Skummee
-(@uref{http://sourceforge.net/projects/skummee}) 
-uses libipmimonitoring on LLNL clusters up to 1152 nodes in size.  
-FreeIPMI monitoring plugins
+(@uref{http://sourceforge.net/projects/skummee}) currently uses
+libipmimonitoring to monitoring sensors on LLNL clusters of up to 2000
+nodes in size.  FreeIPMI sensor monitoring plugins
 for Ganglia 
 (@uref{http://ganglia.info/}) 
 and Nagios 
@@ -239,26 +240,82 @@ and Nagios
 have also been developed and made available for download
 (@uref{http://www.gnu.org/software/freeipmi/download.html}).
 
-The bmc-config, pef-config, ipmi-sensors-config, and
-ipmi-chassis-config configuration file and command-line interface are
-used to easily copy the BMC configuration from one node to every other
-node in a cluster quickly.  It has been used to modify the BMC
+The bmc-config, ipmi-chassis-config, ipmi-pef-config,
+ipmi-sensors-config, and configuration file and command-line interface
+are used to easily copy the BMC configuration from one node to every
+other node in a cluster quickly.  It has been used to modify the BMC
 configuration across large LLNL clusters in a few minutes.  They also
 have the capability to verify (via the diff option) that the desired
 configuration has been properly stored to firmware.
 
-2) Easy setup
+Ipmidetect can be used to enhance the efficiency of the hostranged
+input by eliminating those nodes in the cluster that have been
+temporarily removed for servicing.
+
+2) Additional OEM support
+
+FreeIPMI contains support for a number of OEM extensions and OEM
+sensors and/or events.  Ipmi-oem currently supports OEM command
+extensions from Dell, Fujitsu, IBM, Intel, Inventec, Quanta, Sun
+Microsystems, and Supermicro.  Ipmi-sensors and Ipmi-sel support OEM
+sensors and/or events from Dell, Intel, Inventec, Quanta, Sun
+Microsystems, and Supermicro.
+
+3) Additional flexibility and features
+
+By implementing various IPMI sub-sections into multiple tools, each
+tool is capable of providing the user with more flexibility and
+ultimately more features in addition to those listed above.  It may
+not be as easy (or architecturally possible) to do in an all-in-one
+tool.  
+
+4) Extra IPMI support
+
+In addition to the features listed above, FreeIPMI also supports the
+Data Center Management Interface, or DCMI, via the FreeIPMI tool
+ipmi-dcmi.
+
+5) Easy setup
 
 By implementing drivers in userspace libraries, there is no need to
 build/setup/manage any kernel modules/drivers.
 
-3) Portability
+6) Portability
 
 Likewise, by implementing everything in userspace libraries and tools,
 portability to multiple operating systems and architectures should be
 easier.
 
-@node SSIF Driver Configuration, x86-64 Compilation, What is special about FreeIPMI, Top
+@node Serial Over LAN (SOL) / Ipmiconsole Setup, SSIF Driver Configuration, What is special about FreeIPMI, Top
+@section What setup is needed for Serial over LAN (SOL) or Ipmiconsole
+
+The setup of Serial-over-LAN (SOL) and/or Ipmiconsole is highly dependent on your motherboard.  However, most motherboards
+require the following:
+
+1) Adjust the BIOS COM port for serial redirection over SOL instead of
+the normal serial port and set the appropriate baud rate.  If you do
+not know which port is the SOL port, you may need to play around and
+guess.  It is likely a non-default setting, since many manufacturers
+may still assume the default redirection is out of the normal serial
+port.  If you do not have a serial port on your motherboard, this part
+can probably be skipped.
+
+2) Configure IPMI on the motherboard to use SOL.  Many motherboards
+may have this enabled by default, however you may wish to verify with
+FreeIPMI's bmc-config.  More information can be found in the
+bmc-config.conf(5) manpage on the settings.  However, the key settings
+are to enable SOL on the system, enable SOL for individual users, and
+select the appropriate baud.  On many motherboards, the selected baud
+must match what is configured in the BIOS.
+
+3) Adjust your operating systems serial console settings to use the
+appropriate COM port.  For Linux, the following guide
+(@uref{http://www.vanemery.com/Linux/Serial/serial-console.html})
+provides a pretty good overview of setting of a serial console on
+Linux.  The only difference for setting up a serial console with
+Ipmiconsole or SOL, is the ttySX terminal may need to be changed.
+
+@node SSIF Driver Configuration, x86-64 Compilation, Serial Over LAN (SOL) / Ipmiconsole Setup, Top
 @section SSIF Driver Configuration
 
 FreeIPMI's SSIF driver works on top of kernel'2 i2c device
@@ -296,46 +353,34 @@ BMC address Locator:
     Usual values for record 08h -> 0x400
 @end example
 
-@node x86-64 Compilation, SUNBMC Driver Compilation, SSIF Driver Configuration, Top
+@node x86-64 Compilation, libgcrypt requirement, SSIF Driver Configuration, Top
 @section x86-64 Compilation
 
-Under some x86-64 platforms such as SUSE GNU/Linux, native 64
-bit libraries reside under lib64 and 32 bit libs under lib. Autotools
-by default installs libfreeipmi.so under /usr/lib, instead of
-/usr/lib64 causing dynamic linking errors.  Pass libdir appropriately
-to configure script to workaround this
-problem. (i.e. --libdir=/usr/lib64)
+By default, FreeIPMI's build autotools (e.g. configure) should detect
+if you are on a 64 bit system and should build against 64 bit
+libraries.  However, some multi-architecture installs (e.g. you have
+32 bit and 64 bit libraries installed) may lead to builds and installs
+of 32 bit instead of 64 bit.  For those noticing this, pass libdir
+appropriately to the configure script to workaround this
+problem. (e.g. --libdir=/usr/lib64)
 
 Example:
 @example
   # ./configure  --prefix=/usr --libdir=/usr/lib64
 @end example
 
-@node SUNBMC Driver Compilation, Installing FreeIPMI on FreeBSD, x86-64 Compilation, Top
-@section SUNBMC Driver Compilation
+@node libgcrypt requirement, Installing FreeIPMI on FreeBSD, x86-64 Compilation, Top
+@section libgcrypt requirement
 
-In order to compile the sunbmc driver, the bmc_intf.h header file must
-be in your include path.  This can be added by to the include search
-path by adding the path to the CPPFLAGS environment variable.  i.e.
+FreeIPMI requires the libgcrypt library to be installed for a variety
+of encryption requirements in IPMI 2.0.  If you are building FreeIPMI
+and receive a 'libgcrypt required to build libfreeipmi' error, please
+install libgcrypt.  For Linux users, this may require the install of
+the libgcrypt-devel package as well.  For those who do not need IPMI
+2.0 encryption, FreeIPMI may be built without it by specifying
+--without-encryption when executing configure.
 
-in bash
-
-@example
-export CPPFLAGS=''-I/my/bmc_intf_path/''
-@end example
-
-in csh/tcsh
-
-@example
-setenv CPPFLAGS ``-I/my/bmc_intf_path/''
-@end example
-
-If the file is not on your system, the bmc_intf.h file may simply be
-downloaded from 
-(@uref{http://opensolaris.org/}) 
-and installed into any location.
-
-@node Installing FreeIPMI on FreeBSD, , SUNBMC Driver Compilation, Top
+@node Installing FreeIPMI on FreeBSD, , libgcrypt requirement, Top
 @section Installing FreeIPMI on FreeBSD
 
 You can install a binary package of freeipmi or use the port,

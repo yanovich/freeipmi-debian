@@ -1,5 +1,5 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+   Copyright (C) 2003-2010 FreeIPMI Core Team
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,9 +13,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 
-*/
+ */
 
 #ifndef _IPMI_SERIAL_MODEM_PARAMETER_SPEC_H
 #define _IPMI_SERIAL_MODEM_PARAMETER_SPEC_H
@@ -73,6 +73,18 @@ extern "C" {
 #define IPMI_SERIAL_MODEM_PARAMETER_PPP_UDP_PROXY_TRANSMIT_BUFFER_SIZE    46
 #define IPMI_SERIAL_MODEM_PARAMETER_PPP_UDP_PROXY_RECEIVE_BUFFER_SIZE     47
 #define IPMI_SERIAL_MODEM_PARAMETER_PPP_REMOTE_CONSOLE_IP_ADDRESS         48
+#define IPMI_SERIAL_MODEM_PARAMETER_OEM_MIN                               192
+#define IPMI_SERIAL_MODEM_PARAMETER_OEM_MAX                               255
+
+/* To avoid gcc warnings, add +1 in comparison */
+#define IPMI_SERIAL_PARAMETER_SELECTOR_VALID(__parameter_selector)              \
+  ((((__parameter_selector) + 1) > (IPMI_SERIAL_MODEM_PARAMETER_SET_IN_PROGRESS + 1) \
+    && (__parameter_selector) <= IPMI_SERIAL_MODEM_PARAMETER_PPP_REMOTE_CONSOLE_IP_ADDRESS) ? 1 : 0)
+
+/* To avoid gcc warnings, subtract -1 in comparison */
+#define IPMI_SERIAL_PARAMETER_SELECTOR_IS_OEM(__parameter_selector) \
+  (((__parameter_selector) >= IPMI_SERIAL_MODEM_PARAMETER_OEM_MIN \
+    && ((__parameter_selector) - 1) <= (IPMI_SERIAL_MODEM_PARAMETER_OEM_MAX - 1)) ? 1 : 0)
 
 #ifdef __cplusplus
 }

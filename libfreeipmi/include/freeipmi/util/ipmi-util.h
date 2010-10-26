@@ -1,5 +1,5 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+   Copyright (C) 2003-2010 FreeIPMI Core Team
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,12 +13,12 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 
-*/
+ */
 
 #ifndef _IPMI_UTIL_H
-#define	_IPMI_UTIL_H	1
+#define _IPMI_UTIL_H    1
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,21 +27,48 @@ extern "C" {
 #include <stdint.h>
 #include <freeipmi/fiid/fiid.h>
 
-uint8_t ipmi_checksum (uint8_t *buf, uint64_t len);
+uint8_t ipmi_checksum (const void *buf, unsigned int buflen);
 
-int8_t ipmi_check_cmd(fiid_obj_t obj_cmd, uint8_t cmd);
+/* returns 1 on pass, 0 on fail, -1 on error */
+int ipmi_check_cmd (fiid_obj_t obj_cmd, uint8_t cmd);
 
-int8_t ipmi_check_completion_code(fiid_obj_t obj_cmd, uint8_t completion_code);
+/* returns 1 on pass, 0 on fail, -1 on error */
+int ipmi_check_completion_code (fiid_obj_t obj_cmd, uint8_t completion_code);
 
-int8_t ipmi_check_completion_code_success (fiid_obj_t obj_cmd);
+/* returns 1 on pass, 0 on fail, -1 on error */
+int ipmi_check_completion_code_success (fiid_obj_t obj_cmd);
 
-int ipmi_get_random (uint8_t *buf, unsigned int buflen);
+int ipmi_get_random (void *buf, unsigned int buflen);
 
-int8_t ipmi_is_ipmi_1_5_packet(uint8_t *pkt, uint32_t pkt_len);
+/* returns 1 on pass, 0 on fail, -1 on error */
+int ipmi_is_ipmi_1_5_packet (const void *pkt, unsigned int pkt_len);
 
-int8_t ipmi_is_ipmi_2_0_packet(uint8_t *pkt, uint32_t pkt_len);
+/* returns 1 on pass, 0 on fail, -1 on error */
+int ipmi_is_ipmi_2_0_packet (const void *pkt, unsigned int pkt_len);
 
-const char *ipmi_cmd_str(uint8_t net_fn, uint8_t cmd);
+int ipmi_check_session_sequence_number_1_5_init (uint32_t *highest_received_sequence_number,
+                                                 uint32_t *previously_received_list);
+
+int ipmi_check_session_sequence_number_2_0_init (uint32_t *highest_received_sequence_number,
+                                                 uint32_t *previously_received_list);
+
+/* returns 1 if sequence number in range, 0 if not, -1 on error */
+/* highest_received_sequence_number and previously_received_list updated on success */
+/* set sequence_number_window to 0 for default */
+int ipmi_check_session_sequence_number_1_5 (uint32_t session_sequence_number,
+                                            uint32_t *highest_received_sequence_number,
+                                            uint32_t *previously_received_list,
+                                            unsigned int sequence_number_window);
+
+/* returns 1 if sequence number in range, 0 if not, -1 on error */
+/* highest_received_sequence_number and previously_received_list updated on success */
+/* set sequence_number_window to 0 for default */
+int ipmi_check_session_sequence_number_2_0 (uint32_t session_sequence_number,
+                                            uint32_t *highest_received_sequence_number,
+                                            uint32_t *previously_received_list,
+                                            unsigned int sequence_number_window);
+
+const char *ipmi_cmd_str (uint8_t net_fn, uint8_t cmd);
 
 #ifdef __cplusplus
 }

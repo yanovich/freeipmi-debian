@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: debug.h,v 1.4 2008/03/28 00:14:41 chu11 Exp $
+ *  $Id: debug.h,v 1.7.8.1 2009-12-23 21:24:11 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -102,19 +102,19 @@ char *_debug_msg_create(const char *fmt, ...);
 
 #ifndef NDEBUG
 
-#define ERR_DEBUG(__msg) \
+#define IPMIDETECTD_DEBUG(__msg) \
     do { \
       DEBUG_MSG_CREATE(__msg) \
       err_debug(__err); \
     } while(0)
 
-#define ERR_OUTPUT(__msg) \
+#define IPMIDETECTD_OUTPUT(__msg) \
     do { \
       DEBUG_MSG_CREATE(__msg) \
       err_output(__err); \
     } while(0)
 
-#define ERR_EXIT(__msg) \
+#define IPMIDETECTD_EXIT(__msg) \
     do { \
       DEBUG_MSG_CREATE(__msg) \
       err_exit(__err); \
@@ -122,14 +122,14 @@ char *_debug_msg_create(const char *fmt, ...);
    
 #else /* NDEBUG */
 
-#define ERR_DEBUG(__msg)
+#define IPMIDETECTD_DEBUG(__msg)
 
-#define ERR_OUTPUT(__msg) \
+#define IPMIDETECTD_OUTPUT(__msg) \
     do { \
       err_output __msg; \
     } while(0)
 
-#define ERR_EXIT(__msg) \
+#define IPMIDETECTD_EXIT(__msg) \
     do { \
       err_exit __msg; \
     } while(0)

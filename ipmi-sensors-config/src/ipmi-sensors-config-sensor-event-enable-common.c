@@ -1,19 +1,19 @@
-/* 
-   Copyright (C) 2008 FreeIPMI Core Team
-   
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-   
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-   
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
+/*
+  Copyright (C) 2008-2010 FreeIPMI Core Team
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 */
 
 #if HAVE_CONFIG_H
@@ -32,9 +32,7 @@
 
 #include "freeipmi-portability.h"
 #include "pstdout.h"
-#include "tool-fiid-wrappers.h"
 #include "tool-sdr-cache-common.h"
-#include "tool-sensor-common.h"
 
 /* event field strings */
 
@@ -52,218 +50,218 @@ char *threshold_event_strings[] =
   {
     "Lower_Non_Critical_Going_Low",
     "Lower_Non_Critical_Going_High",
-    "Lower_Critical_Going_Low", 
+    "Lower_Critical_Going_Low",
     "Lower_Critical_Going_High",
-    "Lower_Non_Recoverable_Going_Low", 
+    "Lower_Non_Recoverable_Going_Low",
     "Lower_Non_Recoverable_Going_High",
-    "Upper_Non_Critical_Going_Low", 
+    "Upper_Non_Critical_Going_Low",
     "Upper_Non_Critical_Going_High",
-    "Upper_Critical_Going_Low", 
+    "Upper_Critical_Going_Low",
     "Upper_Critical_Going_High",
-    "Upper_Non_Recoverable_Going_Low", 
+    "Upper_Non_Recoverable_Going_Low",
     "Upper_Non_Recoverable_Going_High",
     NULL,
   };
 
 char *generic_event_strings_0x02[] =
   {
-    "Transition_to_Idle", 
-    "Transition_to_Active", 
-    "Transition_to_Busy", 
+    "Transition_to_Idle",
+    "Transition_to_Active",
+    "Transition_to_Busy",
     NULL,
   };
 
 char *generic_event_strings_0x03[] =
   {
-    "State_Deasserted", 
-    "State_Asserted", 
+    "State_Deasserted",
+    "State_Asserted",
     NULL,
   };
 
 char *generic_event_strings_0x04[] =
   {
-    "Predictive_Failure_Deasserted", 
-    "Predictive_Failure_Asserted", 
+    "Predictive_Failure_Deasserted",
+    "Predictive_Failure_Asserted",
     NULL,
   };
 
 char *generic_event_strings_0x05[] =
   {
-    "Limit_Not_Exceeded", 
-    "Limit_Exceeded", 
+    "Limit_Not_Exceeded",
+    "Limit_Exceeded",
     NULL,
   };
 
 char *generic_event_strings_0x06[] =
   {
-    "Performance_Met", 
-    "Performance_Lags", 
+    "Performance_Met",
+    "Performance_Lags",
     NULL,
   };
 
 char *generic_event_strings_0x07[] =
   {
-    "Transition_to_OK", 
-    "Transition_to_Non_Critical_from_OK", 
-    "Transition_to_Critical_from_Less_Severe", 
-    "Transition_to_Non_Recoverable_from_Less_Severe", 
-    "Transition_to_Non_Critical_from_More_Severe", 
-    "Transition_to_Critical_from_Non_Recoverable", 
-    "Transition_to_Non_Recoverable", 
-    "Monitor", 
-    "Informational", 
+    "Transition_to_OK",
+    "Transition_to_Non_Critical_from_OK",
+    "Transition_to_Critical_from_Less_Severe",
+    "Transition_to_Non_Recoverable_from_Less_Severe",
+    "Transition_to_Non_Critical_from_More_Severe",
+    "Transition_to_Critical_from_Non_Recoverable",
+    "Transition_to_Non_Recoverable",
+    "Monitor",
+    "Informational",
     NULL,
   };
 
 char *generic_event_strings_0x08[] =
   {
-    "Device_Removed_or_Device_Absent", 
-    "Device_Inserted_or_Device_Present", 
+    "Device_Removed_or_Device_Absent",
+    "Device_Inserted_or_Device_Present",
     NULL,
   };
 
 char *generic_event_strings_0x09[] =
   {
-    "Device_Disabled", 
-    "Device_Enabled", 
+    "Device_Disabled",
+    "Device_Enabled",
     NULL,
   };
 
 char *generic_event_strings_0x0A[] =
   {
-    "Transition_to_Running", 
-    "Transition_to_In_Test", 
-    "Transition_to_Power_Off", 
-    "Transition_to_On_Line", 
-    "Transition_to_Off_Line", 
-    "Transition_to_Off_Duty", 
-    "Transition_to_Degraded", 
-    "Transition_to_Power_Save", 
-    "Install_Error", 
+    "Transition_to_Running",
+    "Transition_to_In_Test",
+    "Transition_to_Power_Off",
+    "Transition_to_On_Line",
+    "Transition_to_Off_Line",
+    "Transition_to_Off_Duty",
+    "Transition_to_Degraded",
+    "Transition_to_Power_Save",
+    "Install_Error",
     NULL,
   };
 
 char *generic_event_strings_0x0B[] =
   {
-    "Fully_Redundant", 
-    "Redundancy_Lost", 
-    "Redundancy_Degraded", 
-    "Entered_from_Redundancy_Degraded_or_Fully_Redundant", 
-    "Entered_from_Non_Redundant_Insufficient_Resources", 
-    "Non_Redundant_Insufficient_Resources", 
-    "Redundancy_Degraded_from_Fully_Redundant", 
-    "Redundancy_Degraded_from_Non_Redundant", 
+    "Fully_Redundant",
+    "Redundancy_Lost",
+    "Redundancy_Degraded",
+    "Entered_from_Redundancy_Degraded_or_Fully_Redundant",
+    "Entered_from_Non_Redundant_Insufficient_Resources",
+    "Non_Redundant_Insufficient_Resources",
+    "Redundancy_Degraded_from_Fully_Redundant",
+    "Redundancy_Degraded_from_Non_Redundant",
     NULL,
   };
 
 char *generic_event_strings_0x0C[] =
   {
-    "D0_Power_State", 
-    "D1_Power_State", 
-    "D2_Power_State", 
-    "D3_Power_State", 
+    "D0_Power_State",
+    "D1_Power_State",
+    "D2_Power_State",
+    "D3_Power_State",
     NULL,
   };
 
 char *sensor_specific_event_strings_physical_security_chassis_intrusion[] =
   {
-    "General_Chassis_Intrusion", 
-    "Drive_Bay_Intrusion", 
-    "IO_Card_Area_Intrusion", 
-    "Processor_Area_Intrusion", 
-    "LAN_Leash_Lost", 
-    "Unauthorized_Dock", 
-    "FAN_Area_Intrusion", 
+    "General_Chassis_Intrusion",
+    "Drive_Bay_Intrusion",
+    "IO_Card_Area_Intrusion",
+    "Processor_Area_Intrusion",
+    "LAN_Leash_Lost",
+    "Unauthorized_Dock",
+    "FAN_Area_Intrusion",
     NULL,
   };
 
 char *sensor_specific_event_strings_platform_security_violation_attempt[] =
   {
-    "Secure_Mode_Violation_Attempt", 
-    "Pre_Boot_Password_Violation_User_Password", 
-    "Pre_Boot_Password_Violation_Attempt_Setup_Password", 
-    "Pre_Boot_Password_Violation_Network_Boot_Password", 
-    "Other_Pre_Boot_Password_Violation", 
-    "Out_of_Band_Access_Password_Violation", 
+    "Secure_Mode_Violation_Attempt",
+    "Pre_Boot_Password_Violation_User_Password",
+    "Pre_Boot_Password_Violation_Attempt_Setup_Password",
+    "Pre_Boot_Password_Violation_Network_Boot_Password",
+    "Other_Pre_Boot_Password_Violation",
+    "Out_of_Band_Access_Password_Violation",
     NULL,
   };
 
 char *sensor_specific_event_strings_processor[] =
   {
-    "IERR", 
-    "Thermal_Trip", 
-    "FRB1_BIST_failure", 
-    "FRB2_Hang_In_POST_Failure", 
-    "FRB3_Processor_Startup_Initialization_Failure", 
-    "Configuration_Error", 
-    "SM_BIOS_Uncorrectable_CPU_Complex_Error", 
-    "Processor_Presence_detected", 
-    "Processor_Disabled", 
-    "Terminator_Presence_Detected", 
-    "Processor_Automatically_Throttled", 
+    "IERR",
+    "Thermal_Trip",
+    "FRB1_BIST_failure",
+    "FRB2_Hang_In_POST_Failure",
+    "FRB3_Processor_Startup_Initialization_Failure",
+    "Configuration_Error",
+    "SM_BIOS_Uncorrectable_CPU_Complex_Error",
+    "Processor_Presence_detected",
+    "Processor_Disabled",
+    "Terminator_Presence_Detected",
+    "Processor_Automatically_Throttled",
     NULL,
   };
 
 char *sensor_specific_event_strings_power_supply[] =
   {
-    "Presence_Detected", 
-    "Power_Supply_Failure_Detected", 
-    "Predictive_Failure", 
-    "Power_Supply_Input_Lost_AC_DC", 
-    "Power_Supply_Input_Lost_or_Out_of_Range", 
-    "Power_Supply_Input_Out_of_Range_but_Present", 
-    "Configuration_Error", 
+    "Presence_Detected",
+    "Power_Supply_Failure_Detected",
+    "Predictive_Failure",
+    "Power_Supply_Input_Lost_AC_DC",
+    "Power_Supply_Input_Lost_or_Out_of_Range",
+    "Power_Supply_Input_Out_of_Range_but_Present",
+    "Configuration_Error",
     NULL,
   };
 
 char *sensor_specific_event_strings_power_unit[] =
   {
-    "Power_Off_or_Power_Down", 
-    "Power_Cycle", 
-    "240VA_Power_Down", 
-    "Interlock_Power_Down", 
-    "AC_Lost", 
-    "Soft_Power_Control_Failure", 
-    "Power_Unit_Failure_Detected", 
-    "Predictive_Failure", 
+    "Power_Off_or_Power_Down",
+    "Power_Cycle",
+    "240VA_Power_Down",
+    "Interlock_Power_Down",
+    "AC_Lost",
+    "Soft_Power_Control_Failure",
+    "Power_Unit_Failure_Detected",
+    "Predictive_Failure",
     NULL,
   };
 
 char *sensor_specific_event_strings_memory[] =
   {
-    "Correctable_ECC", 
-    "Uncorrectable_ECC", 
-    "Parity", 
-    "Memory_Scrub_Failed", 
-    "Memory_Device_Disabled", 
-    "Correctable_ECC_Logging_Limit_Reached", 
-    "Presence_Detected", 
-    "Configuration_Error", 
-    "Spare", 
-    "Memory_Automatically_Throttled", 
-    "Critical_Overtemperature", 
+    "Correctable_ECC",
+    "Uncorrectable_ECC",
+    "Parity",
+    "Memory_Scrub_Failed",
+    "Memory_Device_Disabled",
+    "Correctable_ECC_Logging_Limit_Reached",
+    "Presence_Detected",
+    "Configuration_Error",
+    "Spare",
+    "Memory_Automatically_Throttled",
+    "Critical_Overtemperature",
     NULL,
   };
 
 char *sensor_specific_event_strings_drive_slot[] =
   {
-    "Drive_Presence", 
-    "Drive_Fault", 
-    "Predictive_Failure", 
-    "Hot_Spare", 
-    "Consistency_Check_In_Progress", 
-    "In_Critical_Array", 
-    "In_Failed_Array", 
-    "Rebuild_or_Remap_In_Progress", 
-    "Rebuild_or_Remap_Aborted", 
+    "Drive_Presence",
+    "Drive_Fault",
+    "Predictive_Failure",
+    "Hot_Spare",
+    "Consistency_Check_In_Progress",
+    "In_Critical_Array",
+    "In_Failed_Array",
+    "Rebuild_or_Remap_In_Progress",
+    "Rebuild_or_Remap_Aborted",
     NULL,
   };
 
 char *sensor_specific_event_strings_system_firmware_progress[] =
   {
-    "System_Firmware_Error", 
-    "System_Firmware_Hang", 
-    "System_Firmware_Progress", 
+    "System_Firmware_Error",
+    "System_Firmware_Hang",
+    "System_Firmware_Progress",
     NULL,
   };
 
@@ -306,7 +304,7 @@ char *sensor_specific_event_strings_critical_interrupt[] =
     NULL,
   };
 
-char *sensor_specific_event_strings_cable_interconnect[] = 
+char *sensor_specific_event_strings_cable_interconnect[] =
   {
     "Cable_Interconnect_Is_Connected",
     "Configuration_Error_Incorrect_Cable_Connected_or_Incorrect_Interconnection",
@@ -352,7 +350,7 @@ char *sensor_specific_event_strings_watchdog2[] =
     "Timer_Interrupt",
     NULL,
   };
-int sensor_specific_event_strings_watchdog2_indexes[] = {0, 1, 2, 3, 8, -1};
+int sensor_specific_event_strings_watchdog2_indexes[] = { 0, 1, 2, 3, 8, -1};
 
 char *sensor_specific_event_strings_entity_presence[] =
   {
@@ -405,8 +403,8 @@ struct sensor_event_enable_data {
 
 #define KEY_NAME_MAX_LEN 1024
 
-typedef int (*Sdr_event_flags_func)(pstdout_state_t pstate,
-                                    uint8_t *sdr_record,
+typedef int (*Sdr_event_flags_func)(ipmi_sdr_parse_ctx_t ctx,
+                                    const void *sdr_record,
                                     unsigned int sdr_record_len,
                                     uint8_t *event_state_0,
                                     uint8_t *event_state_1,
@@ -424,8 +422,8 @@ typedef int (*Sdr_event_flags_func)(pstdout_state_t pstate,
                                     uint8_t *event_state_13,
                                     uint8_t *event_state_14);
 
-typedef int (*Sdr_threshold_event_flags_func)(pstdout_state_t pstate,
-                                              uint8_t *sdr_record,
+typedef int (*Sdr_threshold_event_flags_func)(ipmi_sdr_parse_ctx_t ctx,
+                                              const void *sdr_record,
                                               unsigned int sdr_record_len,
                                               uint8_t *lower_non_critical_going_low,
                                               uint8_t *lower_non_critical_going_high,
@@ -451,50 +449,81 @@ _get_sensor_event_enable (ipmi_sensors_config_state_data_t *state_data,
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
   uint8_t sensor_number;
-  int8_t field_len;
+  int field_flag;
   uint64_t val;
 
-  assert(state_data);
-  assert(section_name);
-  assert(data);
+  assert (state_data);
+  assert (section_name);
+  assert (data);
 
-  memset(data, '\0', sizeof(struct sensor_event_enable_data));
+  memset (data, '\0', sizeof (struct sensor_event_enable_data));
 
-  if ((ret = get_sdr_record(state_data,
-                            section_name,
-                            sdr_record,
-                            &sdr_record_len)) != CONFIG_ERR_SUCCESS)
+  if ((ret = get_sdr_record (state_data,
+                             section_name,
+                             sdr_record,
+                             &sdr_record_len)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
       goto cleanup;
     }
 
-  if (sdr_cache_get_sensor_number(NULL,
-                                  sdr_record,
-                                  sdr_record_len,
-                                  &sensor_number) < 0)
-    goto cleanup;
+  if (ipmi_sdr_parse_sensor_number (state_data->sdr_parse_ctx,
+                                    sdr_record,
+                                    sdr_record_len,
+                                    &sensor_number) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_sdr_parse_sensor_number: %s\n",
+                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+      goto cleanup;
+    }
 
-  _FIID_OBJ_CREATE(obj_cmd_rs, tmpl_cmd_get_sensor_event_enable_rs);
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_get_sensor_event_enable_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
 
   if (ipmi_cmd_get_sensor_event_enable (state_data->ipmi_ctx,
                                         sensor_number,
                                         obj_cmd_rs) < 0)
     {
       if (state_data->prog_data->args->config_args.common.debug)
-        pstdout_fprintf(state_data->pstate,
-                        stderr,
-                        "ipmi_cmd_get_sensor_event_enable: %s\n",
-                        ipmi_ctx_strerror(ipmi_ctx_errnum(state_data->ipmi_ctx)));
-      if (!IPMI_CTX_ERRNUM_IS_FATAL_ERROR(state_data->ipmi_ctx))
-        rv = CONFIG_ERR_NON_FATAL_ERROR;
+        pstdout_fprintf (state_data->pstate,
+                         stderr,
+                         "ipmi_cmd_get_sensor_event_enable: %s\n",
+                         ipmi_ctx_errormsg (state_data->ipmi_ctx));
+
+      if (config_is_non_fatal_error (state_data->ipmi_ctx,
+                                     obj_cmd_rs,
+                                     &ret))
+        rv = ret;
+
       goto cleanup;
     }
 
-  _FIID_OBJ_GET (obj_cmd_rs, "all_event_messages", &val);
+  if (FIID_OBJ_GET (obj_cmd_rs, "all_event_messages", &val) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_get: 'all_event_messages': %s\n",
+                       fiid_obj_errormsg (obj_cmd_rs));
+      goto cleanup;
+    }
   data->all_event_messages = val;
 
-  _FIID_OBJ_GET (obj_cmd_rs, "scanning_on_this_sensor", &val);
+  if (FIID_OBJ_GET (obj_cmd_rs, "scanning_on_this_sensor", &val) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_get: 'scanning_on_this_sensor': %s\n",
+                       fiid_obj_errormsg (obj_cmd_rs));
+      goto cleanup;
+    }
   data->scanning_on_this_sensor = val;
 
   if (data->all_event_messages == IPMI_SENSOR_ALL_EVENT_MESSAGES_DISABLE)
@@ -504,32 +533,44 @@ _get_sensor_event_enable (ipmi_sensors_config_state_data_t *state_data,
       goto out;
     }
 
-  _FIID_OBJ_GET_WITH_RETURN_VALUE (obj_cmd_rs,
-                                   "assertion_event_bitmask",
-                                   &val,
-                                   field_len);
+  if ((field_flag = fiid_obj_get (obj_cmd_rs,
+                                  "assertion_event_bitmask",
+                                  &val)) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_get: 'assertion_event_bitmask': %s\n",
+                       fiid_obj_errormsg (obj_cmd_rs));
+      goto cleanup;
+    }
 
   /* assertion event bitmask need not be returned */
-  if (field_len)
-    data->assertion_bits = (uint16_t)val;
+  if (field_flag)
+    data->assertion_bits = val;
   else
     data->assertion_bits = 0;
 
-  _FIID_OBJ_GET_WITH_RETURN_VALUE (obj_cmd_rs,
-                                   "deassertion_event_bitmask",
-                                   &val,
-                                   field_len);
+  if ((field_flag = fiid_obj_get (obj_cmd_rs,
+                                  "deassertion_event_bitmask",
+                                  &val)) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_get: 'deassertion_event_bitmask': %s\n",
+                       fiid_obj_errormsg (obj_cmd_rs));
+      goto cleanup;
+    }
 
   /* deassertion event bitmask need not be returned */
-  if (field_len)
-    data->deassertion_bits = (uint16_t)val;
+  if (field_flag)
+    data->deassertion_bits = val;
   else
     data->deassertion_bits = 0;
 
  out:
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
-  _FIID_OBJ_DESTROY(obj_cmd_rs);
+  fiid_obj_destroy (obj_cmd_rs);
   return (rv);
 }
 
@@ -546,26 +587,39 @@ _set_sensor_event_enable (ipmi_sensors_config_state_data_t *state_data,
   config_err_t ret;
   uint8_t sensor_number;
 
-  assert(state_data);
-  assert(section_name);
-  assert(data);
+  assert (state_data);
+  assert (section_name);
+  assert (data);
 
-  if ((ret = get_sdr_record(state_data,
-                            section_name,
-                            sdr_record,
-                            &sdr_record_len)) != CONFIG_ERR_SUCCESS)
+  if ((ret = get_sdr_record (state_data,
+                             section_name,
+                             sdr_record,
+                             &sdr_record_len)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
       goto cleanup;
     }
 
-  if (sdr_cache_get_sensor_number(NULL,
-                                  sdr_record,
-                                  sdr_record_len,
-                                  &sensor_number) < 0)
-    goto cleanup;
+  if (ipmi_sdr_parse_sensor_number (state_data->sdr_parse_ctx,
+                                    sdr_record,
+                                    sdr_record_len,
+                                    &sensor_number) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_sdr_parse_sensor_number: %s\n",
+                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+      goto cleanup;
+    }
 
-  _FIID_OBJ_CREATE(obj_cmd_rs, tmpl_cmd_set_sensor_event_enable_rs);
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_sensor_event_enable_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
 
   if (ipmi_cmd_set_sensor_event_enable (state_data->ipmi_ctx,
                                         sensor_number,
@@ -577,18 +631,22 @@ _set_sensor_event_enable (ipmi_sensors_config_state_data_t *state_data,
                                         obj_cmd_rs) < 0)
     {
       if (state_data->prog_data->args->config_args.common.debug)
-        pstdout_fprintf(state_data->pstate,
-                        stderr,
-                        "ipmi_cmd_set_sensor_event_enable: %s\n",
-                        ipmi_ctx_strerror(ipmi_ctx_errnum(state_data->ipmi_ctx)));
-      if (!IPMI_CTX_ERRNUM_IS_FATAL_ERROR(state_data->ipmi_ctx))
-        rv = CONFIG_ERR_NON_FATAL_ERROR;
+        pstdout_fprintf (state_data->pstate,
+                         stderr,
+                         "ipmi_cmd_set_sensor_event_enable: %s\n",
+                         ipmi_ctx_errormsg (state_data->ipmi_ctx));
+
+      if (config_is_non_fatal_error (state_data->ipmi_ctx,
+                                     obj_cmd_rs,
+                                     &ret))
+        rv = ret;
+
       goto cleanup;
     }
 
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
-  _FIID_OBJ_DESTROY(obj_cmd_rs);
+  fiid_obj_destroy (obj_cmd_rs);
   return (rv);
 }
 
@@ -601,7 +659,7 @@ sensor_event_enable_enable_all_event_messages_checkout (const char *section_name
   struct sensor_event_enable_data data;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
-  
+
   if ((ret = _get_sensor_event_enable (state_data,
                                        section_name,
                                        &data)) != CONFIG_ERR_SUCCESS)
@@ -609,12 +667,12 @@ sensor_event_enable_enable_all_event_messages_checkout (const char *section_name
       rv = ret;
       goto cleanup;
     }
-    
-  if (config_section_update_keyvalue_output(state_data->pstate,
-                                            kv, 
-                                            data.all_event_messages ? "Yes" : "No") < 0)
+
+  if (config_section_update_keyvalue_output (state_data->pstate,
+                                             kv,
+                                             data.all_event_messages ? "Yes" : "No") < 0)
     goto cleanup;
-  
+
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
   return (rv);
@@ -629,7 +687,7 @@ sensor_event_enable_enable_all_event_messages_commit (const char *section_name,
   struct sensor_event_enable_data data;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
-  
+
   if ((ret = _get_sensor_event_enable (state_data,
                                        section_name,
                                        &data)) != CONFIG_ERR_SUCCESS)
@@ -637,13 +695,13 @@ sensor_event_enable_enable_all_event_messages_commit (const char *section_name,
       rv = ret;
       goto cleanup;
     }
-  
+
   /* clear bits just in case, we're not setting anything here */
   data.assertion_bits = 0;
   data.deassertion_bits = 0;
 
   data.all_event_messages = same (kv->value_input, "yes");
-  
+
   if ((ret = _set_sensor_event_enable (state_data,
                                        section_name,
                                        &data,
@@ -652,7 +710,7 @@ sensor_event_enable_enable_all_event_messages_commit (const char *section_name,
       rv = ret;
       goto cleanup;
     }
-  
+
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
   return (rv);
@@ -667,7 +725,7 @@ sensor_event_enable_enable_scanning_on_this_sensor_checkout (const char *section
   struct sensor_event_enable_data data;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
-  
+
   if ((ret = _get_sensor_event_enable (state_data,
                                        section_name,
                                        &data)) != CONFIG_ERR_SUCCESS)
@@ -675,12 +733,12 @@ sensor_event_enable_enable_scanning_on_this_sensor_checkout (const char *section
       rv = ret;
       goto cleanup;
     }
-    
-  if (config_section_update_keyvalue_output(state_data->pstate,
-                                            kv, 
-                                            data.scanning_on_this_sensor ? "Yes" : "No") < 0)
+
+  if (config_section_update_keyvalue_output (state_data->pstate,
+                                             kv,
+                                             data.scanning_on_this_sensor ? "Yes" : "No") < 0)
     goto cleanup;
-  
+
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
   return (rv);
@@ -695,7 +753,7 @@ sensor_event_enable_enable_scanning_on_this_sensor_commit (const char *section_n
   struct sensor_event_enable_data data;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
-  
+
   if ((ret = _get_sensor_event_enable (state_data,
                                        section_name,
                                        &data)) != CONFIG_ERR_SUCCESS)
@@ -703,13 +761,13 @@ sensor_event_enable_enable_scanning_on_this_sensor_commit (const char *section_n
       rv = ret;
       goto cleanup;
     }
-  
+
   /* clear bits just in case, we're not setting anything here */
   data.assertion_bits = 0;
   data.deassertion_bits = 0;
 
   data.scanning_on_this_sensor = same (kv->value_input, "yes");
-  
+
   if ((ret = _set_sensor_event_enable (state_data,
                                        section_name,
                                        &data,
@@ -718,7 +776,7 @@ sensor_event_enable_enable_scanning_on_this_sensor_commit (const char *section_n
       rv = ret;
       goto cleanup;
     }
-  
+
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
   return (rv);
@@ -734,12 +792,12 @@ _setup_event_enable_key (ipmi_sensors_config_state_data_t *state_data,
 {
   unsigned int flags = 0;
 
-  assert(state_data);
-  assert(section);
-  assert(key_name);
+  assert (state_data);
+  assert (section);
+  assert (key_name);
 
   if (event_supported
-      || state_data->prog_data->args->config_args.verbose)
+      || state_data->prog_data->args->config_args.verbose_count)
     {
       if (!event_supported)
         flags |= CONFIG_UNDEFINED;
@@ -755,10 +813,10 @@ _setup_event_enable_key (ipmi_sensors_config_state_data_t *state_data,
         goto cleanup;
     }
 
-  return 0;
+  return (0);
 
  cleanup:
-  return -1;
+  return (-1);
 }
 
 static config_err_t
@@ -770,43 +828,49 @@ _threshold_event_enable_verify (ipmi_sensors_config_state_data_t *state_data,
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
   uint8_t event_reading_type_code;
-  int sensor_class;
+  int event_reading_type_code_class;
 
-  assert(state_data);
-  assert(section_name);
+  assert (state_data);
+  assert (section_name);
 
-  if ((ret = get_sdr_record(state_data,
-                            section_name,
-                            sdr_record,
-                            &sdr_record_len)) != CONFIG_ERR_SUCCESS)
+  if ((ret = get_sdr_record (state_data,
+                             section_name,
+                             sdr_record,
+                             &sdr_record_len)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
       goto cleanup;
     }
-  
-  if (sdr_cache_get_event_reading_type_code (NULL,
-                                             sdr_record,
-                                             sdr_record_len,
-                                             &event_reading_type_code) < 0)
-    goto cleanup;
-  
-  sensor_class = sensor_classify (event_reading_type_code);
 
-  if (sensor_class != SENSOR_CLASS_THRESHOLD)
+  if (ipmi_sdr_parse_event_reading_type_code (state_data->sdr_parse_ctx,
+                                              sdr_record,
+                                              sdr_record_len,
+                                              &event_reading_type_code) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_sdr_parse_event_reading_type_code: %s\n",
+                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+      goto cleanup;
+    }
+
+  event_reading_type_code_class = ipmi_event_reading_type_code_class (event_reading_type_code);
+
+  if (event_reading_type_code_class != IPMI_EVENT_READING_TYPE_CODE_CLASS_THRESHOLD)
     {
       if (state_data->prog_data->args->config_args.common.debug)
-        pstdout_fprintf(state_data->pstate,
-                        stderr,
-                        "Attempting to access threshold event in non-threshold sensor\n");
+        pstdout_fprintf (state_data->pstate,
+                         stderr,
+                         "Attempting to access threshold event in non-threshold sensor\n");
       rv = CONFIG_ERR_NON_FATAL_ERROR;
       goto cleanup;
     }
-  
+
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
   return (rv);
 }
-                               
+
 static config_err_t
 _threshold_event_enable_get_data (ipmi_sensors_config_state_data_t *state_data,
                                   const char *section_name,
@@ -820,12 +884,12 @@ _threshold_event_enable_get_data (ipmi_sensors_config_state_data_t *state_data,
   int found = 0;
   int i;
 
-  assert(state_data);
-  assert(section_name);
-  assert(kv);
-  assert(data);
-  assert(bits);
-  assert(bitposition);
+  assert (state_data);
+  assert (section_name);
+  assert (kv);
+  assert (data);
+  assert (bits);
+  assert (bitposition);
 
   if ((ret = _get_sensor_event_enable (state_data,
                                        section_name,
@@ -835,7 +899,7 @@ _threshold_event_enable_get_data (ipmi_sensors_config_state_data_t *state_data,
       goto cleanup;
     }
 
-  if (stristr(kv->key->key_name, "Deassertion"))
+  if (stristr (kv->key->key_name, "Deassertion"))
     (*bits) = data->deassertion_bits;
   else
     (*bits) = data->assertion_bits;
@@ -843,7 +907,7 @@ _threshold_event_enable_get_data (ipmi_sensors_config_state_data_t *state_data,
   i = 0;
   while (threshold_event_strings[i])
     {
-      if (stristr(kv->key->key_name, threshold_event_strings[i]))
+      if (stristr (kv->key->key_name, threshold_event_strings[i]))
         {
           (*bitposition) = i;
           found++;
@@ -851,10 +915,10 @@ _threshold_event_enable_get_data (ipmi_sensors_config_state_data_t *state_data,
         }
       i++;
     }
-  
+
   if (!found)
     {
-      if (state_data->prog_data->args->config_args.verbose)
+      if (state_data->prog_data->args->config_args.verbose_count)
         pstdout_printf (state_data->pstate,
                         "## Unrecognized section:key_name: %s:%s\n",
                         section_name,
@@ -880,7 +944,7 @@ threshold_event_enable_checkout (const char *section_name,
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
 
-  if ((ret = _threshold_event_enable_verify (state_data, 
+  if ((ret = _threshold_event_enable_verify (state_data,
                                              section_name)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
@@ -897,12 +961,12 @@ threshold_event_enable_checkout (const char *section_name,
       rv = ret;
       goto cleanup;
     }
-  
-  if (config_section_update_keyvalue_output(state_data->pstate,
-                                            kv, 
-                                            ((bits >> bitposition) & 0x1) ? "Yes" : "No") < 0)
+
+  if (config_section_update_keyvalue_output (state_data->pstate,
+                                             kv,
+                                             ((bits >> bitposition) & 0x1) ? "Yes" : "No") < 0)
     goto cleanup;
-  
+
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
   return (rv);
@@ -921,7 +985,7 @@ threshold_event_enable_commit (const char *section_name,
   config_err_t ret;
   uint8_t event_message_action;
 
-  if ((ret = _threshold_event_enable_verify (state_data, 
+  if ((ret = _threshold_event_enable_verify (state_data,
                                              section_name)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
@@ -943,7 +1007,7 @@ threshold_event_enable_commit (const char *section_name,
   data.assertion_bits = 0;
   data.deassertion_bits = 0;
 
-  if (stristr(kv->key->key_name, "Deassertion"))
+  if (stristr (kv->key->key_name, "Deassertion"))
     data.deassertion_bits = (0x1 << bitposition);
   else
     data.assertion_bits = (0x1 << bitposition);
@@ -969,7 +1033,7 @@ threshold_event_enable_commit (const char *section_name,
 
 static int
 _setup_threshold_event_enable_wrapper (ipmi_sensors_config_state_data_t *state_data,
-                                       uint8_t *sdr_record,
+                                       const void *sdr_record,
                                        unsigned int sdr_record_len,
                                        struct config_section *section,
                                        const char *type_str,
@@ -985,21 +1049,21 @@ _setup_threshold_event_enable_wrapper (ipmi_sensors_config_state_data_t *state_d
   uint8_t upper_non_critical_going_high = 0;
   uint8_t upper_critical_going_low = 0;
   uint8_t upper_critical_going_high = 0;
-  uint8_t upper_non_recoverable_going_low = 0; 
+  uint8_t upper_non_recoverable_going_low = 0;
   uint8_t upper_non_recoverable_going_high = 0;
   char key_name[KEY_NAME_MAX_LEN];
   uint16_t bitmask = 0;
   int rv = -1;
   int i;
 
-  assert(state_data);
-  assert(sdr_record);
-  assert(sdr_record_len);
-  assert(section);
-  assert(type_str);
-  assert(sdr_call);
+  assert (state_data);
+  assert (sdr_record);
+  assert (sdr_record_len);
+  assert (section);
+  assert (type_str);
+  assert (sdr_call);
 
-  if (((*sdr_call)(state_data->pstate,
+  if (((*sdr_call)(state_data->sdr_parse_ctx,
                    sdr_record,
                    sdr_record_len,
                    &lower_non_critical_going_low,
@@ -1029,15 +1093,15 @@ _setup_threshold_event_enable_wrapper (ipmi_sensors_config_state_data_t *state_d
   bitmask |= ((upper_critical_going_high & 0x1) << 9);
   bitmask |= ((upper_non_recoverable_going_low & 0x1) << 10);
   bitmask |= ((upper_non_recoverable_going_high & 0x1) << 11);
-                  
+
   i = 0;
   while (threshold_event_strings[i])
     {
-      snprintf(key_name, 
-               KEY_NAME_MAX_LEN, 
-               "Enable_%s_Event_%s", 
-               type_str,
-               threshold_event_strings[i]);
+      snprintf (key_name,
+                KEY_NAME_MAX_LEN,
+                "Enable_%s_Event_%s",
+                type_str,
+                threshold_event_strings[i]);
 
       if (_setup_event_enable_key (state_data,
                                    section,
@@ -1049,31 +1113,31 @@ _setup_threshold_event_enable_wrapper (ipmi_sensors_config_state_data_t *state_d
 
       i++;
     }
-  
+
   rv = 0;
  cleanup:
-  return rv;
+  return (rv);
 }
 
 int
 _setup_threshold_event_enable (ipmi_sensors_config_state_data_t *state_data,
-                               uint8_t *sdr_record,
+                               const void *sdr_record,
                                unsigned int sdr_record_len,
                                struct config_section *section)
 {
   int rv = -1;
 
-  assert(state_data);
-  assert(sdr_record);
-  assert(sdr_record_len);
-  assert(section);
+  assert (state_data);
+  assert (sdr_record);
+  assert (sdr_record_len);
+  assert (section);
 
   if (_setup_threshold_event_enable_wrapper (state_data,
                                              sdr_record,
                                              sdr_record_len,
                                              section,
                                              "Assertion",
-                                             &sdr_cache_get_threshold_assertion_supported) < 0)
+                                             &ipmi_sdr_parse_threshold_assertion_supported) < 0)
     goto cleanup;
 
   if (_setup_threshold_event_enable_wrapper (state_data,
@@ -1081,17 +1145,17 @@ _setup_threshold_event_enable (ipmi_sensors_config_state_data_t *state_data,
                                              sdr_record_len,
                                              section,
                                              "Deassertion",
-                                             &sdr_cache_get_threshold_deassertion_supported) < 0)
+                                             &ipmi_sdr_parse_threshold_deassertion_supported) < 0)
     goto cleanup;
 
   rv = 0;
  cleanup:
-  return rv;
+  return (rv);
 }
 
 static int
 _get_event_state_bitmask (ipmi_sensors_config_state_data_t *state_data,
-                          uint8_t *sdr_record,
+                          const void *sdr_record,
                           unsigned int sdr_record_len,
                           Sdr_event_flags_func sdr_call,
                           uint16_t *bitmask)
@@ -1113,13 +1177,13 @@ _get_event_state_bitmask (ipmi_sensors_config_state_data_t *state_data,
   uint8_t event_state_14 = 0;
   int rv = -1;
 
-  assert(state_data);
-  assert(sdr_record);
-  assert(sdr_record_len);
-  assert(sdr_call);
-  assert(bitmask);
+  assert (state_data);
+  assert (sdr_record);
+  assert (sdr_record_len);
+  assert (sdr_call);
+  assert (bitmask);
 
-  if (((*sdr_call)(state_data->pstate,
+  if (((*sdr_call)(state_data->sdr_parse_ctx,
                    sdr_record,
                    sdr_record_len,
                    &event_state_0,
@@ -1138,7 +1202,7 @@ _get_event_state_bitmask (ipmi_sensors_config_state_data_t *state_data,
                    &event_state_13,
                    &event_state_14)) < 0)
     goto cleanup;
-  
+
   (*bitmask) = 0;
   (*bitmask) |= (event_state_0 & 0x1);
   (*bitmask) |= ((event_state_1 & 0x1) << 1);
@@ -1171,51 +1235,57 @@ _generic_event_enable_verify (ipmi_sensors_config_state_data_t *state_data,
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
   uint8_t event_reading_type_code;
-  int sensor_class;
+  int event_reading_type_code_class;
 
-  assert(state_data);
-  assert(section_name);
-  assert(event_reading_type_code_ptr);
+  assert (state_data);
+  assert (section_name);
+  assert (event_reading_type_code_ptr);
 
-  if ((ret = get_sdr_record(state_data,
-                            section_name,
-                            sdr_record,
-                            &sdr_record_len)) != CONFIG_ERR_SUCCESS)
+  if ((ret = get_sdr_record (state_data,
+                             section_name,
+                             sdr_record,
+                             &sdr_record_len)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
       goto cleanup;
     }
-  
-  if (sdr_cache_get_event_reading_type_code(NULL,
-                                            sdr_record,
-                                            sdr_record_len,
-                                            &event_reading_type_code) < 0)
-    goto cleanup;
 
-  sensor_class = sensor_classify (event_reading_type_code);
+  if (ipmi_sdr_parse_event_reading_type_code (state_data->sdr_parse_ctx,
+                                              sdr_record,
+                                              sdr_record_len,
+                                              &event_reading_type_code) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_sdr_parse_event_reading_type_code: %s\n",
+                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+      goto cleanup;
+    }
 
-  if (sensor_class != SENSOR_CLASS_GENERIC_DISCRETE)
+  event_reading_type_code_class = ipmi_event_reading_type_code_class (event_reading_type_code);
+
+  if (event_reading_type_code_class != IPMI_EVENT_READING_TYPE_CODE_CLASS_GENERIC_DISCRETE)
     {
       if (state_data->prog_data->args->config_args.common.debug)
-        pstdout_fprintf(state_data->pstate,
-                        stderr,
-                        "Attempting to access generic event in non-generic sensor\n");
+        pstdout_fprintf (state_data->pstate,
+                         stderr,
+                         "Attempting to access generic event in non-generic sensor\n");
       rv = CONFIG_ERR_NON_FATAL_ERROR;
       goto cleanup;
     }
-  
+
   (*event_reading_type_code_ptr) = event_reading_type_code;
 
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
   return (rv);
 }
-                               
+
 static char **
 _generic_event_enable_get_event_strings (ipmi_sensors_config_state_data_t *state_data,
                                          uint8_t event_reading_type_code)
 {
-  assert(state_data);
+  assert (state_data);
 
   /* achu: I'm sorry.  But these fields have no description in the
    * IPMI spec, so there is no macro for them.  So I'm hard coding
@@ -1225,32 +1295,32 @@ _generic_event_enable_get_event_strings (ipmi_sensors_config_state_data_t *state
   switch (event_reading_type_code)
     {
     case 0x02:
-      return &generic_event_strings_0x02[0];
+      return (&generic_event_strings_0x02[0]);
     case 0x03:
-      return &generic_event_strings_0x03[0];
+      return (&generic_event_strings_0x03[0]);
     case 0x04:
-      return &generic_event_strings_0x04[0];
+      return (&generic_event_strings_0x04[0]);
     case 0x05:
-      return &generic_event_strings_0x05[0];
+      return (&generic_event_strings_0x05[0]);
     case 0x06:
-      return &generic_event_strings_0x06[0];
+      return (&generic_event_strings_0x06[0]);
     case 0x07:
-      return &generic_event_strings_0x07[0];
+      return (&generic_event_strings_0x07[0]);
     case 0x08:
-      return &generic_event_strings_0x08[0];
+      return (&generic_event_strings_0x08[0]);
     case 0x09:
-      return &generic_event_strings_0x09[0];
+      return (&generic_event_strings_0x09[0]);
     case 0x0A:
-      return &generic_event_strings_0x0A[0];
+      return (&generic_event_strings_0x0A[0]);
     case 0x0B:
-      return &generic_event_strings_0x0B[0];
+      return (&generic_event_strings_0x0B[0]);
     case 0x0C:
-      return &generic_event_strings_0x0C[0];
+      return (&generic_event_strings_0x0C[0]);
     }
 
-  return NULL;
+  return (NULL);
 }
-                                         
+
 static config_err_t
 _generic_event_enable_get_data (ipmi_sensors_config_state_data_t *state_data,
                                 const char *section_name,
@@ -1266,12 +1336,12 @@ _generic_event_enable_get_data (ipmi_sensors_config_state_data_t *state_data,
   int found = 0;
   int i;
 
-  assert(state_data);
-  assert(section_name);
-  assert(kv);
-  assert(data);
-  assert(bits);
-  assert(bitposition);
+  assert (state_data);
+  assert (section_name);
+  assert (kv);
+  assert (data);
+  assert (bits);
+  assert (bitposition);
 
   if ((ret = _get_sensor_event_enable (state_data,
                                        section_name,
@@ -1281,7 +1351,7 @@ _generic_event_enable_get_data (ipmi_sensors_config_state_data_t *state_data,
       goto cleanup;
     }
 
-  if (stristr(kv->key->key_name, "Deassertion"))
+  if (stristr (kv->key->key_name, "Deassertion"))
     (*bits) = data->deassertion_bits;
   else
     (*bits) = data->assertion_bits;
@@ -1290,7 +1360,7 @@ _generic_event_enable_get_data (ipmi_sensors_config_state_data_t *state_data,
                                                            event_reading_type_code);
   if (!event_strings)
     {
-      if (state_data->prog_data->args->config_args.verbose)
+      if (state_data->prog_data->args->config_args.verbose_count)
         pstdout_printf (state_data->pstate,
                         "## Unable to handle event flags for event reading type code 0x%X\n",
                         event_reading_type_code);
@@ -1301,7 +1371,7 @@ _generic_event_enable_get_data (ipmi_sensors_config_state_data_t *state_data,
   i = 0;
   while (event_strings[i])
     {
-      if (stristr(kv->key->key_name, event_strings[i]))
+      if (stristr (kv->key->key_name, event_strings[i]))
         {
           (*bitposition) = i;
           found++;
@@ -1309,10 +1379,10 @@ _generic_event_enable_get_data (ipmi_sensors_config_state_data_t *state_data,
         }
       i++;
     }
-  
+
   if (!found)
     {
-      if (state_data->prog_data->args->config_args.verbose)
+      if (state_data->prog_data->args->config_args.verbose_count)
         pstdout_printf (state_data->pstate,
                         "## Unrecognized section:key_name: %s:%s\n",
                         section_name,
@@ -1339,7 +1409,7 @@ generic_event_enable_checkout (const char *section_name,
   config_err_t ret;
   uint8_t event_reading_type_code;
 
-  if ((ret = _generic_event_enable_verify (state_data, 
+  if ((ret = _generic_event_enable_verify (state_data,
                                            section_name,
                                            &event_reading_type_code)) != CONFIG_ERR_SUCCESS)
     {
@@ -1358,12 +1428,12 @@ generic_event_enable_checkout (const char *section_name,
       rv = ret;
       goto cleanup;
     }
-  
-  if (config_section_update_keyvalue_output(state_data->pstate,
-                                            kv, 
-                                            ((bits >> bitposition) & 0x1) ? "Yes" : "No") < 0)
+
+  if (config_section_update_keyvalue_output (state_data->pstate,
+                                             kv,
+                                             ((bits >> bitposition) & 0x1) ? "Yes" : "No") < 0)
     goto cleanup;
-  
+
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
   return (rv);
@@ -1383,14 +1453,14 @@ generic_event_enable_commit (const char *section_name,
   uint8_t event_reading_type_code;
   uint8_t event_message_action;
 
-  if ((ret = _generic_event_enable_verify (state_data, 
+  if ((ret = _generic_event_enable_verify (state_data,
                                            section_name,
                                            &event_reading_type_code)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
       goto cleanup;
     }
-  
+
   if ((ret = _generic_event_enable_get_data (state_data,
                                              section_name,
                                              kv,
@@ -1407,7 +1477,7 @@ generic_event_enable_commit (const char *section_name,
   data.assertion_bits = 0;
   data.deassertion_bits = 0;
 
-  if (stristr(kv->key->key_name, "Deassertion"))
+  if (stristr (kv->key->key_name, "Deassertion"))
     data.deassertion_bits = (0x1 << bitposition);
   else
     data.assertion_bits = (0x1 << bitposition);
@@ -1433,7 +1503,7 @@ generic_event_enable_commit (const char *section_name,
 
 static int
 _setup_generic_event_enable_wrapper (ipmi_sensors_config_state_data_t *state_data,
-                                     uint8_t *sdr_record,
+                                     const void *sdr_record,
                                      unsigned int sdr_record_len,
                                      struct config_section *section,
                                      const char *type_str,
@@ -1446,12 +1516,12 @@ _setup_generic_event_enable_wrapper (ipmi_sensors_config_state_data_t *state_dat
   int rv = -1;
   int i;
 
-  assert(state_data);
-  assert(sdr_record);
-  assert(sdr_record_len);
-  assert(section);
-  assert(type_str);
-  assert(sdr_call);
+  assert (state_data);
+  assert (sdr_record);
+  assert (sdr_record_len);
+  assert (section);
+  assert (type_str);
+  assert (sdr_call);
 
   if (_get_event_state_bitmask (state_data,
                                 sdr_record,
@@ -1459,28 +1529,28 @@ _setup_generic_event_enable_wrapper (ipmi_sensors_config_state_data_t *state_dat
                                 sdr_call,
                                 &bitmask) < 0)
     goto cleanup;
-  
+
   event_strings = _generic_event_enable_get_event_strings (state_data,
                                                            event_reading_type_code);
   if (!event_strings)
     {
-      if (state_data->prog_data->args->config_args.verbose)
+      if (state_data->prog_data->args->config_args.verbose_count)
         pstdout_printf (state_data->pstate,
                         "## Unable to handle event flags for event reading type code 0x%X\n",
                         event_reading_type_code);
       rv = 0;
       goto cleanup;
     }
-                
+
   i = 0;
   while (event_strings[i])
     {
-      snprintf(key_name, 
-               KEY_NAME_MAX_LEN, 
-               "Enable_%s_Event_%s", 
-               type_str,
-               event_strings[i]);
-      
+      snprintf (key_name,
+                KEY_NAME_MAX_LEN,
+                "Enable_%s_Event_%s",
+                type_str,
+                event_strings[i]);
+
       if (_setup_event_enable_key (state_data,
                                    section,
                                    key_name,
@@ -1488,35 +1558,35 @@ _setup_generic_event_enable_wrapper (ipmi_sensors_config_state_data_t *state_dat
                                    generic_event_enable_checkout,
                                    generic_event_enable_commit) < 0)
         goto cleanup;
-      
+
       i++;
     }
 
   rv = 0;
  cleanup:
-  return rv;
+  return (rv);
 }
 
 int
 _setup_generic_event_enable (ipmi_sensors_config_state_data_t *state_data,
-                             uint8_t *sdr_record,
+                             const void *sdr_record,
                              unsigned int sdr_record_len,
                              struct config_section *section,
                              uint8_t event_reading_type_code)
 {
   int rv = -1;
 
-  assert(state_data);
-  assert(sdr_record);
-  assert(sdr_record_len);
-  assert(section);
+  assert (state_data);
+  assert (sdr_record);
+  assert (sdr_record_len);
+  assert (section);
 
   if (_setup_generic_event_enable_wrapper (state_data,
                                            sdr_record,
                                            sdr_record_len,
                                            section,
                                            "Assertion",
-                                           &sdr_cache_get_assertion_supported,
+                                           &ipmi_sdr_parse_assertion_supported,
                                            event_reading_type_code) < 0)
     goto cleanup;
 
@@ -1525,13 +1595,13 @@ _setup_generic_event_enable (ipmi_sensors_config_state_data_t *state_data,
                                            sdr_record_len,
                                            section,
                                            "Deassertion",
-                                           &sdr_cache_get_deassertion_supported,
+                                           &ipmi_sdr_parse_deassertion_supported,
                                            event_reading_type_code) < 0)
     goto cleanup;
 
   rv = 0;
  cleanup:
-  return rv;
+  return (rv);
 }
 
 static config_err_t
@@ -1545,44 +1615,56 @@ _sensor_specific_event_enable_verify (ipmi_sensors_config_state_data_t *state_da
   config_err_t ret;
   uint8_t event_reading_type_code;
   uint8_t sensor_type;
-  int sensor_class;
+  int event_reading_type_code_class;
 
-  assert(state_data);
-  assert(section_name);
-  assert(sensor_type_ptr);
+  assert (state_data);
+  assert (section_name);
+  assert (sensor_type_ptr);
 
-  if ((ret = get_sdr_record(state_data,
-                            section_name,
-                            sdr_record,
-                            &sdr_record_len)) != CONFIG_ERR_SUCCESS)
+  if ((ret = get_sdr_record (state_data,
+                             section_name,
+                             sdr_record,
+                             &sdr_record_len)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
       goto cleanup;
     }
-  
-  if (sdr_cache_get_event_reading_type_code(NULL,
-                                            sdr_record,
-                                            sdr_record_len,
-                                            &event_reading_type_code) < 0)
-    goto cleanup;
 
-  sensor_class = sensor_classify (event_reading_type_code);
+  if (ipmi_sdr_parse_event_reading_type_code (state_data->sdr_parse_ctx,
+                                              sdr_record,
+                                              sdr_record_len,
+                                              &event_reading_type_code) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_sdr_parse_event_reading_type_code: %s\n",
+                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+      goto cleanup;
+    }
 
-  if (sensor_class != SENSOR_CLASS_SENSOR_SPECIFIC_DISCRETE)
+  event_reading_type_code_class = ipmi_event_reading_type_code_class (event_reading_type_code);
+
+  if (event_reading_type_code_class != IPMI_EVENT_READING_TYPE_CODE_CLASS_SENSOR_SPECIFIC_DISCRETE)
     {
       if (state_data->prog_data->args->config_args.common.debug)
-        pstdout_fprintf(state_data->pstate,
-                        stderr,
-                        "Attempting to access sensor-specific event in non-sensor-specific sensor\n");
+        pstdout_fprintf (state_data->pstate,
+                         stderr,
+                         "Attempting to access sensor-specific event in non-sensor-specific sensor\n");
       rv = CONFIG_ERR_NON_FATAL_ERROR;
       goto cleanup;
     }
-  
-  if (sdr_cache_get_sensor_type(NULL,
-                                sdr_record,
-                                sdr_record_len,
-                                &sensor_type) < 0)
-    goto cleanup;
+
+  if (ipmi_sdr_parse_sensor_type (state_data->sdr_parse_ctx,
+                                  sdr_record,
+                                  sdr_record_len,
+                                  &sensor_type) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_sdr_parse_sensor_type: %s\n",
+                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+      goto cleanup;
+    }
 
   (*sensor_type_ptr) = sensor_type;
 
@@ -1590,56 +1672,56 @@ _sensor_specific_event_enable_verify (ipmi_sensors_config_state_data_t *state_da
  cleanup:
   return (rv);
 }
-                
-static char **               
+
+static char **
 _sensor_specific_event_enable_get_event_strings (ipmi_sensors_config_state_data_t *state_data,
                                                  uint8_t sensor_type)
 {
-  assert(state_data);
+  assert (state_data);
 
   switch (sensor_type)
     {
     case IPMI_SENSOR_TYPE_PHYSICAL_SECURITY:
-      return &sensor_specific_event_strings_physical_security_chassis_intrusion[0];
+      return (&sensor_specific_event_strings_physical_security_chassis_intrusion[0]);
     case IPMI_SENSOR_TYPE_PLATFORM_SECURITY_VIOLATION_ATTEMPT:
-      return &sensor_specific_event_strings_platform_security_violation_attempt[0];
+      return (&sensor_specific_event_strings_platform_security_violation_attempt[0]);
     case IPMI_SENSOR_TYPE_PROCESSOR:
-      return &sensor_specific_event_strings_processor[0];
+      return (&sensor_specific_event_strings_processor[0]);
     case IPMI_SENSOR_TYPE_POWER_SUPPLY:
-      return &sensor_specific_event_strings_power_supply[0];
+      return (&sensor_specific_event_strings_power_supply[0]);
     case IPMI_SENSOR_TYPE_POWER_UNIT:
-      return &sensor_specific_event_strings_power_unit[0];
+      return (&sensor_specific_event_strings_power_unit[0]);
     case IPMI_SENSOR_TYPE_MEMORY:
-      return &sensor_specific_event_strings_memory[0];
+      return (&sensor_specific_event_strings_memory[0]);
     case IPMI_SENSOR_TYPE_DRIVE_SLOT:
-      return &sensor_specific_event_strings_drive_slot[0];
+      return (&sensor_specific_event_strings_drive_slot[0]);
     case IPMI_SENSOR_TYPE_SYSTEM_FIRMWARE_PROGRESS:
-      return &sensor_specific_event_strings_system_firmware_progress[0];
+      return (&sensor_specific_event_strings_system_firmware_progress[0]);
     case IPMI_SENSOR_TYPE_EVENT_LOGGING_DISABLED:
-      return &sensor_specific_event_strings_event_logging_disabled[0];
+      return (&sensor_specific_event_strings_event_logging_disabled[0]);
     case IPMI_SENSOR_TYPE_SYSTEM_EVENT:
-      return &sensor_specific_event_strings_system_event[0];
+      return (&sensor_specific_event_strings_system_event[0]);
     case IPMI_SENSOR_TYPE_CRITICAL_INTERRUPT:
-      return &sensor_specific_event_strings_critical_interrupt[0];
+      return (&sensor_specific_event_strings_critical_interrupt[0]);
     case IPMI_SENSOR_TYPE_CABLE_INTERCONNECT:
-      return &sensor_specific_event_strings_cable_interconnect[0];
+      return (&sensor_specific_event_strings_cable_interconnect[0]);
     case IPMI_SENSOR_TYPE_BOOT_ERROR:
-      return &sensor_specific_event_strings_boot_error[0];
+      return (&sensor_specific_event_strings_boot_error[0]);
     case IPMI_SENSOR_TYPE_SLOT_CONNECTOR:
-      return &sensor_specific_event_strings_slot_connector[0];
+      return (&sensor_specific_event_strings_slot_connector[0]);
     case IPMI_SENSOR_TYPE_WATCHDOG2:
-      return &sensor_specific_event_strings_watchdog2[0];
+      return (&sensor_specific_event_strings_watchdog2[0]);
     case IPMI_SENSOR_TYPE_ENTITY_PRESENCE:
-      return &sensor_specific_event_strings_entity_presence[0];
+      return (&sensor_specific_event_strings_entity_presence[0]);
     case IPMI_SENSOR_TYPE_MANAGEMENT_SUBSYSTEM_HEALTH:
-      return &sensor_specific_event_strings_management_subsystem_health[0];
+      return (&sensor_specific_event_strings_management_subsystem_health[0]);
     case IPMI_SENSOR_TYPE_BATTERY:
-      return &sensor_specific_event_strings_battery[0];
+      return (&sensor_specific_event_strings_battery[0]);
     case IPMI_SENSOR_TYPE_FRU_STATE:
-      return &sensor_specific_event_strings_fru_state[0];
+      return (&sensor_specific_event_strings_fru_state[0]);
     }
 
-  return NULL;
+  return (NULL);
 }
 
 static config_err_t
@@ -1657,12 +1739,12 @@ _sensor_specific_event_enable_get_data (ipmi_sensors_config_state_data_t *state_
   int found = 0;
   int i;
 
-  assert(state_data);
-  assert(section_name);
-  assert(kv);
-  assert(data);
-  assert(bits);
-  assert(bitposition);
+  assert (state_data);
+  assert (section_name);
+  assert (kv);
+  assert (data);
+  assert (bits);
+  assert (bitposition);
 
   if ((ret = _get_sensor_event_enable (state_data,
                                        section_name,
@@ -1672,7 +1754,7 @@ _sensor_specific_event_enable_get_data (ipmi_sensors_config_state_data_t *state_
       goto cleanup;
     }
 
-  if (stristr(kv->key->key_name, "Deassertion"))
+  if (stristr (kv->key->key_name, "Deassertion"))
     (*bits) = data->deassertion_bits;
   else
     (*bits) = data->assertion_bits;
@@ -1681,7 +1763,7 @@ _sensor_specific_event_enable_get_data (ipmi_sensors_config_state_data_t *state_
                                                                    sensor_type);
   if (!event_strings)
     {
-      if (state_data->prog_data->args->config_args.verbose)
+      if (state_data->prog_data->args->config_args.verbose_count)
         pstdout_printf (state_data->pstate,
                         "## Unable to handle event flags for sensor type 0x%X\n",
                         sensor_type);
@@ -1696,8 +1778,8 @@ _sensor_specific_event_enable_get_data (ipmi_sensors_config_state_data_t *state_
     {
       while (sensor_specific_event_strings_watchdog2_indexes[i] >= 0)
         {
-          if (stristr(kv->key->key_name, 
-                      event_strings[sensor_specific_event_strings_watchdog2_indexes[i]]))
+          if (stristr (kv->key->key_name,
+                       event_strings[sensor_specific_event_strings_watchdog2_indexes[i]]))
             {
               (*bitposition) = sensor_specific_event_strings_watchdog2_indexes[i];
               found++;
@@ -1710,7 +1792,7 @@ _sensor_specific_event_enable_get_data (ipmi_sensors_config_state_data_t *state_
     {
       while (event_strings[i])
         {
-          if (stristr(kv->key->key_name, event_strings[i]))
+          if (stristr (kv->key->key_name, event_strings[i]))
             {
               (*bitposition) = i;
               found++;
@@ -1719,10 +1801,10 @@ _sensor_specific_event_enable_get_data (ipmi_sensors_config_state_data_t *state_
           i++;
         }
     }
-  
+
   if (!found)
     {
-      if (state_data->prog_data->args->config_args.verbose)
+      if (state_data->prog_data->args->config_args.verbose_count)
         pstdout_printf (state_data->pstate,
                         "## Unrecognized section:key_name: %s:%s\n",
                         section_name,
@@ -1749,7 +1831,7 @@ sensor_specific_event_enable_checkout (const char *section_name,
   config_err_t ret;
   uint8_t sensor_type;
 
-  if ((ret = _sensor_specific_event_enable_verify (state_data, 
+  if ((ret = _sensor_specific_event_enable_verify (state_data,
                                                    section_name,
                                                    &sensor_type)) != CONFIG_ERR_SUCCESS)
     {
@@ -1768,12 +1850,12 @@ sensor_specific_event_enable_checkout (const char *section_name,
       rv = ret;
       goto cleanup;
     }
-  
-  if (config_section_update_keyvalue_output(state_data->pstate,
-                                            kv, 
-                                            ((bits >> bitposition) & 0x1) ? "Yes" : "No") < 0)
+
+  if (config_section_update_keyvalue_output (state_data->pstate,
+                                             kv,
+                                             ((bits >> bitposition) & 0x1) ? "Yes" : "No") < 0)
     goto cleanup;
-  
+
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
   return (rv);
@@ -1793,14 +1875,14 @@ sensor_specific_event_enable_commit (const char *section_name,
   uint8_t sensor_type;
   uint8_t event_message_action;
 
-  if ((ret = _sensor_specific_event_enable_verify (state_data, 
+  if ((ret = _sensor_specific_event_enable_verify (state_data,
                                                    section_name,
                                                    &sensor_type)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
       goto cleanup;
     }
-  
+
   if ((ret = _sensor_specific_event_enable_get_data (state_data,
                                                      section_name,
                                                      kv,
@@ -1817,7 +1899,7 @@ sensor_specific_event_enable_commit (const char *section_name,
   data.assertion_bits = 0;
   data.deassertion_bits = 0;
 
-  if (stristr(kv->key->key_name, "Deassertion"))
+  if (stristr (kv->key->key_name, "Deassertion"))
     data.deassertion_bits = (0x1 << bitposition);
   else
     data.assertion_bits = (0x1 << bitposition);
@@ -1843,7 +1925,7 @@ sensor_specific_event_enable_commit (const char *section_name,
 
 static int
 _setup_sensor_specific_event_enable_wrapper (ipmi_sensors_config_state_data_t *state_data,
-                                             uint8_t *sdr_record,
+                                             const void *sdr_record,
                                              unsigned int sdr_record_len,
                                              struct config_section *section,
                                              const char *type_str,
@@ -1856,12 +1938,12 @@ _setup_sensor_specific_event_enable_wrapper (ipmi_sensors_config_state_data_t *s
   int rv = -1;
   int i;
 
-  assert(state_data);
-  assert(sdr_record);
-  assert(sdr_record_len);
-  assert(section);
-  assert(type_str);
-  assert(sdr_call);
+  assert (state_data);
+  assert (sdr_record);
+  assert (sdr_record_len);
+  assert (section);
+  assert (type_str);
+  assert (sdr_call);
 
   if (_get_event_state_bitmask (state_data,
                                 sdr_record,
@@ -1870,17 +1952,23 @@ _setup_sensor_specific_event_enable_wrapper (ipmi_sensors_config_state_data_t *s
                                 &bitmask) < 0)
     goto cleanup;
 
-  if (sdr_cache_get_sensor_type (state_data->pstate,
-                                 sdr_record,
-                                 sdr_record_len,
-                                 &sensor_type) < 0)
-    goto cleanup;
-  
+  if (ipmi_sdr_parse_sensor_type (state_data->sdr_parse_ctx,
+                                  sdr_record,
+                                  sdr_record_len,
+                                  &sensor_type) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_sdr_parse_sensor_type: %s\n",
+                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+      goto cleanup;
+    }
+
   event_strings = _sensor_specific_event_enable_get_event_strings (state_data,
                                                                    sensor_type);
   if (!event_strings)
     {
-      if (state_data->prog_data->args->config_args.verbose)
+      if (state_data->prog_data->args->config_args.verbose_count)
         pstdout_printf (state_data->pstate,
                         "## Unable to handle event flags for sensor type 0x%X\n",
                         sensor_type);
@@ -1895,11 +1983,11 @@ _setup_sensor_specific_event_enable_wrapper (ipmi_sensors_config_state_data_t *s
     {
       while (sensor_specific_event_strings_watchdog2_indexes[i] >= 0)
         {
-          snprintf(key_name, 
-                   KEY_NAME_MAX_LEN, 
-                   "Enable_%s_Event_%s", 
-                   type_str,
-                   event_strings[sensor_specific_event_strings_watchdog2_indexes[i]]);
+          snprintf (key_name,
+                    KEY_NAME_MAX_LEN,
+                    "Enable_%s_Event_%s",
+                    type_str,
+                    event_strings[sensor_specific_event_strings_watchdog2_indexes[i]]);
 
           if (_setup_event_enable_key (state_data,
                                        section,
@@ -1917,12 +2005,12 @@ _setup_sensor_specific_event_enable_wrapper (ipmi_sensors_config_state_data_t *s
       i = 0;
       while (event_strings[i])
         {
-          snprintf(key_name, 
-                   KEY_NAME_MAX_LEN, 
-                   "Enable_%s_Event_%s", 
-                   type_str,
-                   event_strings[i]);
-          
+          snprintf (key_name,
+                    KEY_NAME_MAX_LEN,
+                    "Enable_%s_Event_%s",
+                    type_str,
+                    event_strings[i]);
+
           if (_setup_event_enable_key (state_data,
                                        section,
                                        key_name,
@@ -1930,36 +2018,36 @@ _setup_sensor_specific_event_enable_wrapper (ipmi_sensors_config_state_data_t *s
                                        sensor_specific_event_enable_checkout,
                                        sensor_specific_event_enable_commit) < 0)
             goto cleanup;
-          
+
           i++;
         }
     }
 
   rv = 0;
  cleanup:
-  return rv;
+  return (rv);
 }
 
-int 
+int
 _setup_sensor_specific_event_enable (ipmi_sensors_config_state_data_t *state_data,
-                                     uint8_t *sdr_record,
+                                     const void *sdr_record,
                                      unsigned int sdr_record_len,
                                      struct config_section *section,
                                      uint8_t event_reading_type_code)
 {
   int rv = -1;
 
-  assert(state_data);
-  assert(sdr_record);
-  assert(sdr_record_len);
-  assert(section);
+  assert (state_data);
+  assert (sdr_record);
+  assert (sdr_record_len);
+  assert (section);
 
   if (_setup_sensor_specific_event_enable_wrapper (state_data,
                                                    sdr_record,
                                                    sdr_record_len,
                                                    section,
                                                    "Assertion",
-                                                   &sdr_cache_get_assertion_supported) < 0)
+                                                   &ipmi_sdr_parse_assertion_supported) < 0)
     goto cleanup;
 
   if (_setup_sensor_specific_event_enable_wrapper (state_data,
@@ -1967,37 +2055,43 @@ _setup_sensor_specific_event_enable (ipmi_sensors_config_state_data_t *state_dat
                                                    sdr_record_len,
                                                    section,
                                                    "Deassertion",
-                                                   &sdr_cache_get_deassertion_supported) < 0)
+                                                   &ipmi_sdr_parse_deassertion_supported) < 0)
     goto cleanup;
 
   rv = 0;
  cleanup:
-  return rv;
+  return (rv);
 }
 
 int
 setup_sensor_event_enable_fields (ipmi_sensors_config_state_data_t *state_data,
-                                  uint8_t *sdr_record,
+                                  const void *sdr_record,
                                   unsigned int sdr_record_len,
                                   struct config_section *section)
 {
   uint8_t event_message_control_support = 0;
   int rv = -1;
 
-  assert(state_data);
-  assert(sdr_record);
-  assert(sdr_record_len);
-  assert(section);
+  assert (state_data);
+  assert (sdr_record);
+  assert (sdr_record_len);
+  assert (section);
 
-  if (sdr_cache_get_sensor_capabilities (state_data->pstate,
-                                         sdr_record,
-                                         sdr_record_len,
-                                         &event_message_control_support,
-                                         NULL,
-                                         NULL,
-                                         NULL,
-                                         NULL) < 0)
-    goto cleanup;
+  if (ipmi_sdr_parse_sensor_capabilities (state_data->sdr_parse_ctx,
+                                          sdr_record,
+                                          sdr_record_len,
+                                          &event_message_control_support,
+                                          NULL,
+                                          NULL,
+                                          NULL,
+                                          NULL) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_sdr_parse_sensor_capabilities: %s\n",
+                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+      goto cleanup;
+    }
 
   /* achu: I'm not quite sure what IPMI_SDR_GLOBAL_DISABLE_ONLY means.
    * Does it mean all sensors on the motherboard can be disabled
@@ -2016,7 +2110,7 @@ setup_sensor_event_enable_fields (ipmi_sensors_config_state_data_t *state_data,
                                   sensor_event_enable_enable_all_event_messages_commit,
                                   config_yes_no_validate) < 0)
         goto cleanup;
-      
+
       if (config_section_add_key (state_data->pstate,
                                   section,
                                   "Enable_Scanning_On_This_Sensor",
@@ -2031,17 +2125,23 @@ setup_sensor_event_enable_fields (ipmi_sensors_config_state_data_t *state_data,
   if (event_message_control_support == IPMI_SDR_PER_EVENT_ENABLE_DISABLE_SUPPORT)
     {
       uint8_t event_reading_type_code;
-      int sensor_class;
+      int event_reading_type_code_class;
 
-      if (sdr_cache_get_event_reading_type_code (NULL,
-                                                 sdr_record,
-                                                 sdr_record_len,
-                                                 &event_reading_type_code) < 0)
-        goto cleanup;
-      
-      sensor_class = sensor_classify (event_reading_type_code);
-      
-      if (sensor_class == SENSOR_CLASS_THRESHOLD)
+      if (ipmi_sdr_parse_event_reading_type_code (state_data->sdr_parse_ctx,
+                                                  sdr_record,
+                                                  sdr_record_len,
+                                                  &event_reading_type_code) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_sdr_parse_event_reading_type_code: %s\n",
+                           ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+          goto cleanup;
+        }
+
+      event_reading_type_code_class = ipmi_event_reading_type_code_class (event_reading_type_code);
+
+      if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_THRESHOLD)
         {
           if (_setup_threshold_event_enable (state_data,
                                              sdr_record,
@@ -2049,7 +2149,7 @@ setup_sensor_event_enable_fields (ipmi_sensors_config_state_data_t *state_data,
                                              section) < 0)
             goto cleanup;
         }
-      else if (sensor_class == SENSOR_CLASS_GENERIC_DISCRETE)
+      else if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_GENERIC_DISCRETE)
         {
           if (_setup_generic_event_enable (state_data,
                                            sdr_record,
@@ -2058,7 +2158,7 @@ setup_sensor_event_enable_fields (ipmi_sensors_config_state_data_t *state_data,
                                            event_reading_type_code) < 0)
             goto cleanup;
         }
-      else if (sensor_class == SENSOR_CLASS_SENSOR_SPECIFIC_DISCRETE)
+      else if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_SENSOR_SPECIFIC_DISCRETE)
         {
           if (_setup_sensor_specific_event_enable (state_data,
                                                    sdr_record,
@@ -2071,5 +2171,5 @@ setup_sensor_event_enable_fields (ipmi_sensors_config_state_data_t *state_data,
 
   rv = 0;
  cleanup:
-  return rv;
+  return (rv);
 }

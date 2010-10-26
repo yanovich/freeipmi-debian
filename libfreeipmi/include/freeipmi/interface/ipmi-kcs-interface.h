@@ -1,5 +1,5 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+   Copyright (C) 2003-2010 FreeIPMI Core Team
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,9 +13,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 
-*/
+ */
 
 #ifndef _IPMI_KCS_INTERFACE_H
 #define _IPMI_KCS_INTERFACE_H 1
@@ -27,21 +27,35 @@ extern "C" {
 #include <stdint.h>
 #include <freeipmi/fiid/fiid.h>
 
+/* 
+ * fill* functions return 0 on success, -1 on error.
+ *
+ * object must be for the fill function's respective fiid
+ * template.
+ *
+ * assemble/unassemble functions must be passed fiid objects of the
+ * respective expected header/trailer templates.
+ *
+ * see freeipmi/templates/ for template definitions 
+ */
+
 extern fiid_template_t tmpl_hdr_kcs;
 
-int8_t fill_hdr_ipmi_kcs (uint8_t lun, 
-			  uint8_t fn, 
-			  fiid_obj_t obj_kcs_hdr);
+int fill_hdr_ipmi_kcs (uint8_t lun,
+                       uint8_t fn,
+                       fiid_obj_t obj_kcs_hdr);
 
-int32_t assemble_ipmi_kcs_pkt (fiid_obj_t obj_kcs_hdr, 
-                               fiid_obj_t obj_cmd, 
-                               uint8_t *pkt, 
-                               uint32_t pkt_len);
+/* returns length written to pkt on success, -1 on error */
+int assemble_ipmi_kcs_pkt (fiid_obj_t obj_kcs_hdr,
+                           fiid_obj_t obj_cmd,
+                           void *pkt,
+                           unsigned int pkt_len);
 
-int32_t unassemble_ipmi_kcs_pkt (uint8_t *pkt, 
-                                 uint32_t pkt_len, 
-                                 fiid_obj_t obj_kcs_hdr, 
-                                 fiid_obj_t obj_cmd);
+/* returns 1 if fully unparsed, 0 if not, -1 on error */
+int unassemble_ipmi_kcs_pkt (const void *pkt,
+                             unsigned int pkt_len,
+                             fiid_obj_t obj_kcs_hdr,
+                             fiid_obj_t obj_cmd);
 
 #ifdef __cplusplus
 }

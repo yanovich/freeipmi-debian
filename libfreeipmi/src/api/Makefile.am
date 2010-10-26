@@ -1,7 +1,7 @@
 noinst_HEADERS = \
-	ipmi-err-wrappers-api.h \
-	ipmi-fiid-wrappers-api.h \
-	ipmi-ctx.h \
+	ipmi-api-defs.h \
+	ipmi-api-trace.h \
+	ipmi-api-util.h \
 	ipmi-lan-interface-api.h \
 	ipmi-lan-session-common.h \
 	ipmi-kcs-driver-api.h \
@@ -22,11 +22,13 @@ libapi_la_CPPFLAGS = \
 
 libapi_la_SOURCES = \
 	ipmi-api.c \
+	ipmi-api-util.c \
 	ipmi-kcs-driver-api.c \
 	ipmi-openipmi-driver-api.c \
 	ipmi-ssif-driver-api.c \
 	ipmi-sunbmc-driver-api.c \
 	ipmi-chassis-cmds-api.c \
+	ipmi-dcmi-cmds-api.c \
 	ipmi-device-global-cmds-api.c \
 	ipmi-event-cmds-api.c \
 	ipmi-fru-inventory-device-cmds-api.c \

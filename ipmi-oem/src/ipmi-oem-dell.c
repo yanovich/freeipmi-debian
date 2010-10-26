@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2008-2009 FreeIPMI Core Team
+  Copyright (C) 2008-2010 FreeIPMI Core Team
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #if STDC_HEADERS
 #include <string.h>
+#include <ctype.h>
 #endif /* STDC_HEADERS */
 #if TIME_WITH_SYS_TIME
 #include <sys/time.h>
@@ -38,6 +39,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <limits.h>
 #include <assert.h>
 
 #include <freeipmi/freeipmi.h>
@@ -49,22 +51,44 @@
 
 #include "freeipmi-portability.h"
 #include "pstdout.h"
+#include "tool-sdr-cache-common.h"
+#include "tool-sensor-common.h"
+
+/*
+ * Dell Xanadu II (Inventec 5441) Notes
+ *
+ * Dell appears to have implemented two equivalent OEM commands
+ * that do the same as the Inventec get/set-nic-status commands.
+ * See comments in ipmi-oem-inventec.c for information.
+ *
+ * Dell appears to have implemented two equivalent OEM commands
+ * that do the same as the Inventec get/set of web parameters.
+ * See comments in ipmi-oem-inventec.c for information.
+ */
 
 /* 256 b/c length is 8 bit field */
 #define IPMI_OEM_DELL_MAX_BYTES 256
 
-#define IPMI_OEM_DELL_SYSTEM_INFO_ASSET_TAG              0xC4
-#define IPMI_OEM_DELL_SYSTEM_INFO_SERVICE_TAG            0xC5
-#define IPMI_OEM_DELL_SYSTEM_INFO_PRODUCT_NAME           0xD1
-#define IPMI_OEM_DELL_SYSTEM_INFO_10G_MAC_ADDRESSES      0xCB
-#define IPMI_OEM_DELL_SYSTEM_INFO_11G_MAC_ADDRESSES      0xDA
-#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_VALIDATOR        0xDD
-#define IPMI_OEM_DELL_SYSTEM_INFO_AVERAGE_POWER_HISTORY  0xEB
-#define IPMI_OEM_DELL_SYSTEM_INFO_PEAK_POWER_HISTORY     0xEC
+#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IP_ADDRESS_FORMAT_IPV4 0x00
+#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IP_ADDRESS_FORMAT_IPV6 0x01
 
-#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_TYPE_10G            0x08
-#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_TYPE_11G_MONOLITHIC 0x0A
-#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_TYPE_11G_MODULAR    0x0B
+#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IP_ADDRESS_CONFIG_DHCP   0x00
+#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IP_ADDRESS_CONFIG_STATIC 0x01
+
+#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IDRAC_TYPE_10G            0x08
+#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IDRAC_TYPE_CMC            0x09
+#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IDRAC_TYPE_11G_MONOLITHIC 0x0A
+#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IDRAC_TYPE_11G_MODULAR    0x0B
+#define IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IDRAC_TYPE_MASER_LITE_BMC 0x0D
+
+#define IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_TYPE_BITMASK 0x30
+#define IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_TYPE_SHIFT   4
+
+#define IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_NIC_STATUS_BITMASK 0xC0
+#define IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_NIC_STATUS_SHIFT   6
+
+#define IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_NIC_NUMBER_BITMASK 0x1F
+#define IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_NIC_NUMBER_SHIFT   0
 
 #define IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_TYPE_ETHERNET  0
 #define IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_TYPE_ISCSI     1
@@ -78,28 +102,192 @@
 #define IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_STATUS_PLAYING_DEAD 2
 #define IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_STATUS_RESERVED     3
 
-#define IPMI_OEM_DELL_TOKEN_ID_SSH                 0x0A
-#define IPMI_OEM_DELL_TOKEN_ID_TELNET              0x0B
-#define IPMI_OEM_DELL_TOKEN_ID_WEB_SERVER          0x0C
-#define IPMI_OEM_DELL_TOKEN_ID_ACTIVE_DIRECTORY    0x07
+#define IPMI_OEM_DELL_NIC_SELECTION_SHARED                           0x00
+#define IPMI_OEM_DELL_NIC_SELECTION_SHARED_WITH_FAILOVER_TO_NIC2     0x01
+#define IPMI_OEM_DELL_NIC_SELECTION_DEDICATED                        0x02
+#define IPMI_OEM_DELL_NIC_SELECTION_SHARED_WITH_FAILOVER_TO_ALL_NICS 0x03
 
-#define IPMI_OEM_DELL_TOKEN_VERSION                0x01
+#define IPMI_OEM_DELL_GET_ACTIVE_LOM_STATUS_GET_STATUS 0x00
 
-#define IPMI_OEM_DELL_TOKEN_DATA_MAX               65536
+#define IPMI_OEM_DELL_LOM_STATUS_NO_ACTIVE_LOM 0x00
+#define IPMI_OEM_DELL_LOM_STATUS_LOM_1         0x01
+#define IPMI_OEM_DELL_LOM_STATUS_LOM_2         0x02
+#define IPMI_OEM_DELL_LOM_STATUS_LOM_3         0x03
+#define IPMI_OEM_DELL_LOM_STATUS_LOM_4         0x04
+#define IPMI_OEM_DELL_LOM_STATUS_UNKNOWN       0xFF
 
-#define IPMI_OEM_DELL_TOKEN_STRING_MAX             255
+#define IPMI_OEM_DELL_MAC_ADDRESS_LENGTH             6
 
-#define IPMI_OEM_DELL_TOKEN_WRITE_MAX              128
+#define IPMI_OEM_DELL_11G_MAC_ADDRESS_LENGTH         8 
 
-#define IPMI_OEM_DELL_TOKEN_DATA_COMMON_HEADER_LEN 5
+#define IPMI_OEM_DELL_TOKEN_ID_NIC_LINK_SETTING_GROUP    0x02
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_USER_PRIVILEGE        0x04
+#define IPMI_OEM_DELL_TOKEN_ID_SNMP_GROUP                0x05
+#define IPMI_OEM_DELL_TOKEN_ID_DNS_AND_DDNS_GROUP        0x06
+#define IPMI_OEM_DELL_TOKEN_ID_AD_CONFIGURATION          0x07
+#define IPMI_OEM_DELL_TOKEN_ID_EMAIL_ALERT_CONFIGURATION 0x08
+#define IPMI_OEM_DELL_TOKEN_ID_SSL_CONFIGURATION         0x09
+#define IPMI_OEM_DELL_TOKEN_ID_SSH_CONFIGURATION         0x0A
+#define IPMI_OEM_DELL_TOKEN_ID_TELNET_CONFIGURATION      0x0B
+#define IPMI_OEM_DELL_TOKEN_ID_WEB_SERVER_CONFIGURATION  0x0C
+#define IPMI_OEM_DELL_TOKEN_ID_CR_CONFIGURATION          0x0D
+#define IPMI_OEM_DELL_TOKEN_ID_VM_CONFIGURATION          0x0E
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_INFO                  0x0F
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_FW_UPDATE             0x10
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_SERIAL_SHELL          0x11
+#define IPMI_OEM_DELL_TOKEN_ID_MISC                      0x12
+#define IPMI_OEM_DELL_TOKEN_ID_OOB_SECURITY              0x13
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_CONTROL               0x14
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_LOG_FILES             0x15
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_CERTIFICATE_FILES     0x16
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_SESSION_INFO          0x17
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_TIME                  0x19
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_SSAD_CONFIGURATION    0x1B
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_USER_CERT_FILES       0x1C
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_LOCAL_CONFIGURATION   0x1D
+#define IPMI_OEM_DELL_TOKEN_ID_RAC_VKVM_CONFIGURATION    0x1E
+#define IPMI_OEM_DELL_TOKEN_ID_IPV6_EXTENDED_GROUP       0x20
+#define IPMI_OEM_DELL_TOKEN_ID_IPV6_URL_GROUP            0x23
+#define IPMI_OEM_DELL_TOKEN_ID_ACTIVE_DIRECTORY_USER_DOMAIN_GROUP 0x24
+#define IPMI_OEM_DELL_TOKEN_ID_SMART_CARD_GROUP          0x25
+#define IPMI_OEM_DELL_TOKEN_ID_VMEDIA_SHARING_VIA_CMC    0x26
+#define IPMI_OEM_DELL_TOKEN_ID_REMOTE_SYSLOG             0x28
+#define IPMI_OEM_DELL_TOKEN_ID_GENERIC_LDAP_GROUP        0x29
+#define IPMI_OEM_DELL_TOKEN_ID_LDAP_RATE_GROUP           0x2A
+#define IPMI_OEM_DELL_TOKEN_ID_SSH_PK_GROUP              0x2B
+#define IPMI_OEM_DELL_TOKEN_ID_AD_SRV_LOOKUP_GROUP       0x2D
+#define IPMI_OEM_DELL_TOKEN_ID_CLOSE_RAC_SESSION_INFO    0x2E
 
-#define IPMI_OEM_DELL_MAC_ADDRESS_LENGTH 6
+#define IPMI_OEM_DELL_TOKEN_VERSION                  0x01
 
-#define IPMI_OEM_DELL_11G_MAC_ADDRESS_LENGTH 8 
+#define IPMI_OEM_DELL_TOKEN_DATA_MAX                 65536
 
-#define IPMI_IANA_ENTERPRISE_ID_DELL 674
+#define IPMI_OEM_DELL_TOKEN_STRING_MAX               255
 
-#define IPMI_NET_FN_OEM_GROUP_RQ         0x2E
+#define IPMI_OEM_DELL_TOKEN_WRITE_MAX                128
+
+#define IPMI_OEM_DELL_TOKEN_DATA_COMMON_HEADER_LEN   5
+
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_READ_ALL_BYTES 0xFF
+
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_IN_PROGRESS    0x00
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_LAST_TOKEN     0x01
+
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_ENABLE_FIELD_MASK                        0x0001
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_TIMEOUT_FIELD_MASK                       0x0002
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_ROOT_DOMAIN_FIELD_MASK                   0x0004
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_RAC_DOMAIN_FIELD_MASK                    0x0008
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_RAC_NAME_FIELD_MASK                      0x0010
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_TYPE_FIELD_MASK                          0x0020
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_SCL_STATE_FIELD_MASK                        0x0040
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_CRL_STATE_FIELD_MASK                        0x0080
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_SSO_ENABLE_FIELD_MASK                    0x0100
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_DC_FILTER1_FIELD_MASK                    0x0200
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_DC_FILTER2_FIELD_MASK                    0x0400
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_DC_FILTER3_FIELD_MASK                    0x0800
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_GC_FILTER1_FIELD_MASK                    0x1000
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_GC_FILTER2_FIELD_MASK                    0x2000
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_GC_FILTER3_FIELD_MASK                    0x4000
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_CERTIFICATE_VALIDATION_ENABLE_FIELD_MASK 0x8000
+
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_ALL_FIELD_MASK   \
+  (IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_ENABLE_FIELD_MASK  \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_TIMEOUT_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_ROOT_DOMAIN_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_RAC_DOMAIN_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_RAC_NAME_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_TYPE_FIELD_MASK  \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_SCL_STATE_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_CRL_STATE_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_SSO_ENABLE_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_DC_FILTER1_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_DC_FILTER2_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_DC_FILTER3_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_GC_FILTER1_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_GC_FILTER2_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_GC_FILTER3_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_CERTIFICATE_VALIDATION_ENABLE_FIELD_MASK)
+
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_TYPE_EXTENDED 1
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_TYPE_STANDARD 2
+
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_ENABLE_FIELD_MASK             0x0001
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_MAX_CONNECTIONS_FIELD_MASK    0x0002
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_ACTIVE_CONNECTIONS_FIELD_MASK 0x0004
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_IDLE_TIMEOUT_FIELD_MASK       0x0008
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_PORT_NUMBER_FIELD_MASK        0x0010
+
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_ALL_FIELD_MASK  \
+  (IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_ENABLE_FIELD_MASK    \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_MAX_CONNECTIONS_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_ACTIVE_CONNECTIONS_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_IDLE_TIMEOUT_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_PORT_NUMBER_FIELD_MASK);
+
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_ENABLE_FIELD_MASK          0x0001
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_MAX_SESSIONS_FIELD_MASK    0x0002
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_ACTIVE_SESSIONS_FIELD_MASK 0x0004
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_SESSION_TIMEOUT_FIELD_MASK 0x0008
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_PORT_NUMBER_FIELD_MASK     0x0010
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_7FLS_BACKSPACE_FIELD_MASK  0x0020
+
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_ALL_FIELD_MASK \
+  (IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_ENABLE_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_MAX_SESSIONS_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_ACTIVE_SESSIONS_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_SESSION_TIMEOUT_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_PORT_NUMBER_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_7FLS_BACKSPACE_FIELD_MASK)
+
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_ENABLE_FIELD_MASK            0x0001
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_MAX_SESSIONS_FIELD_MASK      0x0002
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_ACTIVE_SESSIONS_FIELD_MASK   0x0004
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_SESSION_TIMEOUT_FIELD_MASK   0x0008
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_HTTP_PORT_NUMBER_FIELD_MASK  0x0010
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_HTTPS_PORT_NUMBER_FIELD_MASK 0x0020
+
+#define IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_ALL_FIELD_MASK \
+  (IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_ENABLE_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_MAX_SESSIONS_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_ACTIVE_SESSIONS_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_SESSION_TIMEOUT_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_HTTP_PORT_NUMBER_FIELD_MASK \
+   | IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_HTTPS_PORT_NUMBER_FIELD_MASK)
+
+#define IPMI_OEM_DELL_RESET_TO_DEFAULTS_GET_STATUS                  0x00
+#define IPMI_OEM_DELL_RESET_TO_DEFAULTS_INITIATE_RESULT_TO_DEFAULTS 0xAA
+
+#define IPMI_OEM_DELL_RESET_TO_DEFAULTS_IN_PROGRESS 0x00
+#define IPMI_OEM_DELL_RESET_TO_DEFAULTS_COMPLETE    0x01
+
+#define IPMI_OEM_DELL_RESET_POWER_CONSUMPTION_DATA_CUMULATIVE 0x01
+#define IPMI_OEM_DELL_RESET_POWER_CONSUMPTION_DATA_PEAK       0x02
+#define IPMI_OEM_DELL_RESET_POWER_CONSUMPTION_DATA_ALL        0x04
+
+#define IPMI_OEM_DELL_POWER_SUPPLY_INFO_AC 0x00
+#define IPMI_OEM_DELL_POWER_SUPPLY_INFO_DC 0x01
+
+#define IPMI_OEM_DELL_POWER_CONSUMPTION_ENTITY_INSTANCE_ALL 0x00
+
+#define IPMI_OEM_DELL_POWER_CAPACITY_UNITS_WATTS   0x00
+#define IPMI_OEM_DELL_POWER_CAPACITY_UNITS_BTUPHR  0x01
+#define IPMI_OEM_DELL_POWER_CAPACITY_UNITS_PERCENT 0x03
+
+#define IPMI_OEM_DELL_GET_POWER_CAPACITY_SYSTEM_THROTTLING_NORMAL_SYSTEM_OPERATION      0
+#define IPMI_OEM_DELL_GET_POWER_CAPACITY_SYSTEM_THROTTLING_SYSTEM_NEEDS_TO_BE_THROTTLED 1
+#define IPMI_OEM_DELL_GET_POWER_CAPACITY_SYSTEM_THROTTLING_SYSTEM_IS_OVERCONFIGURED     2
+
+#define IPMI_OEM_DELL_GET_POWER_CAPACITY_STATUS_BITMASK 0x01
+#define IPMI_OEM_DELL_GET_POWER_CAPACITY_STATUS_SHIFT   0
+
+#define IPMI_OEM_DELL_GET_POWER_CAPACITY_IS_SETTABLE_BITMASK 0x02
+#define IPMI_OEM_DELL_GET_POWER_CAPACITY_IS_SETTABLE_SHIFT   1
+
+#define IPMI_OEM_DELL_SET_POWER_CAPACITY_STATUS_ENABLE  0x01
+#define IPMI_OEM_DELL_SET_POWER_CAPACITY_STATUS_DISABLE 0x00
+
+#define IPMI_OEM_DELL_QUERY_CHASSIS_IDENTIFY_STATUS_OFF 0x00
+#define IPMI_OEM_DELL_QUERY_CHASSIS_IDENTIFY_STATUS_ON  0x01
 
 /* Will call ipmi_cmd_get_system_info_parameters only once, b/c field
  * requested is defined by OEM to be < 16 bytes in length
@@ -108,7 +296,8 @@ static int
 _get_dell_system_info_short_string (ipmi_oem_state_data_t *state_data,
                                     uint8_t parameter_selector,
                                     char *string,
-                                    unsigned int string_len)
+                                    unsigned int string_len,
+				    unsigned int *string_len_ret)
 {
   fiid_obj_t obj_cmd_rs = NULL;
   uint8_t configuration_parameter_data[IPMI_OEM_MAX_BYTES];
@@ -138,7 +327,7 @@ _get_dell_system_info_short_string (ipmi_oem_state_data_t *state_data,
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_get_system_info_parameters: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -150,7 +339,7 @@ _get_dell_system_info_short_string (ipmi_oem_state_data_t *state_data,
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "fiid_obj_get_data: 'configuration_parameter_data': %s\n",
-                       fiid_strerror (fiid_obj_errnum (obj_cmd_rs)));
+                       fiid_obj_errormsg (obj_cmd_rs));
       goto cleanup;
     }
 
@@ -190,6 +379,9 @@ _get_dell_system_info_short_string (ipmi_oem_state_data_t *state_data,
               &(configuration_parameter_data[1]),
               configuration_parameter_data[0]);
     }
+
+  if (string_len_ret)
+    (*string_len_ret) = configuration_parameter_data[0];
 
   rv = 0;
  cleanup:
@@ -234,7 +426,7 @@ _get_dell_system_info_long_string (ipmi_oem_state_data_t *state_data,
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_get_system_info_parameters: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -246,7 +438,7 @@ _get_dell_system_info_long_string (ipmi_oem_state_data_t *state_data,
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "fiid_obj_get_data: 'configuration_parameter_data': %s\n",
-                       fiid_strerror (fiid_obj_errnum (obj_cmd_rs)));
+                       fiid_obj_errormsg (obj_cmd_rs));
       goto cleanup;
     }
 
@@ -261,8 +453,7 @@ _get_dell_system_info_long_string (ipmi_oem_state_data_t *state_data,
 
   /* configuration_parameter_data[0] is the set selector, we don't care */
 
-  /* 0h = ascii */
-  if (configuration_parameter_data[1])
+  if (configuration_parameter_data[1] != IPMI_SYSTEM_INFO_ENCODING_ASCII_LATIN1)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
@@ -275,6 +466,8 @@ _get_dell_system_info_long_string (ipmi_oem_state_data_t *state_data,
 
   if (!string_length)
     goto out;
+
+  /* -3 b/c of set selector, encoding, and string length bytes */
 
   if (len - 3)
     {
@@ -306,7 +499,7 @@ _get_dell_system_info_long_string (ipmi_oem_state_data_t *state_data,
           pstdout_fprintf (state_data->pstate,
                            stderr,
                            "fiid_obj_clear: %s\n",
-                           fiid_strerror (fiid_obj_errnum (obj_cmd_rs)));
+                           fiid_obj_errormsg (obj_cmd_rs));
           goto cleanup;
         }
       
@@ -320,7 +513,7 @@ _get_dell_system_info_long_string (ipmi_oem_state_data_t *state_data,
           pstdout_fprintf (state_data->pstate,
                            stderr,
                            "ipmi_cmd_get_system_info_parameters: %s\n",
-                           ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                           ipmi_ctx_errormsg (state_data->ipmi_ctx));
           goto cleanup;
         }
       
@@ -332,7 +525,7 @@ _get_dell_system_info_long_string (ipmi_oem_state_data_t *state_data,
           pstdout_fprintf (state_data->pstate,
                            stderr,
                            "fiid_obj_get_data: 'configuration_parameter_data': %s\n",
-                           fiid_strerror (fiid_obj_errnum (obj_cmd_rs)));
+                           fiid_obj_errormsg (obj_cmd_rs));
           goto cleanup;
         }
       
@@ -384,30 +577,37 @@ _get_dell_system_info_idrac_info (ipmi_oem_state_data_t *state_data,
   assert (state_data);
   assert (idrac_type);
 
-  /* Dell OEM
+  /* Dell Poweredge OEM
    *
    * From Dell Provided Source Code
    *
    * Uses Get System Info command
    *
-   * iDRAC Validator Parameter = 0xDD
-   * iDRAC Validator Set Selector = 0x02
+   * iDRAC Info Parameter = 0xDD
+   * iDRAC Info Set Selector = ... see below ...
    *
    * Parameter data response formatted:
    *
-   * 1st byte = ??
-   * 2nd byte = ??
-   * 3rd byte = ??
-   * 4th byte = ??
-   * 5th byte = ??
-   * 6th byte = ??
-   * 7th byte = ??
-   * 8th byte = ??
-   * 9th byte = ??
-   * 10th byte = iDRAC type
-   * - 0x08 = iDRAC 10g
-   * - 0x0A = iDRAC 11g monolithic
-   * - 0x0B = iDRAC 11g modular
+   * 1st byte - string type
+   * 2nd byte - string length
+   * 3rd byte - IP address format
+   * - 0x00 - IPv4
+   * - 0x01 - IPv6
+   * 4th byte - DHCP or static
+   * - 0x00 - dhcp
+   * - 0x00 - static
+   * bytes 5-20 - IP address
+   * bytes 21-40 - IDRAC firmware version
+   * byte 41 - idrac type
+   * - 0x08 - 10G
+   * - 0x09 - CMC
+   * - 0x0A - 11G monolithic
+   * - 0x0B - 11g modular
+   * - 0x0D - maser lite
+   *
+   * set selector 0 = bytes 1-16
+   * set selector 1 = bytes 17-32
+   * set selector 2 = bytes 33-41
    */
 
   if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_get_system_info_parameters_rs)))
@@ -418,10 +618,11 @@ _get_dell_system_info_idrac_info (ipmi_oem_state_data_t *state_data,
                        strerror (errno));
       goto cleanup;
     }
-
+  
+  /* Do set selector 2, we only care about the idrac type */
   if (ipmi_cmd_get_system_info_parameters (state_data->ipmi_ctx,
                                            IPMI_GET_SYSTEM_INFO_PARAMETER,
-                                           IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_VALIDATOR,
+                                           IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_IDRAC_INFO,
                                            0x02,
                                            IPMI_SYSTEM_INFO_NO_BLOCK_SELECTOR,
                                            obj_cmd_rs) < 0)
@@ -437,7 +638,7 @@ _get_dell_system_info_idrac_info (ipmi_oem_state_data_t *state_data,
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_get_system_info_parameters: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -449,7 +650,7 @@ _get_dell_system_info_idrac_info (ipmi_oem_state_data_t *state_data,
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "fiid_obj_get_data: 'configuration_parameter_data': %s\n",
-                       fiid_strerror (fiid_obj_errnum (obj_cmd_rs)));
+                       fiid_obj_errormsg (obj_cmd_rs));
       goto cleanup;
     }
 
@@ -462,6 +663,7 @@ _get_dell_system_info_idrac_info (ipmi_oem_state_data_t *state_data,
       goto cleanup;
     }
 
+  /* idrac type in set selector 2 happens to be index 9 */
   (*idrac_type) = configuration_parameter_data[9];
 
   rv = 1;
@@ -493,7 +695,7 @@ _get_dell_system_info_10g_mac_addresses (ipmi_oem_state_data_t *state_data)
 
   if (ipmi_cmd_get_system_info_parameters (state_data->ipmi_ctx,
                                            IPMI_GET_SYSTEM_INFO_PARAMETER,
-                                           IPMI_OEM_DELL_SYSTEM_INFO_10G_MAC_ADDRESSES,
+                                           IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_EMBEDDED_NICS_MAC_ADDRESSES,
                                            0,
                                            IPMI_SYSTEM_INFO_NO_BLOCK_SELECTOR,
                                            obj_cmd_rs) < 0)
@@ -501,7 +703,7 @@ _get_dell_system_info_10g_mac_addresses (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_get_system_info_parameters: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -513,7 +715,7 @@ _get_dell_system_info_10g_mac_addresses (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "fiid_obj_get_data: 'configuration_parameter_data': %s\n",
-                       fiid_strerror (fiid_obj_errnum (obj_cmd_rs)));
+                       fiid_obj_errormsg (obj_cmd_rs));
       goto cleanup;
     }
 
@@ -573,7 +775,7 @@ _get_dell_system_info_11g_mac_addresses (ipmi_oem_state_data_t *state_data)
 
   bytes_rq[0] = IPMI_CMD_GET_SYSTEM_INFO_PARAMETERS;
   bytes_rq[1] = 0x00;		/* get parameter */
-  bytes_rq[2] = IPMI_OEM_DELL_SYSTEM_INFO_11G_MAC_ADDRESSES; /* parameter selector */
+  bytes_rq[2] = IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_11G_MAC_ADDRESSES; /* parameter selector */
   bytes_rq[3] = 0x00;		/* set selector */
   bytes_rq[4] = 0x00;		/* block selector */
   bytes_rq[5] = 0x00;		/* offset */
@@ -590,7 +792,7 @@ _get_dell_system_info_11g_mac_addresses (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_raw: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -599,7 +801,8 @@ _get_dell_system_info_11g_mac_addresses (ipmi_oem_state_data_t *state_data)
                                                    rs_len,
                                                    3,
                                                    IPMI_CMD_GET_SYSTEM_INFO_PARAMETERS,
-                                                   IPMI_NET_FN_APP_RQ) < 0)
+                                                   IPMI_NET_FN_APP_RS,
+                                                   NULL) < 0)
     goto cleanup;
   
   total_bytes = bytes_rs[3];
@@ -628,7 +831,7 @@ _get_dell_system_info_11g_mac_addresses (ipmi_oem_state_data_t *state_data)
       
       bytes_rq[0] = IPMI_CMD_GET_SYSTEM_INFO_PARAMETERS;
       bytes_rq[1] = 0x00;		/* get parameter */
-      bytes_rq[2] = IPMI_OEM_DELL_SYSTEM_INFO_11G_MAC_ADDRESSES; /* parameter selector */
+      bytes_rq[2] = IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_11G_MAC_ADDRESSES; /* parameter selector */
       bytes_rq[3] = 0x00;		/* set selector */
       bytes_rq[4] = 0x00;		/* block selector */
       bytes_rq[5] = i * IPMI_OEM_DELL_11G_MAC_ADDRESS_LENGTH; /* offset */
@@ -645,7 +848,7 @@ _get_dell_system_info_11g_mac_addresses (ipmi_oem_state_data_t *state_data)
 	  pstdout_fprintf (state_data->pstate,
 			   stderr,
 			   "ipmi_cmd_raw: %s\n",
-			   ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+			   ipmi_ctx_errormsg (state_data->ipmi_ctx));
 	  goto cleanup;
 	}
       
@@ -655,10 +858,12 @@ _get_dell_system_info_11g_mac_addresses (ipmi_oem_state_data_t *state_data)
 						       rs_len,
 						       11,
 						       IPMI_CMD_GET_SYSTEM_INFO_PARAMETERS,
-						       IPMI_NET_FN_APP_RQ) < 0)
+						       IPMI_NET_FN_APP_RS,
+                                                       NULL) < 0)
 	goto cleanup;
       
-      mac_type = (bytes_rs[3] & 0x30) >> 4;
+      mac_type = (bytes_rs[3] & IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_TYPE_BITMASK);
+      mac_type >>= IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_TYPE_SHIFT;
       
       if (mac_type == IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_TYPE_ETHERNET)
 	{
@@ -666,8 +871,11 @@ _get_dell_system_info_11g_mac_addresses (ipmi_oem_state_data_t *state_data)
 	  uint8_t nic_status;
 	  char *nic_status_str = NULL;
 
-	  nic_status = (bytes_rs[3] & 0xC0) >> 6;
-	  nic_number = (bytes_rs[4] & 0x1F);
+	  nic_status = (bytes_rs[3] & IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_NIC_STATUS_BITMASK);
+          nic_status >>= IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_NIC_STATUS_SHIFT;
+
+	  nic_number = (bytes_rs[4] & IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_NIC_NUMBER_BITMASK);
+          nic_number >>= IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_NIC_NUMBER_SHIFT;
 
 	  if (nic_status == IPMI_OEM_DELL_SYSTEM_INFO_MAC_ADDRESS_STATUS_ENABLED)
 	    nic_status_str = "Enabled";
@@ -700,24 +908,42 @@ int
 ipmi_oem_dell_get_system_info (ipmi_oem_state_data_t *state_data)
 {
   char string[IPMI_OEM_DELL_MAX_BYTES+1];
+  unsigned int string_len = 0;
   int rv = -1;
 
   assert (state_data);
-  assert (state_data->prog_data->args->oem_options_count == 1);
 
-  /* achu: handle some common typo situations */
-  if (strcasecmp (state_data->prog_data->args->oem_options[0], "asset-tag")
-      && strcasecmp (state_data->prog_data->args->oem_options[0], "asset_tag")
-      && strcasecmp (state_data->prog_data->args->oem_options[0], "assettag")
+  if (!state_data->prog_data->args->oem_options_count)
+    {
+      pstdout_printf (state_data->pstate,
+                      "Option: guid\n"
+                      "Option: asset-tag\n"
+                      "Option: service-tag\n"
+		      "Option: chassis-service-tag\n"
+		      "Option: chassis-related-service-tag\n"
+		      "Option: board-revision\n"
+		      "Option: platform-model-name\n"
+                      "Option: mac-addresses\n");
+      return (0);
+    }
+
+  if (state_data->prog_data->args->oem_options_count != 1)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "%s:%s please specify only get-system-info KEY\n");
+      goto cleanup;
+    }
+
+  if (strcasecmp (state_data->prog_data->args->oem_options[0], "guid")
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "asset-tag")
       && strcasecmp (state_data->prog_data->args->oem_options[0], "service-tag")
-      && strcasecmp (state_data->prog_data->args->oem_options[0], "service_tag")
-      && strcasecmp (state_data->prog_data->args->oem_options[0], "servicetag")
-      && strcasecmp (state_data->prog_data->args->oem_options[0], "product-name")
-      && strcasecmp (state_data->prog_data->args->oem_options[0], "product_name")
-      && strcasecmp (state_data->prog_data->args->oem_options[0], "productname")
-      && strcasecmp (state_data->prog_data->args->oem_options[0], "mac-addresses")
-      && strcasecmp (state_data->prog_data->args->oem_options[0], "mac_addresses")
-      && strcasecmp (state_data->prog_data->args->oem_options[0], "macaddresses"))
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "chassis-service-tag")
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "chassis-related-service-tag")
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "board-revision")
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "product-name") /* legacy */
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "platform-model-name")
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "mac-addresses"))
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
@@ -728,10 +954,11 @@ ipmi_oem_dell_get_system_info (ipmi_oem_state_data_t *state_data)
       goto cleanup;
     }
 
-  /* Dell OEM
+  /* Dell Poweredge OEM
    *
    * Some from http://linux.dell.com/files/openipmi/ipmitool/
    * Some from Dell Provided Source Code
+   * Some from Dell Provided Docs
    *
    * Uses Get System Info command
    *
@@ -740,13 +967,17 @@ ipmi_oem_dell_get_system_info (ipmi_oem_state_data_t *state_data)
    *
    * Format #1)
    *
+   * guid parameter = 0xC3
    * asset-tag parameter = 0xC4
    * service-tag parameter = 0xC5
+   * chassis-service-tag parameter = 0xC6
+   * chassis-related-service-tag parameter = 0xC7
+   * board-revision parameter = 0xC8
    *
    * Parameter data response formatted:
    *
    * 1st byte = length
-   * ? bytes = string
+   * ? bytes = string/buf
    *
    * Format #2)
    *
@@ -757,7 +988,7 @@ ipmi_oem_dell_get_system_info (ipmi_oem_state_data_t *state_data)
    * Set Selector 0:
    *
    * 1st byte = set selector
-   * 2nd byte = encoding (0h = ascii)
+   * 2nd byte = encoding
    * 3rd byte = string length
    * ? bytes = string
    *
@@ -811,28 +1042,102 @@ ipmi_oem_dell_get_system_info (ipmi_oem_state_data_t *state_data)
 
   memset (string, '\0', IPMI_OEM_DELL_MAX_BYTES + 1);
 
-  if (!strcasecmp (state_data->prog_data->args->oem_options[0], "asset-tag")
-      || !strcasecmp (state_data->prog_data->args->oem_options[0], "asset_tag")
-      || !strcasecmp (state_data->prog_data->args->oem_options[0], "assettag"))
+  if (!strcasecmp (state_data->prog_data->args->oem_options[0], "guid"))
     {
       if (_get_dell_system_info_short_string (state_data,
-                                              IPMI_OEM_DELL_SYSTEM_INFO_ASSET_TAG,
+                                              IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_SYSTEM_GUID,
                                               string,
-                                              IPMI_OEM_DELL_MAX_BYTES) < 0)
+                                              IPMI_OEM_DELL_MAX_BYTES,
+					      &string_len) < 0)
+        goto cleanup;
+      
+      if (string_len != IPMI_SYSTEM_GUID_LENGTH)
+	{
+	  pstdout_fprintf (state_data->pstate,
+			   stderr,
+			   "Invalid GUID length returned: %s\n",
+			   string_len);
+	  goto cleanup;
+	}
+
+      pstdout_printf (state_data->pstate,
+		      "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X\n",
+		      (uint8_t)string[15],  /* time low */
+		      (uint8_t)string[14],
+		      (uint8_t)string[13],
+		      (uint8_t)string[12],
+		      (uint8_t)string[11],  /* time mid */
+		      (uint8_t)string[10],
+		      (uint8_t)string[9],   /* time high and version */
+		      (uint8_t)string[8],
+		      (uint8_t)string[6],   /* clock seq high and reserved - comes before clock seq low */
+		      (uint8_t)string[7],   /* clock seq low */
+		      (uint8_t)string[5],   /* node */
+		      (uint8_t)string[4],
+		      (uint8_t)string[3],
+		      (uint8_t)string[2],
+		      (uint8_t)string[1],
+		      (uint8_t)string[0]);
+    }
+  else if (!strcasecmp (state_data->prog_data->args->oem_options[0], "asset-tag"))
+    {
+      if (_get_dell_system_info_short_string (state_data,
+                                              IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_SYSTEM_ASSET_TAG,
+                                              string,
+                                              IPMI_OEM_DELL_MAX_BYTES,
+					      NULL) < 0)
         goto cleanup;
 
       pstdout_printf (state_data->pstate,
 		      "%s\n",
 		      string);
     }
-  else if (!strcasecmp (state_data->prog_data->args->oem_options[0], "service-tag")
-           || !strcasecmp (state_data->prog_data->args->oem_options[0], "service_tag")
-           || !strcasecmp (state_data->prog_data->args->oem_options[0], "servicetag"))
+  else if (!strcasecmp (state_data->prog_data->args->oem_options[0], "service-tag"))
     {
       if (_get_dell_system_info_short_string (state_data,
-                                              IPMI_OEM_DELL_SYSTEM_INFO_SERVICE_TAG,
+                                              IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_SYSTEM_SERVICE_TAG,
                                               string,
-                                              IPMI_OEM_DELL_MAX_BYTES) < 0)
+                                              IPMI_OEM_DELL_MAX_BYTES,
+					      NULL) < 0)
+        goto cleanup;
+
+      pstdout_printf (state_data->pstate,
+		      "%s\n",
+		      string);
+    }
+  else if (!strcasecmp (state_data->prog_data->args->oem_options[0], "chassis-service-tag"))
+    {
+      if (_get_dell_system_info_short_string (state_data,
+                                              IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_CHASSIS_SERVICE_TAG,
+                                              string,
+                                              IPMI_OEM_DELL_MAX_BYTES,
+					      NULL) < 0)
+        goto cleanup;
+
+      pstdout_printf (state_data->pstate,
+		      "%s\n",
+		      string);
+    }
+  else if (!strcasecmp (state_data->prog_data->args->oem_options[0], "chassis-related-service-tag"))
+    {
+      if (_get_dell_system_info_short_string (state_data,
+                                              IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_CHASSIS_RELATED_SERVICE_TAG,
+                                              string,
+                                              IPMI_OEM_DELL_MAX_BYTES,
+					      NULL) < 0)
+        goto cleanup;
+
+      pstdout_printf (state_data->pstate,
+		      "%s\n",
+		      string);
+    }
+  else if (!strcasecmp (state_data->prog_data->args->oem_options[0], "board-revision"))
+    {
+      if (_get_dell_system_info_short_string (state_data,
+                                              IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_BOARD_REVISION,
+                                              string,
+                                              IPMI_OEM_DELL_MAX_BYTES,
+					      NULL) < 0)
         goto cleanup;
 
       pstdout_printf (state_data->pstate,
@@ -840,11 +1145,10 @@ ipmi_oem_dell_get_system_info (ipmi_oem_state_data_t *state_data)
 		      string);
     }
   else if (!strcasecmp (state_data->prog_data->args->oem_options[0], "product-name")
-           || !strcasecmp (state_data->prog_data->args->oem_options[0], "product_name")
-           || !strcasecmp (state_data->prog_data->args->oem_options[0], "productname"))
+           || !strcasecmp (state_data->prog_data->args->oem_options[0], "platform-model-name"))
     {
       if (_get_dell_system_info_long_string (state_data,
-                                             IPMI_OEM_DELL_SYSTEM_INFO_PRODUCT_NAME,
+                                             IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_PLATFORM_MODEL_NAME,
                                              string,
                                              IPMI_OEM_DELL_MAX_BYTES) < 0)
         goto cleanup;
@@ -854,9 +1158,7 @@ ipmi_oem_dell_get_system_info (ipmi_oem_state_data_t *state_data)
 		      string);
 
     }
-  else /* (!strcasecmp (state_data->prog_data->args->oem_options[0], "mac-addresses")
-          || !strcasecmp (state_data->prog_data->args->oem_options[0], "mac_addresses")
-          || !strcasecmp (state_data->prog_data->args->oem_options[0], "macaddresses")) */
+  else /* (!strcasecmp (state_data->prog_data->args->oem_options[0], "mac-addresses")) */
     {
       uint8_t idrac_type = 0;
       int ret;
@@ -867,14 +1169,14 @@ ipmi_oem_dell_get_system_info (ipmi_oem_state_data_t *state_data)
       if (ret)
 	{
 	  /* iDRAC 10g */
-	  if (idrac_type == IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_TYPE_10G)
+	  if (idrac_type == IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IDRAC_TYPE_10G)
 	    {
 	      if (_get_dell_system_info_10g_mac_addresses (state_data) < 0)
 		goto cleanup;
 	    }
 	  /* iDRAC 11g */
-	  else if (idrac_type == IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_TYPE_11G_MONOLITHIC
-		   || idrac_type == IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_TYPE_11G_MODULAR)
+	  else if (idrac_type == IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IDRAC_TYPE_11G_MONOLITHIC
+		   || idrac_type == IPMI_OEM_DELL_SYSTEM_INFO_IDRAC_INFO_IDRAC_TYPE_11G_MODULAR)
 	    {
 	      if (_get_dell_system_info_11g_mac_addresses (state_data) < 0)
 		goto cleanup;
@@ -913,7 +1215,9 @@ ipmi_oem_dell_get_nic_selection (ipmi_oem_state_data_t *state_data)
   assert (state_data);
   assert (!state_data->prog_data->args->oem_options_count);
 
-  /* Dell OEM
+  /* Dell Poweredge OEM
+   *
+   * From Dell Provided Docs
    *
    * Get NIC Selection Request
    *
@@ -931,11 +1235,11 @@ ipmi_oem_dell_get_nic_selection (ipmi_oem_state_data_t *state_data)
    *      - 0x03 = shared w/ failover to all
    */
 
-  bytes_rq[0] = 0x25;
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_GET_NIC_SELECTION;
 
   if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
                               0, /* lun */
-                              0x30, /* network function */
+                              IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
                               bytes_rq, /* data */
                               1, /* num bytes */
                               bytes_rs,
@@ -944,7 +1248,7 @@ ipmi_oem_dell_get_nic_selection (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_raw: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -952,22 +1256,23 @@ ipmi_oem_dell_get_nic_selection (ipmi_oem_state_data_t *state_data)
                                                    bytes_rs,
                                                    rs_len,
                                                    3,
-                                                   0x02,
-                                                   0x30) < 0)
+                                                   IPMI_CMD_OEM_DELL_GET_NIC_SELECTION,
+                                                   IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                   NULL) < 0)
     goto cleanup;
 
   switch (bytes_rs[2])
     {
-    case 0x00:
+    case IPMI_OEM_DELL_NIC_SELECTION_SHARED:
       pstdout_printf (state_data->pstate, "shared\n");
       break;
-    case 0x01:
+    case IPMI_OEM_DELL_NIC_SELECTION_SHARED_WITH_FAILOVER_TO_NIC2:
       pstdout_printf (state_data->pstate, "shared with failover to NIC2\n");
       break;
-    case 0x02:
+    case IPMI_OEM_DELL_NIC_SELECTION_DEDICATED:
       pstdout_printf (state_data->pstate, "dedicated\n");
       break;
-    case 0x03:
+    case IPMI_OEM_DELL_NIC_SELECTION_SHARED_WITH_FAILOVER_TO_ALL_NICS:
       pstdout_printf (state_data->pstate, "shared with failover to all NICs\n");
       break;
     default:
@@ -1005,7 +1310,9 @@ ipmi_oem_dell_set_nic_selection (ipmi_oem_state_data_t *state_data)
       goto cleanup;
     }
 
-  /* Dell OEM
+  /* Dell Poweredge OEM
+   *
+   * From Dell Provided Docs
    *
    * Set NIC Selection Request
    *
@@ -1023,20 +1330,20 @@ ipmi_oem_dell_set_nic_selection (ipmi_oem_state_data_t *state_data)
    * 0x?? - Completion Code
    */
 
-  bytes_rq[0] = 0x24;
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_SET_NIC_SELECTION;
 
   if (!strcasecmp (state_data->prog_data->args->oem_options[0], "shared"))
-    bytes_rq[1] = 0x00;
+    bytes_rq[1] = IPMI_OEM_DELL_NIC_SELECTION_SHARED;
   else if (!strcasecmp (state_data->prog_data->args->oem_options[0], "shared_failover_nic2"))
-    bytes_rq[1] = 0x01;
+    bytes_rq[1] = IPMI_OEM_DELL_NIC_SELECTION_SHARED_WITH_FAILOVER_TO_NIC2;
   else if (!strcasecmp (state_data->prog_data->args->oem_options[0], "dedicated"))
-    bytes_rq[1] = 0x02;
+    bytes_rq[1] = IPMI_OEM_DELL_NIC_SELECTION_DEDICATED;
   else
-    bytes_rq[1] = 0x03;
+    bytes_rq[1] = IPMI_OEM_DELL_NIC_SELECTION_SHARED_WITH_FAILOVER_TO_ALL_NICS;
 
   if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
                               0, /* lun */
-                              0x30, /* network function */
+                              IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
                               bytes_rq, /* data */
                               2, /* num bytes */
                               bytes_rs,
@@ -1045,7 +1352,7 @@ ipmi_oem_dell_set_nic_selection (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_raw: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -1053,10 +1360,104 @@ ipmi_oem_dell_set_nic_selection (ipmi_oem_state_data_t *state_data)
                                                    bytes_rs,
                                                    rs_len,
                                                    2, /* don't care about the 3rd byte, don't know what it is used for */
-                                                   0x03,
-                                                   0x30) < 0)
+                                                   IPMI_CMD_OEM_DELL_SET_NIC_SELECTION,
+                                                   IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                   NULL) < 0)
     goto cleanup;
 
+  rv = 0;
+ cleanup:
+  return (rv);
+}
+
+int
+ipmi_oem_dell_get_active_lom_status (ipmi_oem_state_data_t *state_data)
+{
+  uint8_t bytes_rq[IPMI_OEM_MAX_BYTES];
+  uint8_t bytes_rs[IPMI_OEM_MAX_BYTES];
+  int rs_len;
+  int rv = -1;
+
+  assert (state_data);
+  assert (!state_data->prog_data->args->oem_options_count);
+
+  /* Dell Poweredge OEM
+   *
+   * From Dell Provided Docs
+   *
+   * Get Active LOM Status
+   *
+   * 0x30 - OEM network function
+   * 0xC1 - OEM cmd
+   * 0x?? - reserved
+   * 0x?? - reserved
+   * 
+   * Get NIC Selection Response
+   *
+   * 0xC1 - OEM cmd
+   * 0x?? - Completion Code
+   * 0x?? - 
+   *      - 0x00 = No Lom Active (i.e. dedicated)
+   *      - 0x01 = LOM 1
+   *      - 0x02 = LOM 2
+   *      - 0x03 = LOM 3
+   *      - 0x04 = LOM 4
+   *      - 0xff = unknown
+   * 0x?? - reserved
+   * 0x?? - reserved
+   */
+
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_GET_ACTIVE_LOM_STATUS;
+  bytes_rq[1] = IPMI_OEM_DELL_GET_ACTIVE_LOM_STATUS_GET_STATUS;
+  bytes_rq[2] = 0;
+  bytes_rq[3] = 0;
+
+  if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
+                              0, /* lun */
+                              IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
+                              bytes_rq, /* data */
+                              4, /* num bytes */
+                              bytes_rs,
+                              IPMI_OEM_MAX_BYTES)) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_cmd_raw: %s\n",
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
+      goto cleanup;
+    }
+
+  if (ipmi_oem_check_response_and_completion_code (state_data,
+                                                   bytes_rs,
+                                                   rs_len,
+                                                   3,
+                                                   IPMI_CMD_OEM_DELL_GET_ACTIVE_LOM_STATUS,
+                                                   IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                   NULL) < 0)
+    goto cleanup;
+
+  switch (bytes_rs[2])
+    {
+    case IPMI_OEM_DELL_LOM_STATUS_NO_ACTIVE_LOM:
+      pstdout_printf (state_data->pstate, "dedicated\n");
+      break;
+    case IPMI_OEM_DELL_LOM_STATUS_LOM_1:
+      pstdout_printf (state_data->pstate, "LOM 1\n");
+      break;
+    case IPMI_OEM_DELL_LOM_STATUS_LOM_2:
+      pstdout_printf (state_data->pstate, "LOM 2\n");
+      break;
+    case IPMI_OEM_DELL_LOM_STATUS_LOM_3:
+      pstdout_printf (state_data->pstate, "LOM 3\n");
+      break;
+    case IPMI_OEM_DELL_LOM_STATUS_LOM_4:
+      pstdout_printf (state_data->pstate, "LOM 4\n");
+      break;
+    default:
+      pstdout_printf (state_data->pstate, "unknown active LOM\n");
+      break;
+    }
+  
   rv = 0;
  cleanup:
   return (rv);
@@ -1075,7 +1476,7 @@ _dell_reserve_extended_configuration (ipmi_oem_state_data_t *state_data,
    *
    * Reserve Extended Configuration Request
    *
-   * 0x2E - OEM Group
+   * 0x2E - OEM Group (is IPMI_NET_FN_OEM_GROUP_RQ)
    * 0x01 - OEM cmd
    * 0x?? - Dell IANA (LSB first)
    * 0x?? - Dell IANA
@@ -1094,14 +1495,14 @@ _dell_reserve_extended_configuration (ipmi_oem_state_data_t *state_data,
   assert (state_data);
   assert (reservation_id);
 
-  bytes_rq[0] = 0x01;
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_RESERVED_EXTENDED_CONFIGURATION;
   bytes_rq[1] = (IPMI_IANA_ENTERPRISE_ID_DELL & 0x0000FF);
   bytes_rq[2] = (IPMI_IANA_ENTERPRISE_ID_DELL & 0x00FF00) >> 8;
   bytes_rq[3] = (IPMI_IANA_ENTERPRISE_ID_DELL & 0xFF0000) >> 16;
 
   if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
                               0, /* lun */
-                              0x2E, /* network function */
+                              IPMI_NET_FN_OEM_GROUP_RQ, /* network function */
                               bytes_rq, /* data */
                               4, /* num bytes */
                               bytes_rs,
@@ -1110,7 +1511,7 @@ _dell_reserve_extended_configuration (ipmi_oem_state_data_t *state_data,
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_raw: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -1118,8 +1519,9 @@ _dell_reserve_extended_configuration (ipmi_oem_state_data_t *state_data,
                                                    bytes_rs,
                                                    rs_len,
                                                    6,
-                                                   0x01,
-                                                   0x2E) < 0)
+                                                   IPMI_CMD_OEM_DELL_RESERVED_EXTENDED_CONFIGURATION,
+                                                   IPMI_NET_FN_OEM_GROUP_RS,
+                                                   NULL) < 0)
     goto cleanup;
   
   (*reservation_id) = bytes_rs[5];
@@ -1157,9 +1559,11 @@ _dell_get_extended_configuration (ipmi_oem_state_data_t *state_data,
 
   /* Dell Poweredge OEM
    *
+   * From Dell Provided Docs
+   *
    * Get Extended Configuration Request
    *
-   * 0x2E - OEM network function
+   * 0x2E - OEM network function (is IPMI_NET_FN_OEM_GROUP_RQ)
    * 0x02 - OEM cmd
    * 0x?? - Dell IANA (LSB first)
    * 0x?? - Dell IANA
@@ -1169,7 +1573,7 @@ _dell_get_extended_configuration (ipmi_oem_state_data_t *state_data,
    * 0x?? - index (used by index objects only)
    * 0x?? - data offset - LSB
    * 0x?? - data offset - MSB
-   * 0x?? - byts to read (1 based, 0xFF = all)
+   * 0x?? - bytes to read (1 based, 0xFF = all)
    *
    * Get Extended Configuration Response
    *
@@ -1187,10 +1591,10 @@ _dell_get_extended_configuration (ipmi_oem_state_data_t *state_data,
   while (offset < 0xFFFF)
     {
       if (_dell_reserve_extended_configuration (state_data,
-                                                &reservation_id) < 0)
-        goto cleanup;
-      
-      bytes_rq[0] = 0x02;
+						&reservation_id) < 0)
+	goto cleanup;
+
+      bytes_rq[0] = IPMI_CMD_OEM_DELL_GET_EXTENDED_CONFIGURATION;
       bytes_rq[1] = (IPMI_IANA_ENTERPRISE_ID_DELL & 0x0000FF);
       bytes_rq[2] = (IPMI_IANA_ENTERPRISE_ID_DELL & 0x00FF00) >> 8;
       bytes_rq[3] = (IPMI_IANA_ENTERPRISE_ID_DELL & 0xFF0000) >> 16;
@@ -1199,105 +1603,106 @@ _dell_get_extended_configuration (ipmi_oem_state_data_t *state_data,
       bytes_rq[6] = 0x00;
       bytes_rq[7] = (offset & 0x00FF);
       bytes_rq[8] = (offset & 0xFF00) >> 8;
-      bytes_rq[9] = 0xFF;
-      
+      bytes_rq[9] = IPMI_OEM_DELL_EXTENDED_CONFIG_READ_ALL_BYTES;
+
       if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
-                                  0, /* lun */
-                                  IPMI_NET_FN_OEM_GROUP_RQ, /* network function */
-                                  bytes_rq, /* data */
-                                  10, /* num bytes */
-                                  bytes_rs,
-                                  IPMI_OEM_MAX_BYTES)) < 0)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "ipmi_cmd_raw: %s\n",
-			   ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
-          goto cleanup;
-        }
+				  0, /* lun */
+				  IPMI_NET_FN_OEM_GROUP_RQ, /* network function */
+				  bytes_rq, /* data */
+				  10, /* num bytes */
+				  bytes_rs,
+				  IPMI_OEM_MAX_BYTES)) < 0)
+	{
+	  pstdout_fprintf (state_data->pstate,
+			   stderr,
+			   "ipmi_cmd_raw: %s\n",
+			   ipmi_ctx_errormsg (state_data->ipmi_ctx));
+	  goto cleanup;
+	}
       
       /* atleast 8 bytes of non-token-data + common header */
       if (ipmi_oem_check_response_and_completion_code (state_data,
-                                                       bytes_rs,
-                                                       rs_len,
-                                                       8 + IPMI_OEM_DELL_TOKEN_DATA_COMMON_HEADER_LEN,
-                                                       0x02,
-                                                       IPMI_NET_FN_OEM_GROUP_RQ) < 0)
-        goto cleanup;
+						       bytes_rs,
+						       rs_len,
+						       8 + IPMI_OEM_DELL_TOKEN_DATA_COMMON_HEADER_LEN,
+						       IPMI_CMD_OEM_DELL_GET_EXTENDED_CONFIGURATION,
+						       IPMI_NET_FN_OEM_GROUP_RS,
+                                                       NULL) < 0)
+	goto cleanup;
       
       bytes_read = bytes_rs[7];
       expected_bytes_read = rs_len - 8;
-      
+
       if (bytes_read != expected_bytes_read)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "invalid bytes read returned: expected = %u, returned %u\n",
-                           bytes_read, expected_bytes_read);
-          goto cleanup;
-        }
+	{
+	  pstdout_fprintf (state_data->pstate,
+			   stderr,
+			   "invalid bytes read returned: expected = %u, returned %u\n",
+			   bytes_read, expected_bytes_read);
+	  goto cleanup;
+	}
       
       /* check token common header */
       
       if (!offset)
-        {
-          token_len = bytes_rs[8];
-          token_len |= (bytes_rs[9] << 8);
-          
-          token_version = bytes_rs[10];
-          
-          if (token_version != IPMI_OEM_DELL_TOKEN_VERSION)
-            {
-              pstdout_fprintf (state_data->pstate,
-                               stderr,
-                               "invalid token version returned: expected = %Xh, returned %Xh\n",
-                               IPMI_OEM_DELL_TOKEN_VERSION, token_version);
-              goto cleanup;
-            }
+	{
+	  token_len = bytes_rs[8];
+	  token_len |= (bytes_rs[9] << 8);
 	  
-          valid_field_mask = bytes_rs[11];
-          valid_field_mask |= (bytes_rs[12] << 8);
-          
-          if (valid_field_mask != expected_valid_field_mask)
-            {
-              pstdout_fprintf (state_data->pstate,
-                               stderr,
-                               "invalid field mask returned: expected = %Xh, returned %Xh\n",
-                               expected_valid_field_mask, valid_field_mask);
-              goto cleanup;
-            }
-        }
-      
+	  token_version = bytes_rs[10];
+	  
+	  if (token_version != IPMI_OEM_DELL_TOKEN_VERSION)
+	    {
+	      pstdout_fprintf (state_data->pstate,
+			       stderr,
+			       "invalid token version returned: expected = %Xh, returned %Xh\n",
+			       IPMI_OEM_DELL_TOKEN_VERSION, token_version);
+	      goto cleanup;
+	    }
+
+	  valid_field_mask = bytes_rs[11];
+	  valid_field_mask |= (bytes_rs[12] << 8);
+	  
+	  if (valid_field_mask != expected_valid_field_mask)
+	    {
+	      pstdout_fprintf (state_data->pstate,
+			       stderr,
+			       "invalid field mask returned: expected = %Xh, returned %Xh\n",
+			       expected_valid_field_mask, valid_field_mask);
+	      goto cleanup;
+	    }
+	}
+
       if ((offset + bytes_read) > token_data_len)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "buffer overflow: offset + bytes_read = %u\n",
-                           (offset + bytes_read));
-          goto cleanup;
-        }
+	{
+	  pstdout_fprintf (state_data->pstate,
+			   stderr,
+			   "buffer overflow: offset + bytes_read = %u\n",
+			   (offset + bytes_read));
+	  goto cleanup;
+	}
       
       memcpy (token_data + offset,
-              &bytes_rs[8],
-              bytes_read);
-      
+	      &bytes_rs[8],
+	      bytes_read);
+
       offset += bytes_read;
-      
+
       if (token_len <= offset)
-        break;
+	break;
     }
   
   if (offset != token_len)
     {
       pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "invalid token length returned: expected = %u, read = %u\n",
-                       token_len, offset);
+		       stderr,
+		       "invalid token length returned: expected = %u, read = %u\n",
+		       token_len, offset);
       goto cleanup;
     }
-  
+
   (*token_data_read) = offset;
-  
+
   rv = 0;
  cleanup:
   return (rv);
@@ -1305,10 +1710,10 @@ _dell_get_extended_configuration (ipmi_oem_state_data_t *state_data,
 
 static int
 _dell_set_extended_configuration (ipmi_oem_state_data_t *state_data,
-                                  uint8_t token_id,
-                                  uint8_t *token_data,
-                                  unsigned int token_data_len,
-                                  unsigned int valid_field_mask)
+				  uint8_t token_id,
+				  uint8_t *token_data,
+				  unsigned int token_data_len,
+				  unsigned int valid_field_mask)
 {
   uint8_t bytes_rq[IPMI_OEM_MAX_BYTES];
   uint8_t bytes_rs[IPMI_OEM_MAX_BYTES];
@@ -1324,6 +1729,8 @@ _dell_set_extended_configuration (ipmi_oem_state_data_t *state_data,
   assert (valid_field_mask);
 
   /* Dell Poweredge OEM
+   *
+   * From Dell Provided Docs
    *
    * Set Extended Configuration Request
    *
@@ -1354,15 +1761,15 @@ _dell_set_extended_configuration (ipmi_oem_state_data_t *state_data,
    */
 
   token_len = IPMI_OEM_DELL_TOKEN_DATA_COMMON_HEADER_LEN + token_data_len;
-          
+	  
   while (offset < 0xFFFF)
     {
       unsigned int write_length = 0;
       unsigned int token_write_length = 0;
 
       if (_dell_reserve_extended_configuration (state_data,
-                                                &reservation_id) < 0)
-        goto cleanup;
+						&reservation_id) < 0)
+	goto cleanup;
 
       /* bytes_written response is 1 byte, so presumably you can write
        * up to 255 bytes of data.  However, IPMI over LAN has a max
@@ -1372,7 +1779,7 @@ _dell_set_extended_configuration (ipmi_oem_state_data_t *state_data,
        * guestimate of what is good.
        */
 
-      bytes_rq[0] = 0x03;
+      bytes_rq[0] = IPMI_CMD_OEM_DELL_SET_EXTENDED_CONFIGURATION;
       bytes_rq[1] = (IPMI_IANA_ENTERPRISE_ID_DELL & 0x0000FF);
       bytes_rq[2] = (IPMI_IANA_ENTERPRISE_ID_DELL & 0x00FF00) >> 8;
       bytes_rq[3] = (IPMI_IANA_ENTERPRISE_ID_DELL & 0xFF0000) >> 16;
@@ -1381,91 +1788,96 @@ _dell_set_extended_configuration (ipmi_oem_state_data_t *state_data,
       bytes_rq[6] = 0x00;
       bytes_rq[7] = (offset & 0x00FF);
       bytes_rq[8] = (offset & 0xFF00) >> 8;
-      bytes_rq[9] = 0x01;
 
       if (!offset)
-        {
-          /* common header */
-          
-          bytes_rq[10] = (token_len & 0x00FF);
-          bytes_rq[11] = (token_len & 0xFF00) >> 8;
-          bytes_rq[12] = IPMI_OEM_DELL_TOKEN_VERSION;
-          bytes_rq[13] = (valid_field_mask & 0x00FF); 
-          bytes_rq[14] = (valid_field_mask & 0xFF00) >> 8; 
-
-          /* - 5 for the common header */
-          if ((token_data_len - offset) > (IPMI_OEM_DELL_TOKEN_WRITE_MAX - 5))
-            write_length = IPMI_OEM_DELL_TOKEN_WRITE_MAX - 5;
-          else
-            write_length = (token_data_len - offset);
-          
-          memcpy (&bytes_rq[15],
-                  token_data + offset,
-                  write_length);
-
-          token_write_length = 5 + write_length;
-        }
-      else
-        {
-          if ((token_data_len - offset) > IPMI_OEM_DELL_TOKEN_WRITE_MAX)
-            write_length = IPMI_OEM_DELL_TOKEN_WRITE_MAX;
-          else
-            write_length = (token_data_len - offset);
-
-          memcpy (&bytes_rq[10],
-                  token_data + offset,
-                  write_length);
+	{
+	  /* common header */
 	  
-          token_write_length = write_length;
-        }
-      
+	  bytes_rq[10] = (token_len & 0x00FF);
+	  bytes_rq[11] = (token_len & 0xFF00) >> 8;
+	  bytes_rq[12] = IPMI_OEM_DELL_TOKEN_VERSION;
+	  bytes_rq[13] = (valid_field_mask & 0x00FF); 
+	  bytes_rq[14] = (valid_field_mask & 0xFF00) >> 8; 
+
+	  /* - 5 for the common header */
+	  if ((token_data_len - offset) > (IPMI_OEM_DELL_TOKEN_WRITE_MAX - IPMI_OEM_DELL_TOKEN_DATA_COMMON_HEADER_LEN))
+	    write_length = IPMI_OEM_DELL_TOKEN_WRITE_MAX - IPMI_OEM_DELL_TOKEN_DATA_COMMON_HEADER_LEN;
+	  else
+	    write_length = (token_data_len - offset);
+	  
+	  memcpy (&bytes_rq[15],
+		  token_data + offset,
+		  write_length);
+
+	  token_write_length = IPMI_OEM_DELL_TOKEN_DATA_COMMON_HEADER_LEN + write_length;
+	}
+      else
+	{
+	  if ((token_data_len - offset) > IPMI_OEM_DELL_TOKEN_WRITE_MAX)
+	    write_length = IPMI_OEM_DELL_TOKEN_WRITE_MAX;
+	  else
+	    write_length = (token_data_len - offset);
+
+	  memcpy (&bytes_rq[10],
+		  token_data + offset,
+		  write_length);
+
+	  token_write_length = write_length;
+	}
+
+      if (token_len <= (offset + token_write_length))
+        bytes_rq[9] = IPMI_OEM_DELL_EXTENDED_CONFIG_LAST_TOKEN;
+      else
+        bytes_rq[9] = IPMI_OEM_DELL_EXTENDED_CONFIG_IN_PROGRESS;
+
       if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
-                                  0, /* lun */
-                                  IPMI_NET_FN_OEM_GROUP_RQ, /* network function */
-                                  bytes_rq, /* data */
-                                  10 + token_write_length, /* num bytes */
-                                  bytes_rs,
-                                  IPMI_OEM_MAX_BYTES)) < 0)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "ipmi_cmd_raw: %s\n",
-			   ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
-          goto cleanup;
-        }
+				  0, /* lun */
+				  IPMI_NET_FN_OEM_GROUP_RQ, /* network function */
+				  bytes_rq, /* data */
+				  10 + token_write_length, /* num bytes */
+				  bytes_rs,
+				  IPMI_OEM_MAX_BYTES)) < 0)
+	{
+	  pstdout_fprintf (state_data->pstate,
+			   stderr,
+			   "ipmi_cmd_raw: %s\n",
+			   ipmi_ctx_errormsg (state_data->ipmi_ctx));
+	  goto cleanup;
+	}
       
       if (ipmi_oem_check_response_and_completion_code (state_data,
-                                                       bytes_rs,
-                                                       rs_len,
-                                                       6,
-                                                       0x03,
-                                                       IPMI_NET_FN_OEM_GROUP_RQ) < 0)
-        goto cleanup;
+						       bytes_rs,
+						       rs_len,
+						       6,
+						       IPMI_CMD_OEM_DELL_SET_EXTENDED_CONFIGURATION,
+						       IPMI_NET_FN_OEM_GROUP_RS,
+                                                       NULL) < 0)
+	goto cleanup;
       
       if (bytes_rs[5] != token_write_length)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "invalid data length written: expected = %u, returned %u\n",
-                           token_write_length, bytes_rs[5]);
-          goto cleanup;
-        }
-      
+	{
+	  pstdout_fprintf (state_data->pstate,
+			   stderr,
+			   "invalid data length written: expected = %u, returned %u\n",
+			   token_write_length, bytes_rs[5]);
+	  goto cleanup;
+	}
+
       offset += bytes_rs[5];
-      
+
       if (token_len <= offset)
-        break;
+	break;
     }
-  
+
   if (offset != token_len)
     {
       pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "invalid token length written: expected = %u, write = %u\n",
-                       token_len, offset);
+		       stderr,
+		       "invalid token length written: expected = %u, write = %u\n",
+		       token_len, offset);
       goto cleanup;
     }
-  
+
   rv = 0;
  cleanup:
   return (rv);
@@ -1475,7 +1887,7 @@ int
 ipmi_oem_dell_get_ssh_config (ipmi_oem_state_data_t *state_data)
 {
   uint8_t token_data[IPMI_OEM_DELL_TOKEN_DATA_MAX];
-  uint16_t expected_valid_field_mask = 0x1F; /* 5 fields */
+  uint16_t expected_valid_field_mask = IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_ALL_FIELD_MASK;
   unsigned int token_data_read = 0;
   unsigned int expected_token_data_read = 0;
   uint8_t sshenable;
@@ -1510,7 +1922,7 @@ ipmi_oem_dell_get_ssh_config (ipmi_oem_state_data_t *state_data)
   assert (!state_data->prog_data->args->oem_options_count);
 
   if (_dell_get_extended_configuration (state_data,
-					IPMI_OEM_DELL_TOKEN_ID_SSH,
+					IPMI_OEM_DELL_TOKEN_ID_SSH_CONFIGURATION,
 					token_data,
 					IPMI_OEM_DELL_TOKEN_DATA_MAX,
 					expected_valid_field_mask,
@@ -1563,207 +1975,6 @@ ipmi_oem_dell_get_ssh_config (ipmi_oem_state_data_t *state_data)
   return (rv);
 }
 
-static int 
-_parse_key_value (ipmi_oem_state_data_t *state_data,
-                  unsigned int option_num,
-                  char **key,
-                  char **value)
-{  
-  char *tempstr = NULL;
-  char *tempptr = NULL;
-  char *tempkey = NULL;
-  char *tempvalue = NULL;
-  int rv = -1;
-   
-  assert (state_data);
-  assert (key);
-  assert (value);
-   
-  if (!(tempstr = strdup (state_data->prog_data->args->oem_options[option_num])))
-    {
-      pstdout_perror (state_data->pstate,
-                      "strdup");
-      goto cleanup;
-    }
-   
-  tempptr = strchr (tempstr, '=');
-  if (!tempptr)
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "%s:%s invalid OEM option argument '%s' : no equal sign\n",
-                       state_data->prog_data->args->oem_id,
-                       state_data->prog_data->args->oem_command,
-                       state_data->prog_data->args->oem_options[option_num]);
-      goto cleanup;
-    }
-
-  (*tempptr) = '\0'; 
-  tempptr++;
-
-  if (!(tempkey = strdup (tempstr)))
-    {
-      pstdout_perror (state_data->pstate,
-                      "strdup");
-      goto cleanup;
-    }
-
-  if (!(tempvalue = strdup (tempptr)))
-    {
-      pstdout_perror (state_data->pstate,
-                      "strdup");
-      goto cleanup; 
-    }
-  
-  (*key) = tempkey;
-  (*value) = tempvalue;
-  
-  rv = 0;
- cleanup:
-  free (tempstr);
-  if (rv < 0)
-    {
-      free (tempkey);
-      free (tempvalue);
-    }
-  return (rv);
-}
-
-static int
-_parse_enable (ipmi_oem_state_data_t *state_data,
-               unsigned int option_num,
-               const char *value,
-               uint8_t *enable)
-{
-  assert (state_data);
-  assert (value);
-  assert (enable);
-
-  if (strcasecmp (value, "enable") && strcasecmp (value, "disable"))
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "%s:%s invalid OEM option argument '%s' : invalid value\n",
-                       state_data->prog_data->args->oem_id,
-                       state_data->prog_data->args->oem_command,
-                       state_data->prog_data->args->oem_options[option_num]);
-      return (-1);
-    }
-  
-  if (!strcasecmp (value, "enable"))
-    (*enable) = 1;
-  else
-    (*enable) = 0;
-  
-  return (0);
-}
-
-static int
-_parse_timeout (ipmi_oem_state_data_t *state_data,
-                unsigned int option_num,
-                const char *value,
-                uint32_t *timeout)
-{ 
-  unsigned int temp;
-  char *ptr = NULL;
-  
-  assert (state_data);
-  assert (value);
-  assert (timeout);
-  
-  errno = 0;
-  
-  temp = strtoul (value, &ptr, 10);
-  
-  if (errno
-      || ptr[0] != '\0')
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "%s:%s invalid OEM option argument '%s' : invalid value\n",
-                       state_data->prog_data->args->oem_id,
-                       state_data->prog_data->args->oem_command,
-                       state_data->prog_data->args->oem_options[option_num]);
-      return (-1);
-    }
-  
-  (*timeout) = temp;
-  return (0);
-}
-
-static int
-_parse_port (ipmi_oem_state_data_t *state_data,
-             unsigned int option_num,
-             const char *value,
-             uint16_t *port)
-{
-  unsigned int temp;
-  char *ptr = NULL;
-
-  assert (state_data);
-  assert (value);
-  assert (port);
-
-  errno = 0;
-  
-  temp = strtoul (value, &ptr, 10);
-  
-  if (errno
-      || ptr[0] != '\0'
-      || temp > 65535)
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "%s:%s invalid OEM option argument '%s' : invalid value\n",
-                       state_data->prog_data->args->oem_id,
-                       state_data->prog_data->args->oem_command,
-                       state_data->prog_data->args->oem_options[option_num]);
-      return (-1);
-    }
-  
-  (*port) = temp;
-  return (0);
-}
-
-#if 0
-/* don't support for now */
-static int
-_parse_string (ipmi_oem_state_data_t *state_data,
-	       unsigned int option_num,
-	       const char *value,
-	       uint8_t *string_length,
-	       char *stringbuf,
-	       unsigned int stringbuflen)
-{
-  assert (state_data);
-  assert (value);
-  assert (string_length);
-  assert (stringbuf);
-  assert (stringbuflen);
-  
-  if (strlen (value) > stringbuflen)
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "%s:%s invalid OEM option argument '%s' : string length too long\n",
-                       state_data->prog_data->args->oem_id,
-                       state_data->prog_data->args->oem_command,
-                       state_data->prog_data->args->oem_options[option_num]);
-      return (-1);
-    }
-
-  (*string_length) = strlen (value);
-
-  /* use memcpy, do not need NULL termination */
-  if ((*string_length))
-    memcpy (stringbuf,
-	    value,
-	    (*string_length));
-  
-  return (0);
-}
-#endif
-
 int
 ipmi_oem_dell_set_ssh_config (ipmi_oem_state_data_t *state_data)
 {
@@ -1773,7 +1984,7 @@ ipmi_oem_dell_set_ssh_config (ipmi_oem_state_data_t *state_data)
   uint32_t idletimeout = 0;
   uint16_t portnumber = 0;
   int rv = -1;
-  int i;
+  unsigned int i;
 
   /* Dell OEM
    *
@@ -1812,32 +2023,32 @@ ipmi_oem_dell_set_ssh_config (ipmi_oem_state_data_t *state_data)
       char *key = NULL;
       char *value = NULL;
       
-      if (_parse_key_value (state_data,
-                            i,
-                            &key,
-                            &value) < 0)
+      if (ipmi_oem_parse_key_value (state_data,
+                                    i,
+                                    &key,
+                                    &value) < 0)
         goto cleanup;
 
       if (!strcasecmp (key, "ssh"))
         {
-          if (_parse_enable (state_data, i, value, &sshenable) < 0)
+          if (ipmi_oem_parse_enable (state_data, i, value, &sshenable) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0001;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_ENABLE_FIELD_MASK;
         }
       else if (!strcasecmp (key, "idletimeout"))
         {
-          if (_parse_timeout (state_data, i, value, &idletimeout) < 0)
+          if (ipmi_oem_parse_4_byte_field (state_data, i, value, &idletimeout) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0008;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_IDLE_TIMEOUT_FIELD_MASK;
         }
       else if (!strcasecmp (key, "portnumber"))
         {
-          if (_parse_port (state_data, i, value, &portnumber) < 0)
+          if (ipmi_oem_parse_2_byte_field (state_data, i, value, &portnumber) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0010;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_SSH_CONFIGURATION_PORT_NUMBER_FIELD_MASK;
         }
       else
         {
@@ -1865,7 +2076,7 @@ ipmi_oem_dell_set_ssh_config (ipmi_oem_state_data_t *state_data)
   token_data[8] = (portnumber & 0xFF00) >> 8;
 
   if (_dell_set_extended_configuration (state_data,
-					IPMI_OEM_DELL_TOKEN_ID_SSH,
+					IPMI_OEM_DELL_TOKEN_ID_SSH_CONFIGURATION,
 					token_data,
 					9,
 					valid_field_mask) < 0)
@@ -1880,7 +2091,7 @@ int
 ipmi_oem_dell_get_telnet_config (ipmi_oem_state_data_t *state_data)
 {
   uint8_t token_data[IPMI_OEM_DELL_TOKEN_DATA_MAX];
-  uint16_t expected_valid_field_mask = 0x3F; /* 6 fields */
+  uint16_t expected_valid_field_mask = IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_ALL_FIELD_MASK;
   unsigned int token_data_read = 0;
   unsigned int expected_token_data_read = 0;
   uint8_t telnetenable;
@@ -1917,7 +2128,7 @@ ipmi_oem_dell_get_telnet_config (ipmi_oem_state_data_t *state_data)
   assert (!state_data->prog_data->args->oem_options_count);
 
   if (_dell_get_extended_configuration (state_data,
-					IPMI_OEM_DELL_TOKEN_ID_TELNET,
+					IPMI_OEM_DELL_TOKEN_ID_TELNET_CONFIGURATION,
 					token_data,
 					IPMI_OEM_DELL_TOKEN_DATA_MAX,
 					expected_valid_field_mask,
@@ -1988,7 +2199,7 @@ ipmi_oem_dell_set_telnet_config (ipmi_oem_state_data_t *state_data)
   uint16_t portnumber = 0;
   uint8_t _7flsenable = 0;
   int rv = -1;
-  int i;
+  unsigned int i;
 
   /* Dell OEM
    *
@@ -2029,39 +2240,39 @@ ipmi_oem_dell_set_telnet_config (ipmi_oem_state_data_t *state_data)
       char *key = NULL;
       char *value = NULL;
       
-      if (_parse_key_value (state_data,
-                            i,
-                            &key,
-                            &value) < 0)
+      if (ipmi_oem_parse_key_value (state_data,
+                                    i,
+                                    &key,
+                                    &value) < 0)
         goto cleanup;
 
       if (!strcasecmp (key, "telnet"))
         {
-          if (_parse_enable (state_data, i, value, &telnetenable) < 0)
+          if (ipmi_oem_parse_enable (state_data, i, value, &telnetenable) < 0)
             goto cleanup;
 
-          valid_field_mask |= 0x0001;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_ENABLE_FIELD_MASK;
         }
       else if (!strcasecmp (key, "sessiontimeout"))
         {
-          if (_parse_timeout (state_data, i, value, &sessiontimeout) < 0)
+          if (ipmi_oem_parse_4_byte_field (state_data, i, value, &sessiontimeout) < 0)
             goto cleanup;
 
-          valid_field_mask |= 0x0008;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_SESSION_TIMEOUT_FIELD_MASK;
         }
       else if (!strcasecmp (key, "portnumber"))
         {
-          if (_parse_port (state_data, i, value, &portnumber) < 0)
+          if (ipmi_oem_parse_2_byte_field (state_data, i, value, &portnumber) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0010;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_PORT_NUMBER_FIELD_MASK;
         }
       else if (!strcasecmp (key, "7fls"))
         {
-          if (_parse_enable (state_data, i, value, &_7flsenable) < 0)
+          if (ipmi_oem_parse_enable (state_data, i, value, &_7flsenable) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0020;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_TELNET_CONFIGURATION_7FLS_BACKSPACE_FIELD_MASK;
         }
       else
         {
@@ -2090,7 +2301,7 @@ ipmi_oem_dell_set_telnet_config (ipmi_oem_state_data_t *state_data)
   token_data[9] = _7flsenable;
 
   if (_dell_set_extended_configuration (state_data,
-					IPMI_OEM_DELL_TOKEN_ID_TELNET,
+					IPMI_OEM_DELL_TOKEN_ID_TELNET_CONFIGURATION,
 					token_data,
 					10,
 					valid_field_mask) < 0)
@@ -2105,7 +2316,7 @@ int
 ipmi_oem_dell_get_web_server_config (ipmi_oem_state_data_t *state_data)
 {
   uint8_t token_data[IPMI_OEM_DELL_TOKEN_DATA_MAX];
-  uint16_t expected_valid_field_mask = 0x3F; /* 6 fields */
+  uint16_t expected_valid_field_mask = IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_ALL_FIELD_MASK;
   unsigned int token_data_read = 0;
   unsigned int expected_token_data_read = 0;
   uint8_t webserverenable;
@@ -2142,7 +2353,7 @@ ipmi_oem_dell_get_web_server_config (ipmi_oem_state_data_t *state_data)
   assert (!state_data->prog_data->args->oem_options_count);
 
   if (_dell_get_extended_configuration (state_data,
-					IPMI_OEM_DELL_TOKEN_ID_WEB_SERVER,
+					IPMI_OEM_DELL_TOKEN_ID_WEB_SERVER_CONFIGURATION,
 					token_data,
 					IPMI_OEM_DELL_TOKEN_DATA_MAX,
 					expected_valid_field_mask,
@@ -2211,7 +2422,7 @@ ipmi_oem_dell_set_web_server_config (ipmi_oem_state_data_t *state_data)
   uint16_t httpportnumber = 0;
   uint16_t httpsportnumber = 0;
   int rv = -1;
-  int i;
+  unsigned int i;
 
   /* Dell OEM
    *
@@ -2252,39 +2463,39 @@ ipmi_oem_dell_set_web_server_config (ipmi_oem_state_data_t *state_data)
       char *key = NULL;
       char *value = NULL;
       
-      if (_parse_key_value (state_data,
-                            i,
-                            &key,
-                            &value) < 0)
+      if (ipmi_oem_parse_key_value (state_data,
+                                    i,
+                                    &key,
+                                    &value) < 0)
         goto cleanup;
 
       if (!strcasecmp (key, "webserver"))
         {
-          if (_parse_enable (state_data, i, value, &webserverenable) < 0)
+          if (ipmi_oem_parse_enable (state_data, i, value, &webserverenable) < 0)
             goto cleanup;
 
-          valid_field_mask |= 0x0001;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_ENABLE_FIELD_MASK;
         }
       else if (!strcasecmp (key, "sessiontimeout"))
         {
-          if (_parse_timeout (state_data, i, value, &sessiontimeout) < 0)
+          if (ipmi_oem_parse_4_byte_field (state_data, i, value, &sessiontimeout) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0008;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_SESSION_TIMEOUT_FIELD_MASK;
         }
       else if (!strcasecmp (key, "httpportnumber"))
         {
-          if (_parse_port (state_data, i, value, &httpportnumber) < 0)
+          if (ipmi_oem_parse_2_byte_field (state_data, i, value, &httpportnumber) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0010;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_HTTP_PORT_NUMBER_FIELD_MASK;
         }
       else if (!strcasecmp (key, "httpsportnumber"))
         {
-          if (_parse_port (state_data, i, value, &httpsportnumber) < 0)
+          if (ipmi_oem_parse_2_byte_field (state_data, i, value, &httpsportnumber) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0020;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_WEB_SERVER_CONFIGURATION_HTTPS_PORT_NUMBER_FIELD_MASK;
         }
       else
         {
@@ -2314,7 +2525,7 @@ ipmi_oem_dell_set_web_server_config (ipmi_oem_state_data_t *state_data)
   token_data[10] = (httpsportnumber & 0xFF00) >> 8;
 
   if (_dell_set_extended_configuration (state_data,
-					IPMI_OEM_DELL_TOKEN_ID_WEB_SERVER,
+					IPMI_OEM_DELL_TOKEN_ID_WEB_SERVER_CONFIGURATION,
 					token_data,
 					11,
 					valid_field_mask) < 0)
@@ -2329,7 +2540,7 @@ int
 ipmi_oem_dell_get_active_directory_config (ipmi_oem_state_data_t *state_data)
 {
   uint8_t token_data[IPMI_OEM_MAX_BYTES];
-  uint16_t expected_valid_field_mask = 0xFFFF; /* 16 fields */
+  uint16_t expected_valid_field_mask = IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_ALL_FIELD_MASK;
   unsigned int token_data_read = 0;
   unsigned int min_token_data_read = 0;
   uint8_t ad_enable;
@@ -2416,7 +2627,7 @@ ipmi_oem_dell_get_active_directory_config (ipmi_oem_state_data_t *state_data)
   memset (ad_gc_filter3_string, '\0', IPMI_OEM_DELL_TOKEN_STRING_MAX+1);
 
   if (_dell_get_extended_configuration (state_data,
-					IPMI_OEM_DELL_TOKEN_ID_ACTIVE_DIRECTORY,
+					IPMI_OEM_DELL_TOKEN_ID_AD_CONFIGURATION,
 					token_data,
 					IPMI_OEM_DELL_TOKEN_DATA_MAX,
 					expected_valid_field_mask,
@@ -2669,7 +2880,7 @@ ipmi_oem_dell_set_active_directory_config (ipmi_oem_state_data_t *state_data)
   uint8_t ad_certificate_validation_enable = 0; 
   unsigned int offset = 0;
   int rv = -1;
-  int i;
+  unsigned int i;
 
   /* Dell OEM
    *
@@ -2730,63 +2941,63 @@ ipmi_oem_dell_set_active_directory_config (ipmi_oem_state_data_t *state_data)
       char *key = NULL;
       char *value = NULL;
       
-      if (_parse_key_value (state_data,
-                            i,
-                            &key,
-                            &value) < 0)
+      if (ipmi_oem_parse_key_value (state_data,
+                                    i,
+                                    &key,
+                                    &value) < 0)
         goto cleanup;
 
       if (!strcasecmp (key, "activedirectory"))
         {
-          if (_parse_enable (state_data, i, value, &ad_enable) < 0)
+          if (ipmi_oem_parse_enable (state_data, i, value, &ad_enable) < 0)
             goto cleanup;
 
-          valid_field_mask |= 0x0001;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_ENABLE_FIELD_MASK;
         }
       else if (!strcasecmp (key, "timeout"))
         {
-          if (_parse_timeout (state_data, i, value, &ad_timeout) < 0)
+          if (ipmi_oem_parse_4_byte_field (state_data, i, value, &ad_timeout) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0002;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_TIMEOUT_FIELD_MASK;
         }
 #if 0
-/* don't support for now */
+      /* don't support for now */
       else if (!strcasecmp (key, "rootdomain"))
         {
-          if (_parse_string (state_data,
-			     i,
-			     value,
-			     &ad_root_domain_string_length,
-			     ad_root_domain_string,
-			     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
+          if (ipmi_oem_parse_string (state_data,
+                                     i,
+                                     value,
+                                     &ad_root_domain_string_length,
+                                     ad_root_domain_string,
+                                     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0004;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_ROOT_DOMAIN_FIELD_MASK;
         }
       else if (!strcasecmp (key, "racdomain"))
         {
-          if (_parse_string (state_data,
-			     i,
-			     value,
-			     &ad_rac_domain_string_length,
-			     ad_rac_domain_string,
-			     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
+          if (ipmi_oem_parse_string (state_data,
+                                     i,
+                                     value,
+                                     &ad_rac_domain_string_length,
+                                     ad_rac_domain_string,
+                                     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0008;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_RAC_DOMAIN_FIELD_MASK;
         }
       else if (!strcasecmp (key, "racname"))
         {
-          if (_parse_string (state_data,
-			     i,
-			     value,
-			     &ad_rac_name_string_length,
-			     ad_rac_name_string,
-			     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
+          if (ipmi_oem_parse_string (state_data,
+                                     i,
+                                     value,
+                                     &ad_rac_name_string_length,
+                                     ad_rac_name_string,
+                                     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0010;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_RAC_NAME_FIELD_MASK;
         }
 #endif
       else if (!strcasecmp (key, "type"))
@@ -2803,120 +3014,120 @@ ipmi_oem_dell_set_active_directory_config (ipmi_oem_state_data_t *state_data)
 	    }
 	  
 	  if (!strcasecmp (value, "extended"))
-	    ad_type = 1;
+	    ad_type = IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_TYPE_EXTENDED;
 	  else
-	    ad_type = 2;
+	    ad_type = IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_TYPE_STANDARD;
 
-	  valid_field_mask |= 0x0020;
+	  valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_TYPE_FIELD_MASK;
 	}
 #if 0
       /* read only on iDRAC6 */
       else if (!strcasecmp (key, "smartcardlogon"))
         {
-          if (_parse_enable (state_data, i, value, &scl_state) < 0)
+          if (ipmi_oem_parse_enable (state_data, i, value, &scl_state) < 0)
             goto cleanup;
 
-          valid_field_mask |= 0x0040;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_SCL_STATE_FIELD_MASK;
         }
 #endif
 #if 0
       /* read only on iDRAC6 */
       else if (!strcasecmp (key, "certificaterevocationlist"))
         {
-          if (_parse_enable (state_data, i, value, &crl_state) < 0)
+          if (ipmi_oem_parse_enable (state_data, i, value, &crl_state) < 0)
             goto cleanup;
 
-          valid_field_mask |= 0x0080;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_CRL_STATE_FIELD_MASK;
         }
 #endif
       else if (!strcasecmp (key, "sso"))
         {
-          if (_parse_enable (state_data, i, value, &ad_sso_enable) < 0)
+          if (ipmi_oem_parse_enable (state_data, i, value, &ad_sso_enable) < 0)
             goto cleanup;
 
-          valid_field_mask |= 0x0100;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_SSO_ENABLE_FIELD_MASK;
         }
 #if 0
-/* don't support for now */
+      /* don't support for now */
       else if (!strcasecmp (key, "dcfilter1"))
         {
-          if (_parse_string (state_data,
-			     i,
-			     value,
-			     &ad_dc_filter1_string_length,
-			     ad_dc_filter1_string,
-			     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
+          if (ipmi_oem_parse_string (state_data,
+                                     i,
+                                     value,
+                                     &ad_dc_filter1_string_length,
+                                     ad_dc_filter1_string,
+                                     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0200;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_DC_FILTER1_FIELD_MASK;
         }
       else if (!strcasecmp (key, "dcfilter2"))
         {
-          if (_parse_string (state_data,
-			     i,
-			     value,
-			     &ad_dc_filter2_string_length,
-			     ad_dc_filter2_string,
-			     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
+          if (ipmi_oem_parse_string (state_data,
+                                     i,
+                                     value,
+                                     &ad_dc_filter2_string_length,
+                                     ad_dc_filter2_string,
+                                     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0400;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_DC_FILTER2_FIELD_MASK;
         }
       else if (!strcasecmp (key, "dcfilter3"))
         {
-          if (_parse_string (state_data,
-			     i,
-			     value,
-			     &ad_dc_filter3_string_length,
-			     ad_dc_filter3_string,
-			     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
+          if (ipmi_oem_parse_string (state_data,
+                                     i,
+                                     value,
+                                     &ad_dc_filter3_string_length,
+                                     ad_dc_filter3_string,
+                                     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x0800;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_DC_FILTER3_FIELD_MASK;
         }
       else if (!strcasecmp (key, "gcfilter1"))
         {
-          if (_parse_string (state_data,
-			     i,
-			     value,
-			     &ad_gc_filter1_string_length,
-			     ad_gc_filter1_string,
-			     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
+          if (ipmi_oem_parse_string (state_data,
+                                     i,
+                                     value,
+                                     &ad_gc_filter1_string_length,
+                                     ad_gc_filter1_string,
+                                     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x1000;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_GC_FILTER1_FIELD_MASK;
         }
       else if (!strcasecmp (key, "gcfilter2"))
         {
-          if (_parse_string (state_data,
-			     i,
-			     value,
-			     &ad_gc_filter2_string_length,
-			     ad_gc_filter2_string,
-			     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
+          if (ipmi_oem_parse_string (state_data,
+                                     i,
+                                     value,
+                                     &ad_gc_filter2_string_length,
+                                     ad_gc_filter2_string,
+                                     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x2000;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_GC_FILTER2_FIELD_MASK;
         }
       else if (!strcasecmp (key, "gcfilter3"))
         {
-          if (_parse_string (state_data,
-			     i,
-			     value,
-			     &ad_gc_filter3_string_length,
-			     ad_gc_filter3_string,
-			     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
+          if (ipmi_oem_parse_string (state_data,
+                                     i,
+                                     value,
+                                     &ad_gc_filter3_string_length,
+                                     ad_gc_filter3_string,
+                                     IPMI_OEM_DELL_TOKEN_STRING_MAX) < 0)
             goto cleanup;
           
-          valid_field_mask |= 0x4000;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_GC_FILTER3_FIELD_MASK;
         }
 #endif
       else if (!strcasecmp (key, "certificatevalidation"))
         {
-          if (_parse_enable (state_data, i, value, &ad_certificate_validation_enable) < 0)
+          if (ipmi_oem_parse_enable (state_data, i, value, &ad_certificate_validation_enable) < 0)
             goto cleanup;
 
-          valid_field_mask |= 0x8000;
+          valid_field_mask |= IPMI_OEM_DELL_EXTENDED_CONFIG_AD_CONFIGURATION_AD_CERTIFICATE_VALIDATION_ENABLE_FIELD_MASK;
         }
       else
         {
@@ -3053,7 +3264,7 @@ ipmi_oem_dell_set_active_directory_config (ipmi_oem_state_data_t *state_data)
   offset++;
 
   if (_dell_set_extended_configuration (state_data,
-					IPMI_OEM_DELL_TOKEN_ID_ACTIVE_DIRECTORY,
+					IPMI_OEM_DELL_TOKEN_ID_AD_CONFIGURATION,
 					token_data,
 					offset,
 					valid_field_mask) < 0)
@@ -3077,6 +3288,8 @@ ipmi_oem_dell_reset_to_defaults (ipmi_oem_state_data_t *state_data)
 
   /* Dell Poweredge OEM
    *
+   * From Dell Provided Docs
+   *
    * From Dell Provided Source Code
    *
    * Request
@@ -3094,12 +3307,12 @@ ipmi_oem_dell_reset_to_defaults (ipmi_oem_state_data_t *state_data)
    *             - 0x01 = reset to defaults complete 
    */
 
-  bytes_rq[0] = 0x21;
-  bytes_rq[1] = 0xaa;
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_RESET_TO_DEFAULTS;
+  bytes_rq[1] = IPMI_OEM_DELL_RESET_TO_DEFAULTS_INITIATE_RESULT_TO_DEFAULTS;
 
   if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
                               0, /* lun */
-                              0x30, /* network function */
+                              IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
                               bytes_rq, /* data */
                               2, /* num bytes */
                               bytes_rs,
@@ -3108,7 +3321,7 @@ ipmi_oem_dell_reset_to_defaults (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_raw: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -3116,20 +3329,21 @@ ipmi_oem_dell_reset_to_defaults (ipmi_oem_state_data_t *state_data)
                                                    bytes_rs,
                                                    rs_len,
                                                    3,
-                                                   0x21,
-                                                   0x30) < 0)
+                                                   IPMI_CMD_OEM_DELL_RESET_TO_DEFAULTS,
+                                                   IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                   NULL) < 0)
     goto cleanup;
 
 
   /* don't quit until it is done */
   while (1)
     {
-      bytes_rq[0] = 0x21;
-      bytes_rq[1] = 0x00;
+      bytes_rq[0] = IPMI_CMD_OEM_DELL_RESET_TO_DEFAULTS;
+      bytes_rq[1] = IPMI_OEM_DELL_RESET_TO_DEFAULTS_GET_STATUS;
       
       if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
 				  0, /* lun */
-				  0x30, /* network function */
+				  IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
 				  bytes_rq, /* data */
 				  2, /* num bytes */
 				  bytes_rs,
@@ -3138,7 +3352,7 @@ ipmi_oem_dell_reset_to_defaults (ipmi_oem_state_data_t *state_data)
 	  pstdout_fprintf (state_data->pstate,
 			   stderr,
 			   "ipmi_cmd_raw: %s\n",
-			   ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+			   ipmi_ctx_errormsg (state_data->ipmi_ctx));
 	  goto cleanup;
 	}
       
@@ -3146,11 +3360,12 @@ ipmi_oem_dell_reset_to_defaults (ipmi_oem_state_data_t *state_data)
 						       bytes_rs,
 						       rs_len,
 						       3,
-						       0x21,
-						       0x30) < 0)
+						       IPMI_CMD_OEM_DELL_RESET_TO_DEFAULTS,
+						       IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                       NULL) < 0)
 	goto cleanup;
 
-      if (bytes_rs[2] == 0x01)
+      if (bytes_rs[2] == IPMI_OEM_DELL_RESET_TO_DEFAULTS_COMPLETE)
 	break;
 
       sleep (1);
@@ -3162,7 +3377,7 @@ ipmi_oem_dell_reset_to_defaults (ipmi_oem_state_data_t *state_data)
 }
 
 int
-ipmi_oem_dell_get_power_info (ipmi_oem_state_data_t *state_data)
+ipmi_oem_dell_get_power_consumption_data (ipmi_oem_state_data_t *state_data)
 {
   uint8_t bytes_rq[IPMI_OEM_MAX_BYTES];
   uint8_t bytes_rs[IPMI_OEM_MAX_BYTES];
@@ -3184,23 +3399,24 @@ ipmi_oem_dell_get_power_info (ipmi_oem_state_data_t *state_data)
   assert (state_data);
   assert (!state_data->prog_data->args->oem_options_count);
 
-  /* Dell OEM
+  /* Dell Poweredge OEM
    *
    * From http://linux.dell.com/files/openipmi/ipmitool/
+   * From Dell Provided Docs
    *
    * Request
    *
    * 0x30 - OEM network function
    * 0x9c - OEM cmd
-   * 0x07 - ??
-   * 0x01 - ??
+   * 0x07 - Entity ID
+   * 0x01 - Entity Instance
    * 
    * Response
    *
    * 0x9c - OEM cmd
    * 0x?? - Completion Code
    * bytes 2-5 - cumulative start time
-   * bytes 6-9 - cumulative reading
+   * bytes 6-9 - cumulative reading (in WH)
    * bytes 10-13 - peak start time
    * bytes 14-17 - peak amp time
    * bytes 18-21 - peak amp reading
@@ -3208,13 +3424,13 @@ ipmi_oem_dell_get_power_info (ipmi_oem_state_data_t *state_data)
    * bytes 26-29 - peak watt reading
    */
 
-  bytes_rq[0] = 0x9c;
-  bytes_rq[1] = 0x07;
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_GET_POWER_CONSUMPTION_DATA;
+  bytes_rq[1] = IPMI_ENTITY_ID_SYSTEM_BOARD;
   bytes_rq[2] = 0x01;
 
   if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
                               0, /* lun */
-                              0x30, /* network function */
+                              IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
                               bytes_rq, /* data */
                               3, /* num bytes */
                               bytes_rs,
@@ -3223,7 +3439,7 @@ ipmi_oem_dell_get_power_info (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_raw: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -3231,8 +3447,9 @@ ipmi_oem_dell_get_power_info (ipmi_oem_state_data_t *state_data)
                                                    bytes_rs,
                                                    rs_len,
                                                    26,
-                                                   0x9c,
-                                                   0x30) < 0)
+                                                   IPMI_CMD_OEM_DELL_GET_POWER_CONSUMPTION_DATA,
+                                                   IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                   NULL) < 0)
     goto cleanup;
 
   cumulative_start_time = bytes_rs[2];
@@ -3268,6 +3485,12 @@ ipmi_oem_dell_get_power_info (ipmi_oem_state_data_t *state_data)
 
   cumulative_reading_val = ((double)cumulative_reading) / 1000.0;
 
+  /* Posix says individual calls need not clear/set all portions of
+   * 'struct tm', thus passing 'struct tm' between functions could
+   * have issues.  So we need to memset.
+   */
+  memset (&time_tm, '\0', sizeof(struct tm));
+
   timetmp = cumulative_start_time;
   localtime_r (&timetmp, &time_tm);
   memset (time_buf, '\0', IPMI_OEM_TIME_BUFLEN + 1);
@@ -3283,6 +3506,12 @@ ipmi_oem_dell_get_power_info (ipmi_oem_state_data_t *state_data)
 
   peak_amp_reading_val = ((double)peak_amp_reading) / 10.0;
 
+  /* Posix says individual calls need not clear/set all portions of
+   * 'struct tm', thus passing 'struct tm' between functions could
+   * have issues.  So we need to memset.
+   */
+  memset (&time_tm, '\0', sizeof(struct tm));
+
   timetmp = peak_amp_time;
   localtime_r (&timetmp, &time_tm);
   memset (time_buf, '\0', IPMI_OEM_TIME_BUFLEN + 1);
@@ -3295,6 +3524,12 @@ ipmi_oem_dell_get_power_info (ipmi_oem_state_data_t *state_data)
   pstdout_printf (state_data->pstate,
                   "Peak Amp                     : %.2f A\n",
                   peak_amp_reading_val);
+
+  /* Posix says individual calls need not clear/set all portions of
+   * 'struct tm', thus passing 'struct tm' between functions could
+   * have issues.  So we need to memset.
+   */
+  memset (&time_tm, '\0', sizeof(struct tm));
 
   timetmp = peak_watt_time;
   localtime_r (&timetmp, &time_tm);
@@ -3315,7 +3550,7 @@ ipmi_oem_dell_get_power_info (ipmi_oem_state_data_t *state_data)
 }
 
 int
-ipmi_oem_dell_reset_power_info (ipmi_oem_state_data_t *state_data)
+ipmi_oem_dell_reset_power_consumption_data (ipmi_oem_state_data_t *state_data)
 {
   uint8_t bytes_rq[IPMI_OEM_MAX_BYTES];
   uint8_t bytes_rs[IPMI_OEM_MAX_BYTES];
@@ -3325,6 +3560,11 @@ ipmi_oem_dell_reset_power_info (ipmi_oem_state_data_t *state_data)
   assert (state_data);
   assert (state_data->prog_data->args->oem_options_count == 1);
 
+  /* achu: XXX
+   *
+   * "both" or "all" byte doesn't appear to work, maybe in a later
+   * firmware release?
+   */
   if (strcasecmp (state_data->prog_data->args->oem_options[0], "cumulative")
       && strcasecmp (state_data->prog_data->args->oem_options[0], "peak"))
     {
@@ -3337,17 +3577,18 @@ ipmi_oem_dell_reset_power_info (ipmi_oem_state_data_t *state_data)
       goto cleanup;
     }
 
-  /* Dell OEM
+  /* Dell Poweredge OEM
    *
    * From http://linux.dell.com/files/openipmi/ipmitool/
+   * From Dell Provided Docs
    *
    * Request
    *
    * 0x30 - OEM network function
    * 0x9d - OEM cmd
-   * 0x07 - ??
-   * 0x01 - ??
-   * 0x?? - field to clear (0x1 = cumulative, 0x2 = peak)
+   * 0x07 - Entity ID
+   * 0x01 - Entity Instance
+   * 0x?? - field to clear (0x1 = cumulative, 0x2 = peak, 0x4 = all/both)
    * 
    * Response
    *
@@ -3355,18 +3596,20 @@ ipmi_oem_dell_reset_power_info (ipmi_oem_state_data_t *state_data)
    * 0x?? - Completion Code
    */
 
-  bytes_rq[0] = 0x9d;
-  bytes_rq[1] = 0x07;
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_RESET_POWER_CONSUMPTION_DATA;
+  bytes_rq[1] = IPMI_ENTITY_ID_SYSTEM_BOARD;
   bytes_rq[2] = 0x01;
 
   if (!strcasecmp (state_data->prog_data->args->oem_options[0], "cumulative"))
-    bytes_rq[3] = 1;
+    bytes_rq[3] = IPMI_OEM_DELL_RESET_POWER_CONSUMPTION_DATA_CUMULATIVE;
+  else if (!strcasecmp (state_data->prog_data->args->oem_options[0], "peak"))
+    bytes_rq[3] = IPMI_OEM_DELL_RESET_POWER_CONSUMPTION_DATA_PEAK;
   else
-    bytes_rq[3] = 2;
+    bytes_rq[3] = IPMI_OEM_DELL_RESET_POWER_CONSUMPTION_DATA_ALL;
   
   if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
                               0, /* lun */
-                              0x30, /* network function */
+                              IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
                               bytes_rq, /* data */
                               4, /* num bytes */
                               bytes_rs,
@@ -3375,7 +3618,7 @@ ipmi_oem_dell_reset_power_info (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_raw: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
   
@@ -3383,57 +3626,351 @@ ipmi_oem_dell_reset_power_info (ipmi_oem_state_data_t *state_data)
                                                    bytes_rs,
                                                    rs_len,
                                                    2,
-                                                   0x9d,
-                                                   0x30) < 0)
+                                                   IPMI_CMD_OEM_DELL_RESET_POWER_CONSUMPTION_DATA,
+                                                   IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                   NULL) < 0)
     goto cleanup;
   
   rv = 0;
  cleanup:
   return (rv);
- 
 }
 
 int
-ipmi_oem_dell_get_instantaneous_power_consumption_info (ipmi_oem_state_data_t *state_data)
+ipmi_oem_dell_power_supply_info (ipmi_oem_state_data_t *state_data)
+{
+  struct sensor_entity_id_counts entity_id_counts;
+  uint16_t record_count;
+  int i;
+  int rv = -1;
+
+  assert (state_data);
+  assert (!state_data->prog_data->args->oem_options_count);
+
+  if (sdr_cache_create_and_load (state_data->sdr_cache_ctx,
+                                 state_data->pstate,
+                                 state_data->ipmi_ctx,
+                                 state_data->prog_data->args->sdr.quiet_cache,
+                                 state_data->prog_data->args->sdr.sdr_cache_recreate,
+                                 state_data->hostname,
+                                 state_data->prog_data->args->sdr.sdr_cache_directory) < 0)
+    goto cleanup;
+
+  if (calculate_entity_id_counts (state_data->pstate,
+				  state_data->sdr_cache_ctx,
+				  state_data->sdr_parse_ctx,
+				  &entity_id_counts) < 0)
+    goto cleanup;
+
+  if (ipmi_sdr_cache_record_count (state_data->sdr_cache_ctx, &record_count) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "ipmi_sdr_cache_record_count: %s\n",
+		       ipmi_sdr_cache_ctx_errormsg (state_data->sdr_cache_ctx));
+      goto cleanup;
+    }
+
+  /* Dell Poweredge OEM
+   *
+   * Power Supply Info Request
+   * From Dell Provided Docs
+   *
+   * 0x30 - OEM network function
+   * 0xB0 - OEM cmd
+   * 0x?? - Power Supply Entity ID
+   * 0x?? - Power Supply Entity Instance
+   *
+   * Get Power Supply Info Response
+   *
+   * 0xB0 - OEM cmd
+   * 0x?? - Completion Code
+   * bytes 2-3 - rated watts
+   * bytes 4-5 - rated amps (in 0.1 amps)
+   * bytes 6-7 - rated volts
+   * bytes 8-11 - component ID (internal for Dell)
+   * bytes 12-19 - firmware version (string, non-null terminated)
+   * bytes 20 - power supply type
+   * - 0x00 - AC
+   * - 0x01 - DC
+   * bytes 21-22 - rated dc watts
+   * bytes 23 - online status
+   * - maps to power supply sensor events
+   * bytes 24 - reserved
+   */
+
+  for (i = 0; i < record_count; i++, ipmi_sdr_cache_next (state_data->sdr_cache_ctx))
+    {
+      uint8_t sdr_record[IPMI_SDR_CACHE_MAX_SDR_RECORD_LENGTH];
+      int sdr_record_len = 0;
+      uint16_t record_id;
+      uint8_t record_type;
+
+      if ((sdr_record_len = ipmi_sdr_cache_record_read (state_data->sdr_cache_ctx,
+							sdr_record,
+							IPMI_SDR_CACHE_MAX_SDR_RECORD_LENGTH)) < 0)
+	{
+	  pstdout_fprintf (state_data->pstate,
+			   stderr,
+			   "ipmi_sdr_cache_record_read: %s\n",
+			   ipmi_sdr_cache_ctx_errormsg (state_data->sdr_cache_ctx));
+	  goto cleanup;
+	}
+      
+      if (ipmi_sdr_parse_record_id_and_type (state_data->sdr_parse_ctx,
+					     sdr_record,
+					     sdr_record_len,
+					     &record_id,
+					     &record_type) < 0)
+	{
+	  pstdout_fprintf (state_data->pstate,
+			   stderr,
+			   "ipmi_sdr_parse_record_id_and_type: %s\n",
+			   ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+	  goto cleanup;
+	}
+      
+      if (record_type == IPMI_SDR_FORMAT_FULL_SENSOR_RECORD
+	  || record_type == IPMI_SDR_FORMAT_COMPACT_SENSOR_RECORD)
+	{
+	  uint8_t entity_id;
+	  uint8_t entity_instance;
+	  uint8_t entity_instance_type;
+	  uint8_t sensor_type;
+	  
+	  if (ipmi_sdr_parse_entity_id_instance_type (state_data->sdr_parse_ctx,
+						      sdr_record,
+						      sdr_record_len,
+						      &entity_id,
+						      &entity_instance,
+						      &entity_instance_type) < 0)
+	    {
+	      pstdout_fprintf (state_data->pstate,
+			       stderr,
+			       "ipmi_sdr_parse_entity_id_instance_type: %s\n",
+			       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+	      goto cleanup;
+	    }
+	  
+	  if (ipmi_sdr_parse_sensor_type (state_data->sdr_parse_ctx,
+					  sdr_record,
+					  sdr_record_len,
+					  &sensor_type) < 0)
+	    {
+	      pstdout_fprintf (state_data->pstate,
+			       stderr,
+			       "ipmi_sdr_parse_sensor_type: %s\n",
+			       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+	      goto cleanup;
+	    }
+	  
+	  if (entity_id == IPMI_ENTITY_ID_POWER_SUPPLY
+	      && entity_instance_type == IPMI_SDR_PHYSICAL_ENTITY
+	      && sensor_type == IPMI_SENSOR_TYPE_POWER_SUPPLY)
+	    {
+	      uint8_t bytes_rq[IPMI_OEM_MAX_BYTES];
+	      uint8_t bytes_rs[IPMI_OEM_MAX_BYTES];
+	      int rs_len;
+	      uint16_t ratedwatts;
+	      uint16_t ratedamps;
+	      uint16_t ratedvolts;
+	      uint32_t componentid;
+	      char firmwareversion[IPMI_OEM_MAX_BYTES];
+	      uint8_t powersupplytype;
+	      uint16_t rateddcwatts;
+              uint8_t onlinestatus;
+	      double ratedamps_val;
+	      char sensor_name_buf[MAX_ENTITY_ID_SENSOR_NAME_STRING + 1];
+	      
+	      memset (firmwareversion, '\0', IPMI_OEM_MAX_BYTES);
+
+	      /* achu note:
+	       *
+	       * Dell code does not check for potential sdr record
+	       * sharing, so I won't either.
+	       */
+
+	      if (get_entity_sensor_name_string (state_data->pstate,
+						 state_data->sdr_parse_ctx,
+						 sdr_record,
+						 sdr_record_len,
+						 &entity_id_counts,
+                                                 NULL,
+						 sensor_name_buf,
+						 MAX_ENTITY_ID_SENSOR_NAME_STRING) < 0)
+		goto cleanup;
+	      
+	      bytes_rq[0] = IPMI_CMD_OEM_DELL_POWER_SUPPLY_INFO;
+	      bytes_rq[1] = entity_id;
+	      bytes_rq[2] = entity_instance;
+	      
+	      if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
+					  0, /* lun */
+					  IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
+					  bytes_rq, /* data */
+					  3, /* num bytes */
+					  bytes_rs,
+					  IPMI_OEM_MAX_BYTES)) < 0)
+		{
+		  pstdout_fprintf (state_data->pstate,
+				   stderr,
+				   "ipmi_cmd_raw: %s\n",
+				   ipmi_ctx_errormsg (state_data->ipmi_ctx));
+		  goto cleanup;
+		}
+	      
+	      if (ipmi_oem_check_response_and_completion_code (state_data,
+							       bytes_rs,
+							       rs_len,
+							       25,
+							       IPMI_CMD_OEM_DELL_POWER_SUPPLY_INFO,
+							       IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                               NULL) < 0)
+		goto cleanup;
+	      
+	      ratedwatts = bytes_rs[2];
+	      ratedwatts |= (bytes_rs[3] << 8);
+	      
+	      ratedamps = bytes_rs[4];
+	      ratedamps |= (bytes_rs[5] << 8);
+	      
+	      ratedvolts = bytes_rs[6];
+	      ratedvolts |= (bytes_rs[7] << 8);
+	      
+	      componentid = bytes_rs[8];
+	      componentid |= (bytes_rs[9] << 8);
+	      componentid |= (bytes_rs[10] << 16);
+	      componentid |= (bytes_rs[11] << 24);
+	      
+	      memcpy(firmwareversion, &(bytes_rs[12]), 8);
+	      
+	      powersupplytype = bytes_rs[20];
+	      
+	      rateddcwatts = bytes_rs[21];
+	      rateddcwatts |= (bytes_rs[22] << 8);
+
+              onlinestatus = bytes_rs[23];
+	      
+	      pstdout_printf (state_data->pstate,
+			      "Power Supply      : %s\n",
+			      sensor_name_buf);
+
+	      pstdout_printf (state_data->pstate,
+			      "Rated Watts       : %u W\n",
+			      ratedwatts);
+	      
+	      ratedamps_val = ((double)ratedamps) / 10.0;
+
+	      pstdout_printf (state_data->pstate,
+			      "Rated Amps        : %.2f A\n",
+			      ratedamps_val);
+
+	      pstdout_printf (state_data->pstate,
+			      "Rated Volts       : %u V\n",
+			      ratedvolts);
+
+	      pstdout_printf (state_data->pstate,
+			      "Rated DC Watts    : %u W\n",
+			      rateddcwatts);
+	      
+	      pstdout_printf (state_data->pstate,
+			      "Power Supply Type : %s\n",
+			      (powersupplytype == IPMI_OEM_DELL_POWER_SUPPLY_INFO_DC) ? "DC" : "AC");
+              
+              if (onlinestatus <= ipmi_sensor_type_power_supply_max_index)
+                pstdout_printf (state_data->pstate,
+                                "Online Status     : %s\n",
+                                ipmi_sensor_type_power_supply[onlinestatus]);
+              else
+                pstdout_printf (state_data->pstate,
+                                "Online Status     : %02Xh\n",
+                                onlinestatus);
+	      
+	      pstdout_printf (state_data->pstate,
+			      "Firmare Version   : %s\n",
+			      firmwareversion);
+	      
+	      /* internal dell componentid code */
+	      pstdout_printf (state_data->pstate,
+			      "Dell Componentid  : %u\n",
+			      componentid);
+
+	      pstdout_printf (state_data->pstate,
+			      "\n");
+	    }
+	}
+    }
+
+  rv = 0;
+ cleanup:
+  return (rv);
+}
+
+int
+ipmi_oem_dell_get_instantaneous_power_consumption_data (ipmi_oem_state_data_t *state_data)
 {
   uint8_t bytes_rq[IPMI_OEM_MAX_BYTES];
   uint8_t bytes_rs[IPMI_OEM_MAX_BYTES];
-  uint16_t instantaneous_power_consumption;
+  uint16_t instantaneous_power;
   uint16_t instantaneous_amps;
   double instantaneous_amps_val;
   int rs_len;
   int rv = -1;
 
   assert (state_data);
-  assert (!state_data->prog_data->args->oem_options_count);
-
+ 
   /* Dell Poweredge OEM
    *
    * From Dell Provided Source Code
+   * From Dell Provided Docs
    *
    * Request
    *
    * 0x30 - OEM network function
    * 0xB3 - OEM cmd
-   * 0x0A - ??
-   * 0x00 - ??
+   * 0x0A - Entity ID
+   * 0x?? - Entity Instance
+   * - 0x00 - both/all power supplies
    * 
    * Response
    *
    * 0xB3 - OEM cmd
    * 0x?? - Completion Code
-   * bytes 2-3 - instantaneous power consumption
+   * bytes 2-3 - instantaneous power
    * bytes 4-5 - instantaneous amps
    * bytes 6-8 - reserved
    */
 
-  bytes_rq[0] = 0xB3;
-  bytes_rq[1] = 0x0A;
-  bytes_rq[2] = 0x00;
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_POWER_CONSUMPTION;
+  bytes_rq[1] = IPMI_ENTITY_ID_POWER_SUPPLY;
+  if (!state_data->prog_data->args->oem_options_count)
+    bytes_rq[2] = IPMI_OEM_DELL_POWER_CONSUMPTION_ENTITY_INSTANCE_ALL;
+  else
+    {
+      char *ptr = NULL;
+      unsigned int temp;
+      
+      errno = 0;
+      temp = strtoul (state_data->prog_data->args->oem_options[0], &ptr, 10);
+      if (errno
+          || temp > UCHAR_MAX
+          || ptr[0] != '\0')
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "%s:%s invalid OEM option argument '%s'\n",
+                           state_data->prog_data->args->oem_id,
+                           state_data->prog_data->args->oem_command,
+                           state_data->prog_data->args->oem_options[0]);
+          goto cleanup;
+        }
+
+      bytes_rq[2] = temp;
+    }    
 
   if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
                               0, /* lun */
-                              0x30, /* network function */
+                              IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
                               bytes_rq, /* data */
                               3, /* num bytes */
                               bytes_rs,
@@ -3442,7 +3979,7 @@ ipmi_oem_dell_get_instantaneous_power_consumption_info (ipmi_oem_state_data_t *s
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_raw: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -3450,12 +3987,13 @@ ipmi_oem_dell_get_instantaneous_power_consumption_info (ipmi_oem_state_data_t *s
                                                    bytes_rs,
                                                    rs_len,
                                                    9,
-                                                   0xB3,
-                                                   0x30) < 0)
+                                                   IPMI_CMD_OEM_DELL_POWER_CONSUMPTION,
+                                                   IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                   NULL) < 0)
     goto cleanup;
 
-  instantaneous_power_consumption = bytes_rs[2];
-  instantaneous_power_consumption |= (bytes_rs[3] << 8);
+  instantaneous_power = bytes_rs[2];
+  instantaneous_power |= (bytes_rs[3] << 8);
 
   instantaneous_amps = bytes_rs[4];
   instantaneous_amps |= (bytes_rs[5] << 8);
@@ -3463,11 +4001,11 @@ ipmi_oem_dell_get_instantaneous_power_consumption_info (ipmi_oem_state_data_t *s
   instantaneous_amps_val = ((double)instantaneous_amps) / 10.0;
 
   pstdout_printf (state_data->pstate,
-		  "Instantaneous Power Consumption : %u W\n",
-		  instantaneous_power_consumption);
+		  "Instantaneous Power : %u W\n",
+		  instantaneous_power);
 
   pstdout_printf (state_data->pstate,
-		  "Instantaneous Amperage          : %.2f A\n",
+		  "Instantaneous Amps  : %.2f A\n",
 		  instantaneous_amps_val);
 
   rv = 0;
@@ -3476,12 +4014,12 @@ ipmi_oem_dell_get_instantaneous_power_consumption_info (ipmi_oem_state_data_t *s
 }
 
 int
-ipmi_oem_dell_get_power_headroom_info (ipmi_oem_state_data_t *state_data)
+ipmi_oem_dell_get_power_head_room (ipmi_oem_state_data_t *state_data)
 {
   uint8_t bytes_rq[IPMI_OEM_MAX_BYTES];
   uint8_t bytes_rs[IPMI_OEM_MAX_BYTES];
-  uint16_t instantaneous_power_headroom;
-  uint16_t peak_power_headroom;
+  uint16_t instantaneous_head_room;
+  uint16_t peak_head_room;
   int rs_len;
   int rv = -1;
 
@@ -3491,6 +4029,7 @@ ipmi_oem_dell_get_power_headroom_info (ipmi_oem_state_data_t *state_data)
   /* Dell Poweredge OEM
    *
    * From Dell Provided Source Code
+   * From Dell Provided Docs
    *
    * Request
    *
@@ -3499,17 +4038,20 @@ ipmi_oem_dell_get_power_headroom_info (ipmi_oem_state_data_t *state_data)
    * 
    * Response
    *
-   * 0xB3 - OEM cmd
+   * 0xBB - OEM cmd
    * 0x?? - Completion Code
-   * bytes 2-3 - instantaneous power headroom
-   * bytes 4-5 - peak power headroom
+   * bytes 2-3 - instantaneous head room in watts
+   * bytes 4-5 - peak head room in watts
+   *
+   * Notes: Head room is the difference between Max potential and the
+   * current power consumption.
    */
 
-  bytes_rq[0] = 0xBB;
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_GET_POWER_HEAD_ROOM;
 
   if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
                               0, /* lun */
-                              0x30, /* network function */
+                              IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
                               bytes_rq, /* data */
                               1, /* num bytes */
                               bytes_rs,
@@ -3518,7 +4060,7 @@ ipmi_oem_dell_get_power_headroom_info (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_raw: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -3526,23 +4068,24 @@ ipmi_oem_dell_get_power_headroom_info (ipmi_oem_state_data_t *state_data)
                                                    bytes_rs,
                                                    rs_len,
                                                    6,
-                                                   0xBB,
-                                                   0x30) < 0)
+                                                   IPMI_CMD_OEM_DELL_GET_POWER_HEAD_ROOM,
+                                                   IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                   NULL) < 0)
     goto cleanup;
 
-  instantaneous_power_headroom = bytes_rs[2];
-  instantaneous_power_headroom |= (bytes_rs[3] << 8);
+  instantaneous_head_room = bytes_rs[2];
+  instantaneous_head_room |= (bytes_rs[3] << 8);
 
-  peak_power_headroom = bytes_rs[4];
-  peak_power_headroom |= (bytes_rs[5] << 8);
-
-  pstdout_printf (state_data->pstate,
-		  "Instantaneous Power Headroom : %u W\n",
-		  instantaneous_power_headroom);
+  peak_head_room = bytes_rs[4];
+  peak_head_room |= (bytes_rs[5] << 8);
 
   pstdout_printf (state_data->pstate,
-		  "Peak Power Headroom          : %u W\n",
-		  peak_power_headroom);
+		  "Instantaneous Head Room : %u W\n",
+		  instantaneous_head_room);
+
+  pstdout_printf (state_data->pstate,
+		  "Peak Head Room          : %u W\n",
+		  peak_head_room);
 
   rv = 0;
  cleanup:
@@ -3550,34 +4093,85 @@ ipmi_oem_dell_get_power_headroom_info (ipmi_oem_state_data_t *state_data)
 }
 
 int
-ipmi_oem_dell_get_average_power_history (ipmi_oem_state_data_t *state_data)
+ipmi_oem_dell_get_power_consumption_statistics (ipmi_oem_state_data_t *state_data)
 {
   fiid_obj_t obj_cmd_rs = NULL;
   uint8_t configuration_parameter_data[IPMI_OEM_MAX_BYTES];
-  uint16_t last_minute_average_power;
-  uint16_t last_hour_average_power;
-  uint16_t last_day_average_power;
-  uint16_t last_week_average_power;
+  uint16_t last_minute_power = 0;
+  uint16_t last_hour_power = 0;
+  uint16_t last_day_power = 0;
+  uint16_t last_week_power = 0;
+  uint32_t last_minute_power_time = 0;
+  uint32_t last_hour_power_time = 0;
+  uint32_t last_day_power_time = 0;
+  uint32_t last_week_power_time = 0;
+  time_t timetmp;
+  struct tm time_tm;
+  char time_buf[IPMI_OEM_TIME_BUFLEN + 1];
   int len;
+  uint8_t system_info_parameter;
+  char *system_info_string = NULL;
   int rv = -1;
 
   assert (state_data);
-  assert (!state_data->prog_data->args->oem_options_count);
+  assert (state_data->prog_data->args->oem_options_count == 1);
+
+  /* achu: handle some additional possibilities */
+  if (strcasecmp (state_data->prog_data->args->oem_options[0], "average")
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "avg")
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "maximum")
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "max")
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "minimum")
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "min"))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "%s:%s invalid OEM option argument '%s'\n",
+                       state_data->prog_data->args->oem_id,
+                       state_data->prog_data->args->oem_command,
+                       state_data->prog_data->args->oem_options[0]);
+      goto cleanup;
+    }
 
   /* Dell Poweredge OEM
    *
    * From Dell Provided Source Code
+   * From Dell Provided Docs
    *
    * Uses Get System Info command
    *
    * Parameter data response formatted:
+   *
+   * For IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_AVERAGE_POWER_CONSUMPTION_STATISTICS
    *
    * bytes 1-2 - last minute average power
    * bytes 3-4 - last hour average power
    * bytes 5-6 - last day average power
    * bytes 7-8 - last week average power
    *
+   * For IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MAX_POWER_CONSUMPTION_STATISTICS
+   * and IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MIN_POWER_CONSUMPTION_STATISTICS
+   *
+   * bytes 1-2 - last minute max/min power
+   * bytes 3-4 - last hour max/min power
+   * bytes 5-6 - last day max/min power
+   * bytes 7-8 - last week max/min power
+   * bytes 9-12 - last minute max/min power time
+   * bytes 13-16 - last hour max/min power time
+   * bytes 17-20 - last day max/min power time
+   * bytes 21-24 - last week max/min power time
+   *
    */
+
+  if (!strcasecmp (state_data->prog_data->args->oem_options[0], "average")
+      || !strcasecmp (state_data->prog_data->args->oem_options[0], "avg"))
+    system_info_parameter = IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_AVERAGE_POWER_CONSUMPTION_STATISTICS;
+  else if (!strcasecmp (state_data->prog_data->args->oem_options[0], "maximum")
+	   || !strcasecmp (state_data->prog_data->args->oem_options[0], "max"))
+    system_info_parameter = IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MAX_POWER_CONSUMPTION_STATISTICS;
+  else  /* (!strcasecmp (state_data->prog_data->args->oem_options[0], "minimum")
+	   || !strcasecmp (state_data->prog_data->args->oem_options[0], "min")) */
+    system_info_parameter = IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MIN_POWER_CONSUMPTION_STATISTICS;
 
   if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_get_system_info_parameters_rs)))
     {
@@ -3590,7 +4184,7 @@ ipmi_oem_dell_get_average_power_history (ipmi_oem_state_data_t *state_data)
 
   if (ipmi_cmd_get_system_info_parameters (state_data->ipmi_ctx,
                                            IPMI_GET_SYSTEM_INFO_PARAMETER,
-                                           IPMI_OEM_DELL_SYSTEM_INFO_AVERAGE_POWER_HISTORY,
+                                           system_info_parameter,
                                            0,
                                            IPMI_SYSTEM_INFO_NO_BLOCK_SELECTOR,
                                            obj_cmd_rs) < 0)
@@ -3598,7 +4192,7 @@ ipmi_oem_dell_get_average_power_history (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_get_system_info_parameters: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
@@ -3610,7 +4204,7 @@ ipmi_oem_dell_get_average_power_history (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "fiid_obj_get_data: 'configuration_parameter_data': %s\n",
-                       fiid_strerror (fiid_obj_errnum (obj_cmd_rs)));
+                       fiid_obj_errormsg (obj_cmd_rs));
       goto cleanup;
     }
 
@@ -3623,61 +4217,201 @@ ipmi_oem_dell_get_average_power_history (ipmi_oem_state_data_t *state_data)
       goto cleanup;
     }
   
-  last_minute_average_power = configuration_parameter_data[0];
-  last_minute_average_power |= (configuration_parameter_data[1] << 8);
+  last_minute_power = configuration_parameter_data[0];
+  last_minute_power |= (configuration_parameter_data[1] << 8);
 
-  last_hour_average_power = configuration_parameter_data[2];
-  last_hour_average_power |= (configuration_parameter_data[3] << 8);
+  last_hour_power = configuration_parameter_data[2];
+  last_hour_power |= (configuration_parameter_data[3] << 8);
 
-  last_day_average_power = configuration_parameter_data[4];
-  last_day_average_power |= (configuration_parameter_data[5] << 8);
+  last_day_power = configuration_parameter_data[4];
+  last_day_power |= (configuration_parameter_data[5] << 8);
 
-  last_week_average_power = configuration_parameter_data[6];
-  last_week_average_power |= (configuration_parameter_data[7] << 8);
+  last_week_power = configuration_parameter_data[6];
+  last_week_power |= (configuration_parameter_data[7] << 8);
+
+  if (system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MAX_POWER_CONSUMPTION_STATISTICS
+      || system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MIN_POWER_CONSUMPTION_STATISTICS)
+    {
+      last_minute_power_time = configuration_parameter_data[8];
+      last_minute_power_time |= (configuration_parameter_data[9] << 8);
+      last_minute_power_time |= (configuration_parameter_data[10] << 16);
+      last_minute_power_time |= (configuration_parameter_data[11] << 24);
+
+      last_hour_power_time = configuration_parameter_data[12];
+      last_hour_power_time |= (configuration_parameter_data[13] << 8);
+      last_hour_power_time |= (configuration_parameter_data[14] << 16);
+      last_hour_power_time |= (configuration_parameter_data[15] << 24);
+
+      last_day_power_time = configuration_parameter_data[16];
+      last_day_power_time |= (configuration_parameter_data[17] << 8);
+      last_day_power_time |= (configuration_parameter_data[18] << 16);
+      last_day_power_time |= (configuration_parameter_data[19] << 24);
+
+      last_week_power_time = configuration_parameter_data[20];
+      last_week_power_time |= (configuration_parameter_data[21] << 8);
+      last_week_power_time |= (configuration_parameter_data[22] << 16);
+      last_week_power_time |= (configuration_parameter_data[23] << 24);
+    }
+
+  if (system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_AVERAGE_POWER_CONSUMPTION_STATISTICS)
+    system_info_string = "Average";
+  else if (system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MAX_POWER_CONSUMPTION_STATISTICS)
+    system_info_string = "Max";
+  else
+    system_info_string = "Min";
 
   pstdout_printf (state_data->pstate,
-                  "Last Minute Average Power : %u W\n",
-		  last_minute_average_power);
+		  "Last Minute %s Power      : %u W\n",
+		  system_info_string,
+		  last_minute_power);
+  
+  if (system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MAX_POWER_CONSUMPTION_STATISTICS
+      || system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MIN_POWER_CONSUMPTION_STATISTICS)
+    {
+      /* Posix says individual calls need not clear/set all portions of
+       * 'struct tm', thus passing 'struct tm' between functions could
+       * have issues.  So we need to memset.
+       */
+      memset (&time_tm, '\0', sizeof(struct tm));
+      
+      timetmp = last_minute_power_time;
+      localtime_r (&timetmp, &time_tm);
+      memset (time_buf, '\0', IPMI_OEM_TIME_BUFLEN + 1);
+      strftime (time_buf, IPMI_OEM_TIME_BUFLEN, "%D - %T", &time_tm);
+      
+      pstdout_printf (state_data->pstate,
+		      "Last Minute %s Power Time : %s\n",
+		      system_info_string,
+		      time_buf);
+    }
 
   pstdout_printf (state_data->pstate,
-                  "Last Hour Average Power   : %u W\n",
-		  last_hour_average_power);
+		  "Last Hour %s Power        : %u W\n",
+		  system_info_string,
+		  last_hour_power);
+  
+  if (system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MAX_POWER_CONSUMPTION_STATISTICS
+      || system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MIN_POWER_CONSUMPTION_STATISTICS)
+    {
+      /* Posix says individual calls need not clear/set all portions of
+       * 'struct tm', thus passing 'struct tm' between functions could
+       * have issues.  So we need to memset.
+       */
+      memset (&time_tm, '\0', sizeof(struct tm));
+
+      timetmp = last_hour_power_time;
+      localtime_r (&timetmp, &time_tm);
+      memset (time_buf, '\0', IPMI_OEM_TIME_BUFLEN + 1);
+      strftime (time_buf, IPMI_OEM_TIME_BUFLEN, "%D - %T", &time_tm);
+      
+      pstdout_printf (state_data->pstate,
+		      "Last Hour %s Power Time   : %s\n",
+		      system_info_string,
+		      time_buf);
+    }
 
   pstdout_printf (state_data->pstate,
-                  "Last Day Average Power    : %u W\n",
-		  last_day_average_power);
+		  "Last Day %s Power         : %u W\n",
+		  system_info_string,
+		  last_day_power);
+  
+  if (system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MAX_POWER_CONSUMPTION_STATISTICS
+      || system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MIN_POWER_CONSUMPTION_STATISTICS)
+    {
+      /* Posix says individual calls need not clear/set all portions of
+       * 'struct tm', thus passing 'struct tm' between functions could
+       * have issues.  So we need to memset.
+       */
+      memset (&time_tm, '\0', sizeof(struct tm));
+
+      timetmp = last_day_power_time;
+      localtime_r (&timetmp, &time_tm);
+      memset (time_buf, '\0', IPMI_OEM_TIME_BUFLEN + 1);
+      strftime (time_buf, IPMI_OEM_TIME_BUFLEN, "%D - %T", &time_tm);
+
+      pstdout_printf (state_data->pstate,
+		      "Last Day %s Power Time    : %s\n",
+		      system_info_string,
+		      time_buf);
+    }
 
   pstdout_printf (state_data->pstate,
-                  "Last Week Average Power   : %u W\n",
-		  last_week_average_power);
+		  "Last Week %s Power        : %u W\n",
+		  system_info_string,
+		  last_week_power);
 
+  if (system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MAX_POWER_CONSUMPTION_STATISTICS
+      || system_info_parameter == IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_MIN_POWER_CONSUMPTION_STATISTICS)
+    {
+      /* Posix says individual calls need not clear/set all portions of
+       * 'struct tm', thus passing 'struct tm' between functions could
+       * have issues.  So we need to memset.
+       */
+      memset (&time_tm, '\0', sizeof(struct tm));
+
+      timetmp = last_week_power_time;
+      localtime_r (&timetmp, &time_tm);
+      memset (time_buf, '\0', IPMI_OEM_TIME_BUFLEN + 1);
+      strftime (time_buf, IPMI_OEM_TIME_BUFLEN, "%D - %T", &time_tm);
+      
+      pstdout_printf (state_data->pstate,
+		      "Last Week %s Power Time   : %s\n",
+		      system_info_string,
+		      time_buf);
+    }
+     
   rv = 0;
  cleanup:
   fiid_obj_destroy (obj_cmd_rs);
   return (rv);
 }
 
+/* legacy */
+int
+ipmi_oem_dell_get_average_power_history (ipmi_oem_state_data_t *state_data)
+{
+  assert (state_data);
+  assert (!state_data->prog_data->args->oem_options_count);
+
+  if (!(state_data->prog_data->args->oem_options[0] = strdup ("average")))
+    {
+      pstdout_perror (state_data->pstate,
+		      "strdup");
+      return (-1);
+    }
+  state_data->prog_data->args->oem_options_count++;
+  
+  return (ipmi_oem_dell_get_power_consumption_statistics (state_data));
+}
+
+/* legacy */
 int
 ipmi_oem_dell_get_peak_power_history (ipmi_oem_state_data_t *state_data)
 {
+  assert (state_data);
+  assert (!state_data->prog_data->args->oem_options_count);
+
+  if (!(state_data->prog_data->args->oem_options[0] = strdup ("max")))
+    {
+      pstdout_perror (state_data->pstate,
+		      "strdup");
+      return (-1);
+    }
+  state_data->prog_data->args->oem_options_count++;
+
+  return (ipmi_oem_dell_get_power_consumption_statistics (state_data));
+}
+
+static int
+_get_power_capacity (ipmi_oem_state_data_t *state_data,
+		     uint8_t *configuration_parameter_data,
+		     unsigned int configuration_parameter_data_len)
+{
   fiid_obj_t obj_cmd_rs = NULL;
-  uint8_t configuration_parameter_data[IPMI_OEM_MAX_BYTES];
-  uint16_t last_minute_peak_power;
-  uint16_t last_hour_peak_power;
-  uint16_t last_day_peak_power;
-  uint16_t last_week_peak_power;
-  uint32_t last_minute_peak_power_time;
-  uint32_t last_hour_peak_power_time;
-  uint32_t last_day_peak_power_time;
-  uint32_t last_week_peak_power_time;
-  time_t timetmp;
-  struct tm time_tm;
-  char time_buf[IPMI_OEM_TIME_BUFLEN + 1];
   int len;
   int rv = -1;
 
   assert (state_data);
-  assert (!state_data->prog_data->args->oem_options_count);
 
   /* Dell Poweredge OEM
    *
@@ -3687,14 +4421,20 @@ ipmi_oem_dell_get_peak_power_history (ipmi_oem_state_data_t *state_data)
    *
    * Parameter data response formatted:
    *
-   * bytes 1-2 - last minute peak power
-   * bytes 3-4 - last hour peak power
-   * bytes 5-6 - last day peak power
-   * bytes 7-8 - last week peak power
-   * bytes 9-12 - last minute peak power time
-   * bytes 13-16 - last hour peak power time
-   * bytes 17-20 - last day peak power time
-   * bytes 21-24 - last week peak power time
+   * bytes 1-2 - power capacity
+   * bytes 3 - units
+   *         - 0x00 watts (?)
+   *         - 0x01 btuphr (?)
+   *         - 0x03 percent (???)
+   * bytes 4-5 - maximum power consumption
+   * bytes 6-7 - minimum power consumption
+   * bytes 8 - total number of power supplies
+   * bytes 9-10 - available power
+   * bytes 11 - system throttling
+   *          - 0 - Normal system operation
+   *          - 1 - System needs to be throttled
+   *          - 2 - System is overconfigured
+   * bytes 12 - reserved
    *
    */
 
@@ -3709,7 +4449,7 @@ ipmi_oem_dell_get_peak_power_history (ipmi_oem_state_data_t *state_data)
 
   if (ipmi_cmd_get_system_info_parameters (state_data->ipmi_ctx,
                                            IPMI_GET_SYSTEM_INFO_PARAMETER,
-                                           IPMI_OEM_DELL_SYSTEM_INFO_PEAK_POWER_HISTORY,
+                                           IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_POWER_CAPACITY,
                                            0,
                                            IPMI_SYSTEM_INFO_NO_BLOCK_SELECTOR,
                                            obj_cmd_rs) < 0)
@@ -3717,23 +4457,23 @@ ipmi_oem_dell_get_peak_power_history (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_get_system_info_parameters: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
   if ((len = fiid_obj_get_data (obj_cmd_rs,
                                 "configuration_parameter_data",
                                 configuration_parameter_data,
-                                IPMI_OEM_MAX_BYTES)) < 0)
+                                configuration_parameter_data_len)) < 0)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "fiid_obj_get_data: 'configuration_parameter_data': %s\n",
-                       fiid_strerror (fiid_obj_errnum (obj_cmd_rs)));
+                       fiid_obj_errormsg (obj_cmd_rs));
       goto cleanup;
     }
-
-  if (len < 24)
+  
+  if (len < 12)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
@@ -3742,89 +4482,275 @@ ipmi_oem_dell_get_peak_power_history (ipmi_oem_state_data_t *state_data)
       goto cleanup;
     }
   
-  last_minute_peak_power = configuration_parameter_data[0];
-  last_minute_peak_power |= (configuration_parameter_data[1] << 8);
+  rv = 0;
+ cleanup:
+  return (rv);
+}
 
-  last_hour_peak_power = configuration_parameter_data[2];
-  last_hour_peak_power |= (configuration_parameter_data[3] << 8);
+static int
+_get_power_capacity_status (ipmi_oem_state_data_t *state_data,
+			    uint8_t *power_capacity_status,
+			    uint8_t *power_capacity_is_settable)
+{
+  uint8_t bytes_rq[IPMI_OEM_MAX_BYTES];
+  uint8_t bytes_rs[IPMI_OEM_MAX_BYTES];
+  int rs_len;
+  int rv = -1;
+  
+  assert (state_data);
 
-  last_day_peak_power = configuration_parameter_data[4];
-  last_day_peak_power |= (configuration_parameter_data[5] << 8);
+  /* Dell Poweredge OEM
+   *
+   * From Dell Provided Source Code
+   *
+   * Power Capacity Status Request
+   *
+   * 0x30 - OEM network function
+   * 0xBA - OEM cmd
+   * 0x01 - ?? (I'm guessing a "get" option)
+   * 0xFF - ?? (I'm guessing a "get all" bitmask)
+   * 
+   * Power Capacity Status Response
+   *
+   * 0xBA - OEM cmd
+   * 0x?? - Completion Code
+   * 0x?? - status
+   *      - 0x01 bitmask = 0b = disabled, 1b = enabled
+   *      - 0x02 bitmask = 0b = not-settable, 1b = settable
+   */
 
-  last_week_peak_power = configuration_parameter_data[6];
-  last_week_peak_power |= (configuration_parameter_data[7] << 8);
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_POWER_CAPACITY_STATUS;
+  bytes_rq[1] = 0x01;
+  bytes_rq[2] = 0xFF;
 
-  last_minute_peak_power_time = configuration_parameter_data[8];
-  last_minute_peak_power_time |= (configuration_parameter_data[9] << 8);
-  last_minute_peak_power_time |= (configuration_parameter_data[10] << 16);
-  last_minute_peak_power_time |= (configuration_parameter_data[11] << 24);
+  if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
+                              0, /* lun */
+                              IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
+                              bytes_rq, /* data */
+                              3, /* num bytes */
+                              bytes_rs,
+                              IPMI_OEM_MAX_BYTES)) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_cmd_raw: %s\n",
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
+      goto cleanup;
+    }
 
-  last_hour_peak_power_time = configuration_parameter_data[12];
-  last_hour_peak_power_time |= (configuration_parameter_data[13] << 8);
-  last_hour_peak_power_time |= (configuration_parameter_data[14] << 16);
-  last_hour_peak_power_time |= (configuration_parameter_data[15] << 24);
+  if (ipmi_oem_check_response_and_completion_code (state_data,
+                                                   bytes_rs,
+                                                   rs_len,
+                                                   3,
+                                                   IPMI_CMD_OEM_DELL_POWER_CAPACITY_STATUS,
+                                                   IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                   NULL) < 0)
+    goto cleanup;
 
-  last_day_peak_power_time = configuration_parameter_data[16];
-  last_day_peak_power_time |= (configuration_parameter_data[17] << 8);
-  last_day_peak_power_time |= (configuration_parameter_data[18] << 16);
-  last_day_peak_power_time |= (configuration_parameter_data[19] << 24);
+  if (power_capacity_status)
+    {
+      (*power_capacity_status) = (bytes_rs[2] & IPMI_OEM_DELL_GET_POWER_CAPACITY_STATUS_BITMASK);
+      (*power_capacity_status) >>= IPMI_OEM_DELL_GET_POWER_CAPACITY_STATUS_SHIFT;
+    }
 
-  last_week_peak_power_time = configuration_parameter_data[20];
-  last_week_peak_power_time |= (configuration_parameter_data[21] << 8);
-  last_week_peak_power_time |= (configuration_parameter_data[22] << 16);
-  last_week_peak_power_time |= (configuration_parameter_data[23] << 24);
+  if (power_capacity_is_settable)
+    {
+      (*power_capacity_is_settable) = (bytes_rs[2] & IPMI_OEM_DELL_GET_POWER_CAPACITY_IS_SETTABLE_BITMASK);
+      (*power_capacity_is_settable) >>= IPMI_OEM_DELL_GET_POWER_CAPACITY_IS_SETTABLE_SHIFT;
+    }
+
+  rv = 0;
+ cleanup:
+  return (rv);
+}
+
+int
+ipmi_oem_dell_get_power_capacity (ipmi_oem_state_data_t *state_data)
+{
+  uint8_t configuration_parameter_data[IPMI_OEM_MAX_BYTES];
+  uint16_t power_capacity;
+  uint8_t units;
+  uint16_t maximum_power_consumption;
+  uint16_t minimum_power_consumption;
+  uint8_t total_number_power_supplies;
+  uint16_t available_power;
+  uint8_t system_throttling;
+  char *system_throttling_str;
+  int rv = -1;
+
+  assert (state_data);
+  assert (!state_data->prog_data->args->oem_options_count);
+
+  if (_get_power_capacity (state_data,
+			   configuration_parameter_data,
+			   IPMI_OEM_MAX_BYTES) < 0)
+    goto cleanup;
+  
+  power_capacity = configuration_parameter_data[0];
+  power_capacity |= (configuration_parameter_data[1] << 8);
+
+  units = configuration_parameter_data[2];
+
+  maximum_power_consumption = configuration_parameter_data[3];
+  maximum_power_consumption |= (configuration_parameter_data[4] << 8);
+
+  minimum_power_consumption = configuration_parameter_data[5];
+  minimum_power_consumption |= (configuration_parameter_data[6] << 8);
+
+  total_number_power_supplies = configuration_parameter_data[7];
+
+  available_power = configuration_parameter_data[8];
+  available_power |= (configuration_parameter_data[9] << 8);
+
+  system_throttling = configuration_parameter_data[10];
 
   pstdout_printf (state_data->pstate,
-                  "Last Minute Peak Power      : %u W\n",
-		  last_minute_peak_power);
-
-  timetmp = last_minute_peak_power_time;
-  localtime_r (&timetmp, &time_tm);
-  memset (time_buf, '\0', IPMI_OEM_TIME_BUFLEN + 1);
-  strftime (time_buf, IPMI_OEM_TIME_BUFLEN, "%D - %T", &time_tm);
+                  "Power Capacity                 : %u W\n",
+		  power_capacity);
 
   pstdout_printf (state_data->pstate,
-                  "Last Minute Peak Power Time : %s\n",
-                  time_buf);
+                  "Minimum Power Consumption      : %u W\n",
+		  minimum_power_consumption);
 
   pstdout_printf (state_data->pstate,
-                  "Last Hour Peak Power        : %u W\n",
-		  last_hour_peak_power);
-
-  timetmp = last_hour_peak_power_time;
-  localtime_r (&timetmp, &time_tm);
-  memset (time_buf, '\0', IPMI_OEM_TIME_BUFLEN + 1);
-  strftime (time_buf, IPMI_OEM_TIME_BUFLEN, "%D - %T", &time_tm);
+                  "Maximum Power Consumption      : %u W\n",
+		  maximum_power_consumption);
 
   pstdout_printf (state_data->pstate,
-                  "Last Hour Peak Power Time   : %s\n",
-                  time_buf);
+		  "Total Number of Power Supplies : %u\n",
+		  total_number_power_supplies);
 
   pstdout_printf (state_data->pstate,
-                  "Last Day Peak Power         : %u W\n",
-		  last_day_peak_power);
+		  "Available Power                : %u W\n",
+		  available_power);
 
-  timetmp = last_day_peak_power_time;
-  localtime_r (&timetmp, &time_tm);
-  memset (time_buf, '\0', IPMI_OEM_TIME_BUFLEN + 1);
-  strftime (time_buf, IPMI_OEM_TIME_BUFLEN, "%D - %T", &time_tm);
-
-  pstdout_printf (state_data->pstate,
-                  "Last Day Peak Power Time    : %s\n",
-                  time_buf);
-
-  pstdout_printf (state_data->pstate,
-                  "Last Week Peak Power        : %u W\n",
-		  last_week_peak_power);
-
-  timetmp = last_week_peak_power_time;
-  localtime_r (&timetmp, &time_tm);
-  memset (time_buf, '\0', IPMI_OEM_TIME_BUFLEN + 1);
-  strftime (time_buf, IPMI_OEM_TIME_BUFLEN, "%D - %T", &time_tm);
+  if (system_throttling == IPMI_OEM_DELL_GET_POWER_CAPACITY_SYSTEM_THROTTLING_NORMAL_SYSTEM_OPERATION)
+    system_throttling_str = "Normal system operation";
+  else if (system_throttling == IPMI_OEM_DELL_GET_POWER_CAPACITY_SYSTEM_THROTTLING_SYSTEM_NEEDS_TO_BE_THROTTLED)
+    system_throttling_str = "System needs to be throttled";
+  else if (system_throttling == IPMI_OEM_DELL_GET_POWER_CAPACITY_SYSTEM_THROTTLING_SYSTEM_IS_OVERCONFIGURED)
+    system_throttling_str = "System is overconfigured";
+  else
+    system_throttling_str = "Unknown";
 
   pstdout_printf (state_data->pstate,
-                  "Last Week Peak Power Time   : %s\n",
-                  time_buf);
+		  "System Throttling              : %s\n",
+		  system_throttling_str);
+
+  rv = 0;
+ cleanup:
+  return (rv);
+}
+
+int
+ipmi_oem_dell_set_power_capacity (ipmi_oem_state_data_t *state_data)
+{
+  fiid_obj_t obj_cmd_rs = NULL;
+  uint8_t configuration_parameter_data[IPMI_OEM_MAX_BYTES];
+  uint8_t power_capacity_is_settable = 0;
+  uint16_t power_capacity;
+  uint16_t maximum_power_consumption;
+  uint16_t minimum_power_consumption;
+  unsigned int temp;
+  char *ptr = NULL;
+  int rv = -1;
+
+  assert (state_data);
+  assert (state_data->prog_data->args->oem_options_count == 1);
+
+  /* Dell Poweredge OEM
+   *
+   * From Dell Provided Source Code
+   *
+   * Uses Set System Info command
+   *
+   * Configuration Parameter Data formatted:
+   *
+   * bytes 1-2 - power capacity
+   * bytes 3 - units
+   *         - 0x00 watts (?)
+   *         - 0x01 btuphr (?)
+   *         - 0x03 percent (???)
+   * bytes 4-5 - maximum power consumption
+   * bytes 6-7 - minimum power consumption
+   * bytes 8 - total number of power supplies
+   * bytes 9-10 - available power
+   * bytes 11 - system throttling
+   * bytes 12 - reserved
+   *
+   */
+
+  if (_get_power_capacity_status (state_data, NULL, &power_capacity_is_settable) < 0)
+    goto cleanup;
+
+  if (!power_capacity_is_settable)
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "Power Capacity not settable\n");
+      goto cleanup;
+    }
+
+  if (_get_power_capacity (state_data,
+			   configuration_parameter_data,
+			   IPMI_OEM_MAX_BYTES) < 0)
+    goto cleanup;
+
+  errno = 0;
+  temp = strtoul (state_data->prog_data->args->oem_options[0], &ptr, 10);
+  if (errno
+      || temp > USHRT_MAX
+      || ptr[0] != '\0')
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "%s:%s invalid OEM option argument '%s'\n",
+		       state_data->prog_data->args->oem_id,
+		       state_data->prog_data->args->oem_command,
+		       state_data->prog_data->args->oem_options[0]);
+      goto cleanup;
+    }
+  power_capacity = temp;
+
+  maximum_power_consumption = configuration_parameter_data[3];
+  maximum_power_consumption |= (configuration_parameter_data[4] << 8);
+
+  minimum_power_consumption = configuration_parameter_data[5];
+  minimum_power_consumption |= (configuration_parameter_data[6] << 8);
+
+  if (power_capacity < minimum_power_consumption || power_capacity > maximum_power_consumption)
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "Power Capacity '%u' out of range\n",
+		       power_capacity);
+      goto cleanup;
+    }
+
+  configuration_parameter_data[0] = (power_capacity & 0x00FF);
+  configuration_parameter_data[1] = ((power_capacity & 0xFF00) >> 8);
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_system_info_parameters_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
+  
+  if (ipmi_cmd_set_system_info_parameters (state_data->ipmi_ctx,
+                                           IPMI_SYSTEM_INFO_PARAMETER_OEM_DELL_POWER_CAPACITY,
+					   configuration_parameter_data,
+					   12,
+					   obj_cmd_rs) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_cmd_set_system_info_parameters: %s\n",
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
+      goto cleanup;
+    }
 
   rv = 0;
  cleanup:
@@ -3833,36 +4759,151 @@ ipmi_oem_dell_get_peak_power_history (ipmi_oem_state_data_t *state_data)
 }
 
 int
-ipmi_oem_dell_get_fcb_version (ipmi_oem_state_data_t *state_data)
+ipmi_oem_dell_get_power_capacity_status (ipmi_oem_state_data_t *state_data)
 {
-  uint8_t bytes_rq[IPMI_OEM_MAX_BYTES];
-  uint8_t bytes_rs[IPMI_OEM_MAX_BYTES];
-  int32_t rs_len;
+  uint8_t power_capacity_status = 0;
   int rv = -1;
 
   assert (state_data);
   assert (!state_data->prog_data->args->oem_options_count);
 
-  /* llnlxanadu2 OEM
+  if (_get_power_capacity_status (state_data, &power_capacity_status, NULL) < 0)
+    goto cleanup;
+
+  if (power_capacity_status)
+    pstdout_printf (state_data->pstate, "enabled\n");
+  else
+    pstdout_printf (state_data->pstate, "disabled\n");
+
+  rv = 0;
+ cleanup:
+  return (rv);
+}
+
+int
+ipmi_oem_dell_set_power_capacity_status (ipmi_oem_state_data_t *state_data)
+{
+  uint8_t bytes_rq[IPMI_OEM_MAX_BYTES];
+  uint8_t bytes_rs[IPMI_OEM_MAX_BYTES];
+  uint8_t power_capacity_is_settable = 0;
+  int rs_len;
+  int rv = -1;
+  
+  assert (state_data);
+  assert (state_data->prog_data->args->oem_options_count == 1);
+
+  if (strcasecmp (state_data->prog_data->args->oem_options[0], "enable")
+      && strcasecmp (state_data->prog_data->args->oem_options[0], "disable"))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "%s:%s invalid OEM option argument '%s'\n",
+                       state_data->prog_data->args->oem_id,
+                       state_data->prog_data->args->oem_command,
+                       state_data->prog_data->args->oem_options[0]);
+      goto cleanup;
+    }
+
+  /* Dell Poweredge OEM
    *
-   * Get FCB Version Request
+   * From Dell Provided Source Code
    *
-   * 0x34 - OEM network function
-   * 0x16 - OEM cmd
+   * Power Capacity Status Request
    *
-   * Get FCB Version Response
+   * 0x30 - OEM network function
+   * 0xBA - OEM cmd
+   * 0x00 - ?? (I'm guessing a "set" option)
+   * 0x?? - ?? (I'm guessing a bitmask)
+   *      - 0x01 bitmask = 0b = disable, 1b = enable
+   * 
+   * Power Capacity Status Response
    *
-   * 0x16 - OEM cmd
+   * 0xBA - OEM cmd
    * 0x?? - Completion Code
-   * 0x?? - major version (in hex)
-   * 0x?? - minor version (in hex)
    */
 
-  bytes_rq[0] = 0x16;
+  if (_get_power_capacity_status (state_data, NULL, &power_capacity_is_settable) < 0)
+    goto cleanup;
+
+  if (!power_capacity_is_settable)
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "Power Capacity not settable\n");
+      goto cleanup;
+    }
+
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_POWER_CAPACITY_STATUS;
+  bytes_rq[1] = 0x00;
+  if (!strcasecmp (state_data->prog_data->args->oem_options[0], "enable"))
+    bytes_rq[2] = IPMI_OEM_DELL_SET_POWER_CAPACITY_STATUS_ENABLE;
+  else
+    bytes_rq[2] = IPMI_OEM_DELL_SET_POWER_CAPACITY_STATUS_DISABLE;
 
   if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
                               0, /* lun */
-                              0x34, /* network function */
+                              IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
+                              bytes_rq, /* data */
+                              3, /* num bytes */
+                              bytes_rs,
+                              IPMI_OEM_MAX_BYTES)) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_cmd_raw: %s\n",
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
+      goto cleanup;
+    }
+
+  if (ipmi_oem_check_response_and_completion_code (state_data,
+                                                   bytes_rs,
+                                                   rs_len,
+                                                   2,
+                                                   IPMI_CMD_OEM_DELL_POWER_CAPACITY_STATUS,
+                                                   IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                   NULL) < 0)
+    goto cleanup;
+
+  rv = 0;
+ cleanup:
+  return (rv);
+}
+
+int
+ipmi_oem_dell_get_chassis_identify_status (ipmi_oem_state_data_t *state_data)
+{
+  uint8_t bytes_rq[IPMI_OEM_MAX_BYTES];
+  uint8_t bytes_rs[IPMI_OEM_MAX_BYTES];
+  uint8_t identify_status;
+  int rs_len;
+  int rv = -1;
+  
+  assert (state_data);
+  assert (!state_data->prog_data->args->oem_options_count);
+
+  /* Dell Poweredge OEM
+   *
+   * From Dell Provided Docs
+   *
+   * Query Chassis Identify Status Request
+   *
+   * 0x30 - OEM network function
+   * 0x32 - OEM cmd
+   * 
+   * Query Chassis Identify Status Response
+   * 
+   * 0x32 - OEM cmd
+   * 0x?? - Completion Code
+   * 0x?? - identify status
+   * - 0x00 - off
+   * - 0x01 - on
+   */
+
+  bytes_rq[0] = IPMI_CMD_OEM_DELL_QUERY_CHASSIS_IDENTIFY_STATUS;
+
+  if ((rs_len = ipmi_cmd_raw (state_data->ipmi_ctx,
+                              0, /* lun */
+                              IPMI_NET_FN_OEM_DELL_GENERIC_RQ, /* network function */
                               bytes_rq, /* data */
                               1, /* num bytes */
                               bytes_rs,
@@ -3871,24 +4912,30 @@ ipmi_oem_dell_get_fcb_version (ipmi_oem_state_data_t *state_data)
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_raw: %s\n",
-                       ipmi_ctx_strerror (ipmi_ctx_errnum (state_data->ipmi_ctx)));
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
       goto cleanup;
     }
 
   if (ipmi_oem_check_response_and_completion_code (state_data,
                                                    bytes_rs,
                                                    rs_len,
-                                                   4,
-                                                   0x16,
-                                                   0x34) < 0)
+                                                   2,
+                                                   IPMI_CMD_OEM_DELL_QUERY_CHASSIS_IDENTIFY_STATUS,
+                                                   IPMI_NET_FN_OEM_DELL_GENERIC_RS,
+                                                   NULL) < 0)
     goto cleanup;
 
-  pstdout_printf (state_data->pstate,
-                  "%X.%02X\n",
-                  bytes_rs[2],
-                  bytes_rs[3]);
+  identify_status = bytes_rs[2];
+
+  if (identify_status == IPMI_OEM_DELL_QUERY_CHASSIS_IDENTIFY_STATUS_OFF)
+    pstdout_printf (state_data->pstate, "Off\n");
+  else if (identify_status == IPMI_OEM_DELL_QUERY_CHASSIS_IDENTIFY_STATUS_ON)
+    pstdout_printf (state_data->pstate, "On\n");
+  else
+    pstdout_printf (state_data->pstate, "Unknown\n");
 
   rv = 0;
  cleanup:
   return (rv);
 }
+

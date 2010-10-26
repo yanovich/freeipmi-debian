@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: ipmi-sdr-cache-delete.c,v 1.4 2008/06/07 16:10:00 chu11 Exp $
+ *  $Id: ipmi-sdr-cache-delete.c,v 1.9.4.1 2009-12-23 21:24:23 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -41,34 +41,45 @@
 #include "freeipmi/sdr-cache/ipmi-sdr-cache.h"
 
 #include "ipmi-sdr-cache-defs.h"
-
-#include "libcommon/ipmi-err-wrappers.h"
+#include "ipmi-sdr-cache-trace.h"
+#include "ipmi-sdr-cache-util.h"
 
 #include "freeipmi-portability.h"
 
-int 
-ipmi_sdr_cache_delete(ipmi_sdr_cache_ctx_t ctx, char *filename)
+int
+ipmi_sdr_cache_delete (ipmi_sdr_cache_ctx_t ctx, const char *filename)
 {
-  ERR(ctx && ctx->magic == IPMI_SDR_CACHE_MAGIC);
-  
-  SDR_CACHE_ERR_PARAMETERS(filename);
+  if (!ctx || ctx->magic != IPMI_SDR_CACHE_CTX_MAGIC)
+    {
+      ERR_TRACE (ipmi_sdr_cache_ctx_errormsg (ctx), ipmi_sdr_cache_ctx_errnum (ctx));
+      return (-1);
+    }
+
+  if (!filename)
+    {
+      SDR_CACHE_SET_ERRNUM (ctx, IPMI_SDR_CACHE_ERR_PARAMETERS);
+      return (-1);
+    }
 
   if (ctx->operation != IPMI_SDR_CACHE_OPERATION_UNINITIALIZED)
     {
       if (ctx->operation == IPMI_SDR_CACHE_OPERATION_READ_CACHE)
-        SDR_CACHE_ERRNUM_SET(IPMI_SDR_CACHE_CTX_ERR_CACHE_DELETE_CTX_SET_TO_READ);
+        SDR_CACHE_SET_ERRNUM (ctx, IPMI_SDR_CACHE_ERR_CACHE_DELETE_CTX_SET_TO_READ);
       else
-        SDR_CACHE_ERRNUM_SET(IPMI_SDR_CACHE_CTX_ERR_INTERNAL_ERROR);
-      return -1;
+        SDR_CACHE_SET_ERRNUM (ctx, IPMI_SDR_CACHE_ERR_INTERNAL_ERROR);
+      return (-1);
     }
 
-  if (unlink(filename) < 0)
+  if (unlink (filename) < 0)
     {
       /* If there is no file (ENOENT), its ok */
       if (errno != ENOENT)
-        SDR_CACHE_ERR(0);
+        {
+          SDR_CACHE_ERRNO_TO_SDR_CACHE_ERRNUM (ctx, errno);
+          return (-1);
+        }
     }
-  
-  ctx->errnum = IPMI_SDR_CACHE_CTX_ERR_SUCCESS;
-  return 0;
+
+  ctx->errnum = IPMI_SDR_CACHE_ERR_SUCCESS;
+  return (0);
 }

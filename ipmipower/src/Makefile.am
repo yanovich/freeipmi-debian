@@ -1,18 +1,16 @@
 noinst_HEADERS = \
 	argv.h \
-	ierror.h \
 	ipmipower_check.h \
 	ipmipower_argp.h \
 	ipmipower_connection.h \
+	ipmipower_error.h \
 	ipmipower.h \
 	ipmipower_output.h \
 	ipmipower_packet.h \
 	ipmipower_ping.h \
 	ipmipower_powercmd.h \
 	ipmipower_prompt.h \
-	ipmipower_util.h \
-	ipmipower_wrappers.h \
-	wrappers.h
+	ipmipower_util.h
  
 sbin_PROGRAMS = ipmipower
 
@@ -40,19 +38,17 @@ ipmipower_LDADD = \
 
 ipmipower_SOURCES = \
 	argv.c \
-	ierror.c \
 	ipmipower_check.c \
 	ipmipower_argp.c \
 	ipmipower_connection.c \
+	ipmipower_error.c \
 	ipmipower.c \
 	ipmipower_output.c \
 	ipmipower_packet.c \
 	ipmipower_ping.c \
 	ipmipower_powercmd.c \
 	ipmipower_prompt.c \
-	ipmipower_util.c \
-	ipmipower_wrappers.c \
-	wrappers.c
+	ipmipower_util.c
  
 $(top_builddir)/common/src/toolcommon/libtoolcommon.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`

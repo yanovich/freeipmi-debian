@@ -56,11 +56,6 @@ separate line.  Arguments for an option are separated by any amount of
 whitespace.  Multiple arguments are also separated by whitespace.
 Comments can be marked by using the pound sign ("#") character, and
 lines can be continued on the next using backslash ("\\").
-.LP
-Note that it is possible to list the username, password and other
-potentially sensitive information in the configuration file.  If this
-data is stored in a configuration file, system administrators should
-limit access to this file.
 .SH "OPTIONS"
 .TP
 .B IPMI_Threshold_Sensor
@@ -112,15 +107,15 @@ Defaults to Nominal.
 Defaults to Critical.
 .RE
 .TP
-.B IPMI_Fan_Device_Install
+.B IPMI_Fan_Device_Present
 The following states correspond to Fan sensors that report on
 device installation.
 .RS
 .TP
-\fBIPMI_Fan_Device_Install_Device_Removed_Device_Absent\fR
+\fBIPMI_Fan_Device_Present_Device_Removed_Device_Absent\fR
 Defaults to Critical.
 .TP
-\fBIPMI_Fan_Device_Install_Device_Inserted_Device_Present\fR
+\fBIPMI_Fan_Device_Present_Device_Inserted_Device_Present\fR
 Defaults to Nominal.
 .RE
 .TP
@@ -241,15 +236,15 @@ Defaults to Warning.
 Defaults to Warning.
 .RE
 .TP
-.B IPMI_Power_Unit_Device_Install
+.B IPMI_Power_Unit_Device_Present
 The following states correspond to Power Unit sensors that report on
 device installation.
 .RS
 .TP
-\fBIPMI_Power_Unit_Device_Install_Device_Removed_Device_Absent\fR
+\fBIPMI_Power_Unit_Device_Present_Device_Removed_Device_Absent\fR
 Defaults to Critical.
 .TP
-\fBIPMI_Power_Unit_Device_Install_Device_Inserted_Device_Present\fR
+\fBIPMI_Power_Unit_Device_Present_Device_Inserted_Device_Present\fR
 Defaults to Nominal.
 .RE
 .TP
@@ -295,15 +290,15 @@ Defaults to Nominal.
 Defaults to Critical.
 .RE
 .TP
-.B IPMI_Module_Board_Device_Install
+.B IPMI_Module_Board_Device_Present
 The following states correspond to Module/Board sensors that report on
 device installation.
 .RS
 .TP
-\fBIPMI_Module_Board_Device_Install_Device_Removed_Device_Absent\fR
+\fBIPMI_Module_Board_Device_Present_Device_Removed_Device_Absent\fR
 Defaults to Critical.
 .TP
-\fBIPMI_Module_Board_Device_Install_Device_Inserted_Device_Present\fR
+\fBIPMI_Module_Board_Device_Present_Device_Inserted_Device_Present\fR
 Defaults to Nominal.
 .RE
 .TP
@@ -331,15 +326,15 @@ Defaults to Nominal.
 Defaults to Critical.
 .RE
 .TP
-.B IPMI_Drive_Slot_Device_Install
+.B IPMI_Drive_Slot_Device_Present
 The following states correspond to Drive Slot sensors that report on
 device installation.
 .RS
 .TP
-\fBIPMI_Drive_Slot_Device_Install_Device_Removed_Device_Absent\fR
+\fBIPMI_Drive_Slot_Device_Present_Device_Removed_Device_Absent\fR
 Defaults to Critical.
 .TP
-\fBIPMI_Drive_Slot_Device_Install_Device_Inserted_Device_Present\fR
+\fBIPMI_Drive_Slot_Device_Present_Device_Inserted_Device_Present\fR
 Defaults to Nominal.
 .RE
 .TP
@@ -355,15 +350,15 @@ Defaults to Nominal.
 Defaults to Nominal.
 .RE
 .TP
-.B IPMI_Entity_Presence_Device_Install
+.B IPMI_Entity_Presence_Device_Present
 The following states correspond to Entity Presence sensors that report on
 device installation.
 .RS
 .TP
-\fBIPMI_Entity_Presence_Device_Install_Device_Removed_Device_Absent\fR
+\fBIPMI_Entity_Presence_Device_Present_Device_Removed_Device_Absent\fR
 Defaults to Nominal.
 .TP
-\fBIPMI_Entity_Presence_Device_Install_Device_Inserted_Device_Present\fR
+\fBIPMI_Entity_Presence_Device_Present_Device_Inserted_Device_Present\fR
 Defaults to Nominal.
 .RE
 .TP
@@ -405,7 +400,7 @@ Defaults to Critical.
 \fBIPMI_Platform_Security_Violation_Attempt_Pre_Boot_Password_Violation_User_Password\fR
 Defaults to Critical.
 .TP
-\fBIPMI_Platform_Security_Violation_Attempt_Pre_Boot_Password_Violation_Setup_Password\fR
+\fBIPMI_Platform_Security_Violation_Attempt_Pre_Boot_Password_Violation_Attempt_Setup_Password\fR
 Defaults to Critical.
 .TP
 \fBIPMI_Platform_Security_Violation_Attempt_Pre_Boot_Password_Violation_Network_Boot_Password\fR
@@ -454,6 +449,12 @@ Defaults to Critical.
 Defaults to Critical.
 .TP
 \fBIPMI_Processor_Processor_Automatically_Throttled\fR
+Defaults to Warning.
+.TP
+\fBIPMI_Processor_Machine_Check_Exception\fR
+Defaults to Critical.
+.TP
+\fBIPMI_Processor_Correctable_Machine_Check_Error\fR
 Defaults to Warning.
 .RE
 .TP
@@ -519,10 +520,10 @@ The following states correspond to Memory sensors w/
 Memory specific output states.
 .RS
 .TP
-\fBIPMI_Memory_Correctable_ECC_Memory_Error\fR
+\fBIPMI_Memory_Correctable_Memory_Error\fR
 Defaults to Warning.
 .TP
-\fBIPMI_Memory_Uncorrectable_ECC_Memory_Error\fR
+\fBIPMI_Memory_Uncorrectable_Memory_Error\fR
 Defaults to Critical.
 .TP
 \fBIPMI_Memory_Parity\fR
@@ -534,7 +535,7 @@ Defaults to Critical.
 \fBIPMI_Memory_Memory_Device_Disabled\fR
 Defaults to Critical.
 .TP
-\fBIPMI_Memory_Correctable_ECC_Memory_Error_Logging_Limit_Reached\fR
+\fBIPMI_Memory_Correctable_Memory_Error_Logging_Limit_Reached\fR
 Defaults to Warning.
 .TP
 \fBIPMI_Memory_Presence_Detected\fR
@@ -548,6 +549,9 @@ Defaults to Nominal.
 .TP
 \fBIPMI_Memory_Memory_Automatically_Throttled\fR
 Defaults to Warning.
+.TP
+\fBIPMI_Memory_Critical_Overtemperature\fR
+Defaults to Critical.
 .RE
 .TP
 .B IPMI_Drive_Slot
@@ -602,7 +606,7 @@ Defaults to Nominal.
 The following states correspond to Event Logging Disabled sensors w/
 .RS
 .TP
-\fBIPMI_Event_Logging_Disabled_Correctable_Memory_Logging_Disabled\fR
+\fBIPMI_Event_Logging_Disabled_Correctable_Memory_Error_Logging_Disabled\fR
 Defaults to Critical.
 .TP
 \fBIPMI_Event_Logging_Disabled_Event_Type_Logging_Disabled\fR
@@ -619,6 +623,9 @@ Defaults to Critical.
 .TP
 \fBIPMI_Event_Logging_Disabled_SEL_Almost_Full\fR
 Defaults to Warning.
+.TP
+\fBIPMI_Event_Logging_Disabled_Correctable_Machine_Check_Error_Logging_Disabled\fR
+Defaults to Critical.
 .RE
 .TP
 .B IPMI_System_Event
@@ -656,7 +663,7 @@ Defaults to Critical.
 \fBIPMI_Critical_Interrupt_Bus_Timeout\fR
 Defaults to Critical.
 .TP
-\fBIPMI_Critical_Interrupt_I_O_Channel_Check_NMI\fR
+\fBIPMI_Critical_Interrupt_IO_Channel_Check_NMI\fR
 Defaults to Critical.
 .TP
 \fBIPMI_Critical_Interrupt_Software_NMI\fR
@@ -682,6 +689,8 @@ Defaults to Critical.
 .TP
 \fBIPMI_Critical_Interrupt_Bus_Fatal_Error\fR
 Defaults to Critical.
+\fBIPMI_Critical_Interrupt_Bus_Degraded\fR
+Defaults to Warning.
 .RE
 .TP
 .B IPMI_Slot_Connector
@@ -845,7 +854,7 @@ Cable/Interconnect specific output states.
 \fBIPMI_Cable_Interconnect_Is_Connected\fR
 Defaults to Nominal.
 .TP
-\fBIPMI_Cable_Interconnect_Incorrect_Cable_Connected_Incorrect_Interconnection\fR
+\fBIPMI_Cable_Interconnect_Configuration_Error\fR
 Defaults to Critical.
 .RE
 .TP
@@ -945,7 +954,7 @@ Defaults to Critical.
 
 #include <@top_srcdir@/common/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright \(co 2003-2008 FreeIPMI Core Team.  
+Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
 
 FreeIPMI is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

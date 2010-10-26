@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2008 FreeIPMI Core Team
+  Copyright (C) 2008-2010 FreeIPMI Core Team
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2, or (at your option)
   any later version.
-  
+
   This program is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -42,18 +42,19 @@ struct ipmi_chassis_config_arguments
 };
 
 typedef struct ipmi_chassis_config_prog_data
-{ 
+{
   char *progname;
   struct ipmi_chassis_config_arguments *args;
   int hosts_count;
 } ipmi_chassis_config_prog_data_t;
 
 typedef struct ipmi_chassis_config_state_data
-{ 
+{
   ipmi_chassis_config_prog_data_t *prog_data;
   ipmi_ctx_t ipmi_ctx;
   pstdout_state_t pstate;
-  
+  struct config_section *sections;
+
   /* achu: workaround for IPMI limitation */
   int front_panel_enable_standby_button_for_entering_standby_initialized;
   uint8_t front_panel_enable_standby_button_for_entering_standby;

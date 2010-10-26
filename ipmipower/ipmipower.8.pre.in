@@ -1,7 +1,7 @@
 .\"#############################################################################
-.\"$Id: ipmipower.8.pre.in,v 1.45.6.1 2009/04/23 17:26:24 chu11 Exp $
+.\"$Id: ipmipower.8.pre.in,v 1.52.4.5 2010-05-27 22:35:41 chu11 Exp $
 .\"#############################################################################
-.\"  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+.\"  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
 .\"  Copyright (C) 2003-2007 The Regents of the University of California.
 .\"  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
 .\"  Written by Albert Chu <chu11@llnl.gov>
@@ -48,7 +48,7 @@ command line interface to enter various commands.  Details of the
 interactive command line interface can be found below under
 INTERACTIVE COMMANDS.
 .LP
-See EXAMPLES below for examples of how ipmipower is commonly used.
+#include <@top_srcdir@/common/man/manpage-common-table-of-contents.man>
 
 #include <@top_srcdir@/common/man/manpage-common-general-options-header.man>
 .TP
@@ -106,13 +106,13 @@ Reset the target hosts.
 \fB\-s\fR, \fB\-\-stat\fR
 Get power status of the target hosts.
 .TP
-\fB\-j\fR, \fB\-\-pulse\fR
+\fB\-\-pulse\fR
 Send power diagnostic interrupt to target hosts.
 .TP
-\fB\-m\fR, \fB\-\-soft\fR
+\fB\-\-soft\fR
 Initiate a soft-shutdown of the OS via ACPI.
 .TP
-\fB\-g\fR, \fB\-\-on\-if\-off\fR
+\fB\-\-on\-if\-off\fR
 The IPMI specification does not require the power cycle or hard reset
 commands to turn on a machine that is currently powered off.  This
 option will force
@@ -120,14 +120,14 @@ option will force
 to issue a power on command instead of a power cycle or hard reset
 command if the remote machine's power is currently off.
 .TP
-\fB\-A\fR, \fB\-\-wait\-until\-on\fR
+\fB\-\-wait\-until\-on\fR
 The IPMI specification allows power on commands to return prior to the
 power on actually taking place.  This option will force
 .B ipmipower 
 to regularly query the remote BMC and return only after the machine
 has powered on.
 .TP
-\fB\-G\fR, \fB\-\-wait\-until\-off\fR
+\fB\-\-wait\-until\-off\fR
 The IPMI specification allows power off commands to return prior the
 power off actually taking place.  This option will force
 .B ipmipower 
@@ -138,19 +138,19 @@ has powered off.
 The following options are used to change the networking behavior of
 .B ipmipower.
 .TP
-\fB\-q\fR, \fB\-\-retransmission\-wait\-timeout\fR=\fBMILLISECONDS\fR
+\fB\-\-retransmission\-wait\-timeout\fR=\fBMILLISECONDS\fR
 Specify the retransmission wait timeout length in milliseconds.  The
 retransmission wait timeout is similar to the retransmission timeout
 above, but is used specifically for power completion verification with
 the \fB\-\-wait\-until\-on\fR and \fB\-\-wait\-until\-off\fR options.
 Defaults to 500 milliseconds (0.5 seconds).
 .TP
-\fB\-b\fR, \fB\-\-retransmission\-backoff\-count\fR=\fBCOUNT\fR
+\fB\-\-retransmission\-backoff\-count\fR=\fBCOUNT\fR
 Specify the retransmission backoff count for retransmissions.  After
 ever COUNT retransmissions, the retransmission timeout length will be
 increased by another factor.  Defaults to 8.
 .TP
-\fB\-i\fR, \fB\-\-ping\-interval\fR=\fBMILLISECONDS\fR
+\fB\-\-ping\-interval\fR=\fBMILLISECONDS\fR
 Specify the ping interval length in milliseconds.  When running in
 interactive mode, RMCP (Remote Management Control Protocol) discovery
 messages will be sent to all configured remote hosts every
@@ -161,7 +161,7 @@ discovery messages can be disabled by setting this valu to 0.  RMCP
 ping discovery messages are automatically disabled in non-interactive
 mode.
 .TP
-\fB\-z\fR, \fB\-\-ping\-timeout\fR=\fBMILLISECONDS\fR
+\fB\-\-ping\-timeout\fR=\fBMILLISECONDS\fR
 Specify the ping timeout length in milliseconds.  When running in
 interactive mode, RMCP (Remote Management Control Protocol) messages
 discovery will be sent to all configured remote hosts to confirm their
@@ -169,12 +169,12 @@ support of IPMI. A remote host is considered undiscovered if the host
 does not respond in MILLISECONDS time.  Defaults to 30000 milliseconds
 (30 seconds).  The ping timeout cannot be larger than the ping interval.
 .TP
-\fB\-v\fR, \fB\-\-ping\-packet\-count\fR=\fBCOUNT\fR
+\fB\-\-ping\-packet\-count\fR=\fBCOUNT\fR
 Specify the ping packet count size.  Defaults to 10.  See the
 \fB\-\-ping-percent\-fR option below for more information on this
 option.
 .TP
-\fB\-w\fR, \fB\-\-ping\-percent\fR=\fBPERCENT\fR
+\fB\-\-ping\-percent\fR=\fBPERCENT\fR
 Specify the ping percent value.  Defaults to 50.
 
 Since IPMI is based on UDP, it is
@@ -202,7 +202,7 @@ be reliable.  This heuristic can be disabled by setting either the
 ping packet count or ping percent to 0.  This feature is not used if
 ping interval is set to 0.
 .TP
-\fB\-x\fR, \fB\-\-ping\-consec\-count\fR=\fBCOUNT\fR
+\fB\-\-ping\-consec\-count\fR=\fBCOUNT\fR
 Specify the ping consecutive count.  This is another heuristic used to
 determine if a node should be considered discovered, undiscovered, or
 with a bad connection.  If a valid RMCP pong response was received for
@@ -358,7 +358,13 @@ Output the current configuration.
 Quit program.
 .B ipmipower.
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-main.man>
-#include <@top_srcdir@/common/man/manpage-common-hostranged-text-shell.man>
+.LP
+When multiple hosts are specified by the user, a socket will be
+created for each host and polled on, effectively allowing
+communication to all hosts in parallel.  This will allow communication
+to large numbers of nodes far more quickly than if done in serial.
+The \fB\-F\fR option can configure the number of nodes that can be
+communicated with in parallel at the same time.
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-options.man>
 .SH "EXAMPLES"
 .LP
@@ -371,7 +377,7 @@ Determine the power status of foo[0-2] with non-null username and password
 Hard reset nodes foo[0-2] with non-null username and password
         ipmipower -h foo[0-2] -u foo -p bar --reset
 
-#include <@top_srcdir@/common/man/manpage-common-troubleshooting.man>
+#include <@top_srcdir@/common/man/manpage-common-troubleshooting-lan-only.man>
 
 .SH "IPMIPOWER TROUBLESHOOTING"
 When powering on a powered off machine, the client must have a means
@@ -403,7 +409,7 @@ not matter when running in interactive mode or with
 since it is a one-time setup cost.
 
 #include <@top_srcdir@/common/man/manpage-common-workaround-heading-text.man>
-#include <@top_srcdir@/common/man/manpage-common-workaround-text.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-outofband-text.man>
 #include <@top_srcdir@/common/man/manpage-common-known-issues.man>
 .LP
 IPMI specifications do not require BMCs to perform a power control
@@ -428,8 +434,6 @@ left in
 for debugging purposes:
 .LP
 .IP o 2
-Sensitive command line arguments are not cleared from memory.
-.IP o
 Core dumps are enabled.
 .IP o
 In interactive mode, commands may output sensitive information
@@ -440,7 +444,7 @@ that the program be compiled with debugging turned off.
 \}
 #include <@top_srcdir@/common/man/manpage-common-reporting-bugs.man>
 .SH COPYRIGHT
-Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
 .br
 Copyright (C) 2003-2007 The Regents of the University of California.
 #include <@top_srcdir@/common/man/manpage-common-gpl-program-text.man>

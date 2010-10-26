@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: pstdout.c,v 1.1.2.2 2009/10/14 21:29:11 chu11 Exp $
+ *  $Id: pstdout.c,v 1.7.4.1 2009-12-23 21:24:04 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -1274,7 +1274,7 @@ pstdout_launch(const char *hostnames, Pstdout_Thread pstdout_func, void *arg)
   int h_count = 0;
   char *host = NULL;
   int exit_code = -1;
-  sighandler_t sighandler_save;
+  sighandler_t sighandler_save = NULL;
   int sighandler_set = 0;
   int rc;
   int i;
@@ -1324,7 +1324,7 @@ pstdout_launch(const char *hostnames, Pstdout_Thread pstdout_func, void *arg)
       if (pstdout_debug_flags & PSTDOUT_DEBUG_STANDARD)
         fprintf(stderr, "h_count = %d\n", h_count);
       pstdout_errnum = PSTDOUT_ERR_INTERNAL;
-      return -1;
+      goto cleanup;
     }
 
   /* Special case */

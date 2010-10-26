@@ -9,12 +9,19 @@ libutil_la_CPPFLAGS = \
 	-D_REENTRANT
 
 libutil_la_SOURCES = \
+	ipmi-channel-util.c \
 	ipmi-cipher-suite-util.c \
+	ipmi-device-types-util.c \
 	ipmi-error-util.c \
+	ipmi-error-dcmi-util.c \
+	ipmi-iana-enterprise-numbers-util.c \
 	ipmi-ipmb-util.c \
 	ipmi-lan-util.c \
+	ipmi-outofband-util.c \
+	ipmi-rmcpplus-util.c \
 	ipmi-sensor-and-event-code-tables-util.c \
 	ipmi-sensor-util.c \
-	ipmi-rmcpplus-util.c \
+	ipmi-sensor-units-util.c \
 	ipmi-util.c \
+	ipmi-dcmi-util.c \
 	rmcp-util.c

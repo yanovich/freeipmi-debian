@@ -1,5 +1,5 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+   Copyright (C) 2003-2010 FreeIPMI Core Team
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,13 +13,13 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 
-*/
+ */
 
 
 #ifndef _RMCP_UTIL_H
-#define	_RMCP_UTIL_H	1
+#define _RMCP_UTIL_H    1
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,7 +28,8 @@ extern "C" {
 #include <stdint.h>
 #include <freeipmi/fiid/fiid.h>
 
-int8_t ipmi_rmcp_check_message_tag (fiid_obj_t pong, uint8_t message_tag);
+/* returns 1 on pass, 0 on fail, -1 on error */
+int ipmi_rmcp_check_message_tag (fiid_obj_t pong, uint8_t message_tag);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+   Copyright (C) 2003-2010 FreeIPMI Core Team
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,11 +13,11 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
-*/
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+ */
 
 #ifndef _IPMI_IPMB_INTERFACE_H
-#define	_IPMI_IPMB_INTERFACE_H	1
+#define _IPMI_IPMB_INTERFACE_H  1
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,27 +28,41 @@ extern "C" {
 
 #define IPMI_IPMB_REQUESTER_SEQUENCE_NUMBER_MAX    0x3F /* 111111b */
 
+/* 
+ * fill* functions return 0 on success, -1 on error.
+ *
+ * object must be for the fill function's respective fiid
+ * template.
+ *
+ * assemble/unassemble functions must be passed fiid objects of the
+ * respective expected header/trailer templates.
+ *
+ * see freeipmi/templates/ for template definitions 
+ */
+
 extern fiid_template_t tmpl_ipmb_msg_hdr_rq;
 extern fiid_template_t tmpl_ipmb_msg_hdr_rs;
 extern fiid_template_t tmpl_ipmb_msg_trlr;
 extern fiid_template_t tmpl_ipmb_msg;
 
-int8_t fill_ipmb_msg_hdr (uint8_t rs_addr,
-                          uint8_t net_fn, 
-                          uint8_t rs_lun,
-                          uint8_t rq_addr,
-                          uint8_t rq_lun,
-                          uint8_t rq_seq, 
-                          fiid_obj_t obj_ipmb_msg_hdr);
+int fill_ipmb_msg_hdr (uint8_t rs_addr,
+                       uint8_t net_fn,
+                       uint8_t rs_lun,
+                       uint8_t rq_addr,
+                       uint8_t rq_lun,
+                       uint8_t rq_seq,
+                       fiid_obj_t obj_ipmb_msg_hdr);
 
-int32_t assemble_ipmi_ipmb_msg (fiid_obj_t obj_ipmb_msg_hdr, 
-                                fiid_obj_t obj_cmd, 
-                                fiid_obj_t obj_ipmb_msg);
+/* returns length written to obj_ipmb_msg on success, -1 on error */
+int assemble_ipmi_ipmb_msg (fiid_obj_t obj_ipmb_msg_hdr,
+                            fiid_obj_t obj_cmd,
+                            fiid_obj_t obj_ipmb_msg);
 
-int8_t unassemble_ipmi_ipmb_msg (fiid_obj_t obj_ipmb_msg,
-                                 fiid_obj_t obj_ipmb_msg_hdr,
-                                 fiid_obj_t obj_cmd,
-                                 fiid_obj_t obj_ipmb_msg_trlr);
+/* returns 1 if fully unparsed, 0 if not, -1 on error */
+int unassemble_ipmi_ipmb_msg (fiid_obj_t obj_ipmb_msg,
+                              fiid_obj_t obj_ipmb_msg_hdr,
+                              fiid_obj_t obj_cmd,
+                              fiid_obj_t obj_ipmb_msg_trlr);
 
 #ifdef __cplusplus
 }

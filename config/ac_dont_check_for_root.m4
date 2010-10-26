@@ -1,5 +1,5 @@
 ##*****************************************************************************
-## $Id: ac_dont_check_for_root.m4,v 1.2.2.2 2009/03/10 18:20:42 chu11 Exp $
+## $Id: ac_dont_check_for_root.m4,v 1.2 2009-03-10 18:15:46 chu11 Exp $
 ##*****************************************************************************
 ## This configure option will allow packagers to disable the check for root
 ## in FreeIPMI tools before executing in-band communication.

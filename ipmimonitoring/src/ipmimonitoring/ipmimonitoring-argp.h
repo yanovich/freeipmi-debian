@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: ipmimonitoring-argp.h,v 1.3 2008/05/10 01:02:12 chu11 Exp $
+ *  $Id: ipmimonitoring-argp.h,v 1.5.4.1 2009-12-23 21:24:11 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -26,6 +26,8 @@
 
 #ifndef _IPMIMONITORING_ARGP_H
 #define _IPMIMONITORING_ARGP_H
+
+#include "ipmimonitoring.h"
 
 void ipmimonitoring_argp_parse (int argc, char **argv, struct ipmimonitoring_arguments *cmd_args);
 

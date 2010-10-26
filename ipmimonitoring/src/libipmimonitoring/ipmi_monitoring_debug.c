@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: ipmi_monitoring_debug.c,v 1.13 2008/08/12 18:14:39 chu11 Exp $
+ *  $Id: ipmi_monitoring_debug.c,v 1.17.8.1 2009-12-23 21:24:11 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -51,43 +51,43 @@
 extern uint32_t _ipmi_monitoring_flags;
 
 static void
-_debug(const char *fmt, va_list ap)
+_debug (const char *fmt, va_list ap)
 {
   char errbuf[IPMI_MONITORING_DEBUG_ERROR_BUFLEN];
 
-  assert(fmt);
+  assert (fmt);
 
-  vsnprintf(errbuf, IPMI_MONITORING_DEBUG_ERROR_BUFLEN, fmt, ap);
+  vsnprintf (errbuf, IPMI_MONITORING_DEBUG_ERROR_BUFLEN, fmt, ap);
   if (_ipmi_monitoring_flags & IPMI_MONITORING_FLAGS_DEBUG)
-    fprintf(stderr, "%s\n", errbuf);
+    fprintf (stderr, "%s\n", errbuf);
 }
 
-void 
-ipmi_monitoring_debug(const char *fmt, ...)
+void
+ipmi_monitoring_debug (const char *fmt, ...)
 {
   va_list ap;
 
-  assert(fmt);
+  assert (fmt);
 
-  va_start(ap, fmt);
-  _debug(fmt, ap);
-  va_end(ap);
+  va_start (ap, fmt);
+  _debug (fmt, ap);
+  va_end (ap);
 }
 
-char * 
-__debug_msg_create(const char *fmt, ...)
+char *
+__debug_msg_create (const char *fmt, ...)
 {
   char *buffer;
   va_list ap;
 
-  assert(fmt);
+  assert (fmt);
 
-  if (!(buffer = malloc(IPMI_MONITORING_DEBUG_ERROR_BUFLEN)))
-    return NULL;
+  if (!(buffer = malloc (IPMI_MONITORING_DEBUG_ERROR_BUFLEN)))
+    return (NULL);
 
-  va_start(ap, fmt);
-  vsnprintf(buffer, IPMI_MONITORING_DEBUG_ERROR_BUFLEN, fmt, ap);
-  va_end(ap);
+  va_start (ap, fmt);
+  vsnprintf (buffer, IPMI_MONITORING_DEBUG_ERROR_BUFLEN, fmt, ap);
+  va_end (ap);
 
-  return buffer;
+  return (buffer);
 }

@@ -7,7 +7,8 @@ bmc-info \- display BMC information
 .SH "DESCRIPTION"
 .B Bmc-info 
 displays BMC information, such as device version numbers, device
-support, and global IDs (guids).
+support, and globally unique IDs (guids).
+#include <@top_srcdir@/common/man/manpage-common-table-of-contents.man>
 #include <@top_srcdir@/common/man/manpage-common-general-options-header.man>
 #include <@top_srcdir@/common/man/manpage-common-driver.man>
 #include <@top_srcdir@/common/man/manpage-common-inband.man>
@@ -29,8 +30,18 @@ support, and global IDs (guids).
 The following options are specific to
 .B Bmc-info.
 .TP
-\fB\-g\fR, \fB\-\-guid\fR
-Display device guid.
+\fB\-\-get\-device\-id\fR
+Display only device ID information.
+.TP
+\fB\-\-get\-device\-guid\fR
+Display only device guid.
+.TP
+\fB\-\-get\-system\-info\fR
+Display only system info.
+.TP
+\fB\-\-get\-channel\-info\fR
+Display only channel information.
+#include <@top_srcdir@/common/man/manpage-common-interpret-oem-data.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-options-header.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-buffer.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-consolidate.man>
@@ -38,12 +49,16 @@ Display device guid.
 #include <@top_srcdir@/common/man/manpage-common-hostranged-eliminate.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-always-prefix.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-main.man>
-#include <@top_srcdir@/common/man/manpage-common-hostranged-text-shell.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-threads.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-options.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-localhost.man>
 #include <@top_srcdir@/common/man/manpage-common-troubleshooting.man>
 #include <@top_srcdir@/common/man/manpage-common-workaround-heading-text.man>
-#include <@top_srcdir@/common/man/manpage-common-workaround-text.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-inband-text.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-outofband-text.man>
+#include <@top_srcdir@/common/man/manpage-common-oem-interpretation.man>
+.LP
+Dell Poweredge R610, Dell Poweredge R710, Intel SR870BN4/Tiger4
 .SH "EXAMPLES"
 .B # bmc-info
 .PP
@@ -60,7 +75,7 @@ Get BMC information across a cluster using IPMI over LAN.
 #include <@top_srcdir@/common/man/manpage-common-known-issues.man>
 #include <@top_srcdir@/common/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright \(co 2003-2008 FreeIPMI Core Team.  
+Copyright \(co 2003-2010 FreeIPMI Core Team.  
 #include <@top_srcdir@/common/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
 freeipmi.conf(5), freeipmi(7), bmc-config(8)

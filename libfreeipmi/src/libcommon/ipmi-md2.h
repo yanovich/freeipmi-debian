@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: ipmi-md2.h,v 1.3 2008/03/28 00:15:03 chu11 Exp $
+ *  $Id: ipmi-md2.h,v 1.7.4.1 2009-12-23 21:24:22 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -27,10 +27,6 @@
 #ifndef _IPMI_MD2_H
 #define _IPMI_MD2_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdint.h>
 
 #define MD2_BLOCK_LENGTH   16
@@ -49,14 +45,10 @@ typedef struct __md2 {
   uint8_t m[MD2_BLOCK_LENGTH];
 } md2_t;
 
-int md2_init(md2_t *ctx);
+int md2_init (md2_t *ctx);
 
-int md2_update_data(md2_t *ctx, uint8_t *buf, unsigned int buflen);
+int md2_update_data (md2_t *ctx, const void *buf, unsigned int buflen);
 
-int md2_finish(md2_t *ctx, uint8_t *digest, unsigned int digestlen);
-
-#ifdef __cplusplus
-}
-#endif
+int md2_finish (md2_t *ctx, void *digest, unsigned int digestlen);
 
 #endif /* _IPMI_MD2_H */

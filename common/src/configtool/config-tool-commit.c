@@ -1,19 +1,19 @@
-/* 
-   Copyright (C) 2003-2008 FreeIPMI Core Team
+/*
+  Copyright (C) 2003-2010 FreeIPMI Core Team
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2, or (at your option)
+  any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 */
 
 #if HAVE_CONFIG_H
@@ -25,6 +25,9 @@
 #if STDC_HEADERS
 #include <string.h>
 #endif /* STDC_HEADERS */
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 #include <errno.h>
 #include <assert.h>
 
@@ -35,10 +38,10 @@
 #include "pstdout.h"
 
 config_err_t
-config_commit_section(pstdout_state_t pstate,
-                      struct config_section *section,
-                      struct config_arguments *cmd_args,
-                      void *arg)
+config_commit_section (pstdout_state_t pstate,
+                       struct config_section *section,
+                       struct config_arguments *cmd_args,
+                       void *arg)
 {
   struct config_keyvalue *kv;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
@@ -46,29 +49,29 @@ config_commit_section(pstdout_state_t pstate,
   config_err_t this_ret;
   unsigned int commit_count = 0;
 
-  assert(section);
-  assert(cmd_args);
+  assert (section);
+  assert (cmd_args);
 
   if (section->section_pre_commit)
     {
-      if ((this_ret = section->section_pre_commit (section->section_name, 
+      if ((this_ret = section->section_pre_commit (section->section_name,
                                                    arg)) == CONFIG_ERR_FATAL_ERROR)
         goto cleanup;
 
-      if (this_ret == CONFIG_ERR_NON_FATAL_ERROR)
+      if (CONFIG_IS_NON_FATAL_ERROR (this_ret))
         {
           PSTDOUT_FPRINTF (pstate,
-                           stderr, 
-                           "ERROR: Section pre-commit `%s'\n", 
+                           stderr,
+                           "ERROR: Section pre-commit `%s'\n",
                            section->section_name);
           ret = CONFIG_ERR_NON_FATAL_ERROR;
         }
     }
 
   kv = section->keyvalues;
-  while (kv) 
+  while (kv)
     {
-      assert(kv->value_input);
+      assert (kv->value_input);
 
       if (!(kv->key->flags & CONFIG_READABLE_ONLY)
           && !(kv->key->flags & CONFIG_UNDEFINED))
@@ -79,57 +82,89 @@ config_commit_section(pstdout_state_t pstate,
             goto cleanup;
 
           if (this_ret == CONFIG_ERR_SUCCESS)
-            commit_count++;
-          
-          if (this_ret == CONFIG_ERR_NON_FATAL_ERROR)
+	    {
+	      /* Discovered on Quanta S99Q/Dell FS12-TY
+	       *
+	       * A number of values on this motherboard appear to take
+	       * a reasonable amount of time to store, causing the BMC
+	       * to return BUSY errors for a bit.  In some cases, the
+	       * BMC eventually hangs or subsequent writes are
+	       * ignored.  We want to try to avoid this.
+	       */
+	      
+	      if (cmd_args->common.tool_specific_workaround_flags & IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_VERY_SLOW_COMMIT)
+		sleep (1);
+	      
+	      commit_count++;
+	    }
+
+          if (CONFIG_IS_NON_FATAL_ERROR (this_ret))
             {
-              PSTDOUT_FPRINTF (pstate,
-                               stderr, 
-                               "ERROR: Failed to commit `%s:%s'\n", 
-                               section->section_name,
-                               kv->key->key_name);
+              if (this_ret == CONFIG_ERR_NON_FATAL_ERROR_READ_ONLY)
+                PSTDOUT_FPRINTF (pstate,
+                                 stderr,
+                                 "ERROR: Failed to commit `%s:%s': Read Only Field\n",
+                                 section->section_name,
+                                 kv->key->key_name);
+              else if (this_ret == CONFIG_ERR_NON_FATAL_ERROR_NOT_SUPPORTED)
+                PSTDOUT_FPRINTF (pstate,
+                                 stderr,
+                                 "ERROR: Failed to commit `%s:%s': Not Supported\n",
+                                 section->section_name,
+                                 kv->key->key_name);
+              else if (this_ret == CONFIG_ERR_NON_FATAL_ERROR_INVALID_UNSUPPORTED_CONFIG)
+                PSTDOUT_FPRINTF (pstate,
+                                 stderr,
+                                 "ERROR: Failed to commit `%s:%s': Invalid/Unsupported Config\n",
+                                 section->section_name,
+                                 kv->key->key_name);
+              else
+                PSTDOUT_FPRINTF (pstate,
+                                 stderr,
+                                 "ERROR: Failed to commit `%s:%s'\n",
+                                 section->section_name,
+                                 kv->key->key_name);
               ret = CONFIG_ERR_NON_FATAL_ERROR;
             }
         }
       else
         {
           PSTDOUT_FPRINTF (pstate,
-                           stderr, 
-                           "ERROR: `%s:%s' is not writeable\n", 
-                           section->section_name, 
+                           stderr,
+                           "ERROR: `%s:%s' is not writeable\n",
+                           section->section_name,
                            kv->key->key_name);
           ret = CONFIG_ERR_NON_FATAL_ERROR;
         }
-      
+
       kv = kv->next;
     }
-  
-  if (cmd_args->verbose)
+
+  if (cmd_args->verbose_count)
     PSTDOUT_FPRINTF (pstate,
-                     stderr, 
+                     stderr,
                      "Completed commit of Section: %s\n",
                      section->section_name);
-  
+
   if (commit_count && section->section_post_commit)
     {
       if ((this_ret = section->section_post_commit (section->section_name,
                                                     arg)) == CONFIG_ERR_FATAL_ERROR)
         goto cleanup;
 
-      if (this_ret == CONFIG_ERR_NON_FATAL_ERROR)
+      if (CONFIG_IS_NON_FATAL_ERROR (this_ret))
         {
           PSTDOUT_FPRINTF (pstate,
-                           stderr, 
-                           "ERROR: Section post-commit `%s:%s'\n", 
-                           section->section_name,
-                           kv->key->key_name);
+                           stderr,
+                           "ERROR: Section post-commit `%s'\n",
+                           section->section_name);
           ret = CONFIG_ERR_NON_FATAL_ERROR;
         }
     }
 
   rv = ret;
  cleanup:
-  return rv;
+  return (rv);
 }
 
 config_err_t
@@ -142,16 +177,16 @@ config_commit (pstdout_state_t pstate,
   config_err_t rv = CONFIG_ERR_SUCCESS;
   config_err_t ret;
 
-  assert(sections);
-  assert(cmd_args);
+  assert (sections);
+  assert (cmd_args);
 
   s = sections;
   while (s)
     {
-      if ((ret = config_commit_section(pstate,
-                                       s, 
-                                       cmd_args,
-                                       arg)) != CONFIG_ERR_SUCCESS)
+      if ((ret = config_commit_section (pstate,
+                                        s,
+                                        cmd_args,
+                                        arg)) != CONFIG_ERR_SUCCESS)
         {
           if (ret == CONFIG_ERR_FATAL_ERROR)
             {
@@ -160,8 +195,31 @@ config_commit (pstdout_state_t pstate,
             }
           rv = ret;
         }
+
+      /* IPMI Workaround (achu)
+       *
+       * Discovered on Supermicro H8QME with SIMSO daughter card.
+       *
+       * Some BMCs appear to not be able to accept a high number of
+       * commits/writes and eventually commits/writes are lost.  This
+       * workaround will slow down the commits/writes to give the BMC
+       * a better chance to accept all changes.
+       *
+       * Discovered on Quanta S99Q/Dell FS12-TY
+       *
+       * A number of values on this motherboard appear to take
+       * a reasonable amount of time to store, causing the BMC
+       * to return BUSY errors for a bit.  In some cases, the
+       * BMC eventually hangs or subsequent writes are
+       * ignored.  We want to try to avoid this.
+       */
+
+      if (cmd_args->common.tool_specific_workaround_flags & IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_SLOW_COMMIT
+	  || cmd_args->common.tool_specific_workaround_flags & IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_VERY_SLOW_COMMIT)
+	sleep (1);
+
       s = s->next;
     }
 
-  return rv;
+  return (rv);
 }

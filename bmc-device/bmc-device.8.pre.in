@@ -13,6 +13,7 @@ purposes.  Most IPMI users will not need to use this tool.  Some of
 the
 .B bmc-device
 commands are not supported on all motherboards.
+#include <@top_srcdir@/common/man/manpage-common-table-of-contents.man>
 #include <@top_srcdir@/common/man/manpage-common-general-options-header.man>
 #include <@top_srcdir@/common/man/manpage-common-driver.man>
 #include <@top_srcdir@/common/man/manpage-common-inband.man>
@@ -73,7 +74,7 @@ Clear IP, UDP, and RMCP statistics.
 \fB\-\-get\-sdr\-repository\-time\fR
 Get SDR repository time.
 .TP
-\fB\-\-set\-sdr\-repository\-time=TIME\fR
+\fB\-\-set\-sdr\-repository\-time\fR=\fITIME\fR
 Set SDR repository time.  Input format = "MM/DD/YYYY - HH:MM:SS".
 Note that hours are input in 24 hour form.  Alternatively, the local
 system time can be specified with "now".
@@ -81,7 +82,7 @@ system time can be specified with "now".
 \fB\-\-get\-sel\-time\fR
 Get SEL time.
 .TP
-\fB\-\-set\-sel\-time=TIME\fR
+\fB\-\-set\-sel\-time\fR=\fITIME\fR
 Set SEL time.  Input format = "MM/DD/YYYY - HH:MM:SS".  Note that
 hours are input in 24 hour form.  Alternatively, the local
 system time can be specified with "now".
@@ -111,6 +112,21 @@ Get KCS interface capabilities.
 \fB\-\-get\-bt\-interface\-capabilities\fR
 Get BT interface capabilities.
 .TP
+\fB\-\-get\-bmc\-global\-enables\fR
+Get BMC Global Enables.
+.TP
+\fB\-\-set\-system\-firmware\-version\fR=\fISTRING\fR
+Set System Firmware Version.
+.TP
+\fB\-\-set\-system\-name\fR=\fISTRING\fR
+Set System Name.
+.TP
+\fB\-\-set\-primary\-operating\-system\-name\fR=\fISTRING\fR
+Set Primary Operating System Name.
+.TP
+\fB\-\-set\-operating\-system\-name\fR=\fISTRING\fR
+Set Operating System Name.
+.TP
 \fB\-\-verbose\fR
 Increase verbosity in output.
 #include <@top_srcdir@/common/man/manpage-common-hostranged-options-header.man>
@@ -120,21 +136,30 @@ Increase verbosity in output.
 #include <@top_srcdir@/common/man/manpage-common-hostranged-eliminate.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-always-prefix.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-main.man>
-#include <@top_srcdir@/common/man/manpage-common-hostranged-text-shell.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-threads.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-options.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-localhost.man>
 #include <@top_srcdir@/common/man/manpage-common-troubleshooting.man>
 #include <@top_srcdir@/common/man/manpage-common-workaround-heading-text.man>
-#include <@top_srcdir@/common/man/manpage-common-workaround-text.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-inband-text.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-outofband-text.man>
 .SH "EXAMPLES"
 .B # bmc-device --cold-reset
 .PP
 Perform a cold reset.
 .PP
+.B # ipmi-dcmi -h ahost -u myusername -p mypassword --cold-reset
+.PP
+Perform a cold reset of a remote machine using IPMI over LAN.
+.PP
+.B # ipmi-dcmi -h mycluster[0-127] -u myusername -p mypassword --cold-reset
+.PP
+Perform a cold reset across a cluster using IPMI over LAN.
+.PP
 #include <@top_srcdir@/common/man/manpage-common-known-issues.man>
 #include <@top_srcdir@/common/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright \(co 2008 FreeIPMI Core Team.  
+Copyright \(co 2008-2010 FreeIPMI Core Team.  
 #include <@top_srcdir@/common/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
 freeipmi.conf(5), freeipmi(7)

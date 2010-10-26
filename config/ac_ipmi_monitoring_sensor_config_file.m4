@@ -1,5 +1,5 @@
 ##*****************************************************************************
-## $Id: ac_ipmi_monitoring_sensor_config_file.m4,v 1.2 2007/12/14 19:16:19 chu11 Exp $
+## $Id: ac_ipmi_monitoring_sensor_config_file.m4,v 1.2 2007-12-14 19:16:19 chu11 Exp $
 ##*****************************************************************************
 
 AC_DEFUN([AC_IPMI_MONITORING_SENSOR_CONFIG_FILE],

@@ -1,7 +1,7 @@
 /*****************************************************************************\
- *  $Id: ipmi_monitoring.h,v 1.29.2.4 2009/09/09 18:26:19 chu11 Exp $
+ *  $Id: ipmi_monitoring.h,v 1.51.4.4 2010-06-10 22:10:06 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2008 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -31,7 +31,7 @@
 extern "C" {
 #endif
 
-enum ipmi_monitoring_error_codes 
+enum ipmi_monitoring_error_codes
   {
     IPMI_MONITORING_ERR_SUCCESS                             = 0,
     IPMI_MONITORING_ERR_CTX_NULL                            = 1,
@@ -42,7 +42,7 @@ enum ipmi_monitoring_error_codes
     IPMI_MONITORING_ERR_CONFIG_FILE_PARSE                   = 6,
     IPMI_MONITORING_ERR_SENSOR_CONFIG_FILE_PARSE            = 7,
     IPMI_MONITORING_ERR_SDR_CACHE_PERMISSION                = 8,
-    IPMI_MONITORING_ERR_SDR_CACHE_FILESYSTEM                = 9, 
+    IPMI_MONITORING_ERR_SDR_CACHE_FILESYSTEM                = 9,
     IPMI_MONITORING_ERR_HOSTNAME_INVALID                    = 10,
     IPMI_MONITORING_ERR_SENSOR_NOT_FOUND                    = 11,
     IPMI_MONITORING_ERR_NO_SENSOR_READINGS                  = 12,
@@ -58,44 +58,45 @@ enum ipmi_monitoring_error_codes
     IPMI_MONITORING_ERR_AUTHENTICATION_TYPE_UNAVAILABLE     = 22,
     IPMI_MONITORING_ERR_IPMI_2_0_UNAVAILABLE                = 23,
     IPMI_MONITORING_ERR_CIPHER_SUITE_ID_UNAVAILABLE         = 24,
-    IPMI_MONITORING_ERR_BMC_BUSY                            = 25,
-    IPMI_MONITORING_ERR_OUT_OF_MEMORY                       = 26,
-    IPMI_MONITORING_ERR_IPMI_ERROR                          = 27,
-    IPMI_MONITORING_ERR_SYSTEM_ERROR                        = 28,
-    IPMI_MONITORING_ERR_INTERNAL_ERROR                      = 29,
-    IPMI_MONITORING_ERR_ERRNUMRANGE                         = 30,
+    IPMI_MONITORING_ERR_CALLBACK_ERROR                      = 25,
+    IPMI_MONITORING_ERR_BMC_BUSY                            = 26,
+    IPMI_MONITORING_ERR_OUT_OF_MEMORY                       = 27,
+    IPMI_MONITORING_ERR_IPMI_ERROR                          = 28,
+    IPMI_MONITORING_ERR_SYSTEM_ERROR                        = 29,
+    IPMI_MONITORING_ERR_INTERNAL_ERROR                      = 30,
+    IPMI_MONITORING_ERR_ERRNUMRANGE                         = 31,
   };
 
-enum ipmi_monitoring_sensor_group
+enum ipmi_monitoring_sensor_type
   {
-    IPMI_MONITORING_SENSOR_GROUP_TEMPERATURE                         = 0x00,
-    IPMI_MONITORING_SENSOR_GROUP_VOLTAGE                             = 0x01,
-    IPMI_MONITORING_SENSOR_GROUP_CURRENT                             = 0x02,
-    IPMI_MONITORING_SENSOR_GROUP_FAN                                 = 0x03,
-    IPMI_MONITORING_SENSOR_GROUP_PHYSICAL_SECURITY                   = 0x04,
-    IPMI_MONITORING_SENSOR_GROUP_PLATFORM_SECURITY_VIOLATION_ATTEMPT = 0x05,
-    IPMI_MONITORING_SENSOR_GROUP_PROCESSOR                           = 0x06,
-    IPMI_MONITORING_SENSOR_GROUP_POWER_SUPPLY                        = 0x07,
-    IPMI_MONITORING_SENSOR_GROUP_POWER_UNIT                          = 0x08,
-    IPMI_MONITORING_SENSOR_GROUP_MEMORY                              = 0x09,
-    IPMI_MONITORING_SENSOR_GROUP_DRIVE_SLOT                          = 0x0A,
-    IPMI_MONITORING_SENSOR_GROUP_SYSTEM_FIRMWARE_PROGRESS            = 0x0B,
-    IPMI_MONITORING_SENSOR_GROUP_EVENT_LOGGING_DISABLED              = 0x0C,
-    IPMI_MONITORING_SENSOR_GROUP_SYSTEM_EVENT                        = 0x0D, 
-    IPMI_MONITORING_SENSOR_GROUP_CRITICAL_INTERRUPT                  = 0x0E,
-    IPMI_MONITORING_SENSOR_GROUP_MODULE_BOARD                        = 0x0F, 
-    IPMI_MONITORING_SENSOR_GROUP_SLOT_CONNECTOR                      = 0x10,
-    IPMI_MONITORING_SENSOR_GROUP_WATCHDOG2                           = 0x11,
-    IPMI_MONITORING_SENSOR_GROUP_ENTITY_PRESENCE                     = 0x12,
-    IPMI_MONITORING_SENSOR_GROUP_MANAGEMENT_SUBSYSTEM_HEALTH         = 0x13,
-    IPMI_MONITORING_SENSOR_GROUP_BATTERY                             = 0x14,
-    IPMI_MONITORING_SENSOR_GROUP_FRU_STATE                           = 0x15,
-    IPMI_MONITORING_SENSOR_GROUP_CABLE_INTERCONNECT                  = 0x16,
-    IPMI_MONITORING_SENSOR_GROUP_BOOT_ERROR                          = 0x17,
-    IPMI_MONITORING_SENSOR_GROUP_BUTTON_SWITCH                       = 0x18,
-    IPMI_MONITORING_SENSOR_GROUP_SYSTEM_ACPI_POWER_STATE             = 0x19,
-    IPMI_MONITORING_SENSOR_GROUP_UNKNOWN                             = 0x1B,
-  } ipmi_monitoring_sensor_group_t;
+    IPMI_MONITORING_SENSOR_TYPE_TEMPERATURE                         = 0x00,
+    IPMI_MONITORING_SENSOR_TYPE_VOLTAGE                             = 0x01,
+    IPMI_MONITORING_SENSOR_TYPE_CURRENT                             = 0x02,
+    IPMI_MONITORING_SENSOR_TYPE_FAN                                 = 0x03,
+    IPMI_MONITORING_SENSOR_TYPE_PHYSICAL_SECURITY                   = 0x04,
+    IPMI_MONITORING_SENSOR_TYPE_PLATFORM_SECURITY_VIOLATION_ATTEMPT = 0x05,
+    IPMI_MONITORING_SENSOR_TYPE_PROCESSOR                           = 0x06,
+    IPMI_MONITORING_SENSOR_TYPE_POWER_SUPPLY                        = 0x07,
+    IPMI_MONITORING_SENSOR_TYPE_POWER_UNIT                          = 0x08,
+    IPMI_MONITORING_SENSOR_TYPE_MEMORY                              = 0x09,
+    IPMI_MONITORING_SENSOR_TYPE_DRIVE_SLOT                          = 0x0A,
+    IPMI_MONITORING_SENSOR_TYPE_SYSTEM_FIRMWARE_PROGRESS            = 0x0B,
+    IPMI_MONITORING_SENSOR_TYPE_EVENT_LOGGING_DISABLED              = 0x0C,
+    IPMI_MONITORING_SENSOR_TYPE_SYSTEM_EVENT                        = 0x0D,
+    IPMI_MONITORING_SENSOR_TYPE_CRITICAL_INTERRUPT                  = 0x0E,
+    IPMI_MONITORING_SENSOR_TYPE_MODULE_BOARD                        = 0x0F,
+    IPMI_MONITORING_SENSOR_TYPE_SLOT_CONNECTOR                      = 0x10,
+    IPMI_MONITORING_SENSOR_TYPE_WATCHDOG2                           = 0x11,
+    IPMI_MONITORING_SENSOR_TYPE_ENTITY_PRESENCE                     = 0x12,
+    IPMI_MONITORING_SENSOR_TYPE_MANAGEMENT_SUBSYSTEM_HEALTH         = 0x13,
+    IPMI_MONITORING_SENSOR_TYPE_BATTERY                             = 0x14,
+    IPMI_MONITORING_SENSOR_TYPE_FRU_STATE                           = 0x15,
+    IPMI_MONITORING_SENSOR_TYPE_CABLE_INTERCONNECT                  = 0x16,
+    IPMI_MONITORING_SENSOR_TYPE_BOOT_ERROR                          = 0x17,
+    IPMI_MONITORING_SENSOR_TYPE_BUTTON_SWITCH                       = 0x18,
+    IPMI_MONITORING_SENSOR_TYPE_SYSTEM_ACPI_POWER_STATE             = 0x19,
+    IPMI_MONITORING_SENSOR_TYPE_UNKNOWN                             = 0x1B,
+  } ipmi_monitoring_sensor_type_t;
 
 enum ipmi_monitoring_sensor_state
   {
@@ -122,47 +123,46 @@ enum ipmi_monitoring_sensor_reading_type
     IPMI_MONITORING_SENSOR_READING_TYPE_UNSIGNED_INTEGER8_BOOL     = 0x00,
     IPMI_MONITORING_SENSOR_READING_TYPE_UNSIGNED_INTEGER32         = 0x01,
     IPMI_MONITORING_SENSOR_READING_TYPE_DOUBLE                     = 0x02,
-    IPMI_MONITORING_SENSOR_READING_TYPE_UNSIGNED_INTEGER16_BITMASK = 0x03,
-    IPMI_MONITORING_SENSOR_READING_TYPE_UNKNOWN                    = 0x04,
+    IPMI_MONITORING_SENSOR_READING_TYPE_UNKNOWN                    = 0x03,
   };
 
 enum ipmi_monitoring_sensor_bitmask_type
   {
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_TRANSITION                          = 0x00,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_STATE                               = 0x01,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_PREDICTIVE_FAILURE                  = 0x02,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_LIMIT                               = 0x03,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_PERFORMANCE                         = 0x04,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_TRANSITION_SEVERITY                 = 0x05,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_DEVICE_INSTALL                      = 0x06,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_DEVICE_STATE                        = 0x07,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_TRANSITION_DEVICE                   = 0x08,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_REDUNDANCY                          = 0x09,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_POWER_STATE                         = 0x0A,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_PHYSICAL_SECURITY                   = 0x0B,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_PLATFORM_SECURITY_VIOLATION_ATTEMPT = 0x0C,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_PROCESSOR                           = 0x0D, 
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_POWER_SUPPLY                        = 0x0E,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_POWER_UNIT                          = 0x0F,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_MEMORY                              = 0x10,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_DRIVE_SLOT                          = 0x11,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_SYSTEM_FIRMWARE_PROGRESS            = 0x12,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_EVENT_LOGGING_DISABLED              = 0x13,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_SYSTEM_EVENT                        = 0x14, 
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_CRITICAL_INTERRUPT                  = 0x15,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_MODULE_BOARD                        = 0x16, 
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_SLOT_CONNECTOR                      = 0x17,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_WATCHDOG2                           = 0x18,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_ENTITY_PRESENCE                     = 0x19,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_MANAGEMENT_SUBSYSTEM_HEALTH         = 0x1A,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_BATTERY                             = 0x1B,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_FRU_STATE                           = 0x1C,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_CABLE_INTERCONNECT                  = 0x1D,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_BOOT_ERROR                          = 0x1E,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_BUTTON_SWITCH                       = 0x1F,
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_SYSTEM_ACPI_POWER_STATE             = 0x20,
-
-    IPMI_MONITORING_SENSOR_BITMASK_TYPE_UNKNOWN                             = 0x21,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_THRESHOLD                           = 0x00,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_TRANSITION_STATE                    = 0x01,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_STATE                               = 0x02,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_PREDICTIVE_FAILURE                  = 0x03,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_LIMIT                               = 0x04,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_PERFORMANCE                         = 0x05,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_TRANSITION_SEVERITY                 = 0x06,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_DEVICE_PRESENT                      = 0x07,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_DEVICE_ENABLED                      = 0x08,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_TRANSITION_AVAILABILITY             = 0x09,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_REDUNDANCY                          = 0x0A,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_ACPI_POWER_STATE                    = 0x0B,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_PHYSICAL_SECURITY                   = 0x0C,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_PLATFORM_SECURITY_VIOLATION_ATTEMPT = 0x0D,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_PROCESSOR                           = 0x0E,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_POWER_SUPPLY                        = 0x0F,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_POWER_UNIT                          = 0x10,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_MEMORY                              = 0x11,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_DRIVE_SLOT                          = 0x12,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_SYSTEM_FIRMWARE_PROGRESS            = 0x13,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_EVENT_LOGGING_DISABLED              = 0x14,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_SYSTEM_EVENT                        = 0x15,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_CRITICAL_INTERRUPT                  = 0x16,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_MODULE_BOARD                        = 0x17,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_SLOT_CONNECTOR                      = 0x18,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_WATCHDOG2                           = 0x19,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_ENTITY_PRESENCE                     = 0x1A,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_MANAGEMENT_SUBSYSTEM_HEALTH         = 0x1B,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_BATTERY                             = 0x1C,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_FRU_STATE                           = 0x1D,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_CABLE_INTERCONNECT                  = 0x1E,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_BOOT_ERROR                          = 0x1F,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_BUTTON_SWITCH                       = 0x20,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_SYSTEM_ACPI_POWER_STATE             = 0x21,
+    IPMI_MONITORING_SENSOR_BITMASK_TYPE_UNKNOWN                             = 0x22,
   };
 
 enum ipmi_monitoring_driver_type
@@ -207,32 +207,46 @@ enum ipmi_monitoring_flags
  */
 enum ipmi_monitoring_workaround_flags
   {
-    IPMI_MONITORING_WORKAROUND_FLAGS_ACCEPT_SESSION_ID_ZERO      = 0x00000001,
-    IPMI_MONITORING_WORKAROUND_FLAGS_FORCE_PERMSG_AUTHENTICATION = 0x00000002,
-    IPMI_MONITORING_WORKAROUND_FLAGS_CHECK_UNEXPECTED_AUTHCODE   = 0x00000004,
-    IPMI_MONITORING_WORKAROUND_FLAGS_BIG_ENDIAN_SEQUENCE_NUMBER  = 0x00000008,
-    IPMI_MONITORING_WORKAROUND_FLAGS_AUTHENTICATION_CAPABILITIES = 0x00000010,
-    IPMI_MONITORING_WORKAROUND_FLAGS_INTEL_2_0_SESSION           = 0x01000000,
-    IPMI_MONITORING_WORKAROUND_FLAGS_SUPERMICRO_2_0_SESSION      = 0x02000000,
-    IPMI_MONITORING_WORKAROUND_FLAGS_SUN_2_0_SESSION             = 0x04000000,
-    IPMI_MONITORING_WORKAROUND_FLAGS_OPEN_SESSION_PRIVILEGE      = 0x08000000,
+    IPMI_MONITORING_WORKAROUND_FLAGS_ACCEPT_SESSION_ID_ZERO          = 0x00000001,
+    IPMI_MONITORING_WORKAROUND_FLAGS_FORCE_PERMSG_AUTHENTICATION     = 0x00000002,
+    IPMI_MONITORING_WORKAROUND_FLAGS_CHECK_UNEXPECTED_AUTHCODE       = 0x00000004,
+    IPMI_MONITORING_WORKAROUND_FLAGS_BIG_ENDIAN_SEQUENCE_NUMBER      = 0x00000008,
+    IPMI_MONITORING_WORKAROUND_FLAGS_AUTHENTICATION_CAPABILITIES     = 0x00000010,
+    IPMI_MONITORING_WORKAROUND_FLAGS_INTEL_2_0_SESSION               = 0x01000000,
+    IPMI_MONITORING_WORKAROUND_FLAGS_SUPERMICRO_2_0_SESSION          = 0x02000000,
+    IPMI_MONITORING_WORKAROUND_FLAGS_SUN_2_0_SESSION                 = 0x04000000,
+    IPMI_MONITORING_WORKAROUND_FLAGS_OPEN_SESSION_PRIVILEGE          = 0x08000000,
+    IPMI_MONITORING_WORKAROUND_FLAGS_NON_EMPTY_INTEGRITY_CHECK_VALUE = 0x10000000,
+    IPMI_MONITORING_WORKAROUND_FLAGS_ASSUME_IO_BASE_ADDRESS          = 0x00001000,
   };
-
+  
 enum ipmi_monitoring_sensor_reading_flags
   {
-    IPMI_MONITORING_SENSOR_READING_FLAGS_REREAD_SDR_CACHE          = 0x00000001,
-    IPMI_MONITORING_SENSOR_READING_FLAGS_IGNORE_UNREADABLE_SENSORS = 0x00000002,
-    IPMI_MONITORING_SENSOR_READING_FLAGS_BRIDGE_SENSORS            = 0x00000004,
+    IPMI_MONITORING_SENSOR_READING_FLAGS_REREAD_SDR_CACHE                 = 0x00000001,
+    IPMI_MONITORING_SENSOR_READING_FLAGS_IGNORE_NON_INTERPRETABLE_SENSORS = 0x00000002,
+    IPMI_MONITORING_SENSOR_READING_FLAGS_BRIDGE_SENSORS                   = 0x00000004,
+    IPMI_MONITORING_SENSOR_READING_FLAGS_INTERPRET_OEM_DATA               = 0x00000008,
+    IPMI_MONITORING_SENSOR_READING_FLAGS_SHARED_SENSORS                   = 0x00000010,
+    IPMI_MONITORING_SENSOR_READING_FLAGS_IGNORE_UNREADABLE_SENSORS        = 0x00000002, /* legacy macro */
   };
 
-/* 
+/*
  * IPMI Bitmasks
  *
- * The following are the bitmask masks that can be returned by
- * those sensors that return bitmasks.  Use the returned bitmask type
- * to determine which set of bitmasks to use.
+ * The following are the bitmask masks that can be returned.  Use the
+ * returned bitmask type to determine which set of bitmasks to use.
  */
-enum ipmi_monitoring_sensor_bitmask_transition 
+enum ipmi_monitoring_sensor_bitmask_threshold
+  {
+    IPMI_MONITORING_BITMASK_THRESHOLD_AT_OR_BELOW_LOWER_NON_CRITICAL_THRESHOLD = 0x0001,
+    IPMI_MONITORING_BITMASK_THRESHOLD_AT_OR_BELOW_LOWER_CRITICAL_THRESHOLD = 0x0002,
+    IPMI_MONITORING_BITMASK_THRESHOLD_AT_OR_BELOW_LOWER_NON_RECOVERABLE_THRESHOLD = 0x0004,
+    IPMI_MONITORING_BITMASK_THRESHOLD_AT_OR_BELOW_UPPER_NON_CRITICAL_THRESHOLD = 0x0008,
+    IPMI_MONITORING_BITMASK_THRESHOLD_AT_OR_BELOW_UPPER_CRITICAL_THRESHOLD = 0x0010,
+    IPMI_MONITORING_BITMASK_THRESHOLD_AT_OR_BELOW_UPPER_NON_RECOVERABLE_THRESHOLD = 0x0020,
+  };
+
+enum ipmi_monitoring_sensor_bitmask_transition
   {
     IPMI_MONITORING_BITMASK_TRANSITION_TO_IDLE = 0x0001,
     IPMI_MONITORING_BITMASK_TRANSITION_TO_ACTIVE = 0x0002,
@@ -276,19 +290,19 @@ enum ipmi_monitoring_sensor_bitmask_transition_severity
     IPMI_MONITORING_BITMASK_TRANSITION_INFORMATIONAL = 0x0100,
   };
 
-enum ipmi_monitoring_sensor_bitmask_device_install
+enum ipmi_monitoring_sensor_bitmask_device_present
   {
     IPMI_MONITORING_BITMASK_DEVICE_REMOVED_DEVICE_ABSENT = 0x0001,
     IPMI_MONITORING_BITMASK_DEVICE_INSERTED_DEVICE_PRESENT = 0x0002,
   };
 
-enum ipmi_monitoring_sensor_bitmask_device_state
+enum ipmi_monitoring_sensor_bitmask_device_enabled
   {
     IPMI_MONITORING_BITMASK_DEVICE_DISABLED = 0x0001,
     IPMI_MONITORING_BITMASK_DEVICE_ENABLED = 0x0002,
   };
 
-enum ipmi_monitoring_sensor_bitmask_transition_device
+enum ipmi_monitoring_sensor_bitmask_transition_availability
   {
     IPMI_MONITORING_BITMASK_TRANSITION_TO_RUNNING = 0x0001,
     IPMI_MONITORING_BITMASK_TRANSITION_TO_IN_TEST = 0x0002,
@@ -306,14 +320,14 @@ enum ipmi_monitoring_sensor_bitmask_redundancy
     IPMI_MONITORING_BITMASK_FULLY_REDUNDANT = 0x0001,
     IPMI_MONITORING_BITMASK_REDUNDANCY_LOST = 0x0002,
     IPMI_MONITORING_BITMASK_REDUNDANCY_DEGRADED = 0x0004,
-    IPMI_MONITORING_BITMASK_ENTERED_FROM_REDUNDANCY_DEGRADED_OR_FULLY_REDUNDANT = 0x0008,
-    IPMI_MONITORING_BITMASK_ENTERED_FROM_NON_REDUNDANT_INSUFFICIENT_RESOURCES = 0x0010,
+    IPMI_MONITORING_BITMASK_NON_REDUNDANT_SUFFICIENT_RESOURCES_FROM_REDUNDANT = 0x0008,
+    IPMI_MONITORING_BITMASK_NON_REDUNDANT_SUFFICIENT_RESOURCES_FROM_INSUFFICIENT_RESOURCES = 0x0010,
     IPMI_MONITORING_BITMASK_NON_REDUNDANT_INSUFFICIENT_RESOURCES = 0x0020,
     IPMI_MONITORING_BITMASK_REDUNDANCY_DEGRADED_FROM_FULLY_REDUNDANT = 0x0040,
     IPMI_MONITORING_BITMASK_REDUNDANCY_DEGRADED_FROM_NON_REDUNDANT = 0x0080,
   };
 
-enum ipmi_monitoring_sensor_bitmask_power_state
+enum ipmi_monitoring_sensor_bitmask_acpi_power_state
   {
     IPMI_MONITORING_BITMASK_D0_POWER_STATE = 0x0001,
     IPMI_MONITORING_BITMASK_D1_POWER_STATE = 0x0002,
@@ -326,7 +340,7 @@ enum ipmi_monitoring_sensor_bitmask_physical_security
     IPMI_MONITORING_BITMASK_PHYSICAL_SECURITY_GENERAL_CHASSIS_INTRUSION = 0x0001,
     IPMI_MONITORING_BITMASK_PHYSICAL_SECURITY_DRIVE_BAY_INTRUSION = 0x0002,
     IPMI_MONITORING_BITMASK_PHYSICAL_SECURITY_IO_CARD_INTRUSION = 0x0004,
-    IPMI_MONITORING_BITMASK_PHYSICAL_SECURITY_PROCESSOR_AREA_INTRUSION = 0x0008, 
+    IPMI_MONITORING_BITMASK_PHYSICAL_SECURITY_PROCESSOR_AREA_INTRUSION = 0x0008,
     IPMI_MONITORING_BITMASK_PHYSICAL_SECURITY_LAN_LEASH_LOST = 0x0010,
     IPMI_MONITORING_BITMASK_PHYSICAL_SECURITY_UNAUTHORIZED_DOCK_UNDOCK = 0x0020,
     IPMI_MONITORING_BITMASK_PHYSICAL_SECURITY_FAN_AREA_INTRUSION = 0x0040,
@@ -336,7 +350,7 @@ enum ipmi_monitoring_sensor_bitmask_platform_security_violation_attempt
   {
     IPMI_MONITORING_BITMASK_PLATFORM_SECURITY_VIOLATION_ATTEMPT_SECURE_MODE_VIOLATION_ATTEMPT = 0x0001,
     IPMI_MONITORING_BITMASK_PLATFORM_SECURITY_VIOLATION_ATTEMPT_PRE_BOOT_PASSWORD_VIOLATION_USER_PASSWORD = 0x0002,
-    IPMI_MONITORING_BITMASK_PLATFORM_SECURITY_VIOLATION_ATTEMPT_PRE_BOOT_PASSWORD_VIOLATION_SETUP_PASSWORD = 0x0004,
+    IPMI_MONITORING_BITMASK_PLATFORM_SECURITY_VIOLATION_ATTEMPT_PRE_BOOT_PASSWORD_VIOLATION_ATTEMPT_SETUP_PASSWORD = 0x0004,
     IPMI_MONITORING_BITMASK_PLATFORM_SECURITY_VIOLATION_ATTEMPT_PRE_BOOT_PASSWORD_VIOLATION_NETWORK_BOOT_PASSWORD = 0x0008,
     IPMI_MONITORING_BITMASK_PLATFORM_SECURITY_VIOLATION_ATTEMPT_OTHER_PRE_BOOT_PASSWORD_VIOLATION = 0x0010,
     IPMI_MONITORING_BITMASK_PLATFORM_SECURITY_VIOLATION_ATTEMPT_OUT_OF_BAND_ACCESS_PASSWORD_VIOLATION = 0x0020,
@@ -355,6 +369,8 @@ enum ipmi_monitoring_sensor_bitmask_processor
     IPMI_MONITORING_BITMASK_PROCESSOR_PROCESSOR_DISABLED = 0x0100,
     IPMI_MONITORING_BITMASK_PROCESSOR_TERMINATOR_PRESENCE_DETECTED = 0x0200,
     IPMI_MONITORING_BITMASK_PROCESSOR_PROCESSOR_AUTOMATICALLY_THROTTLED = 0x0400,
+    IPMI_MONITORING_BITMASK_PROCESSOR_MACHINE_CHECK_EXCEPTION = 0x0800,
+    IPMI_MONITORING_BITMASK_PROCESSOR_CORRECTABLE_MACHINE_CHECK_ERROR = 0x1000,
   };
 
 enum ipmi_monitoring_sensor_bitmask_power_supply
@@ -382,16 +398,17 @@ enum ipmi_monitoring_sensor_bitmask_power_unit
 
 enum ipmi_monitoring_sensor_bitmask_memory
   {
-    IPMI_MONITORING_BITMASK_MEMORY_CORRECTABLE_ECC_MEMORY_ERROR = 0x0001,
-    IPMI_MONITORING_BITMASK_MEMORY_UNCORRECTABLE_ECC_MEMORY_ERROR = 0x0002,
+    IPMI_MONITORING_BITMASK_MEMORY_CORRECTABLE_MEMORY_ERROR = 0x0001,
+    IPMI_MONITORING_BITMASK_MEMORY_UNCORRECTABLE_MEMORY_ERROR = 0x0002,
     IPMI_MONITORING_BITMASK_MEMORY_PARITY = 0x0004,
     IPMI_MONITORING_BITMASK_MEMORY_MEMORY_SCRUB_FAILED = 0x0008,
     IPMI_MONITORING_BITMASK_MEMORY_MEMORY_DEVICE_DISABLED = 0x0010,
-    IPMI_MONITORING_BITMASK_MEMORY_CORRECTABLE_ECC_MEMORY_ERROR_LOGGING_LIMIT_REACHED = 0x0020,
+    IPMI_MONITORING_BITMASK_MEMORY_CORRECTABLE_MEMORY_ERROR_LOGGING_LIMIT_REACHED = 0x0020,
     IPMI_MONITORING_BITMASK_MEMORY_PRESENCE_DETECTED = 0x0040,
     IPMI_MONITORING_BITMASK_MEMORY_CONFIGURATION_ERROR = 0x0080,
     IPMI_MONITORING_BITMASK_MEMORY_SPARE = 0x0100,
     IPMI_MONITORING_BITMASK_MEMORY_MEMORY_AUTOMATICALLY_THROTTLED = 0x0200,
+    IPMI_MONITORING_BITMASK_MEMORY_CRITICAL_OVERTEMPERATURE = 0x0400,
   };
 
 enum ipmi_monitoring_sensor_bitmask_drive_slot
@@ -401,7 +418,7 @@ enum ipmi_monitoring_sensor_bitmask_drive_slot
     IPMI_MONITORING_BITMASK_DRIVE_SLOT_PREDICTIVE_FAILURE = 0x0004,
     IPMI_MONITORING_BITMASK_DRIVE_SLOT_HOT_SPARE = 0x0008,
     IPMI_MONITORING_BITMASK_DRIVE_SLOT_CONSISTENCY_CHECK_PARITY_CHECK_IN_PROGRESS = 0x0010,
-    IPMI_MONITORING_BITMASK_DRIVE_SLOT_IN__ARRAY = 0x0020,
+    IPMI_MONITORING_BITMASK_DRIVE_SLOT_IN_CRITICAL_ARRAY = 0x0020,
     IPMI_MONITORING_BITMASK_DRIVE_SLOT_IN_FAILED_ARRAY = 0x0040,
     IPMI_MONITORING_BITMASK_DRIVE_SLOT_REBUILD_REMAP_IN_PROGRESS = 0x0080,
     IPMI_MONITORING_BITMASK_DRIVE_SLOT_REBUILD_REMAP_ABORTED = 0x0100,
@@ -416,12 +433,13 @@ enum ipmi_monitoring_sensor_bitmask_system_firmware_progress
 
 enum ipmi_monitoring_sensor_bitmask_event_logging_disabled
   {
-    IPMI_MONITORING_BITMASK_EVENT_LOGGING_DISABLED_CORRECTABLE_MEMORY_LOGGING_DISABLED = 0x0001,
+    IPMI_MONITORING_BITMASK_EVENT_LOGGING_DISABLED_CORRECTABLE_MEMORY_ERROR_LOGGING_DISABLED = 0x0001,
     IPMI_MONITORING_BITMASK_EVENT_LOGGING_DISABLED_EVENT_TYPE_LOGGING_DISABLED = 0x0002,
     IPMI_MONITORING_BITMASK_EVENT_LOGGING_DISABLED_LOG_AREA_RESET_CLEARED = 0x0004,
     IPMI_MONITORING_BITMASK_EVENT_LOGGING_DISABLED_ALL_EVENT_LOGGING_DISABLED = 0x0008,
     IPMI_MONITORING_BITMASK_EVENT_LOGGING_DISABLED_SEL_FULL = 0x0010,
     IPMI_MONITORING_BITMASK_EVENT_LOGGING_DISABLED_SEL_ALMOST_FULL = 0x0020,
+    IPMI_MONITORING_BITMASK_EVENT_LOGGING_DISABLED_CORRECTABLE_MACHINE_CHECK_ERROR_LOGGING_DISABLED = 0x0040,
   };
 
 enum ipmi_monitoring_sensor_bitmask_system_event
@@ -429,7 +447,7 @@ enum ipmi_monitoring_sensor_bitmask_system_event
     IPMI_MONITORING_BITMASK_SYSTEM_EVENT_SYSTEM_RECONFIGURED = 0x0001,
     IPMI_MONITORING_BITMASK_SYSTEM_EVENT_OEM_SYSTEM_BOOT_EVENT = 0x0002,
     IPMI_MONITORING_BITMASK_SYSTEM_EVENT_UNDETERMINED_SYSTEM_HARDWARE_FAILURE = 0x0004,
-    IPMI_MONITORING_BITMASK_SYSTEM_EVENT_ENTRY_ADDED_TO_AUXILIARY_LOG = 0x0008, 
+    IPMI_MONITORING_BITMASK_SYSTEM_EVENT_ENTRY_ADDED_TO_AUXILIARY_LOG = 0x0008,
     IPMI_MONITORING_BITMASK_SYSTEM_EVENT_PEF_ACTION = 0x0010,
     IPMI_MONITORING_BITMASK_SYSTEM_EVENT_TIMESTAMP_CLOCK_SYNC = 0x0020,
   };
@@ -438,21 +456,16 @@ enum ipmi_monitoring_sensor_bitmask_critical_interrupt
   {
     IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_FRONT_PANEL_NMI_DIAGNOSTIC_INTERRUPT = 0x0001,
     IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_BUS_TIMEOUT = 0x0002,
-    IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_I_O_CHANNEL_CHECK_NMI = 0x0004,
+    IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_IO_CHANNEL_CHECK_NMI = 0x0004,
     IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_SOFTWARE_NMI = 0x0008,
-    IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_PCI_PERR = 0x0010,             
+    IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_PCI_PERR = 0x0010,
     IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_PCI_SERR = 0x0020,
     IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_EISA_FAIL_SAFE_TIMEOUT = 0x0040,
     IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_BUS_CORRECTABLE_ERROR = 0x0080,
     IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_BUS_UNCORRECTABLE_ERROR = 0x0100,
     IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_FATAL_NMI = 0x0200,
     IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_BUS_FATAL_ERROR = 0x0400,
-  };
-
-enum ipmi_monitoring_sensor_bitmask_module_board
-  {
-    IPMI_MONITORING_BITMASK_CABLE_INTERCONNECT_IS_CONNECTED = 0x0001,
-    IPMI_MONITORING_BITMASK_CABLE_INTERCONNECT_INCORRECT_CABLE_CONNECTED_INCORRECT_INTERCONNECTION = 0x0002,
+    IPMI_MONITORING_BITMASK_CRITICAL_INTERRUPT_BUS_DEGRADED = 0x0800,
   };
 
 enum ipmi_monitoring_sensor_bitmask_slot_connector
@@ -520,48 +533,48 @@ enum ipmi_monitoring_sensor_bitmask_fru_state
 
 enum ipmi_monitoring_sensor_bitmask_cable_interconnect
   {
-    IPMI_CABLE_INTERCONNECT_IS_CONNECTED = 0x0001,
-    IPMI_CABLE_INTERCONNECT_INCORRECT_CABLE_CONNECTED_INCORRECT_INTERCONNECTION = 0x0002,
+    IPMI_MONITORING_BITMASK_CABLE_INTERCONNECT_IS_CONNECTED = 0x0001,
+    IPMI_MONITORING_BITMASK_CABLE_INTERCONNECT_CONFIGURATION_ERROR = 0x0002,
   };
 
 enum ipmi_monitoring_sensor_bitmask_boot_error
   {
-    IPMI_BOOT_ERROR_NO_BOOTABLE_MEDIA = 0x0001,
-    IPMI_BOOT_ERROR_NON_BOOTABLE_DISKETTE_LEFT_IN_DRIVE = 0x0002,
-    IPMI_BOOT_ERROR_PXE_SERVER_NOT_FOUND = 0x0004,
-    IPMI_BOOT_ERROR_INVALID_BOOT_SECTOR = 0x0008,
-    IPMI_BOOT_ERROR_TIMEOUT_WAITING_FOR_USER_SELECTION_OF_BOOT_SOURCE = 0x0010,
+    IPMI_MONITORING_BITMASK_BOOT_ERROR_NO_BOOTABLE_MEDIA = 0x0001,
+    IPMI_MONITORING_BITMASK_BOOT_ERROR_NON_BOOTABLE_DISKETTE_LEFT_IN_DRIVE = 0x0002,
+    IPMI_MONITORING_BITMASK_BOOT_ERROR_PXE_SERVER_NOT_FOUND = 0x0004,
+    IPMI_MONITORING_BITMASK_BOOT_ERROR_INVALID_BOOT_SECTOR = 0x0008,
+    IPMI_MONITORING_BITMASK_BOOT_ERROR_TIMEOUT_WAITING_FOR_USER_SELECTION_OF_BOOT_SOURCE = 0x0010,
   };
 
 enum ipmi_monitoring_sensor_bitmask_button_switch
   {
-    IPMI_BUTTON_SWITCH_POWER_BUTTON_PRESSED = 0x0001,
-    IPMI_BUTTON_SWITCH_SLEEP_BUTTON_PRESSED = 0x0002,
-    IPMI_BUTTON_SWITCH_RESET_BUTTON_PRESSED = 0x0004,
-    IPMI_BUTTON_SWITCH_FRU_LATCH_OPEN = 0x0008,
-    IPMI_BUTTON_SWITCH_FRU_SERVICE_REQUEST_BUTTON = 0x0010,
+    IPMI_MONITORING_BITMASK_BUTTON_SWITCH_POWER_BUTTON_PRESSED = 0x0001,
+    IPMI_MONITORING_BITMASK_BUTTON_SWITCH_SLEEP_BUTTON_PRESSED = 0x0002,
+    IPMI_MONITORING_BITMASK_BUTTON_SWITCH_RESET_BUTTON_PRESSED = 0x0004,
+    IPMI_MONITORING_BITMASK_BUTTON_SWITCH_FRU_LATCH_OPEN = 0x0008,
+    IPMI_MONITORING_BITMASK_BUTTON_SWITCH_FRU_SERVICE_REQUEST_BUTTON = 0x0010,
   };
 
 enum ipmi_monitoring_sensor_bitmask_system_acpi_power_state
   {
-    IPMI_SYSTEM_ACPI_POWER_STATE_S0_G0 = 0x0001,
-    IPMI_SYSTEM_ACPI_POWER_STATE_S1 = 0x0002,
-    IPMI_SYSTEM_ACPI_POWER_STATE_S2 = 0x0004,
-    IPMI_SYSTEM_ACPI_POWER_STATE_S3 = 0x0008,
-    IPMI_SYSTEM_ACPI_POWER_STATE_S4 = 0x0010,
-    IPMI_SYSTEM_ACPI_POWER_STATE_S5_G2 = 0x0020,
-    IPMI_SYSTEM_ACPI_POWER_STATE_S4_S5_SOFT_OFF = 0x0040,
-    IPMI_SYSTEM_ACPI_POWER_STATE_G3_MECHANICAL_OFF = 0x0080,
-    IPMI_SYSTEM_ACPI_POWER_STATE_SLEEPING_IN_AN_S1_S2_OR_S3_STATES = 0x0100,
-    IPMI_SYSTEM_ACPI_POWER_STATE_G1_SLEEPING = 0x0200,
-    IPMI_SYSTEM_ACPI_POWER_STATE_S5_ENTERED_BY_OVERRIDE = 0x0400,
-    IPMI_SYSTEM_ACPI_POWER_STATE_LEGACY_ON_STATE = 0x0800,
-    IPMI_SYSTEM_ACPI_POWER_STATE_LEGACY_OFF_STATE = 0x1000,
-    IPMI_SYSTEM_ACPI_POWER_STATE_UNSPECIFIED = 0x2000,
-    IPMI_SYSTEM_ACPI_POWER_STATE_UNKNOWN = 0x4000,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_S0_G0 = 0x0001,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_S1 = 0x0002,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_S2 = 0x0004,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_S3 = 0x0008,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_S4 = 0x0010,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_S5_G2 = 0x0020,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_S4_S5_SOFT_OFF = 0x0040,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_G3_MECHANICAL_OFF = 0x0080,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_SLEEPING_IN_AN_S1_S2_OR_S3_STATES = 0x0100,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_G1_SLEEPING = 0x0200,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_S5_ENTERED_BY_OVERRIDE = 0x0400,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_LEGACY_ON_STATE = 0x0800,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_LEGACY_OFF_STATE = 0x1000,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_UNSPECIFIED = 0x2000,
+    IPMI_MONITORING_BITMASK_SYSTEM_ACPI_POWER_STATE_UNKNOWN = 0x4000,
   };
 
-/* 
+/*
  * ipmi_monitoring_ipmi_config
  *
  * Configuration information for IPMI Inband monitoring
@@ -576,7 +589,7 @@ enum ipmi_monitoring_sensor_bitmask_system_acpi_power_state
  *   IPMI_MONITORING_DRIVER_TYPE_SUNBMC
  *
  *    Pass < 0 for default of IPMI_MONITORING_DRIVER_TYPE_KCS.
- * 
+ *
  * disable_auto_probe
  *
  *   Flag informs the library if in-band driver information should be
@@ -638,14 +651,14 @@ enum ipmi_monitoring_sensor_bitmask_system_acpi_power_state
  *   Pass < 0 for default of IPMI_MONITORING_PRIVILEGE_LEVEL_USER.
  *
  * authentication_type
- * 
+ *
  *   authentication type to use
  *
  *   IPMI_MONITORING_AUTHENTICATION_TYPE_NONE
  *   IPMI_MONITORING_AUTHENTICATION_TYPE_STRAIGHT_PASSWORD_KEY
  *   IPMI_MONITORING_AUTHENTICATION_TYPE_MD2
  *   IPMI_MONITORING_AUTHENTICATION_TYPE_MD5
- * 
+ *
  *   Pass < 0 for default of IPMI_MONITORING_AUTHENTICATION_TYPE_MD5.
  *
  * cipher_suite_id
@@ -715,6 +728,14 @@ struct ipmi_monitoring_ipmi_config
 typedef struct ipmi_monitoring_ctx *ipmi_monitoring_ctx_t;
 
 /*
+ * Ipmi_Monitoring_Sensor_Readings_Callback
+ *
+ * If callback returns < 0, libipmimonitoring will stop reading
+ * remaining sensors.
+ */
+typedef int (*Ipmi_Monitoring_Sensor_Readings_Callback)(ipmi_monitoring_ctx_t c, void *callback_data);
+
+/*
  * ipmi_monitoring_sensor_config_file
  *
  * Initialize the ipmi monitoring library with a different default
@@ -725,9 +746,9 @@ typedef struct ipmi_monitoring_ctx *ipmi_monitoring_ctx_t;
  *
  * Returns 0 on success, -1 on error
  */
-int ipmi_monitoring_sensor_config_file(char *file, int *errnum);
+int ipmi_monitoring_sensor_config_file (const char *file, int *errnum);
 
-/* 
+/*
  * ipmi_monitoring_sdr_cache_directory
  *
  * Initialize the ipmi monitoring library with a different SDR cache
@@ -737,7 +758,7 @@ int ipmi_monitoring_sensor_config_file(char *file, int *errnum);
  *
  * Returns 0 on success, -1 on error
  */
-int ipmi_monitoring_sdr_cache_directory(char *dir, int *errnum);
+int ipmi_monitoring_sdr_cache_directory (const char *dir, int *errnum);
 
 /*
  * ipmi_monitoring_sdr_cache_filenames
@@ -752,13 +773,13 @@ int ipmi_monitoring_sdr_cache_directory(char *dir, int *errnum);
  * %L - the hostname of the local machine
  * %H - the remote host being monitored
  *
- * Atleast %H must be specified. 
- * 
+ * Atleast %H must be specified.
+ *
  * Returns 0 on success, -1 on error
  */
-int ipmi_monitoring_sdr_cache_filenames(char *format, int *errnum);
+int ipmi_monitoring_sdr_cache_filenames (const char *format, int *errnum);
 
-/* 
+/*
  * ipmi_monitoring_init
  *
  * Initialize the ipmi monitoring library.  Needs to be called only
@@ -768,40 +789,48 @@ int ipmi_monitoring_sdr_cache_filenames(char *format, int *errnum);
  *
  * Returns 0 on success, -1 on error
  */
-int ipmi_monitoring_init(unsigned int flags, int *errnum);
+int ipmi_monitoring_init (unsigned int flags, int *errnum);
 
-/* 
+/*
  * ipmi_monitoring_ctx_create
  *
  * Create an ipmi monitoring context
  *
  * Returns context on success, NULL on error
  */
-ipmi_monitoring_ctx_t ipmi_monitoring_ctx_create(void);
+ipmi_monitoring_ctx_t ipmi_monitoring_ctx_create (void);
 
-/* 
+/*
  * ipmi_monitoring_ctx_destroy
  *
  * Destroy an ipmi monitoring context
  */
-void ipmi_monitoring_ctx_destroy(ipmi_monitoring_ctx_t c);
+void ipmi_monitoring_ctx_destroy (ipmi_monitoring_ctx_t c);
 
-/* 
+/*
  * ipmi_monitoring_ctx_errnum
  *
  * Returns the error code of the most recently caused error
  */
-int ipmi_monitoring_ctx_errnum(ipmi_monitoring_ctx_t c);
+int ipmi_monitoring_ctx_errnum (ipmi_monitoring_ctx_t c);
 
-/* 
+/*
  * ipmi_monitoring_ctx_strerror
  *
  * Returns a pointer to statically allocated string describing the
  * error code in errnum.
  */
-char *ipmi_monitoring_ctx_strerror(int errnum);
+char *ipmi_monitoring_ctx_strerror (int errnum);
 
-/* 
+/*
+ * ipmi_monitoring_ctx_errormsg
+ *
+ * Returns a pointer to statically allocated string describing the
+ * most recently caused error.
+ */
+char *ipmi_monitoring_ctx_errormsg (ipmi_monitoring_ctx_t c);
+
+/*
  * ipmi_monitoring_sensor_readings_by_record_id
  *
  * Retrieve sensor readings by sensor numbers and store them in the monitoring context.
@@ -809,130 +838,160 @@ char *ipmi_monitoring_ctx_strerror(int errnum);
  * If 'hostname' is NULL, sensors for the current node will be retrieved in-band.
  * If 'record_ids' is NULL, default sensors will be retrieved
  * (default == all sensors unless configured otherwise).
+ * Callback function will be called after each sensor is read and parsed.
  *
  * Returns number of sensors values retrieved on success, -1 on error
  */
-int ipmi_monitoring_sensor_readings_by_record_id(ipmi_monitoring_ctx_t c,
-                                                 const char *hostname,
-                                                 struct ipmi_monitoring_ipmi_config *config,
-                                                 unsigned int sensor_reading_flags,
-                                                 unsigned int *record_ids,
-                                                 unsigned int record_ids_len);
+int ipmi_monitoring_sensor_readings_by_record_id (ipmi_monitoring_ctx_t c,
+                                                  const char *hostname,
+                                                  struct ipmi_monitoring_ipmi_config *config,
+                                                  unsigned int sensor_reading_flags,
+                                                  unsigned int *record_ids,
+                                                  unsigned int record_ids_len,
+                                                  Ipmi_Monitoring_Sensor_Readings_Callback callback,
+                                                  void *callback_data);
 
-/* 
- * ipmi_monitoring_sensor_readings_by_sensor_group
+/*
+ * ipmi_monitoring_sensor_readings_by_sensor_type
  *
- * Retrieve sensor readings by sensor group and store them in the monitoring context.
+ * Retrieve sensor readings by sensor type and store them in the monitoring context.
  *
  * If 'hostname' is NULL, sensors for the current node will be retrieved in-band.
- * If 'sensor_groups' is NULL, default sensors will be retrieved.
+ * If 'sensor_types' is NULL, default sensors will be retrieved.
  * (default == all sensors unless configured otherwise).
+ * Callback function will be called after each sensor is read and parsed.
  *
  * Returns number of sensors values retrieved on success, -1 on error
  */
-int ipmi_monitoring_sensor_readings_by_sensor_group(ipmi_monitoring_ctx_t c,
+int ipmi_monitoring_sensor_readings_by_sensor_type (ipmi_monitoring_ctx_t c,
                                                     const char *hostname,
                                                     struct ipmi_monitoring_ipmi_config *config,
                                                     unsigned int sensor_reading_flags,
-                                                    unsigned int *sensor_groups,
-                                                    unsigned int sensor_groups_len);
+                                                    unsigned int *sensor_types,
+                                                    unsigned int sensor_types_len,
+                                                    Ipmi_Monitoring_Sensor_Readings_Callback callback,
+                                                    void *callback_data);
 
-/* 
+/*
  * ipmi_monitoring_iterator_first
  *
  * Reset iterator to the first sensor reading
- * 
+ *
  * Returns 0 on success, -1 on error
  */
-int ipmi_monitoring_iterator_first(ipmi_monitoring_ctx_t c);
+int ipmi_monitoring_iterator_first (ipmi_monitoring_ctx_t c);
 
-/* 
+/*
  * ipmi_monitoring_iterator_next
  *
  * Advance iterator to the next set of sensors information
  *
  * Returns 0 on success, -1 on error
  */
-int ipmi_monitoring_iterator_next(ipmi_monitoring_ctx_t c);
+int ipmi_monitoring_iterator_next (ipmi_monitoring_ctx_t c);
 
-/* 
- * ipmi_monitoring_iterator_record_id
- *
- * Returns the sensor number
- */
-int ipmi_monitoring_iterator_record_id(ipmi_monitoring_ctx_t c);
-
-/* 
- * ipmi_monitoring_iterator_sensor_group
- *
- * Returns the sensor group
- */
-int ipmi_monitoring_iterator_sensor_group(ipmi_monitoring_ctx_t c);
-
-/* 
- * ipmi_monitoring_iterator_sensor_name
- *
- * Returns a pointer to the sensor name
- */
-char *ipmi_monitoring_iterator_sensor_name(ipmi_monitoring_ctx_t c);
-
-/* 
- * ipmi_monitoring_iterator_sensor_state
- *
- * Returns the current sensor state
- */
-int ipmi_monitoring_iterator_sensor_state(ipmi_monitoring_ctx_t c);
-
-/* 
- * ipmi_monitoring_iterator_sensor_units
- *
- * Returns the sensor units type
- */
-int ipmi_monitoring_iterator_sensor_units(ipmi_monitoring_ctx_t c);
-
-/* 
- * ipmi_monitoring_iterator_sensor_reading_type
- *
- * Returns the sensor reading type
- */
-int ipmi_monitoring_iterator_sensor_reading_type(ipmi_monitoring_ctx_t c);
-
-/* 
- * ipmi_monitoring_iterator_sensor_bitmask_type
- *
- * Returns the bitmask type that should be used if the reading type is
- * a bitmask.
- */
-int ipmi_monitoring_iterator_sensor_bitmask_type(ipmi_monitoring_ctx_t c);
-
-/* 
- * ipmi_monitoring_iterator_sensor_reading
- *
- * Returns a pointer to the sensor reading.  It is the responsibility
- * of the user to cast it to the correct type based on the reading
- * type.  Returns NULL if no reading available. 
- */
-void *ipmi_monitoring_iterator_sensor_reading(ipmi_monitoring_ctx_t c);
-
-/* 
+/*
  * ipmi_monitoring_iterator_destroy
  *
  * Destroy all internally stored sensors readings.
  */
-void ipmi_monitoring_iterator_destroy(ipmi_monitoring_ctx_t c);
+void ipmi_monitoring_iterator_destroy (ipmi_monitoring_ctx_t c);
 
-/* 
+/*
+ * ipmi_monitoring_read_record_id
+ *
+ * Returns the record id of the current sensor reading in a callback
+ * or the iterator.
+ */
+int ipmi_monitoring_read_record_id (ipmi_monitoring_ctx_t c);
+
+/*
+ * ipmi_monitoring_read_sensor_number
+ *
+ * Returns the sensor number of the current sensor reading in a
+ * callback or the iterator.  May be useful if
+ * IPMI_MONITORING_SENSOR_READING_FLAGS_SHARED_SENSORS has been set.
+ */
+int ipmi_monitoring_read_sensor_number (ipmi_monitoring_ctx_t c);
+
+/*
+ * ipmi_monitoring_read_sensor_type
+ *
+ * Returns the sensor type of the current sensor reading in a
+ * callback or the iterator.
+ */
+int ipmi_monitoring_read_sensor_type (ipmi_monitoring_ctx_t c);
+
+/*
+ * ipmi_monitoring_read_sensor_name
+ *
+ * Returns a pointer to the sensor name of the current sensor reading
+ * in a callback or the iterator.
+ */
+char *ipmi_monitoring_read_sensor_name (ipmi_monitoring_ctx_t c);
+
+/*
+ * ipmi_monitoring_read_sensor_state
+ *
+ * Returns the current sensor state of the current sensor reading in a
+ * callback or the iterator.
+ */
+int ipmi_monitoring_read_sensor_state (ipmi_monitoring_ctx_t c);
+
+/*
+ * ipmi_monitoring_read_sensor_units
+ *
+ * Returns the sensor units type of the current sensor reading in a
+ * callback or the iterator.
+ */
+int ipmi_monitoring_read_sensor_units (ipmi_monitoring_ctx_t c);
+
+/*
+ * ipmi_monitoring_read_sensor_reading_type
+ *
+ * Returns the sensor reading type of the current sensor reading in a
+ * callback or the iterator.
+ */
+int ipmi_monitoring_read_sensor_reading_type (ipmi_monitoring_ctx_t c);
+
+/*
+ * ipmi_monitoring_read_sensor_bitmask_type
+ *
+ * Returns the bitmask type of the current sensor reading in a
+ * callback or the iterator.
+ */
+int ipmi_monitoring_read_sensor_bitmask_type (ipmi_monitoring_ctx_t c);
+
+/*
+ * ipmi_monitoring_read_sensor_bitmask
+ *
+ * Returns the bitmask of the current sensor reading in a callback or
+ * the iterator.
+ */
+int ipmi_monitoring_read_sensor_bitmask (ipmi_monitoring_ctx_t c);
+
+/*
+ * ipmi_monitoring_read_sensor_reading
+ *
+ * Returns a pointer to the sensor reading of the current sensor
+ * reading in a callback or the iterator.  It is the responsibility of
+ * the user to cast it to the correct type based on the reading type.
+ * Returns NULL if no reading available.
+ */
+void *ipmi_monitoring_read_sensor_reading (ipmi_monitoring_ctx_t c);
+
+/*
  * ipmi_monitoring_bitmask_string
  *
  * Retrieve a string for the given bitmask.
  *
  * Returns 0 on success, -1 on error
  */
-int ipmi_monitoring_bitmask_string(ipmi_monitoring_ctx_t c,
-                                   int bitmask_type,
-                                   unsigned int bitmask,
-                                   char *buffer,
-                                   unsigned int buflen);
+int ipmi_monitoring_bitmask_string (ipmi_monitoring_ctx_t c,
+                                    unsigned int bitmask_type,
+                                    unsigned int bitmask,
+                                    char *buffer,
+                                    unsigned int buflen);
 #ifdef __cplusplus
 }
 #endif
