@@ -1,0 +1,11 @@
+freeipmi (0.8.10-1) unstable; urgency=low
+
+ * Upstream has switched from CVS to SVN.  Since target SVN seemed to lack any
+   history of merging, I had decided to revert to classical way to package for
+   Debian based on tarballs.  Thus do not expect complete development history
+   upon checkout.  As a consequence I  have abandoned any previous history of
+   Debian packaging, and recreated Debian packaging repository use
+   git-import-dscs --debsnap.  Please remove any previous debcheckout of
+   freeipmi you might have.
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 25 Oct 2010 21:23:54 -0400
