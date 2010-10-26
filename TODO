@@ -1,0 +1,112 @@
+libfreeipmi
+-----------
+* how to support xRC4 (can we? should we? does any vendor support this?)
+* abstract FRU parsing into lib?
+* abstract SEL parsing into lib?
+
+sunbmc driver
+-------------
+untested - need solaris hardware
+
+ipmi-chassis-config
+-------------------
+* conf.5 manpage
+- panel button config (need to test against hardware)
+
+general
+-------
+beginning doc for developers
+event handling
+try and consolidate checks/etc code in ipmipower/ipmiconsole/api
+-x option for excluding hosts??
+firmware firewall support?
+- new config tool??
+
+config
+------
+config file - support workarounds/etc. for heterogenous cluster?
+
+bmc-device
+--------
+get auxiliary log status
+- not tested, don't have a machine with this support
+
+pef-config
+-----------
+* conf.5 manpage
+
+inband code
+-----------
+retry/resent code?
+
+ipmimonitoring
+--------------
+power supply state (assert = good)
+drive slot predictive failure (deasserted == good)
+drive slot state (hdd.ok2rm - assert == good?)
+acpi power state
+button
+button state
+entity prescenc3e
+
+ipmi-sensors-config
+-------------------
+* conf.5 manpage
+* instructions for each section??
+
+IPv6
+----
+- well, IPMI only supports IPv4, so I suppose there is no need for
+this for now.  Just watch for it in the future.
+
+ipmb
+----
+ipmi 2.0 bridging - untested
+openipmi ipmb - untested
+
+libs
+----
+merge all libs into one?  would aid debian packaging.
+- make package layout simpler?
+- make .so-naming consistent?
+- merge all except libipmidetect?
+
+DCMI functionality
+------------------
+http://www.intel.com/technology/product/DCMI/index.htm
+- new FreeIPMI tool? or separate project? or contrib project?
+  - probably a contrib project
+- nothing special as a whole, mostly already IPMI 2.0 with a few new
+additions.
+- get dcmi capabilities info
+  - the typical what is dcmi supported and version info junk
+- get asset tag
+  - seems useless.  gets asset tag, but the asset tag is already
+    stored in the FRU (and output via normal FRU output in ipmi-fru.)
+  - if supported, make ipmi-fru stuff into lib or steal code 
+    from ipmi-fru for parsing.
+- get dcmi sensor info command
+  - seems useless, only gets the SDR #s of specific sensors
+    DCMI cares about?  But sensors already should be output by
+    ipmi-sensors/ipmimonitoring/etc.
+- get power reading
+- get power limit
+- set power limit
+- activate/deactive power limit
+  - these 4 commands seem like the only maybe potentially useful
+    additions.
+
+0.7.0 porting ensure works
+--------------------------
+BSD
+- gethostbyname_r - still compiles
+- autoconf - no argp-standalone - config errors w/ argp library not found. argp-standalone required
+- autoconf - finds argp-standalone
+
+RELEASE TODOS - Do on every release
+-----------------------------------
+Email freeipmi-users && freeipmi-devel
+Update savannah announcements
+Update freshmeat.net
+Update freeipmi webpage
+Update fsf directory info.

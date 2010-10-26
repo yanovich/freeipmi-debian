@@ -1,0 +1,317 @@
+.TH IPMI-OEM 8 "@ISODATE@" "IPMI OEM version @PACKAGE_VERSION@" "System Commands"
+.SH "NAME"
+ipmi-oem \- IPMI OEM utility
+.SH "SYNOPSIS"
+.B ipmi-oem
+[\fIOPTION\fR...] <\fIOEMID\fR> <\fIOEMCOMMAND\fR> [\fIOEMOPTION\fR...]
+.SH "DESCRIPTION"
+.B Ipmi-oem
+is used to execute OEM specific IPMI commands.  It is intended to provide
+a better user interface for OEM specific IPMI commands better than
+.B ipmi-raw(8).
+
+Please see SUPPORTED OEM IDS and COMMANDS below for a list of
+supported OEM specific IPMI commands.  A list of supported OEM
+specific commands may also be generated using the \fB\-\-list\fR
+option.
+
+There are no guarantees that the below OEM commands will work on any
+particular motherboard.  OEM extensions may or may not exist on
+particular hardware revisions and/or firmware revisions of
+motherboards.  The extensions may or may not function for other lines of
+motherboards from the same manufacturer.
+
+#include <@top_srcdir@/common/man/manpage-common-general-options-header.man>
+#include <@top_srcdir@/common/man/manpage-common-driver.man>
+#include <@top_srcdir@/common/man/manpage-common-inband.man>
+#include <@top_srcdir@/common/man/manpage-common-outofband-hostname-hostranged.man>
+.TP
+\fB\-u\fR, \fB\-\-username\fR=\fIUSERNAME\fR
+Specify the username to use when authenticating with the remote host.
+If not specified, a null (i.e. anonymous) username is assumed.  The
+required user privilege will depend on the oem commands executed.
+#include <@top_srcdir@/common/man/manpage-common-outofband-password.man>
+#include <@top_srcdir@/common/man/manpage-common-outofband-k-g.man>
+#include <@top_srcdir@/common/man/manpage-common-outofband-session-timeout.man>
+#include <@top_srcdir@/common/man/manpage-common-outofband-retransmission-timeout.man>
+#include <@top_srcdir@/common/man/manpage-common-authentication-type.man>
+#include <@top_srcdir@/common/man/manpage-common-cipher-suite-id-main.man>
+#include <@top_srcdir@/common/man/manpage-common-cipher-suite-id-details.man>
+#include <@top_srcdir@/common/man/manpage-common-privilege-level-admin.man>
+#include <@top_srcdir@/common/man/manpage-common-config-file.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-flags.man>
+#include <@top_srcdir@/common/man/manpage-common-debug.man>
+#include <@top_srcdir@/common/man/manpage-common-misc.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-options-header.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-buffer.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-consolidate.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-fanout.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-eliminate.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-always-prefix.man>
+.SH "IPMI-OEM OPTIONS"
+The following options are specific to
+.B Ipmi-oem.
+.TP
+\fB\-L\fR, \fB\-\-list\fR
+List supported OEM IDs and Commands.
+.TP
+\fB\-v\fR, \fB\-\-verbose\fR
+Output verbose information.  Additional output will depend on specific
+OEM ID and OEM COMMANDS specified.
+.SH "SUPPORTED OEM IDS and COMMANDS"
+The currently supported OEM IDs and COMMANDs are:
+.TP
+.B Dell
+.RS
+.TP
+.B get-system-info \fIasset\-tag|service\-tag|product\-name|mac\-addresses\fR
+This OEM command can retrieve the motherboard asset tag, service tag,
+product name, or mac addresses.  Command confirmed to work on Dell
+Poweredge 2900, 2950 and R610.  However, specific system information
+may not be readable/available on all Dell Poweredges systems.
+.TP
+.B get-nic-selection
+This OEM command will determine the current NIC selection for IPMI as
+dedicated, shared, shared w/ failover to NIC2, or shared w/ failover
+to all.  Dedicated indicates IPMI is only available on an expansion
+card, shared indicates IPMI is available on NIC1, shared w/ failover
+to NIC2 indicates IPMI is available on NIC1 w/ failover to NIC2 on
+NIC1's failure, and shared w/ failover to all indicates IPMI is
+available on NIC1 w/ failover to all other NICs in the event of NIC
+failure.  Command confirmed to work on Dell Poweredge 2900, 2950, and
+R610.
+.TP
+.B set-nic-section \fIdedicated|shared|shared_failover_nic2|shared_failover_all\fR
+This OEM command will set the current NIC selection to dedicated,
+shared, shared_failover_nic2, or shared_failover_all.  (See
+\fIget\-nic\-selection\fR above for description on inputs.)  On older
+Poweredge systems, \fIshared_failover_nic2\fR may have ben documented
+as just \fIfailover\fR.  Command confirmed to work on Dell Poweredge
+2900, 2950, and R610.
+.TP
+.B get-ssh-config
+This OEM command will get the current SSH configuration on the IPMI
+card.  Command confirmed to work on Dell Poweredge R610.
+.TP
+.B set-ssh-config \fIKEY=VALUE ...\fR
+This OEM command will set the current SSH configuration on the IPMI
+card.  The possible keys and values are
+\fIssh=enable|disable\fR, \fIidletimeout=seconds\fR, and
+\fIportnumber=num\fR.  Multiple key=value pairs may be
+specified.  If no key=value pairs are specifed, available pairs are
+output.  Some fields may be read-only on specific Poweredge systems.
+Command confirmed to work on Dell Poweredge R610.
+.TP
+.B get-telnet-config
+This OEM command will get the current telnet configuration on the IPMI
+card.  Command confirmed to work on Dell Poweredge R610.
+.TP
+.B set-telnet-config \fIKEY=VALUE ...\fR
+This OEM command will set the current Telnet configuration on the IPMI
+card.  The possible keys and values are
+\fItelnet=enable|disable\fR, \fIsessiontimeout=seconds\fR,
+\fIportnumber=num\fR, and \fI7fls=enable|disable\fR.
+Multiple key=value pairs may be specified.
+If no key=value pairs are specifed, available pairs are output.  Some
+fields may be read-only on specific Poweredge systems.  Command
+confirmed to work on Dell Poweredge R610.
+.TP
+.B get-web-server-config
+This OEM command will get the current web server configuration on the
+IPMI card.  Command confirmed to work on Dell Poweredge R610.
+.TP
+.B set-web-server-config \fIKEY=VALUE ...\fR
+This OEM command will set the current Web Server configuration on the
+IPMI card.  The possible keys and values are
+\fIwebserver=enable|disable\fR,
+\fIsessiontimeout=seconds\fR, \fIhttpportnumber=num\fR,
+and \fIhttpsportnumber=num\fR.  Multiple key=value pairs may be
+specified.  If no key=value pairs are specifed, available pairs are
+output.  Some fields may be read-only on specific Poweredge systems.
+Command confirmed to work on Dell Poweredge R610.
+.TP
+.B get-active-directory-config
+This OEM command will get the current active directory configuration
+on the IPMI card.  Command confirmed to work on Dell Poweredge R610.
+.TP
+.B set-active-directory-config
+This OEM command will set the current Web Server configuration on the
+IPMI card.  The possible keys and values are
+\fIactivedirectory=enable|disable\fR, \fItimeout=seconds\fR,
+.if 0 \{
+\fIrootdomain=string\fR,
+\fIracdomain=string\fR,
+\fIracname=string\fR,
+\}
+\fItype=extended|standard\fR,
+.if 0 \{
+\fIsmartcardlogon=enable|disable\fR,
+\fIcertificaterevocationlist=enable|disable\fR,
+\}
+\fIsso=enable|disable\fR,
+.if 0 \{
+\fIdcfilter1=string\fR,
+\fIdcfilter2=string\fR,
+\fIdcfilter3=string\fR,
+\fIgcfilter1=string\fR,
+\fIgcfilter2=string\fR,
+\fIgcfilter3=string\fR,
+\}
+and
+\fIcertificatevalidation=enable|disable\fR.
+If no key=value pairs are specifed, available pairs are output.  Some
+fields may be read-only on specific Poweredge systems.  Command
+confirmed to work on Dell Poweredge R610.
+.TP
+.B reset-to-defaults
+This OEM command will reset the BMC configuration back to default
+values.  The command will spin until the reset is confirmed to be
+complete.  Command confirmed to work on Dell Poweredge R610.
+.TP
+.B get-power-info
+This OEM command can retrieve power information.  Command confirmed to
+work on Dell Poweredge R610.
+.TP
+.B reset-power-info \fIcumulative|peak\fI
+This OEM command can reset the cumulative or peak power information
+readings (viewed via \fBget\-power\-info\fR).  Command confirmed to
+work on Dell Poweredge R610.
+.TP
+.B get-instantaneous-power-consumption-info
+This OEM command can read instantaneous power consumption information.
+Command confirmed to work on Dell Poweredge R610.
+.TP
+.B get-power-headroom-info
+This OEM command can read power headroom information.  Command
+confirmed to work on Dell Poweredge R610.
+.TP
+.B get-average-power-history
+This OEM command can read average power usage history.  Command
+confirmed to work on Dell Poweredge R610.
+.TP
+.B get-peak-power-history
+This OEM command can read peak power usage history.  Command confirmed
+to work on Dell Poweredge R610.
+.TP
+.B get-fcb-version
+This OEM command can retrieve the fan control board (FCB) version
+number.  Command confirmed to work on Dell Xanadu2.
+.RE
+.TP
+.B Fujitsu
+.RS
+.TP
+.B get-power-on-source
+This OEM command will return the reason for the most recent Power On.
+Command confirmed to work on Fujitsu RX100 S5.
+.TP
+.B get-power-off-source
+This OEM command will return the reason for the most recent Power Off.
+Command confirmed to work on Fujitsu RX100 S5.
+.TP
+.B get-identify-led
+This OEM command will get the current identify LED status.  Command
+confirmed to work on Fujitsu RX100 S5.
+.TP
+.B set-identify-led \fIon|off\fR
+This OEM command will set the current identify LED status.  Command
+confirmed to work on Fujitsu RX100 S5.
+.TP
+.B get-error-led
+This OEM command will get the current error LED status.  Command
+confirmed to work on Fujitsu RX100 S5.
+.RE
+.TP
+.B Inventec
+.RS
+.TP
+.B get-nic-status
+This OEM command will determine the current NIC status as dedicated or
+shared.  Dedicated indicates IPMI is only available on the dedicated
+management port.  Shared indicates IPMI is also available on one of
+the primary ethernet ports.  Command confirmed to work on Inventec
+5441 (and subsequently Dell Xanadu2).
+.TP
+.B set-nic-status \fIdedicated|shared\fR
+This OEM command will set the current NIC status to dedicated or
+shared.  (See \fIget\-nic\-status\fR above for description on dedicated
+vs. shared status.)  This OEM command may internally reset the BMC,
+making the BMC unusable for awhile.  Command confirmed to work on
+Inventec 5441 (and subsequently Dell Xanadu2).
+.TP
+.B get-mac-address\fR
+This command will retrieve the BMC MAC address.  This is actually not
+an OEM command, but rather the normal IPMI MAC address command
+(identical to what is used in the
+.B bmc-config(8)
+tool).  This command is placed here for convenience.
+.TP
+.B set-mac-address \fIdedicated|shared\fR \fIMACADDR\fR
+This OEM command will set the dedicated or shared BMC MAC address.
+(See \fIget\-nic\-status\fR above for description on dedicated
+vs. shared status.)  The BMC MAC address cannot be set through the
+normal IPMI MAC address command (what is used in the
+.B bmc-config(8)
+tool).  The MACADDR should be specified in XX:XX:XX:XX:XX:XX form.  A
+shared BMC MAC address may conflict with normal communication ethernet
+communication on the primary ethernet port.  Users may wish to
+configuration an alternate MAC address instead.  After configuration
+of the MAC address, the BMC must be reset.  This may be accomplished
+by executing a cold-reset with
+.B bmc-device(8).
+Command confirmed to work on Inventec 5441 (and subsequently Dell Xanadu2).
+.TP
+.B get-bmc-services
+This OEM command will display the currently enables BMC services.
+Command confirmed to work on Inventec 5441 (and subsequently Dell Xanadu2).
+.TP
+.B set-bmc-services \fIenable|disable\fR \fIall|kvm|http|ssh\fR
+This OEM command will enable or disable other BMC services besides
+IPMI.  \fIall\fR can be specified to enable/disable all services,
+\fIkvm\fR specifies KVM and Virtual Storage, \fIhttp\fR specifies HTTP
+and HTTPS, and \fIssh\fR specifies both SSH and Telnet.  Command
+confirmed to work on Inventec 5441 (and subsequently Dell Xanadu2).
+.TP
+.B read-eeprom \fIat24c256n\fR
+This OEM command will read the specified eeprom. Command confirmed to
+work on Inventec 5441 (and subsequently Dell Xanadu2).
+.TP
+.B clear-eeprom \fIat24c256n\fR
+This OEM command will clear the specified eeprom.  If the verbose
+option is set, progress percent will be output as the clearing is
+being done.  Command confirmed to work on Inventec 5441 (and
+subsequently Dell Xanadu2).
+.RE
+.TP
+.B Supermicro
+.RS
+.TP
+.B extra-firmware-info
+This OEM command will output additional firmware version information.
+Command confirmed to work on Supermicro H8QME.
+.TP
+.B reset-intrusion
+This OEM command will reset the motherboard intrusion flag after it
+has been triggered.  For example, in
+.B ipmi-sensors
+or
+.B ipmi-sel,
+you may notice a 'General Chassis Intrusion' if the motherboard
+chassis is not open, but was opened in the past.  Command confirmed to
+work on Supermicro H8QME.
+.RE
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-main.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-shell.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-options.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-localhost.man>
+#include <@top_srcdir@/common/man/manpage-common-troubleshooting.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-heading-text.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-text.man>
+#include <@top_srcdir@/common/man/manpage-common-known-issues.man>
+#include <@top_srcdir@/common/man/manpage-common-reporting-bugs.man>
+.SH "COPYRIGHT"
+Copyright \(co 2008 FreeIPMI Core Team
+#include <@top_srcdir@/common/man/manpage-common-gpl-program-text.man>
+.SH "SEE ALSO"
+freeipmi(7), bmc-config(8), bmc-device(8), ipmi-raw(8)
+#include <@top_srcdir@/common/man/manpage-common-homepage.man>

@@ -1,0 +1,110 @@
+.TH IPMI-SEL 8 "@ISODATE@" "ipmi-sel @PACKAGE_VERSION@" "System Commands"
+.SH "NAME"
+ipmi-sel \- display SEL entries
+.SH "SYNOPSIS"
+.B ipmi-sel
+[\fIOPTION\fR...]
+.SH "DESCRIPTION"
+.B Ipmi-sel
+is used to view and manage System Event Log (SEL) entries.  SEL
+records store system event information and may be useful for debugging
+problems. Although output may vary dependent on individual SEL events,
+most entries will display the SEL record id, date of event, time of
+event, sensor group, sensor name, and the sensor event occurrence.
+
+Some timestamps in the SEL may report a date of 1-Jan-1970.  This
+timestamp is not necessarily incorrect.  It usually indicates a
+hardware event that occurred before a timestamp in firmware has been
+initialized.  For example, certain hardware components will have their
+internal clocks reset during a power cycle.
+
+#include <@top_srcdir@/common/man/manpage-common-general-options-header.man>
+#include <@top_srcdir@/common/man/manpage-common-driver.man>
+#include <@top_srcdir@/common/man/manpage-common-inband.man>
+#include <@top_srcdir@/common/man/manpage-common-outofband-hostname-hostranged.man>
+#include <@top_srcdir@/common/man/manpage-common-outofband-username-user.man>
+#include <@top_srcdir@/common/man/manpage-common-outofband-password.man>
+#include <@top_srcdir@/common/man/manpage-common-outofband-k-g.man>
+#include <@top_srcdir@/common/man/manpage-common-outofband-session-timeout.man>
+#include <@top_srcdir@/common/man/manpage-common-outofband-retransmission-timeout.man>
+#include <@top_srcdir@/common/man/manpage-common-authentication-type.man>
+#include <@top_srcdir@/common/man/manpage-common-cipher-suite-id-main.man>
+#include <@top_srcdir@/common/man/manpage-common-cipher-suite-id-details.man>
+#include <@top_srcdir@/common/man/manpage-common-privilege-level-operator.man>
+#include <@top_srcdir@/common/man/manpage-common-config-file.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-flags.man>
+#include <@top_srcdir@/common/man/manpage-common-debug.man>
+#include <@top_srcdir@/common/man/manpage-common-misc.man>
+.SH "IPMI-SEL OPTIONS"
+The following options are specific to
+.B Ipmi-sel.
+.TP
+\fB\-i\fR, \fB\-\-info\fR
+Show general information about the SEL.
+.TP
+\fB\-c\fR, \fB\-\-delete-all\fR
+Delete all SEL records.
+.TP
+\fB\-d REC-LIST\fR, \fB\-\-delete=REC-LIST\fR
+Delete records by record id in the SEL.  Accepts space or comma
+separated lists.
+.TP
+\fB\-\-delete-range=START-END\fR
+Delete record ids from START to END in the SEL.
+.TP
+\fB\-x [FILE]\fR, \fB\-\-hex-dump[=FILE]\fR
+Hex-dump SEL entries optionally into a FILE.
+.TP
+\fB\-\-assume\-system\-event\-records\fR
+Some motherboards have invalid SEL record types listed, leading to
+errors such as 'Unknown SEL Record Type'.  The records may actually be
+formatted correctly.  Use this option to assume these invalid record
+types are system event records and pray for the best.
+#include <@top_srcdir@/common/man/manpage-common-sdr-options.man>
+#include <@top_srcdir@/common/man/manpage-common-ignore-sdr-cache.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-options-header.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-buffer.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-consolidate.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-fanout.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-eliminate.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-always-prefix.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-main.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-shell.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-options.man>
+#include <@top_srcdir@/common/man/manpage-common-hostranged-text-localhost.man>
+#include <@top_srcdir@/common/man/manpage-common-troubleshooting.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-heading-text.man>
+#include <@top_srcdir@/common/man/manpage-common-workaround-text.man>
+.SH "EXAMPLES"
+.B # ipmi-sel 
+.PP
+Show all SEL records on the local machine.
+.PP
+.B # ipmi-sel -h ahost -u myusername -p mypassword
+.PP
+Show all SEL records of a remote machine using IPMI over LAN.
+.PP
+.B # ipmi-sel -h mycluster[0-127] -u myusername -p mypassword
+.PP
+Show all SEL records across a cluster using IPMI over LAN.
+.PP
+.B # ipmi-sel --delete=44,82
+.PP
+Delete SEL records 44 and 82 on the local machine.
+.PP
+.B # ipmi-sel --delete-all
+.PP
+Delete all SEL entries on the local machine.
+.PP
+.B # ipmi-sel --delete-range 12-42
+.PP
+Delete SEL entries in the range 12 to 42 on the local machine.
+.PP
+#include <@top_srcdir@/common/man/manpage-common-known-issues.man>
+#include <@top_srcdir@/common/man/manpage-common-reporting-bugs.man>
+.SH "COPYRIGHT"
+Copyright \(co 2003-2008 FreeIPMI Core Team.  
+#include <@top_srcdir@/common/man/manpage-common-gpl-program-text.man>
+.SH "SEE ALSO"
+freeipmi(7), bmc-config(8)
+#include <@top_srcdir@/common/man/manpage-common-homepage.man>
