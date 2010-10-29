@@ -1,3 +1,19 @@
+freeipmi (0.8.10-1~1.gbp99ea59) UNRELEASED; urgency=low
+
+  ** SNAPSHOT build @99ea59096e750afabdff404a96320fcc6a05ceac **
+
+  * [6a9c9a1] first commit in a simplified life of the maintainer --
+    lets just use tarballs
+  * [d6cd92c] moving gbp.conf under debian/
+  * [95fc33b] switching to 3.0 (quilt) source format
+  * [bf6be36] converted the only difference into a quilt patch...
+    comments are yet due
+  * [53ba1b1] Imported Upstream version 0.8.10
+  * [18a32b4] Added first piece of NEWS about VCS switch
+  * [99ea590] use pristine-tar
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 25 Oct 2010 21:44:19 -0400
+
 freeipmi (0.7.17~beta2-1) unstable; urgency=low
 
   * Fresh (as of 2009/12/07) upstream for 0.7 branch -- includes a few bugfixes
