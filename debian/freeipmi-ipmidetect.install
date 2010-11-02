@@ -1,2 +1,3 @@
 usr/sbin/ipmidetect
 usr/sbin/ipmidetectd
+etc/ipmidetectd.conf

@@ -19,3 +19,5 @@ debian/tmp/usr/share/man/man8/ipmi-raw.8
 debian/tmp/usr/share/man/man8/ipmi-sel.8
 debian/tmp/usr/share/man/man8/pef-config.8
 debian/tmp/usr/share/man/man8/rmcpping.8
+debian/tmp/usr/share/man/man8/ipmi-pef-config.8
+debian/tmp/usr/share/man/man8/ipmi-dcmi.8

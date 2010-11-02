@@ -16,5 +16,7 @@ usr/sbin/bmc-info
 usr/sbin/ipmiconsole
 usr/sbin/ipmimonitoring
 usr/sbin/ipmi-sensors
+usr/sbin/ipmi-pef-config
+usr/sbin/ipmi-dcmi
 var/lib/freeipmi/
 
