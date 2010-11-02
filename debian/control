@@ -2,7 +2,7 @@ Source: freeipmi
 Section: admin
 Priority: extra
 Maintainer: Yaroslav Halchenko <debian@onerussian.com>
-Build-Depends: debhelper (>= 6.0.7~), autotools-dev, libreadline5-dev, libgcrypt11-dev, chrpath,
+Build-Depends: debhelper (>= 7.0.50~), autotools-dev, libreadline5-dev, libgcrypt11-dev, chrpath,
  autoconf, automake, libtool, texinfo
 Standards-Version: 3.8.3
 Homepage: http://www.gnu.org/software/freeipmi/
@@ -28,7 +28,7 @@ Section: admin
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: freeipmi-ipmidetect, freeipmi-bmc-watchdog
-Description: GNU implementation of the IPMI protocol - Tools
+Description: GNU implementation of the IPMI protocol - tools
  FreeIPMI is a collection of Intelligent Platform Management IPMI
  system software. It provides in-band and out-of-band software and a
  development library conforming to the Intelligent Platform Management
