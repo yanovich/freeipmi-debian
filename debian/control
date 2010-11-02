@@ -124,7 +124,7 @@ Description: GNU IPMI - ipmidetect development package
  .
  This is the development package for libipmidetect.
 
-Package: libipmimonitoring1
+Package: libipmimonitoring4
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -139,7 +139,7 @@ Description: GNU IPMI - Sensor monitoring library
 Package: libipmimonitoring-dev
 Section: libdevel
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libipmimonitoring1 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libipmimonitoring4 (= ${binary:Version})
 Description: GNU IPMI - ipmimonitoring development package
  FreeIPMI is a collection of Intelligent Platform Management IPMI
  system software. It provides in-band and out-of-band software and a
