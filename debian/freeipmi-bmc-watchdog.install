@@ -1,3 +1,3 @@
-etc/logrotate.d/freeipmi-bmc-watchdog
-etc/sysconfig/freeipmi-bmc-watchdog etc/default/
+etc/logrotate.d/bmc-watchdog
+etc/sysconfig/bmc-watchdog etc/default/
 usr/sbin/bmc-watchdog

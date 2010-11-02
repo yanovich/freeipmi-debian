@@ -1,0 +1,16 @@
+#!/bin/sh
+# postrm script for freeipmi-bmc-watchdog
+#
+# see: dh_installdeb(1)
+
+set -e
+
+if dpkg-maintscript-helper supports mv_conffile 2>/dev/null; then
+    dpkg-maintscript-helper mv_conffile /etc/default/freeipmi-bmc-watchdog /etc/default/bmc-watchdog 0.7.17~beta2-1 -- "$@"
+    dpkg-maintscript-helper mv_conffile /etc/init.d/freeipmi-bmc-watchdog /etc/init.d/bmc-watchdog 0.7.17~beta2-1 -- "$@"
+    dpkg-maintscript-helper mv_conffile /etc/logrotate.d/freeipmi-bmc-watchdog /etc/logrotate.d/bmc-watchdog 0.7.17~beta2-1 -- "$@"
+fi
+
+#DEBHELPER#
+
+exit 0
