@@ -76,7 +76,7 @@ Description: GNU IPMI - IPMI node detection tool
  .
  This package contains a tool and a daemon for detecting IPMI nodes.
 
-Package: libfreeipmi6
+Package: libfreeipmi10
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-common (= ${source:Version})
@@ -91,7 +91,7 @@ Description: GNU IPMI - libraries
 Package: libfreeipmi-dev
 Section: libdevel
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libfreeipmi6 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfreeipmi10 (= ${binary:Version})
 Description: GNU IPMI - development package
  FreeIPMI is a collection of Intelligent Platform Management IPMI
  system software. It provides in-band and out-of-band software and a
