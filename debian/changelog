@@ -1,18 +1,30 @@
-freeipmi (0.8.10-1~1.gbp99ea59) UNRELEASED; urgency=low
+freeipmi (0.8.10-1) experimental; urgency=low
 
-  ** SNAPSHOT build @99ea59096e750afabdff404a96320fcc6a05ceac **
-
-  * [6a9c9a1] first commit in a simplified life of the maintainer --
-    lets just use tarballs
-  * [d6cd92c] moving gbp.conf under debian/
-  * [95fc33b] switching to 3.0 (quilt) source format
-  * [bf6be36] converted the only difference into a quilt patch...
-    comments are yet due
   * [53ba1b1] Imported Upstream version 0.8.10
-  * [18a32b4] Added first piece of NEWS about VCS switch
-  * [99ea590] use pristine-tar
+    - [d662212] freeipmi- prefix stripped upstream from bmc-watchdog
+                daemon/scripts
+    - [335992b] libfreeipmi soversion advanced from 6 to 10 -- package
+                rename
+    - [4607787] libipmimonitoring soversion advanced from 1 to 4 --
+                package rename
+  * [6a9c9a1] Packaging reverted to be based on tarballs
+    - [99ea590] Use pristine-tar
+    - [95fc33b] Switch to 3.0 (quilt) source format
+    - [bf6be36] Converted changes to bmc-watchdog into a quilt patch
+    - [d6cd92c] Move gbp.conf under debian/
+    - [18a32b4] GIT VCS is not based on CVS any longer. Added NEWS entry
+                about VCS switch
+    - [9076e3f] debian/rules: converted to use dh7
+  * [18a97eb] Boost policy compliance to 3.9.1 -- no changes
+  * [5329ccd] Boost dh compat to 7 for dh_install to operate consistent
+              with previous promises
+  * [971671f] Moving installed manpages listing into .manpages
+  * [8bfd2b0] NEWS entry describing renames
+  * [a925d46] Install all readmes
+  * [488b18b] Fixed up few missing installs
+  * [678b7f0] fixing up chrpath stripping
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 25 Oct 2010 21:44:19 -0400
+ -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 02 Nov 2010 09:42:07 -0400
 
 freeipmi (0.7.17~beta2-1) unstable; urgency=low
 

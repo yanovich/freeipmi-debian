@@ -1,4 +1,4 @@
-freeipmi (0.8.10-1) unstable; urgency=low
+freeipmi (0.8.10-1) experimental; urgency=low
 
   Upstream has switched from CVS to SVN.  Since target SVN seemed to lack any
   history of merging, I had decided to revert to classical way to package for
