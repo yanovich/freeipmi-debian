@@ -1,6 +1,6 @@
 
 
-.TH IPMI-CHASSIS-CONFIG 8 "2010-09-28" "ipmi-chassis-config 0.8.10" "System Commands"
+.TH IPMI-CHASSIS-CONFIG 8 "2010-12-06" "ipmi-chassis-config 0.8.12" "System Commands"
 .SH "NAME"
 ipmi-chassis-config \- configure chassis fields
 .SH "SYNOPSIS"
@@ -534,10 +534,10 @@ hitting this issue may see commit errors or commits not being written
 to the BMC. Issue observed on Supermicro H8QME.
 .LP
 "veryslowcommit" - This workaround will slow down commits to the BMC
-by sleeping one second between the commit of every key. It works around
-motherboards that have BMCs that can be overwhelmed by commits. Those
-hitting this issue may commit errors or commits not being written
-to the BMC. Issue observed on Quanta S99Q/Dell FS12-TY.
+by sleeping one second between the commit of every key. It works
+around motherboards that have BMCs that can be overwhelmed by commits.
+Those hitting this issue may see commit errors or commits not being
+written to the BMC. Issue observed on Quanta S99Q/Dell FS12-TY.
 .SH "EXAMPLES"
 .B # ipmi-chassis-config --checkout
 .PP

@@ -1,7 +1,7 @@
 This is freeipmi-faq.info, produced by makeinfo version 4.8 from
 freeipmi-faq.texi.
 
-   This manual is for FreeIPMI (version 0.8.10, 28 September 2010).
+   This manual is for FreeIPMI (version 0.8.12, 17 September 2010).
 Copyright (C) 2006-2010 FreeIPMI Core Team
 
      Permission is granted to copy, distribute and/or modify this
@@ -22,8 +22,8 @@ File: freeipmi-faq.info,  Node: Top,  Next: What is IPMI,  Prev: (dir),  Up: (di
 
    Frequently Asked Questions on *FreeIPMI*
 
-   This edition of the documentation was last updated on 28 September
-2010 for release 0.8.10 of the FreeIPMI.
+   This edition of the documentation was last updated on 6 December
+2010 for release 0.8.12 of the FreeIPMI.
 
 * Menu:
 
@@ -387,16 +387,16 @@ Makefile), if you have problems building from the port.
 
 Tag Table:
 Node: Top696
-Node: What is IPMI1309
-Node: What is FreeIPMI?2498
-Node: How did FreeIPMI start?2906
-Node: What operating systems does FreeIPMI run on?4223
-Node: FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil4900
-Node: What is special about FreeIPMI5771
-Node: Serial Over LAN (SOL) / Ipmiconsole Setup11454
-Node: SSIF Driver Configuration13182
-Node: x86-64 Compilation14732
-Node: libgcrypt requirement15408
-Node: Installing FreeIPMI on FreeBSD16054
+Node: What is IPMI1307
+Node: What is FreeIPMI?2496
+Node: How did FreeIPMI start?2904
+Node: What operating systems does FreeIPMI run on?4221
+Node: FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil4898
+Node: What is special about FreeIPMI5769
+Node: Serial Over LAN (SOL) / Ipmiconsole Setup11452
+Node: SSIF Driver Configuration13180
+Node: x86-64 Compilation14730
+Node: libgcrypt requirement15406
+Node: Installing FreeIPMI on FreeBSD16052
 
 End Tag Table

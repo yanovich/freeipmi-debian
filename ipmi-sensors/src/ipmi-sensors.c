@@ -629,6 +629,7 @@ _output_sensor (ipmi_sensors_state_data_t *state_data,
    * Supermicro X8DTH
    * Supermicro X8DTG
    * Supermicro X8DTU
+   * Supermicro X8DTU-6+ (X8DTU_6PLUS)
    */
   else if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_OEM
            && state_data->prog_data->args->interpret_oem_data
@@ -636,7 +637,8 @@ _output_sensor (ipmi_sensors_state_data_t *state_data,
 	       || state_data->oem_data.manufacturer_id ==  IPMI_IANA_ENTERPRISE_ID_SUPERMICRO_WORKAROUND)
 	   && (state_data->oem_data.product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8DTH
                || state_data->oem_data.product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8DTG
-               || state_data->oem_data.product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8DTU)
+               || state_data->oem_data.product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8DTU
+	       || state_data->oem_data.product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8DTU_6PLUS)
 	   && event_reading_type_code == IPMI_EVENT_READING_TYPE_CODE_OEM_SUPERMICRO_GENERIC)
     {
       char event_buf[IPMI_SENSORS_OEM_MESSAGE_LENGTH + 1];
@@ -739,7 +741,7 @@ _output_sensor (ipmi_sensors_state_data_t *state_data,
       rv = ipmi_sensors_detailed_output (state_data,
                                          sdr_record,
                                          sdr_record_len,
-					 sensor_number_base + shared_sensor_number_offset,
+                                         sensor_number_base + shared_sensor_number_offset,
                                          sensor_reading,
                                          event_message_list,
                                          event_message_list_len);
@@ -813,7 +815,8 @@ _display_sensors (ipmi_sensors_state_data_t *state_data)
           /* at this point shouldn't have record id not found error */
           pstdout_fprintf (state_data->pstate,
                            stderr,
-                           "ipmi_sdr_cache_search_record_id: %s\n",
+                           "ipmi_sdr_cache_search_record_id: 0x%02X %s\n",
+                           output_record_ids[i],
                            ipmi_sdr_cache_ctx_errormsg (state_data->sdr_cache_ctx));
           goto cleanup;
         }

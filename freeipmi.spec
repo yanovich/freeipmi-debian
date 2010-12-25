@@ -3,7 +3,7 @@
 #
 
 %define name freeipmi
-%define version 0.8.10
+%define version 0.8.12
 %if %{?_with_debug:1}%{!?_with_debug:0}
 %define release 1.debug%{?dist}
 %else
@@ -385,7 +385,7 @@ fi
 - Obsolete old subpackage freeipmi-ipmimonitoring.
 
 * Tue Dec 18 2007 Albert Chu <chu11@llnl.gov> 0.6.0
-- Use %{version} instead of 0.8.10 for substitution in paths.
+- Use %{version} instead of 0.8.12 for substitution in paths.
 
 * Fri Dec 14 2007 Albert Chu <chu11@llnl.gov> 0.6.0
 - Update packaging for libfreeipmi reorganization

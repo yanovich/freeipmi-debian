@@ -61,6 +61,7 @@ am_libselparse_la_OBJECTS = libselparse_la-ipmi-sel-parse.lo \
 	libselparse_la-ipmi-sel-parse-common.lo \
 	libselparse_la-ipmi-sel-parse-string.lo \
 	libselparse_la-ipmi-sel-parse-string-dell.lo \
+	libselparse_la-ipmi-sel-parse-string-fujitsu.lo \
 	libselparse_la-ipmi-sel-parse-string-intel.lo \
 	libselparse_la-ipmi-sel-parse-string-intel-node-manager.lo \
 	libselparse_la-ipmi-sel-parse-string-inventec.lo \
@@ -213,6 +214,7 @@ noinst_HEADERS = \
 	ipmi-sel-parse-common.h \
 	ipmi-sel-parse-string.h \
 	ipmi-sel-parse-string-dell.h \
+	ipmi-sel-parse-string-fujitsu.h \
 	ipmi-sel-parse-string-intel.h \
 	ipmi-sel-parse-string-intel-node-manager.h \
 	ipmi-sel-parse-string-inventec.h \
@@ -236,6 +238,7 @@ libselparse_la_SOURCES = \
 	ipmi-sel-parse-common.c \
 	ipmi-sel-parse-string.c \
 	ipmi-sel-parse-string-dell.c \
+	ipmi-sel-parse-string-fujitsu.c \
 	ipmi-sel-parse-string-intel.c \
 	ipmi-sel-parse-string-intel-node-manager.c \
 	ipmi-sel-parse-string-inventec.c \
@@ -296,6 +299,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libselparse_la-ipmi-sel-parse-common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libselparse_la-ipmi-sel-parse-string-dell.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libselparse_la-ipmi-sel-parse-string-fujitsu.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libselparse_la-ipmi-sel-parse-string-intel-node-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libselparse_la-ipmi-sel-parse-string-intel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libselparse_la-ipmi-sel-parse-string-inventec.Plo@am__quote@
@@ -353,6 +357,13 @@ libselparse_la-ipmi-sel-parse-string-dell.lo: ipmi-sel-parse-string-dell.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sel-parse-string-dell.c' object='libselparse_la-ipmi-sel-parse-string-dell.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libselparse_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libselparse_la-ipmi-sel-parse-string-dell.lo `test -f 'ipmi-sel-parse-string-dell.c' || echo '$(srcdir)/'`ipmi-sel-parse-string-dell.c
+
+libselparse_la-ipmi-sel-parse-string-fujitsu.lo: ipmi-sel-parse-string-fujitsu.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libselparse_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libselparse_la-ipmi-sel-parse-string-fujitsu.lo -MD -MP -MF "$(DEPDIR)/libselparse_la-ipmi-sel-parse-string-fujitsu.Tpo" -c -o libselparse_la-ipmi-sel-parse-string-fujitsu.lo `test -f 'ipmi-sel-parse-string-fujitsu.c' || echo '$(srcdir)/'`ipmi-sel-parse-string-fujitsu.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libselparse_la-ipmi-sel-parse-string-fujitsu.Tpo" "$(DEPDIR)/libselparse_la-ipmi-sel-parse-string-fujitsu.Plo"; else rm -f "$(DEPDIR)/libselparse_la-ipmi-sel-parse-string-fujitsu.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sel-parse-string-fujitsu.c' object='libselparse_la-ipmi-sel-parse-string-fujitsu.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libselparse_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libselparse_la-ipmi-sel-parse-string-fujitsu.lo `test -f 'ipmi-sel-parse-string-fujitsu.c' || echo '$(srcdir)/'`ipmi-sel-parse-string-fujitsu.c
 
 libselparse_la-ipmi-sel-parse-string-intel.lo: ipmi-sel-parse-string-intel.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libselparse_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libselparse_la-ipmi-sel-parse-string-intel.lo -MD -MP -MF "$(DEPDIR)/libselparse_la-ipmi-sel-parse-string-intel.Tpo" -c -o libselparse_la-ipmi-sel-parse-string-intel.lo `test -f 'ipmi-sel-parse-string-intel.c' || echo '$(srcdir)/'`ipmi-sel-parse-string-intel.c; \
