@@ -1,3 +1,11 @@
+freeipmi (0.8.12-1) experimental; urgency=low
+
+  * [b3c7c12] Imported Upstream version 0.8.12
+  * [16ce784] Use up-to-date config.{sub,guess} to fix system detection
+    (Closes: #605819)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 24 Dec 2010 22:09:44 -0500
+
 freeipmi (0.8.10-1) experimental; urgency=low
 
   * [53ba1b1] Imported Upstream version 0.8.10
