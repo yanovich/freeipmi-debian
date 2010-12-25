@@ -1,3 +1,102 @@
+2010-12-06 Albert Chu <chu11@llnl.gov>
+
+	* configure.ac: Update for release.
+
+	* Tagged Release-0_8_12.
+	
+2010-12-02 Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/src/fru-parse/: Fix leap year calculation bug.
+	
+2010-11-22 Albert Chu <chu11@llnl.gov>
+
+	* ipmi-chassis-config/: After configuring boot flags, set BMC
+	valid bits appropriately.
+	
+2010-11-18 Albert Chu <chu11@llnl.gov>
+
+	* bmc-config/: Fix bug in HP DL145 RMCPplus workaround.
+	
+2010-11-17 Albert Chu <chu11@llnl.gov>
+
+	* bmc-config/: Fix bug in HP DL145 RMCPplus privilege key.
+	
+2010-11-17 Albert Chu <chu11@llnl.gov>
+
+	* Remove CONFIG_ERR_NON_FATAL_ERROR_REQUIRED_FIELD_NOT_FOUND error
+	code, does not function is initially required.
+
+	* bmc-config/: Output error message directly instead of using
+	CONFIG_ERR_NON_FATAL_ERROR_REQUIRED_FIELD_NOT_FOUND.
+	
+2010-11-17 Albert Chu <chu11@llnl.gov>
+
+	* common/src/configtool/: Support new
+	CONFIG_ERR_NON_FATAL_ERROR_REQUIRED_FIELD_NOT_FOUND error code.
+
+	* bmc-config/: Fix workaround for HP DL145 RMCPplus privilege
+	key configuration when commiting privilege changes.
+	
+2010-11-17 Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-privilege-level-spec.h:
+	Define IPMI_PRIVILEGE_LEVEL_UNSPECIFIED.
+	
+2010-11-16 Albert Chu <chu11@llnl.gov>
+
+	* bmc-config/: Cleanup cipher suite id loading and caching code.
+
+	* bmc-config/: Support workaround of HP DL145 RMCPplus privilege
+	key configuration.
+
+2010-11-05  Albert Chu <chu11@llnl.gov>
+
+	* Support Supermicro X8DTU-6+ OEM sensors.
+	
+2010-11-02  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sel/: Fix output corner case for N/A outputs.
+
+2010-10-28  Albert Chu <chu11@llnl.gov>
+
+	* configure.ac: Update for release.
+
+	* Tagged Release-0_8_11.
+	
+2010-10-22  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sel/: Fix corner case with --output-oem-event-strings, did
+	not work with OEM record types.
+	
+2010-10-21  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sel/: Fix corner case, --output-oem-event-strings does not
+	require --interpret-oem-data.
+
+2010-10-21  Holger Liebig <holger.liebig@ts.fujitsu.com>
+
+	* libfreeipmi/src/sel-parse/ipmi-sel-parse-string-fujitsu.c: Fix
+	error message corner case.
+
+2010-10-20  Albert Chu <chu11@llnl.gov>
+
+	* Code cleanup for consistency to FreeIPMI code style.
+
+	* Re-work OEM SEL interpretations to not call Fujitsu Get SEL
+	Entry Long Text for every event.
+
+	* ipmi-sel/: Support --output-oem-event-string.
+	
+2010-10-20  Holger Liebig <holger.liebig@ts.fujitsu.com>
+
+	* Add initial Fujitsu OEM sensor and SEL support.
+
+2010-10-14 Albert Chu <chu11@llnl.gov>
+
+	* man/: Update workaround flags options.
+
+	* ipmiconsole/src/libipmiconsole/ipmiconsole.h: Fix comment typo.
+	
 2010-09-15  Albert Chu <chu11@llnl.gov>
 
 	* Support 'assumeio' inband workaround.

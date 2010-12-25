@@ -1,6 +1,6 @@
 
 
-.TH IPMI-SENSORS-CONFIG 8 "2010-09-28" "ipmi-sensors-config 0.8.10" "System Commands"
+.TH IPMI-SENSORS-CONFIG 8 "2010-12-06" "ipmi-sensors-config 0.8.12" "System Commands"
 .SH "NAME"
 ipmi-sensors-config \- configure sensors
 .SH "SYNOPSIS"
@@ -569,10 +569,10 @@ hitting this issue may see commit errors or commits not being written
 to the BMC. Issue observed on Supermicro H8QME.
 .LP
 "veryslowcommit" - This workaround will slow down commits to the BMC
-by sleeping one second between the commit of every key. It works around
-motherboards that have BMCs that can be overwhelmed by commits. Those
-hitting this issue may commit errors or commits not being written
-to the BMC. Issue observed on Quanta S99Q/Dell FS12-TY.
+by sleeping one second between the commit of every key. It works
+around motherboards that have BMCs that can be overwhelmed by commits.
+Those hitting this issue may see commit errors or commits not being
+written to the BMC. Issue observed on Quanta S99Q/Dell FS12-TY.
 .SH "EXAMPLES"
 .B # ipmi-sensors-config --checkout
 .PP
