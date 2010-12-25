@@ -1,0 +1,18 @@
+* TODO Resolve manpages issue within lib* packages
+
+Unpacking libipmimonitoring4 (from libipmimonitoring4_0.8.12-1_amd64.deb) ...
+dpkg: error processing libipmimonitoring4_0.8.12-1_amd64.deb (--install):
+ trying to overwrite '/usr/share/man/man5/ipmi_monitoring_sensors.conf.5.gz', which is also in package libipmimonitoring1 0.7.17~beta2-1
+dpkg: dependency problems prevent configuration of freeipmi-tools:
+ freeipmi-tools depends on libipmimonitoring4; however:
+  Package libipmimonitoring4 is not installed.
+dpkg: error processing freeipmi-tools (--install):
+ dependency problems - leaving unconfigured
+Setting up freeipmi-common (0.8.12-1) ...
+
+* TODO Clean up manpages
+
+W: freeipmi-tools: manpage-has-errors-from-man usr/share/man/man5/ipmiconsole.conf.5.gz 26: can't open `man5/freeipmi.conf.5': No such file or directory
+W: freeipmi-tools: manpage-has-errors-from-man usr/share/man/man5/ipmipower.conf.5.gz 26: can't open `man5/freeipmi.conf.5': No such file or directory
+W: freeipmi-tools: manpage-has-errors-from-man usr/share/man/man8/ipmi-chassis-config.8.gz 288: warning [p 5, 1.5i]: cannot adjust line
+W: libipmimonitoring4: manpage-has-errors-from-man usr/share/man/man5/ipmi_monitoring_sensors.conf.5.gz 73: warning [p 2, 0.5i, div `an-div', 0.0i]: cannot adjust line
