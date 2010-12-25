@@ -3,7 +3,7 @@
 
 # mega rule -- Joey knows how to do the rest
 %:
-	dh $@
+	dh $@ --with autotools_dev
 
 override_dh_clean:
 	dh_clean
