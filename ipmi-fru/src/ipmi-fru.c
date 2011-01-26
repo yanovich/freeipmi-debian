@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  $Id: ipmi-fru.c,v 1.55.4.3 2009-12-23 21:24:05 chu11 Exp $
+ *  $Id: ipmi-fru.c,v 1.59 2010-02-08 22:20:58 chu11 Exp $
  *****************************************************************************
  *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2007 The Regents of the University of California.
@@ -13,7 +13,7 @@
  *
  *  Ipmi-fru is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
+ *  Free Software Foundation; either version 3 of the License, or (at your
  *  option) any later version.
  *
  *  Ipmi-fru is distributed in the hope that it will be useful, but
@@ -591,7 +591,7 @@ main (int argc, char **argv)
   prog_data.args = &cmd_args;
 
   /* Special case, if user specified workaround via flags instead of option */
-  if (prog_data.args->common.tool_specific_workaround_flags & IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_SKIP_CHECKS)
+  if (prog_data.args->common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SKIP_CHECKS)
     prog_data.args->skip_checks = 1;
 
   if ((hosts_count = pstdout_setup (&(prog_data.args->common.hostname),

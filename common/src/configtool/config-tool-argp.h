@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifndef _CONFIG_TOOL_ARGP_H_
 #define _CONFIG_TOOL_ARGP_H_
@@ -45,6 +45,9 @@ enum config_argp_option_keys
     CONFIG_ARGP_SECTIONS_KEY = 'S',
     CONFIG_ARGP_LIST_SECTIONS_KEY = 'L',
     CONFIG_ARGP_VERBOSE_KEY = 'v',
+    CONFIG_ARGP_LAN_CHANNEL_NUMBER_KEY = 200,
+    CONFIG_ARGP_SERIAL_CHANNEL_NUMBER_KEY = 201,
+    CONFIG_ARGP_SOL_CHANNEL_NUMBER_KEY = 202,
   };
 
 #define CONFIG_ARGP_COMMON_OPTIONS                                                        \
@@ -65,10 +68,22 @@ enum config_argp_option_keys
   { "verbose", CONFIG_ARGP_VERBOSE_KEY, 0, 0,                                             \
       "Print additional detailed information.", 38}
 
+#define CONFIG_ARGP_LAN_CHANNEL_OPTION                                                    \
+  { "lan-channel-number", CONFIG_ARGP_LAN_CHANNEL_NUMBER_KEY, "NUMBER", 0,                \
+      "Use a specific LAN Channel Number.", 39}
+
+#define CONFIG_ARGP_SERIAL_CHANNEL_OPTION                                                 \
+  { "serial-channel-number", CONFIG_ARGP_SERIAL_CHANNEL_NUMBER_KEY, "NUMBER", 0,          \
+      "Use a specific Serial Channel Number.", 40}
+
+#define CONFIG_ARGP_SOL_CHANNEL_OPTION                                                    \
+  { "sol-channel-number", CONFIG_ARGP_SOL_CHANNEL_NUMBER_KEY, "NUMBER", 0,                \
+      "Use a specific SOL Channel Number.", 40}
+
 /* legacy short-option */
 #define CONFIG_ARGP_COMMON_OPTIONS_LEGACY                \
   { "foobar", CONFIG_ARGP_FILENAME_KEY_LEGACY, "FILENAME", OPTION_HIDDEN, \
-      "Specify a config file for checkout/commit/diff.", 39}
+      "Specify a config file for checkout/commit/diff.", 41}
 
 void init_config_args (struct config_arguments *config_args);
 

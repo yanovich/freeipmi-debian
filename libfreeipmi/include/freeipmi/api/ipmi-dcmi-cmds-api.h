@@ -1,20 +1,20 @@
 /*
-   Copyright (C) 2003-2010 FreeIPMI Core Team
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 /*****************************************************************************\
  *  Copyright (C) 2009-2010 Lawrence Livermore National Security, LLC.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
@@ -27,7 +27,7 @@
  *
  *  Ipmi-Dcmi is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
+ *  Free Software Foundation; either version 3 of the License, or (at your
  *  option) any later version.
  *
  *  Ipmi-Dcmi is distributed in the hope that it will be useful, but
@@ -77,6 +77,37 @@ int ipmi_cmd_dcmi_get_dcmi_capability_info_manageability_access_attributes (ipmi
 int ipmi_cmd_dcmi_get_dcmi_capability_info_enhanced_system_power_statistics_attributes (ipmi_ctx_t ctx,
                                                                                         fiid_obj_t obj_cmd_rs);
 
+int ipmi_cmd_dcmi_get_asset_tag (ipmi_ctx_t ctx,
+                                 uint8_t offset_to_read,
+                                 uint8_t number_of_bytes_to_read,
+                                 fiid_obj_t obj_cmd_rs);
+
+int ipmi_cmd_dcmi_set_asset_tag (ipmi_ctx_t ctx,
+                                 uint8_t offset_to_write,
+                                 uint8_t number_of_bytes_to_write,
+                                 const void *data,
+                                 unsigned int data_len,
+                                 fiid_obj_t obj_cmd_rs);
+
+int ipmi_cmd_dcmi_get_management_controller_identifier_string (ipmi_ctx_t ctx,
+                                                               uint8_t offset_to_read,
+                                                               uint8_t number_of_bytes_to_read,
+                                                               fiid_obj_t obj_cmd_rs);
+
+int ipmi_cmd_dcmi_set_management_controller_identifier_string (ipmi_ctx_t ctx,
+                                                               uint8_t offset_to_write,
+                                                               uint8_t number_of_bytes_to_write,
+                                                               const void *data,
+                                                               unsigned int data_len,
+                                                               fiid_obj_t obj_cmd_rs);
+
+int ipmi_cmd_dcmi_get_dcmi_sensor_info (ipmi_ctx_t ctx,
+                                        uint8_t sensor_type,
+                                        uint8_t entity_id,
+                                        uint8_t entity_instance,
+                                        uint8_t entity_instance_start,
+                                        fiid_obj_t obj_cmd_rs);
+
 int ipmi_cmd_dcmi_get_power_reading (ipmi_ctx_t ctx,
                                      uint8_t mode,
                                      uint8_t mode_attributes,
@@ -95,18 +126,6 @@ int ipmi_cmd_dcmi_set_power_limit (ipmi_ctx_t ctx,
 int ipmi_cmd_dcmi_activate_deactivate_power_limit (ipmi_ctx_t ctx,
                                                    uint8_t power_limit_activation,
                                                    fiid_obj_t obj_cmd_rs);
-
-int ipmi_cmd_dcmi_get_asset_tag (ipmi_ctx_t ctx,
-                                 uint8_t offset_to_read,
-                                 uint8_t number_of_bytes_to_read,
-                                 fiid_obj_t obj_cmd_rs);
-
-int ipmi_cmd_dcmi_get_dcmi_sensor_info (ipmi_ctx_t ctx,
-                                        uint8_t sensor_type,
-                                        uint8_t entity_id,
-                                        uint8_t entity_instance,
-                                        uint8_t entity_instance_start,
-                                        fiid_obj_t obj_cmd_rs);
 
 #ifdef __cplusplus
 }

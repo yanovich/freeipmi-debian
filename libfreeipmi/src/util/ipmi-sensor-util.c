@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -56,8 +56,6 @@ static int threshold_comparison_status_desc_max = 0x5;
 int
 ipmi_get_threshold_message (uint8_t offset, char *buf, unsigned int buflen)
 {
-  int rv;
-
   if (!buf
       || !buflen
       || offset > threshold_comparison_status_desc_max)
@@ -66,15 +64,7 @@ ipmi_get_threshold_message (uint8_t offset, char *buf, unsigned int buflen)
       return (-1);
     }
 
-  rv = snprintf (buf, buflen, threshold_comparison_status_desc[offset]);
-  /* -1 to account for '\0' */
-  if (rv >= (buflen - 1))
-    {
-      SET_ERRNO (ENOSPC);
-      return (-1);
-    }
-
-  return (rv);
+  return (snprintf (buf, buflen, threshold_comparison_status_desc[offset]));
 }
 
 const char *
@@ -399,3 +389,4 @@ ipmi_sensor_decode_resolution (int8_t r_exponent,
   *value = dval;
   return (0);
 }
+

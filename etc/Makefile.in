@@ -13,7 +13,6 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
-
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -42,10 +41,15 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sdr_cache_dir.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sensor_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -55,15 +59,6 @@ CONFIG_HEADER = $(top_builddir)/config/config.h
 CONFIG_CLEAN_FILES =
 SOURCES =
 DIST_SOURCES =
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(Freeipmiconfdir)"
-FreeipmiconfDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(Freeipmiconf_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
@@ -97,6 +92,7 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 FREEIPMI_CONFIG_FILE_DEFAULT = @FREEIPMI_CONFIG_FILE_DEFAULT@
+FREEIPMI_SYSCONFDIR = @FREEIPMI_SYSCONFDIR@
 GCRYPT_LIBS = @GCRYPT_LIBS@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
@@ -106,14 +102,20 @@ INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTERPRET_SEL_CONFIG_FILE_DEFAULT = @INTERPRET_SEL_CONFIG_FILE_DEFAULT@
+INTERPRET_SENSOR_CONFIG_FILE_DEFAULT = @INTERPRET_SENSOR_CONFIG_FILE_DEFAULT@
+IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
+IPMIMONITORINGSBINDIR = @IPMIMONITORINGSBINDIR@
+IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
-IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT = @IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT@
+IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
 LDFLAGS = @LDFLAGS@
 LIBFREEIPMI_VERSION = @LIBFREEIPMI_VERSION@
 LIBFREEIPMI_VERSION_INFO = @LIBFREEIPMI_VERSION_INFO@
+LIBIPMICONSOLE_CONFIG_FILE_DEFAULT = @LIBIPMICONSOLE_CONFIG_FILE_DEFAULT@
 LIBIPMICONSOLE_VERSION_INFO = @LIBIPMICONSOLE_VERSION_INFO@
 LIBIPMIDETECT_VERSION_INFO = @LIBIPMIDETECT_VERSION_INFO@
 LIBIPMIMONITORING_VERSION_INFO = @LIBIPMIMONITORING_VERSION_INFO@
@@ -191,8 +193,6 @@ target_alias = @target_alias@
 CLEANFILES = *~
 DISTCLEANFILES = .deps/*.P
 EXTRA_DIST = freeipmi.conf
-Freeipmiconfdir = $(sysconfdir)
-Freeipmiconf_DATA = freeipmi.conf
 all: all-am
 
 .SUFFIXES:
@@ -235,23 +235,6 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
-install-FreeipmiconfDATA: $(Freeipmiconf_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(Freeipmiconfdir)" || $(mkdir_p) "$(DESTDIR)$(Freeipmiconfdir)"
-	@list='$(Freeipmiconf_DATA)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f=$(am__strip_dir) \
-	  echo " $(FreeipmiconfDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(Freeipmiconfdir)/$$f'"; \
-	  $(FreeipmiconfDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(Freeipmiconfdir)/$$f"; \
-	done
-
-uninstall-FreeipmiconfDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(Freeipmiconf_DATA)'; for p in $$list; do \
-	  f=$(am__strip_dir) \
-	  echo " rm -f '$(DESTDIR)$(Freeipmiconfdir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(Freeipmiconfdir)/$$f"; \
-	done
 tags: TAGS
 TAGS:
 
@@ -288,11 +271,8 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(DATA)
+all-am: Makefile
 installdirs:
-	for dir in "$(DESTDIR)$(Freeipmiconfdir)"; do \
-	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -337,7 +317,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-FreeipmiconfDATA install-data-local
+install-data-am: install-data-local
 
 install-exec-am:
 
@@ -363,28 +343,25 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-FreeipmiconfDATA uninstall-info-am \
-	uninstall-local
+uninstall-am: uninstall-info-am uninstall-local
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
-	dvi-am html html-am info info-am install \
-	install-FreeipmiconfDATA install-am install-data \
-	install-data-am install-data-local install-exec \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-data-local install-exec \
 	install-exec-am install-info install-info-am install-man \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	uninstall uninstall-FreeipmiconfDATA uninstall-am \
-	uninstall-info-am uninstall-local
+	uninstall uninstall-am uninstall-info-am uninstall-local
 
 
 install-data-local:
-	$(INSTALL) -m 755 -d $(DESTDIR)$(sysconfdir)
-	$(INSTALL) -m 755 $(srcdir)/freeipmi.conf $(DESTDIR)$(sysconfdir)
+	$(INSTALL) -m 755 -d $(DESTDIR)$(FREEIPMI_SYSCONFDIR)
+	$(INSTALL) -m 644 $(srcdir)/freeipmi.conf $(DESTDIR)$(FREEIPMI_CONFIG_FILE_DEFAULT)
 
 uninstall-local:
-	$(RM) -f $(DESTDIR)$(sysconfdir)/freeipmi.conf
+	$(RM) -f $(DESTDIR)$(FREEIPMI_CONFIG_FILE_DEFAULT)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2005-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2005-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -33,6 +33,7 @@
 
 #include <freeipmi/freeipmi.h>
 
+#include "ipmi-locate.h"
 #include "ipmi-locate-argp.h"
 
 #include "freeipmi-portability.h"
@@ -534,11 +535,12 @@ defaults_display (ipmi_locate_ctx_t ctx)
 int
 main (int argc, char **argv)
 {
+  struct ipmi_locate_arguments cmd_args;
   ipmi_locate_ctx_t ctx = NULL;
 
   ipmi_disable_coredump ();
 
-  ipmi_locate_argp_parse (argc, argv);
+  ipmi_locate_argp_parse (argc, argv, &cmd_args);
 
   if (!ipmi_is_root ())
     {
@@ -556,7 +558,8 @@ main (int argc, char **argv)
   smbios_probe_display (ctx);
   acpi_probe_display (ctx);
   pci_probe_display (ctx);
-  defaults_display (ctx);
+  if (cmd_args.defaults)
+    defaults_display (ctx);
 
   if (ctx)
     ipmi_locate_ctx_destroy (ctx);

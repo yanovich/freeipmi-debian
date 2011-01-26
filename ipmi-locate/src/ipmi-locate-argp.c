@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2005-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2005-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -28,6 +28,7 @@
 #include "freeipmi-argp.h"
 #endif /* !HAVE_ARGP_H */
 
+#include "ipmi-locate.h"
 #include "ipmi-locate-argp.h"
 
 #include "freeipmi-portability.h"
@@ -48,6 +49,8 @@ static char cmdline_args_doc[] = "";
 
 static struct argp_option cmdline_options[] =
   {
+    { "defaults", DEFAULTS_KEY, NULL, 0,
+      "Display system defaults.", 30},
     { NULL, 0, NULL, 0, NULL, 0}
   };
 
@@ -61,8 +64,13 @@ static struct argp cmdline_argp = { cmdline_options,
 static error_t
 cmdline_parse (int key, char *arg, struct argp_state *state)
 {
+  struct ipmi_locate_arguments *cmd_args = state->input;
+
   switch (key)
     {
+    case DEFAULTS_KEY:
+      cmd_args->defaults++;
+      break;
     case ARGP_KEY_ARG:
       /* Too many arguments. */
       argp_usage (state);
@@ -77,13 +85,15 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
 }
 
 void
-ipmi_locate_argp_parse (int argc, char **argv)
+ipmi_locate_argp_parse (int argc, char **argv, struct ipmi_locate_arguments *cmd_args)
 {
+  cmd_args->defaults = 0;
+
   argp_parse (&cmdline_argp,
               argc,
               argv,
               ARGP_IN_ORDER,
               NULL,
-              NULL);
+              cmd_args);
 }
 

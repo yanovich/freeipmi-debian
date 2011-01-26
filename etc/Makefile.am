@@ -3,12 +3,9 @@ DISTCLEANFILES = .deps/*.P
 
 EXTRA_DIST = freeipmi.conf
 
-Freeipmiconfdir     = $(sysconfdir)
-Freeipmiconf_DATA   = freeipmi.conf
-
 install-data-local:
-	$(INSTALL) -m 755 -d $(DESTDIR)$(sysconfdir)
-	$(INSTALL) -m 755 $(srcdir)/freeipmi.conf $(DESTDIR)$(sysconfdir)
+	$(INSTALL) -m 755 -d $(DESTDIR)$(FREEIPMI_SYSCONFDIR)
+	$(INSTALL) -m 644 $(srcdir)/freeipmi.conf $(DESTDIR)$(FREEIPMI_CONFIG_FILE_DEFAULT)
 
 uninstall-local:
-	$(RM) -f $(DESTDIR)$(sysconfdir)/freeipmi.conf
+	$(RM) -f $(DESTDIR)$(FREEIPMI_CONFIG_FILE_DEFAULT)

@@ -41,10 +41,15 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sdr_cache_dir.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sensor_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -87,6 +92,7 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 FREEIPMI_CONFIG_FILE_DEFAULT = @FREEIPMI_CONFIG_FILE_DEFAULT@
+FREEIPMI_SYSCONFDIR = @FREEIPMI_SYSCONFDIR@
 GCRYPT_LIBS = @GCRYPT_LIBS@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
@@ -96,14 +102,20 @@ INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTERPRET_SEL_CONFIG_FILE_DEFAULT = @INTERPRET_SEL_CONFIG_FILE_DEFAULT@
+INTERPRET_SENSOR_CONFIG_FILE_DEFAULT = @INTERPRET_SENSOR_CONFIG_FILE_DEFAULT@
+IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
+IPMIMONITORINGSBINDIR = @IPMIMONITORINGSBINDIR@
+IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
-IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT = @IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT@
+IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
 LDFLAGS = @LDFLAGS@
 LIBFREEIPMI_VERSION = @LIBFREEIPMI_VERSION@
 LIBFREEIPMI_VERSION_INFO = @LIBFREEIPMI_VERSION_INFO@
+LIBIPMICONSOLE_CONFIG_FILE_DEFAULT = @LIBIPMICONSOLE_CONFIG_FILE_DEFAULT@
 LIBIPMICONSOLE_VERSION_INFO = @LIBIPMICONSOLE_VERSION_INFO@
 LIBIPMIDETECT_VERSION_INFO = @LIBIPMIDETECT_VERSION_INFO@
 LIBIPMIMONITORING_VERSION_INFO = @LIBIPMIMONITORING_VERSION_INFO@
@@ -219,6 +231,11 @@ EXTRA_DIST = \
 	manpage-common-sdr-options.man \
 	manpage-common-ignore-sdr-cache.man \
 	manpage-common-config-tool-options.man \
+	manpage-common-config-tool-options-verbose.man \
+	manpage-common-config-tool-options-very-verbose.man \
+	manpage-common-config-tool-options-lan-channel-number.man \
+	manpage-common-config-tool-options-serial-channel-number.man \
+	manpage-common-config-tool-options-sol-channel-number.man \
 	manpage-common-config-tool-general-use.man \
 	manpage-common-troubleshooting.man \
 	manpage-common-troubleshooting-lan-only.man \
@@ -227,11 +244,11 @@ EXTRA_DIST = \
 	manpage-common-reporting-bugs.man \
 	manpage-common-gpl-library-text.man \
 	manpage-common-gpl-program-text.man \
+	manpage-common-gpl-freeipmi-text.man \
 	manpage-common-ping-options.man \
 	manpage-common-ping-origin.man \
 	manpage-common-table-of-contents.man \
 	manpage-common-homepage.man \
-	manpage-common-sensor-common.man \
 	manpage-common-interpret-oem-data.man \
 	manpage-common-oem-interpretation.man \
 	manpage-common-entity-sensor-names.man \

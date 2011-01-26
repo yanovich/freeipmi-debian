@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 
 #ifndef _BMC_CONFIG_H_
@@ -38,6 +38,8 @@
 #include "config-tool-validate.h"
 
 #define CIPHER_SUITE_LEN 16
+
+#define CHANNEL_NUMBERS_MAX 16
 
 struct bmc_config_arguments
 {
@@ -64,18 +66,13 @@ typedef struct bmc_config_state_data
   pstdout_state_t pstate;
   struct config_section *sections;
 
-  /* achu: workaround for IPMI limitation */
-  int lan_user_session_limit_len;
-  uint8_t *lan_user_session_limit;
-  int serial_user_session_limit_len;
-  uint8_t *serial_user_session_limit;
-
   /* achu: workaround for OEM compliance issue, see user section */
   int enable_user_after_password_len;
   bmc_config_enable_user_after_password_t *enable_user_after_password;
 
   /* achu: caching to make lan authentication enables go faster */
   int authentication_type_initialized;
+  uint8_t authentication_type_channel_number;
   uint8_t authentication_type_none;
   uint8_t authentication_type_md2;
   uint8_t authentication_type_md5;
@@ -89,16 +86,35 @@ typedef struct bmc_config_state_data
   int cipher_suite_id_supported_set;
   uint8_t cipher_suite_priv[CIPHER_SUITE_LEN];
   int cipher_suite_priv_set;
+  uint8_t cipher_suite_channel_number;
 
-  /* achu: caching to make bmc-config work more quickly */
-  int lan_channel_number_initialized;
-  uint8_t lan_channel_number;
-  int serial_channel_number_initialized;
-  uint8_t serial_channel_number;
-  int sol_channel_number_initialized;
-  uint8_t sol_channel_number;
-  int number_of_users_initialized;
-  uint8_t number_of_users;
+  /* For multi-channel settings
+   *
+   * base is for base section name (e.g. "Lan_Conf")
+   * channel is for channel suffixed section name (e.g. "Lan_Conf_Channel_1")
+   */
+  unsigned int lan_base_config_flags;
+  unsigned int lan_channel_config_flags;
+  unsigned int serial_base_config_flags;
+  unsigned int serial_channel_config_flags;
+  unsigned int sol_base_config_flags;
+  unsigned int sol_channel_config_flags;
+
+  /* For channel reading */
+  uint8_t lan_channel_numbers[CHANNEL_NUMBERS_MAX];
+  unsigned int lan_channel_numbers_count;
+  unsigned int lan_channel_numbers_loaded;
+  uint8_t serial_channel_numbers[CHANNEL_NUMBERS_MAX];
+  unsigned int serial_channel_numbers_count;
+  unsigned int serial_channel_numbers_loaded;
+  
+  /* cache for multi-channel */
+  uint8_t sol_channel_numbers_lan_channel[CHANNEL_NUMBERS_MAX];
+  uint8_t sol_channel_numbers_sol_channel[CHANNEL_NUMBERS_MAX];
+  unsigned int sol_channel_numbers_count;
+  uint8_t sol_channel_numbers_unique[CHANNEL_NUMBERS_MAX];
+  unsigned int sol_channel_numbers_unique_count;
+  unsigned int sol_channel_numbers_loaded;
 } bmc_config_state_data_t;
 
 #endif /* _BMC_CONFIG_H_ */

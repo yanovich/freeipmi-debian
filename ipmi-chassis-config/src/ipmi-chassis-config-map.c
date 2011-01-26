@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2008-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2008-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -25,7 +25,7 @@
 #if STDC_HEADERS
 #include <string.h>
 #endif /* STDC_HEADERS */
-#include <freeipmi/freeipmi.h>
+#include <assert.h>
 
 #include "ipmi-chassis-config.h"
 #include "ipmi-chassis-config-map.h"
@@ -35,6 +35,8 @@
 int
 power_restore_policy_number (const char *string)
 {
+  assert (string);
+
   if (same (string, "off_state_ac_apply"))
     return (IPMI_POWER_RESTORE_POLICY_POWERED_OFF_AFTER_AC_RETURNS);
   if (same (string, "restore_state_ac_apply"))
@@ -62,10 +64,12 @@ power_restore_policy_string (uint8_t value)
 int
 bios_boot_type_number (const char *string)
 {
+  assert (string);
+
   if (same (string, "PC-COMPATIBLE"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_TYPE_PC_COMPATIBLE);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_TYPE_PC_COMPATIBLE);
   if (same (string, "EFI"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_TYPE_EFI);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_TYPE_EFI);
   return (-1);
 }
 
@@ -74,9 +78,9 @@ bios_boot_type_string (uint8_t value)
 {
   switch (value)
     {
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_TYPE_PC_COMPATIBLE:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_TYPE_PC_COMPATIBLE:
       return "PC-COMPATIBLE";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_TYPE_EFI:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_TYPE_EFI:
       return "EFI";
     }
   return "";
@@ -85,30 +89,32 @@ bios_boot_type_string (uint8_t value)
 int
 boot_device_number (const char *string)
 {
+  assert (string);
+
   if (same (string, "NO-OVERRIDE"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_NO_OVERRIDE);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_NO_OVERRIDE);
   if (same (string, "PXE"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_PXE);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_PXE);
   if (same (string, "HARD-DRIVE"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE);
   if (same (string, "HARD-DRIVE-SAFE-MODE"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE_SAFE_MODE);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE_SAFE_MODE);
   if (same (string, "DIAGNOSTIC_PARTITION"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_DIAGNOSTIC_PARTITION);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_DIAGNOSTIC_PARTITION);
   if (same (string, "CD-DVD"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_CD_DVD);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_CD_DVD);
   if (same (string, "BIOS-SETUP"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_BIOS_SETUP);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_BIOS_SETUP);
   if (same (string, "REMOTE-FLOPPY"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_FLOPPY_PRIMARY_REMOVEABLE_MEDIA);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_FLOPPY_PRIMARY_REMOVEABLE_MEDIA);
   if (same (string, "PRIMARY-REMOTE-MEDIA"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_PRIMARY_REMOTE_MEDIA);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_PRIMARY_REMOTE_MEDIA);
   if (same (string, "REMOTE-CD-DVD"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_CD_DVD);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_CD_DVD);
   if (same (string, "REMOTE-HARD-DRIVE"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_HARD_DRIVE);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_HARD_DRIVE);
   if (same (string, "FLOPPY"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_FLOPPY_REMOVEABLE_MEDIA);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_FLOPPY_REMOVEABLE_MEDIA);
   return (-1);
 }
 
@@ -117,29 +123,29 @@ boot_device_string (uint8_t value)
 {
   switch (value)
     {
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_NO_OVERRIDE:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_NO_OVERRIDE:
       return "NO-OVERRIDE";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_PXE:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_PXE:
       return "PXE";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE:
       return "HARD-DRIVE";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE_SAFE_MODE:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE_SAFE_MODE:
       return "HARD-DRIVE-SAFE-MODE";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_DIAGNOSTIC_PARTITION:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_DIAGNOSTIC_PARTITION:
       return "DIAGNOSTIC_PARTITION";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_CD_DVD:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_CD_DVD:
       return "CD-DVD";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_BIOS_SETUP:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_BIOS_SETUP:
       return "BIOS-SETUP";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_FLOPPY_PRIMARY_REMOVEABLE_MEDIA:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_FLOPPY_PRIMARY_REMOVEABLE_MEDIA:
       return "REMOTE-FLOPPY";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_PRIMARY_REMOTE_MEDIA:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_PRIMARY_REMOTE_MEDIA:
       return "PRIMARY-REMOTE-MEDIA";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_CD_DVD:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_CD_DVD:
       return "REMOTE-CD-DVD";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_HARD_DRIVE:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_REMOTELY_CONNECTED_HARD_DRIVE:
       return "REMOTE-HARD-DRIVE";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_FLOPPY_REMOVEABLE_MEDIA:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_FLOPPY_REMOVEABLE_MEDIA:
       return "FLOPPY";
     }
   return "";
@@ -151,6 +157,8 @@ device_instance_selector_number (const char *string)
   uint8_t device_instance_selector;
   char *str = NULL;
 
+  assert (string);
+
   if (same (string, "none"))
     return (0);
 
@@ -158,7 +166,7 @@ device_instance_selector_number (const char *string)
     {
       device_instance_selector = atoi (str + strlen ("external-"));
 
-      if (IPMI_CHASSIS_BOOT_OPTIONS_DEVICE_INSTANCE_SELECTOR_RANGE_VALID (device_instance_selector))
+      if (IPMI_SYSTEM_BOOT_OPTION_DEVICE_INSTANCE_SELECTOR_RANGE_VALID (device_instance_selector))
         return (device_instance_selector);
     }
 
@@ -166,8 +174,8 @@ device_instance_selector_number (const char *string)
     {
       device_instance_selector = atoi (str + strlen ("internal-"));
 
-      if (IPMI_CHASSIS_BOOT_OPTIONS_DEVICE_INSTANCE_SELECTOR_RANGE_VALID (device_instance_selector))
-        return (device_instance_selector | IPMI_CHASSIS_BOOT_OPTIONS_DEVICE_INSTANCE_SELECTOR_INTERNAL_BITMASK);
+      if (IPMI_SYSTEM_BOOT_OPTION_DEVICE_INSTANCE_SELECTOR_RANGE_VALID (device_instance_selector))
+        return (device_instance_selector | IPMI_SYSTEM_BOOT_OPTION_DEVICE_INSTANCE_SELECTOR_INTERNAL_BITMASK);
     }
 
   return (-1);
@@ -248,12 +256,14 @@ device_instance_selector_string (uint8_t value)
 int
 firmware_bios_verbosity_number (const char *string)
 {
+  assert (string);
+
   if (same (string, "DEFAULT"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_DEFAULT);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_DEFAULT);
   if (same (string, "QUIET"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_QUIET);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_QUIET);
   if (same (string, "VERBOSE"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_VERBOSE);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_VERBOSE);
   return (-1);
 }
 
@@ -262,11 +272,11 @@ firmware_bios_verbosity_string (uint8_t value)
 {
   switch (value)
     {
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_DEFAULT:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_DEFAULT:
       return "DEFAULT";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_QUIET:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_QUIET:
       return "QUIET";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_VERBOSE:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_VERBOSE:
       return "VERBOSE";
     }
   return "";
@@ -275,12 +285,14 @@ firmware_bios_verbosity_string (uint8_t value)
 int
 console_redirection_number (const char *string)
 {
+  assert (string);
+
   if (same (string, "BIOS-SETTING"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_CONSOLE_REDIRECTION_BIOS_SETTING);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_CONSOLE_REDIRECTION_BIOS_SETTING);
   if (same (string, "SUPPRESS"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_CONSOLE_REDIRECTION_SUPPRESS);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_CONSOLE_REDIRECTION_SUPPRESS);
   if (same (string, "ENABLE"))
-    return (IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_CONSOLE_REDIRECTION_ENABLE);
+    return (IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_CONSOLE_REDIRECTION_ENABLE);
   return (-1);
 }
 
@@ -289,11 +301,11 @@ console_redirection_string (uint8_t value)
 {
   switch (value)
     {
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_CONSOLE_REDIRECTION_BIOS_SETTING:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_CONSOLE_REDIRECTION_BIOS_SETTING:
       return "BIOS-SETTING";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_CONSOLE_REDIRECTION_SUPPRESS:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_CONSOLE_REDIRECTION_SUPPRESS:
       return "SUPPRESS";
-    case IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_CONSOLE_REDIRECTION_ENABLE:
+    case IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_CONSOLE_REDIRECTION_ENABLE:
       return "ENABLE";
     }
   return "";

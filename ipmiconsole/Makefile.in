@@ -38,24 +38,27 @@ host_triplet = @host@
 subdir = ipmiconsole
 DIST_COMMON = $(dist_man_MANS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/ipmiconsole.8.pre.in \
-	$(srcdir)/ipmiconsole.conf.5.pre.in \
-	$(srcdir)/libipmiconsole.3.pre.in
+	$(srcdir)/ipmiconsole.conf.5.pre.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sdr_cache_dir.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sensor_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config/config.h
-CONFIG_CLEAN_FILES = ipmiconsole.8.pre ipmiconsole.conf.5.pre \
-	libipmiconsole.3.pre
+CONFIG_CLEAN_FILES = ipmiconsole.8.pre ipmiconsole.conf.5.pre
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -64,10 +67,8 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	install-recursive installcheck-recursive installdirs-recursive \
 	pdf-recursive ps-recursive uninstall-info-recursive \
 	uninstall-recursive
-man3dir = $(mandir)/man3
-am__installdirs = "$(DESTDIR)$(man3dir)" "$(DESTDIR)$(man5dir)" \
-	"$(DESTDIR)$(man8dir)"
 man5dir = $(mandir)/man5
+am__installdirs = "$(DESTDIR)$(man5dir)" "$(DESTDIR)$(man8dir)"
 man8dir = $(mandir)/man8
 NROFF = nroff
 MANS = $(dist_man_MANS)
@@ -107,6 +108,7 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 FREEIPMI_CONFIG_FILE_DEFAULT = @FREEIPMI_CONFIG_FILE_DEFAULT@
+FREEIPMI_SYSCONFDIR = @FREEIPMI_SYSCONFDIR@
 GCRYPT_LIBS = @GCRYPT_LIBS@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
@@ -116,14 +118,20 @@ INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTERPRET_SEL_CONFIG_FILE_DEFAULT = @INTERPRET_SEL_CONFIG_FILE_DEFAULT@
+INTERPRET_SENSOR_CONFIG_FILE_DEFAULT = @INTERPRET_SENSOR_CONFIG_FILE_DEFAULT@
+IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
+IPMIMONITORINGSBINDIR = @IPMIMONITORINGSBINDIR@
+IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
-IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT = @IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT@
+IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
 LDFLAGS = @LDFLAGS@
 LIBFREEIPMI_VERSION = @LIBFREEIPMI_VERSION@
 LIBFREEIPMI_VERSION_INFO = @LIBFREEIPMI_VERSION_INFO@
+LIBIPMICONSOLE_CONFIG_FILE_DEFAULT = @LIBIPMICONSOLE_CONFIG_FILE_DEFAULT@
 LIBIPMICONSOLE_VERSION_INFO = @LIBIPMICONSOLE_VERSION_INFO@
 LIBIPMIDETECT_VERSION_INFO = @LIBIPMIDETECT_VERSION_INFO@
 LIBIPMIMONITORING_VERSION_INFO = @LIBIPMIMONITORING_VERSION_INFO@
@@ -201,12 +209,12 @@ target_alias = @target_alias@
 SUBDIRS = src
 MANS_CPP = \
 	ipmiconsole.8 \
-	ipmiconsole.conf.5 \
-	libipmiconsole.3
+	ipmiconsole.conf.5
 
-dist_man_MANS = $(MANS_CPP)
+dist_man_MANS = $(MANS_CPP) ipmi-console.8
 CLEANFILES = $(MANS_CPP) *~
 DISTCLEANFILES = $(MANS_CPP) $(MANS_CPP:%=%.pre) .deps/*.P
+EXTRA_DIST = ipmi-console.8
 all: all-recursive
 
 .SUFFIXES:
@@ -243,8 +251,6 @@ ipmiconsole.8.pre: $(top_builddir)/config.status $(srcdir)/ipmiconsole.8.pre.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 ipmiconsole.conf.5.pre: $(top_builddir)/config.status $(srcdir)/ipmiconsole.conf.5.pre.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-libipmiconsole.3.pre: $(top_builddir)/config.status $(srcdir)/libipmiconsole.3.pre.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -255,51 +261,6 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
-install-man3: $(man3_MANS) $(man_MANS)
-	@$(NORMAL_INSTALL)
-	test -z "$(man3dir)" || $(mkdir_p) "$(DESTDIR)$(man3dir)"
-	@list='$(man3_MANS) $(dist_man3_MANS) $(nodist_man3_MANS)'; \
-	l2='$(man_MANS) $(dist_man_MANS) $(nodist_man_MANS)'; \
-	for i in $$l2; do \
-	  case "$$i" in \
-	    *.3*) list="$$list $$i" ;; \
-	  esac; \
-	done; \
-	for i in $$list; do \
-	  if test -f $(srcdir)/$$i; then file=$(srcdir)/$$i; \
-	  else file=$$i; fi; \
-	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
-	  case "$$ext" in \
-	    3*) ;; \
-	    *) ext='3' ;; \
-	  esac; \
-	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
-	  inst=`echo $$inst | sed -e 's/^.*\///'`; \
-	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
-	  echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man3dir)/$$inst'"; \
-	  $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man3dir)/$$inst"; \
-	done
-uninstall-man3:
-	@$(NORMAL_UNINSTALL)
-	@list='$(man3_MANS) $(dist_man3_MANS) $(nodist_man3_MANS)'; \
-	l2='$(man_MANS) $(dist_man_MANS) $(nodist_man_MANS)'; \
-	for i in $$l2; do \
-	  case "$$i" in \
-	    *.3*) list="$$list $$i" ;; \
-	  esac; \
-	done; \
-	for i in $$list; do \
-	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
-	  case "$$ext" in \
-	    3*) ;; \
-	    *) ext='3' ;; \
-	  esac; \
-	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
-	  inst=`echo $$inst | sed -e 's/^.*\///'`; \
-	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
-	  echo " rm -f '$(DESTDIR)$(man3dir)/$$inst'"; \
-	  rm -f "$(DESTDIR)$(man3dir)/$$inst"; \
-	done
 install-man5: $(man5_MANS) $(man_MANS)
 	@$(NORMAL_INSTALL)
 	test -z "$(man5dir)" || $(mkdir_p) "$(DESTDIR)$(man5dir)"
@@ -570,7 +531,7 @@ check: check-recursive
 all-am: Makefile $(MANS)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(man3dir)" "$(DESTDIR)$(man5dir)" "$(DESTDIR)$(man8dir)"; do \
+	for dir in "$(DESTDIR)$(man5dir)" "$(DESTDIR)$(man8dir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-recursive
@@ -624,7 +585,7 @@ install-exec-am:
 
 install-info: install-info-recursive
 
-install-man: install-man3 install-man5 install-man8
+install-man: install-man5 install-man8
 
 installcheck-am:
 
@@ -648,7 +609,7 @@ uninstall-am: uninstall-info-am uninstall-man
 
 uninstall-info: uninstall-info-recursive
 
-uninstall-man: uninstall-man3 uninstall-man5 uninstall-man8
+uninstall-man: uninstall-man5 uninstall-man8
 
 .PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am check check-am \
 	clean clean-generic clean-libtool clean-recursive ctags \
@@ -656,14 +617,13 @@ uninstall-man: uninstall-man3 uninstall-man5 uninstall-man8
 	distclean-recursive distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-man3 install-man5 \
-	install-man8 install-strip installcheck installcheck-am \
-	installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic maintainer-clean-recursive \
-	mostlyclean mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-recursive pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-info-am uninstall-man \
-	uninstall-man3 uninstall-man5 uninstall-man8
+	install-info-am install-man install-man5 install-man8 \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-generic \
+	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am uninstall-info-am \
+	uninstall-man uninstall-man5 uninstall-man8
 
 
 $(MANS_CPP): $(MANS_CPP:%=%.pre)

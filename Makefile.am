@@ -3,6 +3,9 @@ SUBDIRS = \
 	etc \
 	common \
 	libfreeipmi \
+	libipmiconsole \
+	libipmimonitoring \
+	libipmidetect \
 	man \
 	bmc-config \
 	bmc-info \
@@ -21,10 +24,11 @@ SUBDIRS = \
 	ipmi-locate \
 	ipmiconsole \
 	ipmidetect \
-	ipmimonitoring \
+	ipmidetectd \
 	ipmiping \
 	ipmipower \
 	rmcpping \
+	examples \
 	contrib
 
 PACKAGE = @PACKAGE@
@@ -45,7 +49,6 @@ EXTRA = \
 	COPYING.bmc-watchdog \
 	COPYING.ipmipower \
 	COPYING.ipmiping \
-	COPYING.rmcpping \
 	COPYING.ipmiconsole \
 	COPYING.ipmimonitoring \
 	COPYING.pstdout \
@@ -57,7 +60,6 @@ EXTRA = \
 	DISCLAIMER.bmc-watchdog \
 	DISCLAIMER.ipmipower \
 	DISCLAIMER.ipmiping \
-	DISCLAIMER.rmcpping \
 	DISCLAIMER.ipmiconsole \
 	DISCLAIMER.ipmimonitoring \
 	DISCLAIMER.pstdout \
@@ -67,7 +69,6 @@ EXTRA = \
 	DISCLAIMER.bmc-watchdog.UC \
 	DISCLAIMER.ipmipower.UC \
 	DISCLAIMER.ipmiping.UC \
-	DISCLAIMER.rmcpping.UC \
 	DISCLAIMER.ipmiconsole.UC \
 	DISCLAIMER.ipmimonitoring.UC \
 	DISCLAIMER.pstdout.UC \

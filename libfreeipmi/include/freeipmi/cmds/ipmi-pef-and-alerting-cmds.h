@@ -1,20 +1,20 @@
 /*
-   Copyright (C) 2003-2010 FreeIPMI Core Team
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifndef _IPMI_PEF_AND_ALERTING_CMDS_H
 #define _IPMI_PEF_AND_ALERTING_CMDS_H
@@ -26,6 +26,18 @@ extern "C" {
 #include <stdint.h>
 #include <freeipmi/fiid/fiid.h>
 #include <freeipmi/spec/ipmi-sensor-types-spec.h>
+
+#define IPMI_PEF_CONFIGURATION_PARAMETERS_NO_SET_SELECTOR                            0x0
+#define IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR                          0x0
+
+#define IPMI_PEF_CONFIGURATION_PARAMETERS_SET_COMPLETE                              0x00
+#define IPMI_PEF_CONFIGURATION_PARAMETERS_SET_IN_PROGRESS                           0x01
+#define IPMI_PEF_CONFIGURATION_PARAMETERS_SET_COMMIT_WRITE                          0x02
+
+#define IPMI_PEF_CONFIGURATION_PARAMETERS_SET_IN_PROGRESS_VALID(__value) \
+  (((__value) == IPMI_PEF_CONFIGURATION_PARAMETERS_SET_COMPLETE          \
+    || (__value) == IPMI_PEF_CONFIGURATION_PARAMETERS_SET_IN_PROGRESS    \
+    || (__value) == IPMI_PEF_CONFIGURATION_PARAMETERS_SET_COMMIT_WRITE) ? 1 : 0)
 
 #define IPMI_PEF_POSTPONE_TIMER_DISABLE                     0x00
 #define IPMI_PEF_POSTPONE_TIMER_TEMPORARY_DISABLE           0xFE
@@ -321,6 +333,7 @@ extern fiid_template_t tmpl_cmd_arm_pef_postpone_timer_rs;
 
 extern fiid_template_t tmpl_cmd_set_pef_configuration_parameters_rq;
 extern fiid_template_t tmpl_cmd_set_pef_configuration_parameters_rs;
+extern fiid_template_t tmpl_cmd_set_pef_configuration_parameters_set_in_progress_rq;
 extern fiid_template_t tmpl_cmd_set_pef_configuration_parameters_pef_control_rq;
 extern fiid_template_t tmpl_cmd_set_pef_configuration_parameters_pef_action_global_control_rq;
 extern fiid_template_t tmpl_cmd_set_pef_configuration_parameters_pef_startup_delay_rq;
@@ -333,6 +346,7 @@ extern fiid_template_t tmpl_cmd_set_pef_configuration_parameters_alert_policy_ta
 
 extern fiid_template_t tmpl_cmd_get_pef_configuration_parameters_rq;
 extern fiid_template_t tmpl_cmd_get_pef_configuration_parameters_rs;
+extern fiid_template_t tmpl_cmd_get_pef_configuration_parameters_set_in_progress_rs;
 extern fiid_template_t tmpl_cmd_get_pef_configuration_parameters_pef_control_rs;
 extern fiid_template_t tmpl_cmd_get_pef_configuration_parameters_pef_action_global_control_rs;
 extern fiid_template_t tmpl_cmd_get_pef_configuration_parameters_pef_startup_delay_rs;
@@ -345,7 +359,6 @@ extern fiid_template_t tmpl_cmd_get_pef_configuration_parameters_number_of_alert
 extern fiid_template_t tmpl_cmd_get_pef_configuration_parameters_alert_string_keys_rs;
 extern fiid_template_t tmpl_cmd_get_pef_configuration_parameters_alert_strings_rs;
 extern fiid_template_t tmpl_cmd_get_pef_configuration_parameters_alert_policy_table_rs;
-
 
 extern fiid_template_t tmpl_cmd_set_last_processed_event_id_rq;
 extern fiid_template_t tmpl_cmd_set_last_processed_event_id_rs;
@@ -367,6 +380,9 @@ int fill_cmd_set_pef_configuration_parameters (uint8_t parameter_selector,
                                                const void *configuration_parameter_data,
                                                unsigned int configuration_parameter_data_len,
                                                fiid_obj_t obj_cmd_rq);
+
+int fill_cmd_set_pef_configuration_parameters_set_in_progress (uint8_t state,
+                                                               fiid_obj_t obj_cmd_rq);
 
 int fill_cmd_set_pef_configuration_parameters_pef_control (uint8_t pef,
                                                            uint8_t pef_event_messages,

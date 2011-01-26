@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  $Id: ipmi-sdr-cache-create.c,v 1.40.2.1 2009-12-23 21:24:23 chu11 Exp $
+ *  $Id: ipmi-sdr-cache-create.c,v 1.42 2010-02-08 22:09:40 chu11 Exp $
  *****************************************************************************
  *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
@@ -12,7 +12,7 @@
  *
  *  Ipmimonitoring is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
+ *  Free Software Foundation; either version 3 of the License, or (at your
  *  option) any later version.
  *
  *  Ipmimonitoring is distributed in the hope that it will be useful, but
@@ -65,6 +65,10 @@
 
 #define IPMI_SDR_CACHE_MAX_RESERVATION_ID_RETRY 4
 
+/* achu: bytes to read start = 16 specifically chosen to 16 because it
+ * appears most motherboards can handle 16.  Many cannot handle larger
+ * numbers like 32.
+ */
 #define IPMI_SDR_CACHE_BYTES_TO_READ_START      16
 #define IPMI_SDR_CACHE_BYTES_TO_READ_DECREMENT  4
 
@@ -246,11 +250,13 @@ _sdr_cache_get_record (ipmi_sdr_cache_ctx_t ctx,
   fiid_obj_t obj_cmd_rs = NULL;
   fiid_obj_t obj_sdr_record_header = NULL;
   int sdr_record_header_length = 0;
+  int sdr_record_len = 0;
   unsigned int record_length = 0;
   int rv = -1;
   unsigned int bytes_to_read = IPMI_SDR_CACHE_BYTES_TO_READ_START;
   unsigned int offset_into_record = 0;
   unsigned int reservation_id_retry_count = 0;
+  uint8_t temp_record_buf[IPMI_SDR_CACHE_MAX_SDR_RECORD_LENGTH];
   uint64_t val;
 
   assert (ctx);
@@ -278,6 +284,87 @@ _sdr_cache_get_record (ipmi_sdr_cache_ctx_t ctx,
       SDR_CACHE_ERRNO_TO_SDR_CACHE_ERRNUM (ctx, errno);
       goto cleanup;
     }
+  
+ /* achu:
+  *
+  * Many motherboards now allow you to read the full SDR record, try
+  * that first.  If it fails for any reason, bail and try to read via
+  * partial reads.
+  */
+ 
+  reservation_id_retry_count = 0;
+  
+  while (!offset_into_record)
+    {
+      if (ipmi_cmd_get_sdr (ipmi_ctx,
+			    *reservation_id,
+			    record_id,
+			    0,
+			    IPMI_SDR_READ_ENTIRE_RECORD_BYTES_TO_READ,
+			    obj_cmd_rs) < 0)
+	{
+          if (ipmi_ctx_errnum (ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE)
+	    {
+              uint8_t comp_code;
+	      
+              if (FIID_OBJ_GET (obj_cmd_rs,
+                                "comp_code",
+                                &val) < 0)
+                {
+                  SDR_CACHE_FIID_OBJECT_ERROR_TO_SDR_CACHE_ERRNUM (ctx, obj_cmd_rs);
+                  goto cleanup;
+                }
+              comp_code = val;
+
+              if (comp_code == IPMI_COMP_CODE_RESERVATION_CANCELLED
+                  && (reservation_id_retry_count < IPMI_SDR_CACHE_MAX_RESERVATION_ID_RETRY))
+                {
+                  if (_sdr_cache_reservation_id (ctx,
+                                                 ipmi_ctx,
+                                                 reservation_id) < 0)
+                    goto cleanup;
+                  reservation_id_retry_count++;
+                  continue;
+                }
+            }
+	  
+	  goto partial_read;
+	}
+  
+      if ((sdr_record_len = fiid_obj_get_data (obj_cmd_rs,
+					       "record_data",
+					       temp_record_buf,
+					       IPMI_SDR_CACHE_MAX_SDR_RECORD_LENGTH)) < 0)
+	{
+	  SDR_CACHE_FIID_OBJECT_ERROR_TO_SDR_CACHE_ERRNUM (ctx, obj_cmd_rs);
+	  goto cleanup;
+	}
+      
+      /* Assume this is an "IPMI Error", fall through to partial reads */
+      if (sdr_record_len < sdr_record_header_length)
+        goto partial_read;
+  
+      if (sdr_record_len > record_buf_len)
+	{
+	  SDR_CACHE_SET_ERRNUM (ctx, IPMI_SDR_CACHE_ERR_INTERNAL_ERROR);
+	  goto cleanup;
+	}
+  
+      if (FIID_OBJ_GET (obj_cmd_rs,
+			"next_record_id",
+			&val) < 0)
+	{
+	  SDR_CACHE_FIID_OBJECT_ERROR_TO_SDR_CACHE_ERRNUM (ctx, obj_cmd_rs);
+	  goto cleanup;
+	}
+      *next_record_id = val;
+
+      memcpy (record_buf, temp_record_buf, sdr_record_len);
+      offset_into_record += sdr_record_len;
+      goto out;
+    }
+
+ partial_read:
 
   reservation_id_retry_count = 0;
   while (!record_length)
@@ -357,6 +444,15 @@ _sdr_cache_get_record (ipmi_sdr_cache_ctx_t ctx,
           goto cleanup;
         }
 
+      if (sdr_record_header_len > record_buf_len)
+	{
+	  SDR_CACHE_SET_ERRNUM (ctx, IPMI_SDR_CACHE_ERR_INTERNAL_ERROR);
+	  goto cleanup;
+	}
+
+      /* copy header into buf */
+      memcpy (record_buf, record_header_buf, sdr_record_header_len);
+      offset_into_record += sdr_record_header_len;
       record_length = val + sdr_record_header_length;
     }
 
@@ -418,7 +514,8 @@ _sdr_cache_get_record (ipmi_sdr_cache_ctx_t ctx,
                   reservation_id_retry_count++;
                   continue;
                 }
-              else if  (comp_code == IPMI_COMP_CODE_CANNOT_RETURN_REQUESTED_NUMBER_OF_BYTES
+              else if  ((comp_code == IPMI_COMP_CODE_CANNOT_RETURN_REQUESTED_NUMBER_OF_BYTES
+                         || comp_code == IPMI_COMP_CODE_UNSPECIFIED_ERROR)
                         && bytes_to_read > sdr_record_header_length)
                 {
                   bytes_to_read -= IPMI_SDR_CACHE_BYTES_TO_READ_DECREMENT;
@@ -444,6 +541,7 @@ _sdr_cache_get_record (ipmi_sdr_cache_ctx_t ctx,
       offset_into_record += record_data_len;
     }
 
+ out:
   rv = offset_into_record;
  cleanup:
   fiid_obj_destroy (obj_cmd_rs);

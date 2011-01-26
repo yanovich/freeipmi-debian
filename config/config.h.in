@@ -14,6 +14,9 @@
 /* Define default freeipmi config file. */
 #undef FREEIPMI_CONFIG_FILE_DEFAULT
 
+/* Define legacy freeipmi config file. */
+#undef FREEIPMI_CONFIG_FILE_LEGACY
+
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
@@ -239,11 +242,29 @@
 /* Define to 1 if you have the `vprintf' function. */
 #undef HAVE_VPRINTF
 
-/* Define default ipmidetectd config_file. */
+/* Define default interpret sel config file. */
+#undef INTERPRET_SEL_CONFIG_FILE_DEFAULT
+
+/* Define default interpret sensor config file. */
+#undef INTERPRET_SENSOR_CONFIG_FILE_DEFAULT
+
+/* Define legacy ipmiconsole config file. */
+#undef IPMICONSOLE_CONFIG_FILE_LEGACY
+
+/* Define default ipmidetectd config file. */
 #undef IPMIDETECTD_CONFIG_FILE_DEFAULT
 
-/* Define default ipmidetect config_file. */
+/* Define legacy ipmidetectd config file. */
+#undef IPMIDETECTD_CONFIG_FILE_LEGACY
+
+/* Define default ipmidetect config file. */
 #undef IPMIDETECT_CONFIG_FILE_DEFAULT
+
+/* Define legacy ipmidetect config file. */
+#undef IPMIDETECT_CONFIG_FILE_LEGACY
+
+/* Define legacy ipmipower config file. */
+#undef IPMIPOWER_CONFIG_FILE_LEGACY
 
 /* Define to 1 to not check for root */
 #undef IPMI_DONT_CHECK_FOR_ROOT
@@ -251,11 +272,14 @@
 /* Define default ipmi_monitoring sdr_cache_dir. */
 #undef IPMI_MONITORING_SDR_CACHE_DIR
 
-/* Define default ipmi_monitoring_sensor config_file. */
-#undef IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT
+/* Define legacy ipmi_monitoring_sensor config file. */
+#undef IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY
 
 /* Define to turn on error tracing */
 #undef IPMI_TRACE
+
+/* Define default libipmiconsole config file. */
+#undef LIBIPMICONSOLE_CONFIG_FILE_DEFAULT
 
 /* Define to 1 for a production release */
 #undef NDEBUG

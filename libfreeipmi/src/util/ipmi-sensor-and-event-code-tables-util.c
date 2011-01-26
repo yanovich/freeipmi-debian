@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -39,6 +39,7 @@
 #include "freeipmi/spec/ipmi-sensor-and-event-code-tables-oem-spec.h"
 #include "freeipmi/spec/ipmi-sensor-types-spec.h"
 #include "freeipmi/spec/ipmi-sensor-types-oem-spec.h"
+#include "freeipmi/util/ipmi-sensor-util.h"
 #include "freeipmi/fiid/fiid.h"
 
 #include "libcommon/ipmi-fiid-util.h"
@@ -47,6 +48,12 @@
 #include "freeipmi-portability.h"
 
 static char *_ipmi_event_message_separator = " ; ";
+
+#define EVENT_BUFLEN       1024
+#define EVENT_MAX_MESSAGES   16
+
+/* 16th bit reserved, see Get Sensor Reading command in spec */
+#define IPMI_MAX_SENSOR_AND_EVENT_OFFSET 15
 
 int
 ipmi_event_reading_type_code_class (uint8_t event_reading_type_code)
@@ -2005,19 +2012,19 @@ ipmi_get_oem_specific_message (uint32_t manufacturer_id,
                                     ipmi_oem_intel_specific_pci_fatal_sensor_max_index,
                                     ipmi_oem_intel_specific_pci_fatal_sensor));
     }
-  
+
   SET_ERRNO (EINVAL);
   return (-1);
 }
 
 int
-ipmi_get_oem_sensor_event_bitmask_message (uint32_t manufacturer_id,
-					   uint16_t product_id,
-					   uint8_t event_reading_type_code,
-					   uint8_t sensor_type,
-					   uint16_t sensor_event_bitmask,
-					   char *buf,
-					   unsigned int buflen)
+ipmi_get_oem_event_bitmask_message (uint32_t manufacturer_id,
+                                    uint16_t product_id,
+                                    uint8_t event_reading_type_code,
+                                    uint8_t sensor_type,
+                                    uint16_t event_bitmask,
+                                    char *buf,
+                                    unsigned int buflen)
 {
   if (!buf || !buflen)
     {
@@ -2054,7 +2061,7 @@ ipmi_get_oem_sensor_event_bitmask_message (uint32_t manufacturer_id,
 	      {
 	      case IPMI_SENSOR_TYPE_OEM_SUPERMICRO_CPU_TEMP:
 		{
-		  switch (sensor_event_bitmask)
+		  switch (event_bitmask)
 		    {
 		    case IPMI_SENSOR_TYPE_OEM_SUPERMICRO_CPU_TEMP_LOW:
 		      return (snprintf (buf, buflen, "Low"));
@@ -2077,5 +2084,318 @@ ipmi_get_oem_sensor_event_bitmask_message (uint32_t manufacturer_id,
     }
 
   SET_ERRNO (EINVAL);
+  return (-1);
+}
+
+int
+ipmi_get_event_messages (uint8_t event_reading_type_code,
+                         uint8_t sensor_type, /* ignored if not relevant for event_reading_type_code */
+                         uint16_t event_bitmask, /* ignored if not relevant for event_reading_type_code */
+                         uint32_t manufacturer_id, /* ignored if INTERPRET_OEM_DATA not set */
+                         uint16_t product_id, /* ignored if INTERPRET_OEM_DATA not set */
+                         char ***event_messages,
+                         unsigned int *event_messages_count,
+                         const char *no_event_message_string,
+                         unsigned int flags)
+{
+  char **tmp_event_messages_ptr = NULL;
+  char *tmp_event_messages[EVENT_MAX_MESSAGES];
+  unsigned int tmp_event_messages_count = 0;
+  char buf[EVENT_BUFLEN + 1];
+  int event_reading_type_code_class;
+  uint16_t bitmask;
+  unsigned int i;
+  int len;
+
+  if (!event_messages
+      || !event_messages_count
+      || (flags & ~(IPMI_GET_EVENT_MESSAGES_FLAGS_SHORT
+                    | IPMI_GET_EVENT_MESSAGES_FLAGS_INTERPRET_OEM_DATA
+                    | IPMI_GET_EVENT_MESSAGES_FLAGS_SENSOR_READING)))
+    {
+      SET_ERRNO (EINVAL);
+      return (-1);
+    }
+
+  memset (buf, '\0', EVENT_BUFLEN + 1);
+
+  event_reading_type_code_class = ipmi_event_reading_type_code_class (event_reading_type_code);
+
+  if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_THRESHOLD
+      && flags & IPMI_GET_EVENT_MESSAGES_FLAGS_SENSOR_READING)
+    {
+      int j;
+
+      /* achu: multiple threshold flags can be set (e.g. if we pass
+       * the critical threshold, we've also passed the non-critical
+       * threshold).  It makes no sense to output multiple in this
+       * case, so one message is returned at the max.  Luckily for us
+       * (and due to smarts by the IPMI specification authors) if we
+       * go from high bits to low bits, we will read the flags in the
+       * correct order for output.
+       *
+       * If you're confused why were use 'ipmi_get_threshold_message'
+       * instead of 'ipmi_get_generic_event_message' (b/c this is
+       * presumably event_reading_type_code == 0x01), the reason is
+       * b/c this is for sensors, not sel events.  In other words, the
+       * result we care about comes from the Get Sensor Reading
+       * command.
+       */
+
+      /* use 'j' instead of 'i', b/c needs to be signed integer */
+      for (j = 5; j >= 0; j--)
+        {
+          bitmask = 0x1 << j;
+          
+          if (event_bitmask & bitmask)
+            {
+              memset (buf, '\0', EVENT_BUFLEN + 1);
+              
+              if ((len = ipmi_get_threshold_message (j,
+                                                     buf,
+                                                     EVENT_BUFLEN)) < 0)
+                goto cleanup;
+              
+              if (len)
+                {
+                  if (!(tmp_event_messages[tmp_event_messages_count] = strdup (buf)))
+                    {
+                      SET_ERRNO (ENOMEM);
+                      goto cleanup;
+                    }
+
+                  tmp_event_messages_count++;
+                  break;
+                }
+            }
+        }
+    }
+  /* OEM Interpretation
+   *
+   * Dell Poweredge R610
+   * Dell Poweredge R710
+   */
+  else if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_THRESHOLD
+           || event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_GENERIC_DISCRETE
+           || event_reading_type_code_class ==  IPMI_EVENT_READING_TYPE_CODE_CLASS_SENSOR_SPECIFIC_DISCRETE
+           || (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_OEM
+               && flags & IPMI_GET_EVENT_MESSAGES_FLAGS_INTERPRET_OEM_DATA
+               && ((manufacturer_id == IPMI_IANA_ENTERPRISE_ID_DELL
+                    && (product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R610
+                        || product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R710)
+                    && event_reading_type_code == IPMI_EVENT_READING_TYPE_CODE_OEM_DELL_STATUS))))
+
+    {
+      for (i = 0; i < IPMI_MAX_SENSOR_AND_EVENT_OFFSET; i++)
+        {
+          bitmask = 0x1 << i;
+
+          if (event_bitmask & bitmask)
+            {
+              memset (buf, '\0', EVENT_BUFLEN + 1);
+
+              if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_THRESHOLD
+                  || event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_GENERIC_DISCRETE)
+                {
+                  if (flags & IPMI_GET_EVENT_MESSAGES_FLAGS_SHORT)
+                    len = ipmi_get_generic_event_message_short (event_reading_type_code,
+                                                                i,
+                                                                buf,
+                                                                EVENT_BUFLEN);
+                  else
+                    len = ipmi_get_generic_event_message (event_reading_type_code,
+                                                          i,
+                                                          buf,
+                                                          EVENT_BUFLEN);
+                }
+              else if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_SENSOR_SPECIFIC_DISCRETE)
+                {
+                  if (IPMI_SENSOR_TYPE_IS_OEM (sensor_type))
+                    {
+                      if (flags & IPMI_GET_EVENT_MESSAGES_FLAGS_INTERPRET_OEM_DATA
+                          && ((manufacturer_id == IPMI_IANA_ENTERPRISE_ID_DELL
+                               && (product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R610
+                                   || product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R710)
+                               && (sensor_type == IPMI_SENSOR_TYPE_OEM_DELL_SYSTEM_PERFORMANCE_DEGRADATION_STATUS
+                                   || sensor_type == IPMI_SENSOR_TYPE_OEM_DELL_LINK_TUNING
+                                   || sensor_type == IPMI_SENSOR_TYPE_OEM_DELL_NON_FATAL_ERROR
+                                   || sensor_type == IPMI_SENSOR_TYPE_OEM_DELL_FATAL_IO_ERROR
+                                   || sensor_type == IPMI_SENSOR_TYPE_OEM_DELL_UPGRADE))
+                              || (manufacturer_id == IPMI_IANA_ENTERPRISE_ID_FUJITSU
+                                  && (product_id >= IPMI_FUJITSU_PRODUCT_ID_MIN
+                                      && product_id <= IPMI_FUJITSU_PRODUCT_ID_MAX)
+                                  && (sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_I2C_BUS
+                                      || sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_SYSTEM_POWER_CONSUMPTION
+                                      || sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_MEMORY_STATUS
+                                      || sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_MEMORY_CONFIG
+                                      || sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_FAN_STATUS
+                                      || sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_PSU_STATUS
+                                      || sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_PSU_REDUNDANCY
+                                      || sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_CONFIG_BACKUP
+                                      /* These are for events only --begin */
+                                      || sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_MEMORY
+                                      || sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_FLASH
+                                      || sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_EVENT
+                                      || sensor_type == IPMI_SENSOR_TYPE_OEM_FUJITSU_COMMUNICATION
+                                      /* These are for events only --end */
+                                      ))))
+                        {
+                          len = ipmi_get_oem_sensor_type_message (manufacturer_id,
+                                                                  product_id,
+                                                                  sensor_type,
+                                                                  i,
+                                                                  buf,
+                                                                  EVENT_BUFLEN);
+                        }
+                      else
+                        goto oem_default_output;
+                    }
+                  else
+                    {
+                      if (flags & IPMI_GET_EVENT_MESSAGES_FLAGS_SHORT)
+                        len = ipmi_get_sensor_type_message_short (sensor_type,
+                                                                  i,
+                                                                  buf,
+                                                                  EVENT_BUFLEN);
+                      else
+                        len = ipmi_get_sensor_type_message (sensor_type,
+                                                            i,
+                                                            buf,
+                                                            EVENT_BUFLEN);
+                    }
+                }
+              else
+                len = ipmi_get_oem_generic_event_message (manufacturer_id,
+                                                          product_id,
+                                                          event_reading_type_code,
+                                                          i,
+                                                          buf,
+                                                          EVENT_BUFLEN);
+
+              if (len < 0)
+                {
+                  snprintf (buf,
+                            EVENT_BUFLEN,
+                            "Unrecognized Event = %04Xh",
+                            bitmask);
+                  
+                  if (!(tmp_event_messages[tmp_event_messages_count] = strdup (buf)))
+                    {
+                      SET_ERRNO (ENOMEM);
+                      goto cleanup;
+                    }
+
+                  tmp_event_messages_count++;
+                  continue;
+                }
+              
+              if (len)
+                {
+                  if (!(tmp_event_messages[tmp_event_messages_count] = strdup (buf)))
+                    {
+                      SET_ERRNO (ENOMEM);
+                      goto cleanup;
+                    }
+                  
+                  tmp_event_messages_count++;
+                  continue;
+                }
+            }
+        }
+    }
+  /* OEM Interpretation
+   *
+   * Supermicro X8DTH
+   * Supermicro X8DTG
+   * Supermicro X8DTU
+   * Supermicro X8DTU-6+ (X8DTU_6PLUS)
+   */
+  else if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_OEM
+           && flags & IPMI_GET_EVENT_MESSAGES_FLAGS_INTERPRET_OEM_DATA
+           && (manufacturer_id == IPMI_IANA_ENTERPRISE_ID_SUPERMICRO
+               || manufacturer_id ==  IPMI_IANA_ENTERPRISE_ID_SUPERMICRO_WORKAROUND)
+           && (product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8DTH
+               || product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8DTG
+               || product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8DTU
+	       || product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8DTU_6PLUS)
+           && event_reading_type_code == IPMI_EVENT_READING_TYPE_CODE_OEM_SUPERMICRO_GENERIC)
+    {
+      len = ipmi_get_oem_event_bitmask_message (manufacturer_id,
+                                                product_id,
+                                                event_reading_type_code,
+                                                sensor_type,
+                                                event_bitmask,
+                                                buf,
+                                                EVENT_BUFLEN);
+
+      if (len)
+        {
+          if (!(tmp_event_messages[tmp_event_messages_count] = strdup (buf)))
+            {
+              SET_ERRNO (ENOMEM);
+              goto cleanup;
+            }
+          
+          tmp_event_messages_count++;
+        }
+      else
+        goto oem_default_output;
+    }
+  else /* OEM Event */
+    {
+    oem_default_output:
+
+      memset (buf, '\0', EVENT_BUFLEN + 1);
+      
+      snprintf (buf,
+                EVENT_BUFLEN,
+                "OEM Event = %04Xh",
+                event_bitmask);
+      
+      if (!(tmp_event_messages[tmp_event_messages_count] = strdup (buf)))
+        {
+          SET_ERRNO (ENOMEM);
+          goto cleanup;
+        }
+
+      tmp_event_messages_count++;
+    }
+
+  if (!tmp_event_messages_count
+      && no_event_message_string)
+    {     
+      if (!(tmp_event_messages[0] = strdup (no_event_message_string)))
+        {
+          SET_ERRNO (ENOMEM);
+          goto cleanup;
+        }
+      
+      tmp_event_messages_count++;
+    }
+  
+  if (tmp_event_messages_count)
+    {
+      if (!(tmp_event_messages_ptr = (char **) malloc (sizeof (char *) * (tmp_event_messages_count + 1))))
+        {
+          SET_ERRNO (ENOMEM);
+          goto cleanup;
+        }
+      
+      for (i = 0; i < tmp_event_messages_count; i++)
+        tmp_event_messages_ptr[i] = tmp_event_messages[i];
+      
+      tmp_event_messages_ptr[tmp_event_messages_count] = NULL;
+    }
+
+  (*event_messages) = tmp_event_messages_ptr;
+  (*event_messages_count) = tmp_event_messages_count;
+  
+  return (0);
+
+ cleanup:
+  if (tmp_event_messages_ptr)
+    free (tmp_event_messages_ptr);
+  for (i = 0; i < tmp_event_messages_count; i++)
+    free (tmp_event_messages[i]);
   return (-1);
 }

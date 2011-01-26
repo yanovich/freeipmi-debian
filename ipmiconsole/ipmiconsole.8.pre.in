@@ -1,5 +1,5 @@
 .\"#############################################################################
-.\"$Id: ipmiconsole.8.pre.in,v 1.45.4.5 2010-05-27 22:35:41 chu11 Exp $
+.\"$Id: ipmiconsole.8.pre.in,v 1.52 2010-06-30 21:56:36 chu11 Exp $
 .\"#############################################################################
 .\"  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
 .\"  Copyright (C) 2006-2007 The Regents of the University of California.
@@ -12,7 +12,7 @@
 .\"
 .\"  Ipmiconsole is free software; you can redistribute it and/or modify it under
 .\"  the terms of the GNU General Public License as published by the Free
-.\"  Software Foundation; either version 2 of the License, or (at your option)
+.\"  Software Foundation; either version 3 of the License, or (at your option)
 .\"  any later version.
 .\"  
 .\"  Ipmiconsole is distributed in the hope that it will be useful, but WITHOUT 
@@ -39,7 +39,7 @@ communicates with a remote machine's Baseboard Management Controller
 (BMC) to establish a console session.  Before any SOL communication
 can take place, the remote machine's BMC must be configured properly.
 The FreeIPMI tool
-.B bmc-config(1) 
+.B bmc-config(8) 
 may be used to do this configuration.
 .LP
 Often (although not always), console redirection must be also 
@@ -88,7 +88,7 @@ cipher suite ids are currently supported:
 The following options are specific to
 .B Ipmiconsole.
 .TP
-\fB\-e\fR, \fB\-\-escape-char\fR=\fICHAR\fR
+\fB\-e\fR \fICHAR\fR, \fB\-\-escape-char\fR=\fICHAR\fR
 Specify an alternate escape character (default char '&').
 .TP
 \fB\-\-dont-steal\fR
@@ -101,6 +101,21 @@ earlier SOL sessions may have not been able to be deactivate properly.
 .TP
 \fB\-\-deactivate\fR
 Deactivate a SOL session if one is detected as being in use and exit.
+.TP
+\fB\-\-serial\-keepalive\fR
+Occasionally send NUL characters to detect inactive serial
+connections.  This option is particularly useful for those who intend
+to run
+.B ipmiconsole
+without much interaction, such as for logging purposes.  While IPMI
+connections may still be alive, some motherboards have exhibited bugs
+in which underlying serial data can no longer be sent/received.  From
+the viewpoint of
+.B ipmiconsole,
+data is simply not be sent out of the remote system and this problem
+is only detected once there is user interaction.  By sending the
+occasional NUL character, the underlying loss of serial data transfer
+can be detected far more quickly.
 .TP
 \fB\-\-lock-memory\fR
 Lock sensitive information (such as usernames and passwords) in

@@ -1,19 +1,19 @@
 /*
-   Copyright (C) 2003-2010 FreeIPMI Core Team
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
  */
 
 #ifndef _IPMI_SOL_CMDS_API_H
@@ -41,6 +41,11 @@ int ipmi_cmd_set_sol_configuration_parameters (ipmi_ctx_t ctx,
                                                const void *configuration_parameter_data,
                                                unsigned int configuration_parameter_data_len,
                                                fiid_obj_t obj_cmd_rs);
+
+int ipmi_cmd_set_sol_configuration_parameters_set_in_progress (ipmi_ctx_t ctx,
+                                                               uint8_t channel_number,
+                                                               uint8_t state,
+                                                               fiid_obj_t obj_cmd_rs);
 
 int ipmi_cmd_set_sol_configuration_parameters_sol_enable (ipmi_ctx_t ctx,
                                                           uint8_t channel_number,
@@ -88,6 +93,13 @@ int ipmi_cmd_get_sol_configuration_parameters (ipmi_ctx_t ctx,
                                                uint8_t set_selector,
                                                uint8_t block_selector,
                                                fiid_obj_t obj_cmd_rs);
+
+int ipmi_cmd_get_sol_configuration_parameters_set_in_progress (ipmi_ctx_t ctx,
+                                                               uint8_t channel_number,
+                                                               uint8_t get_parameter,
+                                                               uint8_t set_selector,
+                                                               uint8_t block_selector,
+                                                               fiid_obj_t obj_cmd_rs);
 
 int ipmi_cmd_get_sol_configuration_parameters_sol_enable (ipmi_ctx_t ctx,
                                                           uint8_t channel_number,

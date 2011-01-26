@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51n Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifndef _IPMI_SEL_H
 #define _IPMI_SEL_H
@@ -37,23 +37,31 @@ enum ipmi_sel_argp_option_keys
     EXCLUDE_DISPLAY_KEY = 161,
     DISPLAY_RANGE_KEY = 162,
     EXCLUDE_DISPLAY_RANGE_KEY = 163,
-    TAIL_KEY = 164,
-    CLEAR_KEY = 165,
-    DELETE_ALL_KEY = 166,       /* legacy */
-    DELETE_KEY = 167,
-    DELETE_RANGE_KEY = 168,
-    SYSTEM_EVENT_ONLY_KEY = 169,
-    OEM_EVENT_ONLY_KEY = 170,
-    HEX_DUMP_KEY = 171,
-    ASSUME_SYSTEM_EVENT_RECORDS_KEY = 172,
-    INTERPRET_OEM_DATA_KEY = 173,
-    OUTPUT_OEM_EVENT_STRINGS_KEY = 174,
-    ENTITY_SENSOR_NAMES_KEY = 175,
-    NO_SENSOR_TYPE_OUTPUT_KEY = 176,
-    COMMA_SEPARATED_OUTPUT_KEY = 177,
-    NO_HEADER_OUTPUT_KEY = 178,
-    NON_ABBREVIATED_UNITS_KEY = 179,
-    LEGACY_OUTPUT_KEY = 180,
+    DATE_RANGE_KEY = 164,
+    EXCLUDE_DATE_RANGE_KEY = 165,
+    SENSOR_TYPES_KEY = 't',
+    EXCLUDE_SENSOR_TYPES_KEY = 'T',
+    LIST_SENSOR_TYPES_KEY = 'L',
+    TAIL_KEY = 166,
+    CLEAR_KEY = 167,
+    DELETE_ALL_KEY = 168,       /* legacy */
+    DELETE_KEY = 169,
+    DELETE_RANGE_KEY = 170,
+    SYSTEM_EVENT_ONLY_KEY = 171,
+    OEM_EVENT_ONLY_KEY = 172,
+    OUTPUT_MANUFACTURER_ID_KEY = 173,
+    OUTPUT_EVENT_STATE_KEY = 174,
+    EVENT_STATE_CONFIG_FILE_KEY = 175,
+    HEX_DUMP_KEY = 176,
+    ASSUME_SYSTEM_EVENT_RECORDS_KEY = 177,
+    INTERPRET_OEM_DATA_KEY = 178,
+    OUTPUT_OEM_EVENT_STRINGS_KEY = 179,
+    ENTITY_SENSOR_NAMES_KEY = 180,
+    NO_SENSOR_TYPE_OUTPUT_KEY = 181,
+    COMMA_SEPARATED_OUTPUT_KEY = 182,
+    NO_HEADER_OUTPUT_KEY = 183,
+    NON_ABBREVIATED_UNITS_KEY = 184,
+    LEGACY_OUTPUT_KEY = 185,
   };
 
 struct ipmi_sel_arguments
@@ -75,6 +83,17 @@ struct ipmi_sel_arguments
   int exclude_display_range;
   uint16_t exclude_display_range1;
   uint16_t exclude_display_range2;
+  int date_range;
+  uint32_t date_range1;
+  uint32_t date_range2;
+  int exclude_date_range;
+  uint32_t exclude_date_range1;
+  uint32_t exclude_date_range2;
+  char sensor_types[MAX_SENSOR_TYPES][MAX_SENSOR_TYPES_STRING_LENGTH+1];
+  unsigned int sensor_types_length;
+  char exclude_sensor_types[MAX_SENSOR_TYPES][MAX_SENSOR_TYPES_STRING_LENGTH+1];
+  unsigned int exclude_sensor_types_length;
+  int list_sensor_types;
   int tail;
   uint16_t tail_count;
   int clear;
@@ -86,6 +105,9 @@ struct ipmi_sel_arguments
   uint16_t delete_range2;
   int system_event_only;
   int oem_event_only;
+  int output_manufacturer_id;
+  int output_event_state;
+  char *event_state_config_file;
   int hex_dump;
   int assume_system_event_records;
   int interpret_oem_data;
@@ -113,6 +135,7 @@ typedef struct ipmi_sel_state_data
   ipmi_sdr_cache_ctx_t sdr_cache_ctx;
   ipmi_sdr_parse_ctx_t sdr_parse_ctx;
   ipmi_sel_parse_ctx_t sel_parse_ctx;
+  ipmi_interpret_ctx_t interpret_ctx;
   int output_headers;
   struct sensor_entity_id_counts entity_id_counts;
   struct sensor_column_width column_width;

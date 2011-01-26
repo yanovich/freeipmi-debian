@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifndef _IPMI_SENSOR_AND_EVENT_CODE_TABLES_SPEC_H
 #define _IPMI_SENSOR_AND_EVENT_CODE_TABLES_SPEC_H
@@ -532,19 +532,19 @@ extern unsigned int ipmi_generic_event_reading_type_code_acpi_power_state_short_
 #define IPMI_SENSOR_TYPE_WATCHDOG2_RESERVED4       0x07
 #define IPMI_SENSOR_TYPE_WATCHDOG2_TIMER_INTERRUPT 0x08
 
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_INTERRUPT_TYPE_NONE              0x0
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_INTERRUPT_TYPE_SMI               0x1
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_INTERRUPT_TYPE_NMI               0x2
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_INTERRUPT_TYPE_MESSAGE_INTERRUPT 0x3
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_INTERRUPT_TYPE_UNSPECIFIED       0xF
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_INTERRUPT_TYPE_NONE              0x0
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_INTERRUPT_TYPE_SMI               0x1
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_INTERRUPT_TYPE_NMI               0x2
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_INTERRUPT_TYPE_MESSAGE_INTERRUPT 0x3
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_INTERRUPT_TYPE_UNSPECIFIED       0xF
 
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_RESERVED    0x0
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_BIOS_FRB2   0x1
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_BIOS_POST   0x2
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_OS_LOAD     0x3
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_SMS_OS      0x4
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_OEM         0x5
-#define IPMI_SENSOR_TYPE_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_UNSPECIFIED 0xF
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_RESERVED    0x0
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_BIOS_FRB2   0x1
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_BIOS_POST   0x2
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_OS_LOAD     0x3
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_SMS_OS      0x4
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_OEM         0x5
+#define IPMI_SENSOR_TYPE_WATCHDOG2_EVENT_DATA2_TIMER_USE_AT_EXPIRATION_UNSPECIFIED 0xF
 
 #define IPMI_SENSOR_TYPE_PLATFORM_ALERT_PLATFORM_GENERATED_PAGE       0x00
 #define IPMI_SENSOR_TYPE_PLATFORM_ALERT_PLATFORM_GENERATED_LAN_ALERT  0x01

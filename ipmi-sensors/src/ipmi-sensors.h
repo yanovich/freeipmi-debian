@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifndef _IPMI_SENSORS_H
 #define _IPMI_SENSORS_H
@@ -47,12 +47,16 @@ enum ipmi_sensors_argp_option_keys
     SHARED_SENSORS_KEY = 164,
     INTERPRET_OEM_DATA_KEY = 165,
     IGNORE_NOT_AVAILABLE_SENSORS_KEY = 166,
-    ENTITY_SENSOR_NAMES_KEY = 167,
-    NO_SENSOR_TYPE_OUTPUT_KEY = 168,
-    COMMA_SEPARATED_OUTPUT_KEY = 169,
-    NO_HEADER_OUTPUT_KEY = 170,
-    NON_ABBREVIATED_UNITS_KEY = 171,
-    LEGACY_OUTPUT_KEY = 172,
+    OUTPUT_EVENT_BITMASK_KEY = 167,
+    OUTPUT_SENSOR_STATE_KEY = 168,
+    SENSOR_STATE_CONFIG_FILE_KEY = 169,
+    ENTITY_SENSOR_NAMES_KEY = 170,
+    NO_SENSOR_TYPE_OUTPUT_KEY = 171,
+    COMMA_SEPARATED_OUTPUT_KEY = 172,
+    NO_HEADER_OUTPUT_KEY = 173,
+    NON_ABBREVIATED_UNITS_KEY = 174,
+    LEGACY_OUTPUT_KEY = 175,
+    IPMIMONITORING_LEGACY_OUTPUT_KEY = 176,
   };
 
 struct ipmi_sensors_arguments
@@ -76,12 +80,16 @@ struct ipmi_sensors_arguments
   int shared_sensors;
   int interpret_oem_data;
   int ignore_not_available_sensors;
+  int output_event_bitmask;
+  int output_sensor_state;
+  char *sensor_state_config_file;
   int entity_sensor_names;
   int no_sensor_type_output;
   int comma_separated_output;
   int no_header_output;
   int non_abbreviated_units;
   int legacy_output;
+  int ipmimonitoring_legacy_output;
 };
 
 typedef struct ipmi_sensors_prog_data
@@ -89,6 +97,14 @@ typedef struct ipmi_sensors_prog_data
   char *progname;
   struct ipmi_sensors_arguments *args;
 } ipmi_sensors_prog_data_t;
+
+struct ipmi_sensors_interpret_oem_data_intel_node_manager {
+  int node_manager_data_found;
+  uint8_t nm_health_event_sensor_number;
+  uint8_t nm_exception_event_sensor_number;
+  uint8_t nm_operational_capabilities_sensor_number;
+  uint8_t nm_alert_threshold_exceeded_sensor_number;
+};
 
 typedef struct ipmi_sensors_state_data
 {
@@ -99,10 +115,12 @@ typedef struct ipmi_sensors_state_data
   ipmi_sdr_cache_ctx_t sdr_cache_ctx;
   ipmi_sdr_parse_ctx_t sdr_parse_ctx;
   ipmi_sensor_read_ctx_t sensor_read_ctx;
+  ipmi_interpret_ctx_t interpret_ctx;
   int output_headers;
   struct sensor_entity_id_counts entity_id_counts;
   struct sensor_column_width column_width;
   struct ipmi_oem_data oem_data;
+  struct ipmi_sensors_interpret_oem_data_intel_node_manager intel_node_manager;
 } ipmi_sensors_state_data_t;
 
 #endif

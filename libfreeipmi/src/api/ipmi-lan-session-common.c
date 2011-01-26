@@ -1,21 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -100,7 +99,7 @@ ipmi_lan_cmd_get_session_parameters (ipmi_ctx_t ctx,
   if (ctx->io.outofband.per_msg_auth_disabled)
     {
       (*authentication_type) = IPMI_AUTHENTICATION_TYPE_NONE;
-      if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_CHECK_UNEXPECTED_AUTHCODE)
+      if (ctx->workaround_flags_outofband & IPMI_WORKAROUND_FLAGS_OUTOFBAND_CHECK_UNEXPECTED_AUTHCODE)
         (*internal_workaround_flags) |= IPMI_INTERNAL_WORKAROUND_FLAGS_CHECK_UNEXPECTED_AUTHCODE;
     }
   else
@@ -416,7 +415,7 @@ _ipmi_check_session_sequence_number (ipmi_ctx_t ctx,
    * The session sequence numbers for IPMI 1.5 are the wrong endian.
    * So we have to flip the bits to workaround it.
    */
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_BIG_ENDIAN_SEQUENCE_NUMBER)
+  if (ctx->workaround_flags_outofband & IPMI_WORKAROUND_FLAGS_OUTOFBAND_BIG_ENDIAN_SEQUENCE_NUMBER)
     {
       uint32_t tmp_session_sequence_number = session_sequence_number;
 
@@ -785,7 +784,7 @@ _ipmi_lan_cmd_wrapper_verify_packet (ipmi_ctx_t ctx,
        * actual session id.  To work around this problem, we'll assume the
        * session id is correct if it is equal to zero.
        */
-      if ((ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_ACCEPT_SESSION_ID_ZERO)
+      if ((ctx->workaround_flags_outofband & IPMI_WORKAROUND_FLAGS_OUTOFBAND_ACCEPT_SESSION_ID_ZERO)
           && !rs_session_id)
         /* you get a second chance - continue on checking */
         ;
@@ -1469,7 +1468,7 @@ ipmi_lan_open_session (ipmi_ctx_t ctx)
    * vs. null vs non-null username capabilities.  The workaround is to
    * skip these checks.
    */
-  if (!(ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_AUTHENTICATION_CAPABILITIES))
+  if (!(ctx->workaround_flags_outofband & IPMI_WORKAROUND_FLAGS_OUTOFBAND_AUTHENTICATION_CAPABILITIES))
     {
       if (strlen (ctx->io.outofband.username))
         tmp_username_ptr = ctx->io.outofband.username;
@@ -1499,7 +1498,7 @@ ipmi_lan_open_session (ipmi_ctx_t ctx)
    * The remote BMC ignores if permsg authentiction is enabled
    * or disabled.  So we need to force it no matter what.
    */
-  if (!(ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_FORCE_PERMSG_AUTHENTICATION))
+  if (!(ctx->workaround_flags_outofband & IPMI_WORKAROUND_FLAGS_OUTOFBAND_FORCE_PERMSG_AUTHENTICATION))
     {
       if (FIID_OBJ_GET (obj_cmd_rs,
                         "authentication_status.per_message_authentication",
@@ -1521,7 +1520,7 @@ ipmi_lan_open_session (ipmi_ctx_t ctx)
    * Authentication capabilities flags are not listed properly in the
    * response.  The workaround is to skip these checks.
    */
-  if (!(ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_AUTHENTICATION_CAPABILITIES))
+  if (!(ctx->workaround_flags_outofband & IPMI_WORKAROUND_FLAGS_OUTOFBAND_AUTHENTICATION_CAPABILITIES))
     {
       if ((ret = ipmi_check_authentication_capabilities_authentication_type (ctx->io.outofband.authentication_type,
                                                                              obj_cmd_rs)) < 0)
@@ -1585,8 +1584,8 @@ ipmi_lan_open_session (ipmi_ctx_t ctx)
 
   if (!ret)
     {
-      if (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_INVALID_USERNAME) == 1
-          || ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_NULL_USERNAME_NOT_ENABLED) == 1)
+      if (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_GET_SESSION_CHALLENGE_INVALID_USERNAME) == 1
+          || ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_GET_SESSION_CHALLENGE_NULL_USERNAME_NOT_ENABLED) == 1)
         API_SET_ERRNUM (ctx, IPMI_ERR_USERNAME_INVALID);
       else
         API_BAD_RESPONSE_TO_API_ERRNUM (ctx, obj_cmd_rs);
@@ -1667,11 +1666,11 @@ ipmi_lan_open_session (ipmi_ctx_t ctx)
 
   if (!ret)
     {
-      if (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_NO_SESSION_SLOT_AVAILABLE) == 1
-          || ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_NO_SLOT_AVAILABLE_FOR_GIVEN_USER) == 1
-          || ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_NO_SLOT_AVAILABLE_TO_SUPPORT_USER) == 1)
+      if (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_ACTIVATE_SESSION_NO_SESSION_SLOT_AVAILABLE) == 1
+          || ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_ACTIVATE_SESSION_NO_SLOT_AVAILABLE_FOR_GIVEN_USER) == 1
+          || ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_ACTIVATE_SESSION_NO_SLOT_AVAILABLE_TO_SUPPORT_USER) == 1)
         API_SET_ERRNUM (ctx, IPMI_ERR_BMC_BUSY);
-      else if (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_EXCEEDS_PRIVILEGE_LEVEL) == 1)
+      else if (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_ACTIVATE_SESSION_EXCEEDS_PRIVILEGE_LEVEL) == 1)
         API_SET_ERRNUM (ctx, IPMI_ERR_PRIVILEGE_LEVEL_CANNOT_BE_OBTAINED);
       else
         API_BAD_RESPONSE_TO_API_ERRNUM (ctx, obj_cmd_rs);
@@ -1708,7 +1707,7 @@ ipmi_lan_open_session (ipmi_ctx_t ctx)
    * The session sequence numbers for IPMI 1.5 are the wrong endian.
    * So we have to flip the bits to workaround it.
    */
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_BIG_ENDIAN_SEQUENCE_NUMBER)
+  if (ctx->workaround_flags_outofband & IPMI_WORKAROUND_FLAGS_OUTOFBAND_BIG_ENDIAN_SEQUENCE_NUMBER)
     {
       uint32_t tmp_session_sequence_number = ctx->io.outofband.highest_received_sequence_number;
 
@@ -1777,8 +1776,8 @@ ipmi_lan_open_session (ipmi_ctx_t ctx)
     {
       if (ctx->errnum == IPMI_ERR_BAD_COMPLETION_CODE)
         {
-          if (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_RQ_LEVEL_NOT_AVAILABLE_FOR_USER) == 1
-              || ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_RQ_LEVEL_EXCEEDS_USER_PRIVILEGE_LIMIT) == 1)
+          if (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_SET_SESSION_PRIVILEGE_LEVEL_REQUESTED_LEVEL_NOT_AVAILABLE_FOR_USER) == 1
+              || ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_SET_SESSION_PRIVILEGE_LEVEL_REQUESTED_LEVEL_EXCEEDS_USER_PRIVILEGE_LIMIT) == 1)
             API_SET_ERRNUM (ctx, IPMI_ERR_PRIVILEGE_LEVEL_CANNOT_BE_OBTAINED);
         }
       ERR_TRACE (ipmi_ctx_strerror (ctx->errnum), ctx->errnum);
@@ -3177,7 +3176,6 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
   unsigned int password_len;
   uint8_t authentication_algorithm = 0; /* init to 0 to remove gcc warning */
   uint8_t requested_maximum_privilege;
-  uint8_t assume_rakp_4_success = 0;
   uint8_t name_only_lookup;
   char *tmp_username_ptr = NULL;
   char *tmp_password_ptr = NULL;
@@ -3277,7 +3275,7 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
    *
    * K_g status is reported incorrectly too.  Again, skip the checks.
    */
-  if (!(ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_AUTHENTICATION_CAPABILITIES))
+  if (!(ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_AUTHENTICATION_CAPABILITIES))
     {
       if (strlen (ctx->io.outofband.username))
         tmp_username_ptr = ctx->io.outofband.username;
@@ -3393,9 +3391,9 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
    * instead of a real privilege level.  So we must pass the actual
    * privilege we want to use.
    */
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_INTEL_2_0_SESSION
-      || ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_SUN_2_0_SESSION
-      || ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_OPEN_SESSION_PRIVILEGE)
+  if (ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION
+      || ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUN_2_0_SESSION
+      || ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_OPEN_SESSION_PRIVILEGE)
     requested_maximum_privilege = ctx->io.outofband.privilege_level;
   else
     requested_maximum_privilege = IPMI_PRIVILEGE_LEVEL_HIGHEST_LEVEL;
@@ -3468,7 +3466,7 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
    * of an actual privilege, so have to pass the actual privilege
    * we want to use.
    */
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_INTEL_2_0_SESSION)
+  if (ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION)
     {
       uint8_t maximum_privilege_level;
 
@@ -3543,7 +3541,7 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
    * achu: This should only be done for RAKP 1 message, RAKP 2 check,
    * and session key creation.
    */
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_INTEL_2_0_SESSION)
+  if (ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION)
     {
       memset (username_buf, '\0', IPMI_MAX_USER_NAME_LENGTH+1);
       if (strlen (ctx->io.outofband.username))
@@ -3665,12 +3663,12 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
    * password to 16 bytes when generating keys, hashes, etc.  So we
    * have to do the same when generating keys, hashes, etc.
    */
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_INTEL_2_0_SESSION
+  if (ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION
       && ctx->io.outofband.authentication_algorithm == IPMI_AUTHENTICATION_ALGORITHM_RAKP_HMAC_MD5
       && password_len > IPMI_1_5_MAX_PASSWORD_LENGTH)
     password_len = IPMI_1_5_MAX_PASSWORD_LENGTH;
 
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_SUPERMICRO_2_0_SESSION)
+  if (ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUPERMICRO_2_0_SESSION)
     {
       uint8_t keybuf[IPMI_MAX_PKT_LEN];
       int keybuf_len;
@@ -3753,7 +3751,7 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
    * Notes: Cipher suite 1,2,3 are the ones that use HMAC-SHA1 and
    * have the problem.
    */
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_SUN_2_0_SESSION
+  if (ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUN_2_0_SESSION
       && (ctx->io.outofband.authentication_algorithm == IPMI_AUTHENTICATION_ALGORITHM_RAKP_HMAC_SHA1))
     {
       uint8_t buf[IPMI_MAX_KEY_EXCHANGE_AUTHENTICATION_CODE_LENGTH];
@@ -3853,7 +3851,7 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
   /* achu: If INTEL_2_0 workaround is set, get back to original username &
    * username_len, because that isn't needed for the RAKP3/4 part.
    */
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_INTEL_2_0_SESSION)
+  if (ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION)
     {
       if (strlen (ctx->io.outofband.username))
         username = ctx->io.outofband.username;
@@ -3872,7 +3870,7 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
    * a bug until I saw that the ipmitool folks implemented the
    * same workaround.
    */
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_INTEL_2_0_SESSION)
+  if (ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION)
     name_only_lookup = IPMI_USER_NAME_PRIVILEGE_LOOKUP;
   else
     name_only_lookup = IPMI_NAME_ONLY_LOOKUP;
@@ -3983,7 +3981,7 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
    * one.  Would have taken me awhile to figure this one out :-)
    */
 
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_INTEL_2_0_SESSION)
+  if (ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION)
     {
       if (ctx->io.outofband.integrity_algorithm == IPMI_INTEGRITY_ALGORITHM_NONE)
         authentication_algorithm = IPMI_AUTHENTICATION_ALGORITHM_RAKP_NONE;
@@ -3992,12 +3990,14 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
       else if (ctx->io.outofband.integrity_algorithm == IPMI_INTEGRITY_ALGORITHM_HMAC_MD5_128)
         authentication_algorithm = IPMI_AUTHENTICATION_ALGORITHM_RAKP_HMAC_MD5;
       else if (ctx->io.outofband.integrity_algorithm == IPMI_INTEGRITY_ALGORITHM_MD5_128)
-        /* achu: I have thus far been unable to reverse engineer this
-         * corner case.  So we're just going to accept whatever the
-         * remote BMC gives us.  This has been documented in the
-         * manpage.
-         */
-        assume_rakp_4_success++;
+        {
+          /* achu: I have thus far been unable to reverse engineer this
+           * corner case.  Since we cannot provide a reasonable two
+           * part authentication, we're going to error out.
+           */
+          API_SET_ERRNUM (ctx, IPMI_ERR_IPMI_ERROR);
+          goto cleanup;
+        }
     }
   else
     authentication_algorithm = ctx->io.outofband.authentication_algorithm;
@@ -4011,7 +4011,7 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
    * returns with an Integrity Check Value when it should be empty.
    */
   
-  if (ctx->workaround_flags & IPMI_WORKAROUND_FLAGS_NON_EMPTY_INTEGRITY_CHECK_VALUE
+  if (ctx->workaround_flags_outofband_2_0 & IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE
       && !ctx->io.outofband.cipher_suite_id)
     {
       if (fiid_obj_clear_field (obj_cmd_rs,
@@ -4022,27 +4022,24 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
 	}
     }
   
-  if (!assume_rakp_4_success)
+  if ((ret = ipmi_rmcpplus_check_rakp_4_integrity_check_value (authentication_algorithm,
+                                                               ctx->io.outofband.sik_key_ptr,
+                                                               ctx->io.outofband.sik_key_len,
+                                                               remote_console_random_number,
+                                                               IPMI_REMOTE_CONSOLE_RANDOM_NUMBER_LENGTH,
+                                                               ctx->io.outofband.managed_system_session_id,
+                                                               managed_system_guid,
+                                                               managed_system_guid_len,
+                                                               obj_cmd_rs)) < 0)
     {
-      if ((ret = ipmi_rmcpplus_check_rakp_4_integrity_check_value (authentication_algorithm,
-                                                                   ctx->io.outofband.sik_key_ptr,
-                                                                   ctx->io.outofband.sik_key_len,
-                                                                   remote_console_random_number,
-                                                                   IPMI_REMOTE_CONSOLE_RANDOM_NUMBER_LENGTH,
-                                                                   ctx->io.outofband.managed_system_session_id,
-                                                                   managed_system_guid,
-                                                                   managed_system_guid_len,
-                                                                   obj_cmd_rs)) < 0)
-        {
-          API_ERRNO_TO_API_ERRNUM (ctx, errno);
-          goto cleanup;
-        }
-      
-      if (!ret)
-        {
-          API_SET_ERRNUM (ctx, IPMI_ERR_K_G_INVALID);
-          goto cleanup;
-        }
+      API_ERRNO_TO_API_ERRNUM (ctx, errno);
+      goto cleanup;
+    }
+  
+  if (!ret)
+    {
+      API_SET_ERRNUM (ctx, IPMI_ERR_K_G_INVALID);
+      goto cleanup;
     }
 
   fiid_obj_destroy (obj_cmd_rq);
@@ -4072,8 +4069,8 @@ ipmi_lan_2_0_open_session (ipmi_ctx_t ctx)
     {
       if (ctx->errnum == IPMI_ERR_BAD_COMPLETION_CODE)
         {
-          if (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_RQ_LEVEL_NOT_AVAILABLE_FOR_USER) == 1
-              || ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_RQ_LEVEL_EXCEEDS_USER_PRIVILEGE_LIMIT) == 1)
+          if (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_SET_SESSION_PRIVILEGE_LEVEL_REQUESTED_LEVEL_NOT_AVAILABLE_FOR_USER) == 1
+              || ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_SET_SESSION_PRIVILEGE_LEVEL_REQUESTED_LEVEL_EXCEEDS_USER_PRIVILEGE_LIMIT) == 1)
             API_SET_ERRNUM (ctx, IPMI_ERR_PRIVILEGE_LEVEL_CANNOT_BE_OBTAINED);
         }
       ERR_TRACE (ipmi_ctx_strerror (ctx->errnum), ctx->errnum);

@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  $Id: ipmipower_argp.c,v 1.22.4.3 2010-07-13 22:10:04 chu11 Exp $
+ *  $Id: ipmipower_argp.c,v 1.26 2010-07-13 22:09:52 chu11 Exp $
  *****************************************************************************
  *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
@@ -12,7 +12,7 @@
  *
  *  Ipmipower is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
+ *  Free Software Foundation; either version 3 of the License, or (at your
  *  option) any later version.
  *
  *  Ipmipower is distributed in the hope that it will be useful, but
@@ -51,8 +51,6 @@
 #include "tool-common.h"
 #include "tool-cmdline-common.h"
 #include "tool-config-file-common.h"
-
-#define IPMIPOWER_CONFIG_FILE_DEFAULT "/etc/ipmipower.conf"
 
 extern struct ipmipower_connection *ics;
 
@@ -303,7 +301,7 @@ _ipmipower_config_file_parse (struct ipmipower_arguments *cmd_args)
   /* try legacy file first */
   if (!cmd_args->common.config_file)
     {
-      if (!config_file_parse (IPMIPOWER_CONFIG_FILE_DEFAULT,
+      if (!config_file_parse (IPMIPOWER_CONFIG_FILE_LEGACY,
                               1,         /* do not exit if file not found */
                               &(cmd_args->common),
                               NULL,
@@ -353,20 +351,6 @@ _ipmipower_config_file_parse (struct ipmipower_arguments *cmd_args)
 static void
 _ipmipower_args_validate (struct ipmipower_arguments *cmd_args)
 {
-  if (cmd_args->common.driver_type == IPMI_DEVICE_LAN
-      && cmd_args->common.password
-      && strlen (cmd_args->common.password) > IPMI_1_5_MAX_PASSWORD_LENGTH)
-    {
-      fprintf (stderr, "password too long\n");
-      exit (1);
-    }
-
-  if (cmd_args->common.retransmission_timeout > cmd_args->common.session_timeout)
-    {
-      fprintf (stderr, "retransmission timeout larger than session timeout\n");
-      exit (1);
-    }
-
   if (cmd_args->retransmission_wait_timeout > cmd_args->common.session_timeout)
     {
       fprintf (stderr, "retransmission wait timeout larger than session timeout\n");
@@ -436,11 +420,8 @@ ipmipower_argp_parse (int argc, char **argv, struct ipmipower_arguments *cmd_arg
               NULL,
               cmd_args);
 
-  /* achu: don't do these checks, we don't do inband, so checks aren't appropriate
-   * checks will be done in ipmipower_config_check_values().
-   */
-  /* verify_common_cmd_args (&(cmd_args->common)); */
+  /* don't check hostname inputs, ipmipower isn't like most tools */
+  verify_common_cmd_args_outofband (&(cmd_args->common), 0);
   verify_hostrange_cmd_args (&(cmd_args->hostrange));
-
   _ipmipower_args_validate (cmd_args);
 }

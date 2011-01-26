@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2007-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-*/
+ * Copyright (C) 2007-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -1001,8 +1001,8 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
     }
 
   if (ipmi_cmd_get_system_boot_options_boot_flags (state_data->ipmi_ctx,
-                                                   IPMI_CHASSIS_BOOT_OPTIONS_NO_SET_SELECTOR,
-                                                   IPMI_CHASSIS_BOOT_OPTIONS_NO_BLOCK_SELECTOR,
+                                                   IPMI_SYSTEM_BOOT_OPTIONS_NO_SET_SELECTOR,
+                                                   IPMI_SYSTEM_BOOT_OPTIONS_NO_BLOCK_SELECTOR,
                                                    obj_cmd_rs) < 0)
     {
       pstdout_fprintf (state_data->pstate,
@@ -1021,7 +1021,7 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_TYPE_PC_COMPATIBLE)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_TYPE_PC_COMPATIBLE)
     str = "PC compatible boot";
   else
     str = "Extensible firmware Interface boot";
@@ -1039,7 +1039,7 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_ENABLE)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_ENABLE)
     str = "Enabled";
   else
     str = "Disabled";
@@ -1057,7 +1057,7 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_ENABLE)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_ENABLE)
     str = "Enabled";
   else
     str = "Disabled";
@@ -1075,21 +1075,21 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_NO_OVERRIDE)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_NO_OVERRIDE)
     str = "No override";
-  else if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_PXE)
+  else if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_PXE)
     str = "Force PXE";
-  else if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE)
+  else if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE)
     str = "Force boot from default Hard drive";
-  else if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE_SAFE_MODE)
+  else if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_HARD_DRIVE_SAFE_MODE)
     str = "Force boot from default Hard drive, request safe mode";
-  else if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_DIAGNOSTIC_PARTITION)
+  else if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_DIAGNOSTIC_PARTITION)
     str = "Force boot from default Diagnostic partition";
-  else if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_CD_DVD)
+  else if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_CD_DVD)
     str = "Force boot from default CD/DVD";
-  else if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_BIOS_SETUP)
+  else if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_BIOS_SETUP)
     str = "Force boot into BIOS setup";
-  else if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_BOOT_DEVICE_FORCE_FLOPPY_REMOVEABLE_MEDIA)
+  else if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_BOOT_DEVICE_FORCE_FLOPPY_REMOVEABLE_MEDIA)
     str = "Force boot from default Floppy/primary removable media";
   else
     str = "unknown";
@@ -1107,7 +1107,7 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_ENABLE)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_ENABLE)
     str = "Enabled";
   else
     str = "Disabled";
@@ -1125,7 +1125,7 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_ENABLE)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_ENABLE)
     str = "Enabled";
   else
     str = "Disabled";
@@ -1143,11 +1143,11 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_CONSOLE_REDIRECTION_DEFAULT)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_CONSOLE_REDIRECTION_DEFAULT)
     str = "System default";
-  else if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_CONSOLE_REDIRECTION_SUPPRESS)
+  else if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_CONSOLE_REDIRECTION_SUPPRESS)
     str = "Suppressed";
-  else if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_CONSOLE_REDIRECTION_ENABLE)
+  else if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_CONSOLE_REDIRECTION_ENABLE)
     str = "Enabled";
   else
     str = "unknown";
@@ -1165,7 +1165,7 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_ENABLE)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_ENABLE)
     str = "Enabled";
   else
     str = "Disabled";
@@ -1183,7 +1183,7 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_ENABLE)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_ENABLE)
     str = "Enabled";
   else
     str = "Disabled";
@@ -1201,7 +1201,7 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_ENABLE)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_ENABLE)
     str = "Enabled";
   else
     str = "Disabled";
@@ -1219,7 +1219,7 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_ENABLE)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_ENABLE)
     str = "Enabled";
   else
     str = "Disabled";
@@ -1237,11 +1237,11 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_QUIET)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_QUIET)
     str = "Quiet";
-  else if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_VERBOSE)
+  else if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_VERBOSE)
     str = "Verbose";
-  else if (val == IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_DEFAULT)
+  else if (val == IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_FIRMWARE_BIOS_VERBOSITY_DEFAULT)
     str = "Default";
   else
     str = "unknown";
@@ -1259,7 +1259,7 @@ get_boot_flags (ipmi_chassis_state_data_t *state_data)
       goto cleanup;
     }
 
-  if (val == IPMI_CHASSIS_BOOT_OPTIONS_ENABLE)
+  if (val == IPMI_SYSTEM_BOOT_OPTION_ENABLE)
     str = "Enabled";
   else
     str = "Disabled";
@@ -1280,7 +1280,7 @@ set_boot_flags (ipmi_chassis_state_data_t *state_data)
   fiid_obj_t obj_cmd_rs = NULL;
   fiid_obj_t boot_info_ack_obj_cmd_rs = NULL;
   fiid_obj_t get_boot_flags_rs = NULL;
-  uint8_t boot_info_acknowledge = IPMI_CHASSIS_BOOT_OPTIONS_BOOT_INFO_UNACKNOWLEDGE;
+  uint8_t boot_info_acknowledge = IPMI_SYSTEM_BOOT_OPTION_BOOT_INFO_UNACKNOWLEDGE;
   uint8_t bios_boot_type, boot_flags_persistent, boot_flags_valid,
     lock_out_reset_button, screen_blank, boot_device,
     lock_keyboard, cmos_clear, console_redirection, lock_out_sleep_button,
@@ -1320,8 +1320,8 @@ set_boot_flags (ipmi_chassis_state_data_t *state_data)
     }
 
   if (ipmi_cmd_get_system_boot_options_boot_flags (state_data->ipmi_ctx,
-                                                   IPMI_CHASSIS_BOOT_OPTIONS_NO_SET_SELECTOR,
-                                                   IPMI_CHASSIS_BOOT_OPTIONS_NO_BLOCK_SELECTOR,
+                                                   IPMI_SYSTEM_BOOT_OPTIONS_NO_SET_SELECTOR,
+                                                   IPMI_SYSTEM_BOOT_OPTIONS_NO_BLOCK_SELECTOR,
                                                    get_boot_flags_rs) < 0)
     {
       pstdout_fprintf (state_data->pstate,
@@ -1346,8 +1346,8 @@ set_boot_flags (ipmi_chassis_state_data_t *state_data)
   else
     bios_boot_type = args->set_system_boot_options_args.bios_boot_type_arg;
 
-  boot_flags_persistent = IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_VALID_FOR_NEXT_BOOT;
-  boot_flags_valid = IPMI_CHASSIS_BOOT_OPTIONS_BOOT_FLAG_VALID;
+  boot_flags_persistent = IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_VALID_FOR_NEXT_BOOT;
+  boot_flags_valid = IPMI_SYSTEM_BOOT_OPTION_BOOT_FLAG_VALID;
 
   if (args->set_system_boot_options_args.lock_out_reset_button)
     {
@@ -1525,6 +1525,7 @@ set_boot_flags (ipmi_chassis_state_data_t *state_data)
   bios_shared_mode_override = val;
 
   if (ipmi_cmd_set_system_boot_options_boot_flags (state_data->ipmi_ctx,
+                                                   IPMI_SYSTEM_BOOT_OPTIONS_PARAMETER_VALID_UNLOCKED,
                                                    bios_boot_type,
                                                    boot_flags_persistent,
                                                    boot_flags_valid,
@@ -1552,6 +1553,7 @@ set_boot_flags (ipmi_chassis_state_data_t *state_data)
     }
 
   if (ipmi_cmd_set_system_boot_options_boot_info_acknowledge (state_data->ipmi_ctx,
+                                                              IPMI_SYSTEM_BOOT_OPTIONS_PARAMETER_VALID_UNLOCKED,
                                                               &boot_info_acknowledge,
                                                               &boot_info_acknowledge,
                                                               &boot_info_acknowledge,

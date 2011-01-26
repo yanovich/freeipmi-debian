@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  $Id: ipmi-dcmi.h,v 1.1.4.3 2010-05-17 17:42:55 chu11 Exp $
+ *  $Id: ipmi-dcmi.h,v 1.5 2010-05-17 17:42:45 chu11 Exp $
  *****************************************************************************
  *  Copyright (C) 2009-2010 Lawrence Livermore National Security, LLC.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
@@ -12,7 +12,7 @@
  *
  *  Ipmi-Dcmi is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
+ *  Free Software Foundation; either version 3 of the License, or (at your
  *  option) any later version.
  *
  *  Ipmi-Dcmi is distributed in the hope that it will be useful, but
@@ -37,18 +37,21 @@
 enum ipmi_dcmi_argp_option_keys
   {
     GET_DCMI_CAPABILITY_INFO = 160,
-    GET_SYSTEM_POWER_STATISTICS = 161,
-    GET_ENHANCED_SYSTEM_POWER_STATISTICS = 162,
-    GET_POWER_LIMIT = 163,
-    SET_POWER_LIMIT = 164,
-    EXCEPTION_ACTIONS = 165,
-    POWER_LIMIT_REQUESTED = 166,
-    CORRECTION_TIME_LIMIT = 167,
-    STATISTICS_SAMPLING_PERIOD = 168,
-    ACTIVATE_DEACTIVATE_POWER_LIMIT = 169,
-    GET_ASSET_TAG = 170,
-    GET_DCMI_SENSOR_INFO = 171,
-    INTERPRET_OEM_DATA_KEY = 172,
+    GET_ASSET_TAG = 161,
+    SET_ASSET_TAG = 162,
+    GET_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING = 163,
+    SET_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING = 164,
+    GET_DCMI_SENSOR_INFO = 165,
+    GET_SYSTEM_POWER_STATISTICS = 166,
+    GET_ENHANCED_SYSTEM_POWER_STATISTICS = 167,
+    GET_POWER_LIMIT = 168,
+    SET_POWER_LIMIT = 169,
+    EXCEPTION_ACTIONS = 170,
+    POWER_LIMIT_REQUESTED = 171,
+    CORRECTION_TIME_LIMIT = 172,
+    STATISTICS_SAMPLING_PERIOD = 173,
+    ACTIVATE_DEACTIVATE_POWER_LIMIT = 174,
+    INTERPRET_OEM_DATA_KEY = 175,
   };
 
 struct ipmi_dcmi_arguments
@@ -56,6 +59,13 @@ struct ipmi_dcmi_arguments
   struct common_cmd_args common;
   struct hostrange_cmd_args hostrange;
   int get_dcmi_capability_info;
+  int get_asset_tag;
+  int set_asset_tag;
+  char *set_asset_tag_arg;
+  int get_management_controller_identifier_string;
+  int set_management_controller_identifier_string;
+  char *set_management_controller_identifier_string_arg;
+  int get_dcmi_sensor_info;
   int get_system_power_statistics;
   int get_enhanced_system_power_statistics;
   int get_power_limit;
@@ -70,8 +80,6 @@ struct ipmi_dcmi_arguments
   uint16_t statistics_sampling_period_arg;
   int activate_deactivate_power_limit;
   uint8_t activate_deactivate_power_limit_arg;
-  int get_asset_tag;
-  int get_dcmi_sensor_info;
   int interpret_oem_data;
 };
 

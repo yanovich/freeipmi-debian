@@ -15,6 +15,7 @@
 @SET_MAKE@
 
 
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -40,31 +41,36 @@ host_triplet = @host@
 sbin_PROGRAMS = ipmi-sensors$(EXEEXT)
 subdir = ipmi-sensors/src
 DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+	$(srcdir)/Makefile.in $(srcdir)/ipmimonitoring.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sdr_cache_dir.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sensor_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config/config.h
-CONFIG_CLEAN_FILES =
-am__installdirs = "$(DESTDIR)$(sbindir)"
+CONFIG_CLEAN_FILES = ipmimonitoring
+am__installdirs = "$(DESTDIR)$(sbindir)" "$(DESTDIR)$(sbindir)"
 sbinPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(sbin_PROGRAMS)
 am_ipmi_sensors_OBJECTS = ipmi-sensors.$(OBJEXT) \
 	ipmi-sensors-argp.$(OBJEXT) \
 	ipmi-sensors-detailed-output.$(OBJEXT) \
+	ipmi-sensors-oem-intel-node-manager.$(OBJEXT) \
 	ipmi-sensors-output-common.$(OBJEXT) \
-	ipmi-sensors-simple-output.$(OBJEXT) \
-	ipmi-sensors-util.$(OBJEXT)
+	ipmi-sensors-simple-output.$(OBJEXT)
 ipmi_sensors_OBJECTS = $(am_ipmi_sensors_OBJECTS)
 ipmi_sensors_DEPENDENCIES =  \
 	$(top_builddir)/common/src/toolcommon/libtoolcommon.la \
@@ -73,9 +79,12 @@ ipmi_sensors_DEPENDENCIES =  \
 	$(top_builddir)/common/src/toolsdr/libtoolsdr.la \
 	$(top_builddir)/common/src/toolsensor/libtoolsensor.la \
 	$(top_builddir)/common/src/miscutil/libmiscutils.la \
+	$(top_builddir)/common/src/parsecommon/libparsecommon.la \
 	$(top_builddir)/common/src/portability/libfreeipmiportability.la \
-	$(top_builddir)/ipmidetect/src/libipmidetect/libipmidetect.la \
+	$(top_builddir)/libipmidetect/src/libipmidetect.la \
 	$(top_builddir)/libfreeipmi/src/libfreeipmi.la
+sbinSCRIPT_INSTALL = $(INSTALL_SCRIPT)
+SCRIPTS = $(sbin_SCRIPTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/config
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -125,6 +134,7 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 FREEIPMI_CONFIG_FILE_DEFAULT = @FREEIPMI_CONFIG_FILE_DEFAULT@
+FREEIPMI_SYSCONFDIR = @FREEIPMI_SYSCONFDIR@
 GCRYPT_LIBS = @GCRYPT_LIBS@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
@@ -134,14 +144,20 @@ INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTERPRET_SEL_CONFIG_FILE_DEFAULT = @INTERPRET_SEL_CONFIG_FILE_DEFAULT@
+INTERPRET_SENSOR_CONFIG_FILE_DEFAULT = @INTERPRET_SENSOR_CONFIG_FILE_DEFAULT@
+IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
+IPMIMONITORINGSBINDIR = @IPMIMONITORINGSBINDIR@
+IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
-IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT = @IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT@
+IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
 LDFLAGS = @LDFLAGS@
 LIBFREEIPMI_VERSION = @LIBFREEIPMI_VERSION@
 LIBFREEIPMI_VERSION_INFO = @LIBFREEIPMI_VERSION_INFO@
+LIBIPMICONSOLE_CONFIG_FILE_DEFAULT = @LIBIPMICONSOLE_CONFIG_FILE_DEFAULT@
 LIBIPMICONSOLE_VERSION_INFO = @LIBIPMICONSOLE_VERSION_INFO@
 LIBIPMIDETECT_VERSION_INFO = @LIBIPMIDETECT_VERSION_INFO@
 LIBIPMIMONITORING_VERSION_INFO = @LIBIPMIMONITORING_VERSION_INFO@
@@ -220,9 +236,9 @@ noinst_HEADERS = \
 	ipmi-sensors.h \
 	ipmi-sensors-argp.h \
 	ipmi-sensors-detailed-output.h \
+	ipmi-sensors-oem-intel-node-manager.h \
 	ipmi-sensors-output-common.h \
-	ipmi-sensors-simple-output.h \
-	ipmi-sensors-util.h
+	ipmi-sensors-simple-output.h
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/common/src/toolcommon \
@@ -231,11 +247,13 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/common/src/toolsdr \
 	-I$(top_srcdir)/common/src/toolsensor \
 	-I$(top_srcdir)/common/src/miscutil \
+	-I$(top_srcdir)/common/src/parsecommon \
 	-I$(top_srcdir)/common/src/portability \
 	-I$(top_srcdir)/libfreeipmi/include \
 	-D_GNU_SOURCE \
 	-D_REENTRANT
 
+sbin_SCRIPTS = ipmimonitoring
 ipmi_sensors_LDADD = \
 	$(top_builddir)/common/src/toolcommon/libtoolcommon.la \
 	$(top_builddir)/common/src/toolhostrange/libtoolhostrange.la \
@@ -243,18 +261,20 @@ ipmi_sensors_LDADD = \
 	$(top_builddir)/common/src/toolsdr/libtoolsdr.la \
 	$(top_builddir)/common/src/toolsensor/libtoolsensor.la \
 	$(top_builddir)/common/src/miscutil/libmiscutils.la \
+	$(top_builddir)/common/src/parsecommon/libparsecommon.la \
 	$(top_builddir)/common/src/portability/libfreeipmiportability.la \
-	$(top_builddir)/ipmidetect/src/libipmidetect/libipmidetect.la \
+	$(top_builddir)/libipmidetect/src/libipmidetect.la \
 	$(top_builddir)/libfreeipmi/src/libfreeipmi.la
 
 ipmi_sensors_SOURCES = \
 	ipmi-sensors.c \
 	ipmi-sensors-argp.c \
 	ipmi-sensors-detailed-output.c \
+	ipmi-sensors-oem-intel-node-manager.c \
 	ipmi-sensors-output-common.c \
-	ipmi-sensors-simple-output.c \
-	ipmi-sensors-util.c
+	ipmi-sensors-simple-output.c
 
+EXTRA_DIST = ipmimonitoring
 all: all-am
 
 .SUFFIXES:
@@ -288,6 +308,8 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+ipmimonitoring: $(top_builddir)/config.status $(srcdir)/ipmimonitoring.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-sbinPROGRAMS: $(sbin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(sbindir)" || $(mkdir_p) "$(DESTDIR)$(sbindir)"
@@ -319,6 +341,25 @@ clean-sbinPROGRAMS:
 ipmi-sensors$(EXEEXT): $(ipmi_sensors_OBJECTS) $(ipmi_sensors_DEPENDENCIES) 
 	@rm -f ipmi-sensors$(EXEEXT)
 	$(LINK) $(ipmi_sensors_LDFLAGS) $(ipmi_sensors_OBJECTS) $(ipmi_sensors_LDADD) $(LIBS)
+install-sbinSCRIPTS: $(sbin_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	test -z "$(sbindir)" || $(mkdir_p) "$(DESTDIR)$(sbindir)"
+	@list='$(sbin_SCRIPTS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f $$d$$p; then \
+	    f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
+	    echo " $(sbinSCRIPT_INSTALL) '$$d$$p' '$(DESTDIR)$(sbindir)/$$f'"; \
+	    $(sbinSCRIPT_INSTALL) "$$d$$p" "$(DESTDIR)$(sbindir)/$$f"; \
+	  else :; fi; \
+	done
+
+uninstall-sbinSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(sbin_SCRIPTS)'; for p in $$list; do \
+	  f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
+	  echo " rm -f '$(DESTDIR)$(sbindir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(sbindir)/$$f"; \
+	done
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -328,9 +369,9 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi-sensors-argp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi-sensors-detailed-output.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi-sensors-oem-intel-node-manager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi-sensors-output-common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi-sensors-simple-output.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi-sensors-util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi-sensors.Po@am__quote@
 
 .c.o:
@@ -441,9 +482,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS) $(HEADERS)
+all-am: Makefile $(PROGRAMS) $(SCRIPTS) $(HEADERS)
 installdirs:
-	for dir in "$(DESTDIR)$(sbindir)"; do \
+	for dir in "$(DESTDIR)$(sbindir)" "$(DESTDIR)$(sbindir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -493,7 +534,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-sbinPROGRAMS
+install-exec-am: install-sbinPROGRAMS install-sbinSCRIPTS
 
 install-info: install-info-am
 
@@ -519,7 +560,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am uninstall-sbinPROGRAMS
+uninstall-am: uninstall-info-am uninstall-sbinPROGRAMS \
+	uninstall-sbinSCRIPTS
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libtool clean-sbinPROGRAMS ctags distclean \
@@ -527,12 +569,12 @@ uninstall-am: uninstall-info-am uninstall-sbinPROGRAMS
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-exec \
 	install-exec-am install-info install-info-am install-man \
-	install-sbinPROGRAMS install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-sbinPROGRAMS install-sbinSCRIPTS install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-info-am \
-	uninstall-sbinPROGRAMS
+	uninstall-sbinPROGRAMS uninstall-sbinSCRIPTS
 
 
 $(top_builddir)/common/src/toolcommon/libtoolcommon.la : force-dependency-check
@@ -553,10 +595,13 @@ $(top_builddir)/common/src/toolsensor/libtoolsensor.la : force-dependency-check
 $(top_builddir)/common/src/miscutil/libmiscutils.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
+$(top_builddir)/common/src/parsecommon/libparsecommon.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
 $(top_builddir)/common/src/portability/libfreeipmiportability.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
-$(top_builddir)/ipmidetect/src/libipmidetect/libipmidetect.la : force-dependency-check
+$(top_builddir)/libipmidetect/src/libipmidetect.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/libfreeipmi/src/libfreeipmi.la : force-dependency-check

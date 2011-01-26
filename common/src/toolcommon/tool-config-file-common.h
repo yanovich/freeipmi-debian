@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifndef _TOOL_CONFIG_FILE_COMMON_H
 #define _TOOL_CONFIG_FILE_COMMON_H
@@ -48,8 +48,7 @@
 #define CONFIG_FILE_TOOL_IPMI_SENSORS        0x00001000
 #define CONFIG_FILE_TOOL_IPMI_SENSORS_CONFIG 0x00002000
 #define CONFIG_FILE_TOOL_IPMICONSOLE         0x00004000
-#define CONFIG_FILE_TOOL_IPMIMONITORING      0x00008000
-#define CONFIG_FILE_TOOL_IPMIPOWER           0x00010000
+#define CONFIG_FILE_TOOL_IPMIPOWER           0x00008000
 
 /* achu:
  *
@@ -128,10 +127,22 @@ struct config_file_data_ipmi_sel
 {
   int verbose_count;
   int verbose_count_count;
+  char sensor_types[CONFIG_FILE_MAX_SENSOR_TYPES][CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH+1];
+  unsigned int sensor_types_length;
+  int sensor_types_count;
+  char exclude_sensor_types[CONFIG_FILE_MAX_SENSOR_TYPES][CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH+1];
+  unsigned int exclude_sensor_types_length;
+  int exclude_sensor_types_count;
   int system_event_only;
   int system_event_only_count;
   int oem_event_only;
   int oem_event_only_count;
+  int output_manufacturer_id;
+  int output_manufacturer_id_count;
+  int output_event_state;
+  int output_event_state_count;
+  char *event_state_config_file;
+  int event_state_config_file_count;
   int assume_system_event_records;
   int assume_system_event_records_count;
   int interpret_oem_data;
@@ -180,6 +191,12 @@ struct config_file_data_ipmi_sensors
   int ignore_not_available_sensors_count;
   int entity_sensor_names;
   int entity_sensor_names_count;
+  int output_event_bitmask;
+  int output_event_bitmask_count;
+  int output_sensor_state;
+  int output_sensor_state_count;
+  char *sensor_state_config_file;
+  int sensor_state_config_file_count;
   int no_sensor_type_output;
   int no_sensor_type_output_count;
   int comma_separated_output_count;
@@ -190,6 +207,8 @@ struct config_file_data_ipmi_sensors
   int non_abbreviated_units_count;
   int legacy_output;
   int legacy_output_count;
+  int ipmimonitoring_legacy_output;
+  int ipmimonitoring_legacy_output_count;
 };
 
 struct config_file_data_ipmi_sensors_config
@@ -204,50 +223,10 @@ struct config_file_data_ipmiconsole
   int escape_char_count;
   int dont_steal;
   int dont_steal_count;
+  int serial_keepalive;
+  int serial_keepalive_count;
   int lock_memory;
   int lock_memory_count;
-};
-
-struct config_file_data_ipmimonitoring
-{
-  int verbose_count;
-  int verbose_count_count;
-  int quiet_readings;
-  int quiet_readings_count;
-  unsigned int record_ids[CONFIG_FILE_MAX_SENSOR_RECORD_IDS];
-  unsigned int record_ids_length;
-  int record_ids_count;
-  unsigned int exclude_record_ids[CONFIG_FILE_MAX_SENSOR_RECORD_IDS];
-  unsigned int exclude_record_ids_length;
-  int exclude_record_ids_count;
-  char sensor_types[CONFIG_FILE_MAX_SENSOR_TYPES][CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH+1];
-  unsigned int sensor_types_length;
-  int sensor_types_count;
-  char exclude_sensor_types[CONFIG_FILE_MAX_SENSOR_TYPES][CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH+1];
-  unsigned int exclude_sensor_types_length;
-  int exclude_sensor_types_count;
-  int bridge_sensors;
-  int bridge_sensors_count;
-  int shared_sensors;
-  int shared_sensors_count;
-  int interpret_oem_data;
-  int interpret_oem_data_count;
-  int ignore_non_interpretable_sensors;
-  int ignore_non_interpretable_sensors_count;
-  int entity_sensor_names;
-  int entity_sensor_names_count;
-  int no_sensor_type_output;
-  int no_sensor_type_output_count;
-  int comma_separated_output_count;
-  int comma_separated_output;
-  int no_header_output;
-  int no_header_output_count;
-  int non_abbreviated_units;
-  int non_abbreviated_units_count;
-  int legacy_output;
-  int legacy_output_count;
-  char *sensor_config_file;
-  int sensor_config_file_count;
 };
 
 struct config_file_data_ipmipower

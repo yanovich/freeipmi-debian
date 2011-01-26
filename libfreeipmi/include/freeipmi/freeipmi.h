@@ -1,19 +1,19 @@
 /*
-   Copyright (C) 2003-2010 FreeIPMI Core Team
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
  */
 
 #ifndef _FREEIPMI_H
@@ -31,6 +31,7 @@ extern "C" {
 #include <freeipmi/api/ipmi-fru-inventory-device-cmds-api.h>
 #include <freeipmi/api/ipmi-lan-cmds-api.h>
 #include <freeipmi/api/ipmi-messaging-support-cmds-api.h>
+#include <freeipmi/api/ipmi-oem-intel-node-manager-cmds-api.h>
 #include <freeipmi/api/ipmi-pef-and-alerting-cmds-api.h>
 #include <freeipmi/api/ipmi-rmcpplus-support-and-payload-cmds-api.h>
 #include <freeipmi/api/ipmi-sdr-repository-cmds-api.h>
@@ -47,6 +48,7 @@ extern "C" {
 #include <freeipmi/cmds/ipmi-fru-inventory-device-cmds.h>
 #include <freeipmi/cmds/ipmi-lan-cmds.h>
 #include <freeipmi/cmds/ipmi-messaging-support-cmds.h>
+#include <freeipmi/cmds/ipmi-oem-intel-node-manager-cmds.h>
 #include <freeipmi/cmds/ipmi-pef-and-alerting-cmds.h>
 #include <freeipmi/cmds/ipmi-rmcpplus-support-and-payload-cmds.h>
 #include <freeipmi/cmds/ipmi-sdr-repository-cmds.h>
@@ -67,7 +69,9 @@ extern "C" {
 #include <freeipmi/interface/ipmi-lan-interface.h>
 #include <freeipmi/interface/ipmi-rmcpplus-interface.h>
 #include <freeipmi/interface/rmcp-interface.h>
+#include <freeipmi/interpret/ipmi-interpret.h>
 #include <freeipmi/locate/ipmi-locate.h>
+#include <freeipmi/payload/ipmi-sol-payload.h>
 #include <freeipmi/record-format/ipmi-cipher-suite-record-format.h>
 #include <freeipmi/record-format/ipmi-fru-information-record-format.h>
 #include <freeipmi/record-format/ipmi-sdr-record-format.h>
@@ -79,8 +83,6 @@ extern "C" {
 #include <freeipmi/sensor-read/ipmi-sensor-read.h>
 #include <freeipmi/spec/ipmi-authentication-type-spec.h>
 #include <freeipmi/spec/ipmi-channel-spec.h>
-#include <freeipmi/spec/ipmi-chassis-boot-options-parameter-spec.h>
-#include <freeipmi/spec/ipmi-chassis-boot-options-parameter-oem-spec.h>
 #include <freeipmi/spec/ipmi-cmd-spec.h>
 #include <freeipmi/spec/ipmi-cmd-dcmi-spec.h>
 #include <freeipmi/spec/ipmi-cmd-oem-spec.h>
@@ -96,12 +98,12 @@ extern "C" {
 #include <freeipmi/spec/ipmi-fru-language-codes-spec.h>
 #include <freeipmi/spec/ipmi-iana-enterprise-numbers-spec.h>
 #include <freeipmi/spec/ipmi-ipmb-lun-spec.h>
-#include <freeipmi/spec/ipmi-lan-parameter-spec.h>
-#include <freeipmi/spec/ipmi-lan-parameter-oem-spec.h>
+#include <freeipmi/spec/ipmi-lan-configuration-parameters-spec.h>
+#include <freeipmi/spec/ipmi-lan-configuration-parameters-oem-spec.h>
 #include <freeipmi/spec/ipmi-netfn-spec.h>
 #include <freeipmi/spec/ipmi-netfn-oem-spec.h>
-#include <freeipmi/spec/ipmi-pef-parameter-spec.h>
-#include <freeipmi/spec/ipmi-pef-parameter-oem-spec.h>
+#include <freeipmi/spec/ipmi-pef-configuration-parameters-spec.h>
+#include <freeipmi/spec/ipmi-pef-configuration-parameters-oem-spec.h>
 #include <freeipmi/spec/ipmi-privilege-level-spec.h>
 #include <freeipmi/spec/ipmi-product-id-spec.h>
 #include <freeipmi/spec/ipmi-rmcpplus-status-spec.h>
@@ -111,14 +113,16 @@ extern "C" {
 #include <freeipmi/spec/ipmi-sensor-types-spec.h>
 #include <freeipmi/spec/ipmi-sensor-types-oem-spec.h>
 #include <freeipmi/spec/ipmi-sensor-units-spec.h>
-#include <freeipmi/spec/ipmi-serial-modem-parameter-spec.h>
-#include <freeipmi/spec/ipmi-serial-modem-parameter-oem-spec.h>
+#include <freeipmi/spec/ipmi-serial-modem-configuration-parameters-spec.h>
+#include <freeipmi/spec/ipmi-serial-modem-configuration-parameters-oem-spec.h>
 #include <freeipmi/spec/ipmi-slave-address-spec.h>
 #include <freeipmi/spec/ipmi-slave-address-oem-spec.h>
-#include <freeipmi/spec/ipmi-sol-parameter-spec.h>
-#include <freeipmi/spec/ipmi-sol-parameter-oem-spec.h>
-#include <freeipmi/spec/ipmi-system-info-parameter-spec.h>
-#include <freeipmi/spec/ipmi-system-info-parameter-oem-spec.h>
+#include <freeipmi/spec/ipmi-sol-configuration-parameters-spec.h>
+#include <freeipmi/spec/ipmi-sol-configuration-parameters-oem-spec.h>
+#include <freeipmi/spec/ipmi-system-boot-option-parameters-spec.h>
+#include <freeipmi/spec/ipmi-system-boot-option-parameters-oem-spec.h>
+#include <freeipmi/spec/ipmi-system-info-parameters-spec.h>
+#include <freeipmi/spec/ipmi-system-info-parameters-oem-spec.h>
 #include <freeipmi/spec/ipmi-system-software-id-spec.h>
 #include <freeipmi/util/ipmi-channel-util.h>
 #include <freeipmi/util/ipmi-cipher-suite-util.h>

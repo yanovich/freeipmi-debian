@@ -1,7 +1,7 @@
 
 
 .\"#############################################################################
-.\"$Id: ipmiconsole.8.pre.in,v 1.45.4.5 2010-05-27 22:35:41 chu11 Exp $
+.\"$Id: ipmiconsole.8.pre.in,v 1.52 2010-06-30 21:56:36 chu11 Exp $
 .\"#############################################################################
 .\"  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
 .\"  Copyright (C) 2006-2007 The Regents of the University of California.
@@ -14,7 +14,7 @@
 .\"
 .\"  Ipmiconsole is free software; you can redistribute it and/or modify it under
 .\"  the terms of the GNU General Public License as published by the Free
-.\"  Software Foundation; either version 2 of the License, or (at your option)
+.\"  Software Foundation; either version 3 of the License, or (at your option)
 .\"  any later version.
 .\"  
 .\"  Ipmiconsole is distributed in the hope that it will be useful, but WITHOUT 
@@ -25,7 +25,7 @@
 .\"  You should have received a copy of the GNU General Public License along
 .\"  with Ipmiconsole.  If not, see <http://www.gnu.org/licenses/>.
 .\"############################################################################
-.TH ipmiconsole 8 "2010-12-06" "ipmiconsole 0.8.12" "System Commands"
+.TH ipmiconsole 8 "2011-01-20" "ipmiconsole 1.0.1" "System Commands"
 .SH "NAME"
 ipmiconsole \- IPMI console utility
 .SH "SYNOPSIS"
@@ -41,7 +41,7 @@ communicates with a remote machine's Baseboard Management Controller
 (BMC) to establish a console session. Before any SOL communication
 can take place, the remote machine's BMC must be configured properly.
 The FreeIPMI tool
-.B bmc-config(1)
+.B bmc-config(8)
 may be used to do this configuration.
 .LP
 Often (although not always), console redirection must be also
@@ -56,7 +56,7 @@ issues. For a general introduction to FreeIPMI please see
 The following options are general options for configuring IPMI
 communication and executing general tool commands.
 .TP
-\fB\-h\fR, \fB\-\-hostname\fR=\fIIPMIHOST\fR
+\fB\-h\fR \fIIPMIHOST\FR, \fB\-\-hostname\fR=\fIIPMIHOST\fR
 Specify the remote host to communicate with.
 .TP
 \fB\-u\fR, \fB\-\-username\fR=\fIUSERNAME\fR
@@ -65,7 +65,7 @@ If not specified, a null (i.e. anonymous) username is assumed. The
 user must a high enough privilege to establish a SOL session and have
 SOL session abilities.
 .TP
-\fB\-p\fR, \fB\-\-password\fR=\fIPASSWORD\fR
+\fB\-p\fR \fIPASSWORD\fR, \fB\-\-password\fR=\fIPASSWORD\fR
 Specify the password to use when authenticationg with the remote host.
 If not specified, a null password is assumed. Maximum password length
 is 16 for IPMI 1.5 and 20 for IPMI 2.0.
@@ -74,7 +74,7 @@ is 16 for IPMI 1.5 and 20 for IPMI 2.0.
 Prompt for password to avoid possibility of listing
 it in process lists.
 .TP
-\fB\-k\fR, \fB\-\-k-g\fR=\fIK_G\fR
+\fB\-k\fR \fIK_G\fR, \fB\-\-k-g\fR=\fIK_G\fR
 Specify the K_g BMC key to use when authenticating with the remote
 host for IPMI 2.0. If not specified, a null key is assumed. To input
 the key in hexadecimal form, prefix the string with '0x'. E.g., the
@@ -149,7 +149,7 @@ cipher suite ids are currently supported:
 .\" .sp
 .\" 19 - Authentication Algorithm = HMAC-SHA256; Integrity Algorithm = HMAC_SHA256_128; Confidentiality Algorithm = xRC4-40
 .TP
-\fB\-l\fR, \fB\-\-privilege-level\fR=\fIPRIVILEGE\-LEVEL\fR
+\fB\-l\fR \fIPRIVILEGE\-LEVEL\fR, \fB\-\-privilege-level\fR=\fIPRIVILEGE\-LEVEL\fR
 Specify the privilege level to be used. The currently available
 privilege levels are USER, OPERATOR, and ADMIN. Defaults to ADMIN if
 not specified.
@@ -177,7 +177,7 @@ Output the program version and exit.
 The following options are specific to
 .B Ipmiconsole.
 .TP
-\fB\-e\fR, \fB\-\-escape-char\fR=\fICHAR\fR
+\fB\-e\fR \fICHAR\fR, \fB\-\-escape-char\fR=\fICHAR\fR
 Specify an alternate escape character (default char '&').
 .TP
 \fB\-\-dont-steal\fR
@@ -190,6 +190,21 @@ earlier SOL sessions may have not been able to be deactivate properly.
 .TP
 \fB\-\-deactivate\fR
 Deactivate a SOL session if one is detected as being in use and exit.
+.TP
+\fB\-\-serial\-keepalive\fR
+Occasionally send NUL characters to detect inactive serial
+connections. This option is particularly useful for those who intend
+to run
+.B ipmiconsole
+without much interaction, such as for logging purposes. While IPMI
+connections may still be alive, some motherboards have exhibited bugs
+in which underlying serial data can no longer be sent/received. From
+the viewpoint of
+.B ipmiconsole,
+data is simply not be sent out of the remote system and this problem
+is only detected once there is user interaction. By sending the
+occasional NUL character, the underlying loss of serial data transfer
+can be detected far more quickly.
 .TP
 \fB\-\-lock-memory\fR
 Lock sensitive information (such as usernames and passwords) in
@@ -379,12 +394,10 @@ and Sun Fire 2200/4150/4450 with ELOM.
 .LP
 "intel20" - This workaround option will work around several Intel IPMI
 2.0 authentication issues. The issues covered include padding of
-usernames, automatic acceptance of a RAKP 4 response integrity check
-when using the integrity algorithm MD5-128, and password truncation if
-the authentication algorithm is HMAC-MD5-128. Those hitting this
-issue may see "username invalid", "password invalid", or "k_g invalid"
-errors. Issue observed on Intel SE7520AF2 with Intel Server
-Management Module (Professional Edition).
+usernames and password truncation if the authentication algorithm is
+HMAC-MD5-128. Those hitting this issue may see "username invalid",
+"password invalid", or "k_g invalid" errors. Issue observed on Intel
+SE7520AF2 with Intel Server Management Module (Professional Edition).
 .LP
 "supermicro20" - This workaround option will work around several
 Supermicro IPMI 2.0 authentication issues on motherboards w/ Peppercon
@@ -511,7 +524,7 @@ Copyright (C) 2006-2007 The Regents of the University of California.
 .PP
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at
+the Free Software Foundation; either version 3 of the License, or (at
 your option) any later version.
 .SH "SEE ALSO"
 freeipmi.conf(5), freeipmi(7), bmc-config(8)

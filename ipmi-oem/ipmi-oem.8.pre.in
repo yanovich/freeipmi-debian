@@ -28,7 +28,7 @@ motherboards from the same manufacturer.
 #include <@top_srcdir@/common/man/manpage-common-inband.man>
 #include <@top_srcdir@/common/man/manpage-common-outofband-hostname-hostranged.man>
 .TP
-\fB\-u\fR, \fB\-\-username\fR=\fIUSERNAME\fR
+\fB\-u\fR \fIUSERNAME\fR, \fB\-\-username\fR=\fIUSERNAME\fR
 Specify the username to use when authenticating with the remote host.
 If not specified, a null (i.e. anonymous) username is assumed.  The
 required user privilege will depend on the oem commands executed.
@@ -308,6 +308,27 @@ to work on IBM x3755.
 .B Intel
 .RS
 .TP
+.B get-smtp-config \fI[channel\-number]\fR
+This OEM command will get the current SMTP configuration on the IPMI
+card.  By default, configuration for every LAN channel will be output.
+If a \fIchannel\-number\fR is specified, only that specific channel
+number's configuration will be output.  Command confirmed to work on
+Intel S5500WB (Penguin Computing Relion 700).
+.TP
+.B set-smtp-config \fI[channel\-number]\fR \fIKEY=VALUE ...\fR
+This OEM command will set the current SMTP configuration on the IPMI
+card.  By default, configuration will be done for all LAN channels.
+If a \fIchannel\-number\fR is specified, only that specific channel
+number's configuration will be configured.  The possible keys and
+values are \fIsmtp=enable|disable\fR,
+\fIsmtpserveraddress=ipaddress\fR, \fIsmtpusername=string\fR,
+\fIuserpassword=string\fR, \fIemailaddress=string\fR,
+\fIsubject=string\fR, \fImessagecontent=string\fR,
+\fIsenderemailaddress=string\fR, and \fIsmtphostname=string\fR.
+Multiple key=value pairs may be specified.  If no key=value pairs are
+specifed, available pairs are output.  Command confirmed to work on
+Intel S5500WB (Penguin Computing Relion 700).
+.TP
 .B restore-configuration
 This OEM command will restore BMC configuration values back to default
 values.  The command will spin until the restore is confirmed to be
@@ -316,6 +337,38 @@ Computing Relion 700.  After running this command, the BMC must be
 reset to return it to functioning status.  This may be accomplished by
 executing a cold-reset with
 .B bmc-device(8).
+.RE
+.TP
+.B IntelNM (Intel Node Manager)
+.SP
+The following OEM commands operate on Intel chipsets with Node Manager
+support.  They may work on multiple vendors motherboards.
+.SP
+.RS
+.TP
+.B get-node-manager-statistics \fI[domainid=num]\fR \fI[policyid=num]\fR
+This OEM command will output the Intel Node Manager statistics.  The
+user may optionally specify a \fIdomainid\fR or \fIpolicyid\fR.  The
+default \fIdomainid\fR is 0.  If a \fIpolicyid\fR is specified, per
+policy statistics will be output, otherwise global statistics will be
+output.  Command confirmed to work on Intel S5500WB (Penguin Computing
+Relion 700), Inventec 5441/5442 (Dell Xanadu II/III), Quanta S99Q
+(Dell FS12-TY).
+.TP
+.B reset-node-manager-statistics \fI[domainid=num]\fR \fI[policyid=num]\fR
+This OEM command will reset the Intel Node Manager statistics.  The
+user may optionally specify a \fIdomainid\fR or \fIpolicyid\fR.  The
+default \fIdomainid\fR is 0.  If a \fIpolicyid\fR is specified, per
+policy statistics will be reset, otherwise global statistics will be
+reset.  Command confirmed to work on Intel S5500WB (Penguin Computing
+Relion 700), Inventec 5441/5442 (Dell Xanadu II/III), Quanta S99Q
+(Dell FS12-TY).
+.TP
+.B get-node-manager-version
+This OEM command will output the current Intel Node Manager version
+information.  Command confirmed to work on Intel S5500WB (Penguin
+Computing Relion 700), Inventec 5441/5442 (Dell Xanadu II/III), Quanta
+S99Q (Dell FS12-TY).
 .RE
 .TP
 .B Inventec
@@ -371,8 +424,8 @@ confirmed to work on Inventec 5441/5442 (Dell Xanadu II/III).
 .B get-authentication-config
 This OEM command will display additional OEM authentication settings.
 (See \fIset\-authentication\-config\fR below for description on
-outputs.)  Command confirmed to work on Inventec 5441/5442 (and
-subsequently Dell Xanadu II/III).
+outputs.)  Command confirmed to work on Inventec 5441/5442 (Dell
+Xanadu II/III).
 .TP
 .B set-authentication-config \fIKEY=VALUE ...\fR
 This OEM command will set additional OEM authentication settings on
@@ -388,8 +441,8 @@ any of the settings will disable the lockout feature.  Each time any
 of these settings is modified, the authentication failure count of
 each enabled user is reset to 0.  Multiple key=value pairs may be
 specified.  If no key=value pairs are specifed, available pairs are
-output.  Command confirmed to work on Inventec 5441/5442 (and subsequently
-Dell Xanadu II/III).
+output.  Command confirmed to work on Inventec 5441/5442 (Dell Xanadu
+II/III).
 .TP
 .B get-account-status
 This OEM command will output the current account status of users on
@@ -427,8 +480,8 @@ II/III).
 .TP
 .B get-web-server-config
 This OEM command will get the current web server configuration on the
-IPMI card.  Command confirmed to work on Inventec 5441/5442 (and
-subsequently Dell Xanadu II/III).
+IPMI card.  Command confirmed to work on Inventec 5441/5442 (Dell
+Xanadu II/III).
 .TP
 .B set-web-server-config \fIKEY=VALUE ...\fR
 This OEM command will set the current web server configuration on the
@@ -440,9 +493,9 @@ available pairs are output.  Command confirmed to work on Inventec
 5441/5442 (Dell Xanadu II/III).
 .TP
 .B get-power-management-config
-This OEM command will get the current power management configuration on the
-IPMI card.  Command confirmed to work on Inventec 5441/5442 (and
-subsequently Dell Xanadu II/III).
+This OEM command will get the current power management configuration
+on the IPMI card.  Command confirmed to work on Inventec 5441/5442
+(Dell Xanadu II/III).
 .TP
 .B set-power-management-config \fIKEY=VALUE ...\fR
 This OEM command will set the current power management configuration
@@ -457,8 +510,8 @@ minimum and maximum configured, and \fIuser\fR uses the user defined
 time defined by \fIpowerondelay\fR.  \fIpowerondelay\fR must be within
 the minimum and maximum power on delay times.  Multiple key=value
 pairs may be specified.  If no key=value pairs are specifed, available
-pairs are output.  Command confirmed to work on Inventec 5441/5442 (and
-subsequently Dell Xanadu II/III).
+pairs are output.  Command confirmed to work on Inventec 5441/5442
+(Dell Xanadu II/III).
 .TP
 .B get-sol-idle-timeout
 This OEM command will get the SOL idle timeout.  Command confirmed to
@@ -480,9 +533,9 @@ Command confirmed to work on Inventec 5442 (Dell Xanadu III).
 .if 0 \{
 .TP
 .B get-firmware-update-config
-This OEM command will get the current firmware update configuration on the
-IPMI card.  Command confirmed to work on Inventec 5441/5442 (and
-subsequently Dell Xanadu II).
+This OEM command will get the current firmware update configuration on
+the IPMI card.  Command confirmed to work on Inventec 5441/5442 (Dell
+Xanadu II).
 .TP
 .B set-firmware-update-config \fIKEY=VALUE ...\fR
 This OEM command will set the current firmware update configuration on
@@ -576,7 +629,10 @@ Command confirmed to work on Inventec 5441/5442 (Dell Xanadu II/III).
 This OEM command will restore certain BMC configuration sections back
 to default values.  The command will spin until the reset is confirmed
 to be complete.  Command confirmed to work on Inventec 5442 (Dell
-Xanadu III).
+Xanadu III).  After running this command, the BMC must be reset to
+return it to functioning status.  This may be accomplished by
+executing a cold-reset with
+.B bmc-device(8).
 .if 0 \{
 .TP
 .B set-system-guid \fIsystemguid\fR
@@ -592,8 +648,8 @@ work on Inventec 5441 (Dell Xanadu II) for
 .B clear-eeprom \fIat24c256n\fR
 This OEM command will clear the specified eeprom.  If the verbose
 option is set, progress percent will be output as the clearing is
-being done.  Command confirmed to work on Inventec 5441 (and
-subsequently Dell Xanadu II) for \fIat24c256\fR.
+being done.  Command confirmed to work on Inventec 5441 (Dell Xanadu
+II) for \fIat24c256\fR.
 .RE
 .TP
 .B Quanta
@@ -757,10 +813,8 @@ rate, \fIslow\fR indicates the LED is blinking at 1Hz, and \fIfast\fR
 indicates the LED is blinking at 4Hz.
 If the verbose option is set, sensor names will be output with their
 entity ID and instance when appropriate.  (Similar to the
-\fI\-\-entity\-sensor\-names\fR options in
-.B ipmi-sensors
-and
-.B ipmimonitoring.)
+\fI\-\-entity\-sensor\-names\fR option in
+.B ipmi-sensors.)
 Command confirmed to work on Sun Fire 4140 with ILOM.
 .TP
 .B set-led \fIrecord_id\fR \fIoff|on|standby|slow|fast\fR

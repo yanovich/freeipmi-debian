@@ -1,19 +1,19 @@
 /*
-   Copyright (C) 2003-2010 FreeIPMI Core Team
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
  */
 
 #ifndef _IPMI_PRODUCT_ID_SPEC_H
@@ -31,11 +31,11 @@ extern "C" {
  * I'm not sure.  At minimum, it covers the 2900, 2950, R610, and
  * R710.
  */
-#define IPMI_DELL_PRODUCT_ID_POWEREDGE      256
-#define IPMI_DELL_PRODUCT_ID_POWEREDGE_2900 IPMI_DELL_PRODUCT_ID_POWEREDGE
-#define IPMI_DELL_PRODUCT_ID_POWEREDGE_2950 IPMI_DELL_PRODUCT_ID_POWEREDGE
-#define IPMI_DELL_PRODUCT_ID_POWEREDGE_R610 IPMI_DELL_PRODUCT_ID_POWEREDGE
-#define IPMI_DELL_PRODUCT_ID_POWEREDGE_R710 IPMI_DELL_PRODUCT_ID_POWEREDGE
+#define __IPMI_DELL_PRODUCT_ID_POWEREDGE    256
+#define IPMI_DELL_PRODUCT_ID_POWEREDGE_2900 __IPMI_DELL_PRODUCT_ID_POWEREDGE
+#define IPMI_DELL_PRODUCT_ID_POWEREDGE_2950 __IPMI_DELL_PRODUCT_ID_POWEREDGE
+#define IPMI_DELL_PRODUCT_ID_POWEREDGE_R610 __IPMI_DELL_PRODUCT_ID_POWEREDGE
+#define IPMI_DELL_PRODUCT_ID_POWEREDGE_R710 __IPMI_DELL_PRODUCT_ID_POWEREDGE
 
 /******************************************* 
  * Fujitsu                                 *

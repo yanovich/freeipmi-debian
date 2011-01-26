@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -82,8 +82,8 @@ _get_pef_control (pstdout_state_t pstate,
 
   if (ipmi_cmd_get_pef_configuration_parameters_pef_control (ipmi_ctx,
                                                              IPMI_GET_PEF_PARAMETER,
-                                                             CONFIG_SET_SELECTOR,
-                                                             CONFIG_BLOCK_SELECTOR,
+                                                             IPMI_PEF_CONFIGURATION_PARAMETERS_NO_SET_SELECTOR,
+                                                             IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                              obj_cmd_rs) < 0)
     {
       config_err_t ret;
@@ -210,6 +210,10 @@ enable_pef_checkout (pstdout_state_t pstate,
   struct pef_control pc;
   config_err_t ret;
 
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
+
   if ((ret = _get_pef_control (pstate,
                                ipmi_ctx,
                                cmd_args,
@@ -233,6 +237,10 @@ enable_pef_commit (pstdout_state_t pstate,
   struct pef_control pc;
   config_err_t ret;
 
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
+
   if ((ret = _get_pef_control (pstate,
                                ipmi_ctx,
                                cmd_args,
@@ -252,6 +260,10 @@ enable_pef_event_messages_checkout (pstdout_state_t pstate,
 {
   struct pef_control pc;
   config_err_t ret;
+
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
 
   if ((ret = _get_pef_control (pstate,
                                ipmi_ctx,
@@ -276,6 +288,10 @@ enable_pef_event_messages_commit (pstdout_state_t pstate,
   struct pef_control pc;
   config_err_t ret;
 
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
+
   if ((ret = _get_pef_control (pstate,
                                ipmi_ctx,
                                cmd_args,
@@ -295,6 +311,10 @@ enable_pef_startup_delay_checkout (pstdout_state_t pstate,
 {
   struct pef_control pc;
   config_err_t ret;
+
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
 
   if ((ret = _get_pef_control (pstate,
                                ipmi_ctx,
@@ -319,6 +339,10 @@ enable_pef_startup_delay_commit (pstdout_state_t pstate,
   struct pef_control pc;
   config_err_t ret;
 
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
+
   if ((ret = _get_pef_control (pstate,
                                ipmi_ctx,
                                cmd_args,
@@ -338,6 +362,10 @@ enable_pef_alert_startup_delay_checkout (pstdout_state_t pstate,
 {
   struct pef_control pc;
   config_err_t ret;
+
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
 
   if ((ret = _get_pef_control (pstate,
                                ipmi_ctx,
@@ -361,6 +389,10 @@ enable_pef_alert_startup_delay_commit (pstdout_state_t pstate,
 {
   struct pef_control pc;
   config_err_t ret;
+
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
 
   if ((ret = _get_pef_control (pstate,
                                ipmi_ctx,
@@ -399,8 +431,8 @@ _get_pef_action_global_control (pstdout_state_t pstate,
 
   if (ipmi_cmd_get_pef_configuration_parameters_pef_action_global_control (ipmi_ctx,
                                                                            IPMI_GET_PEF_PARAMETER,
-                                                                           CONFIG_SET_SELECTOR,
-                                                                           CONFIG_BLOCK_SELECTOR,
+                                                                           IPMI_PEF_CONFIGURATION_PARAMETERS_NO_SET_SELECTOR,
+                                                                           IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                            obj_cmd_rs) < 0)
     {
       config_err_t ret;
@@ -549,6 +581,10 @@ enable_alert_action_checkout (pstdout_state_t pstate,
   struct pef_action_global_control gc;
   config_err_t ret;
 
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
+
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
                                              cmd_args,
@@ -572,6 +608,10 @@ enable_alert_action_commit (pstdout_state_t pstate,
   struct pef_action_global_control gc;
   config_err_t ret;
 
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
+
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
                                              cmd_args,
@@ -591,6 +631,10 @@ enable_power_down_action_checkout (pstdout_state_t pstate,
 {
   struct pef_action_global_control gc;
   config_err_t ret;
+
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
 
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
@@ -615,6 +659,10 @@ enable_power_down_action_commit (pstdout_state_t pstate,
   struct pef_action_global_control gc;
   config_err_t ret;
 
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
+
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
                                              cmd_args,
@@ -634,6 +682,10 @@ enable_reset_action_checkout (pstdout_state_t pstate,
 {
   struct pef_action_global_control gc;
   config_err_t ret;
+
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
 
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
@@ -658,6 +710,10 @@ enable_reset_action_commit (pstdout_state_t pstate,
   struct pef_action_global_control gc;
   config_err_t ret;
 
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
+
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
                                              cmd_args,
@@ -677,6 +733,10 @@ enable_power_cycle_action_checkout (pstdout_state_t pstate,
 {
   struct pef_action_global_control gc;
   config_err_t ret;
+
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
 
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
@@ -701,6 +761,10 @@ enable_power_cycle_action_commit (pstdout_state_t pstate,
   struct pef_action_global_control gc;
   config_err_t ret;
 
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
+
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
                                              cmd_args,
@@ -720,6 +784,10 @@ enable_oem_action_checkout (pstdout_state_t pstate,
 {
   struct pef_action_global_control gc;
   config_err_t ret;
+
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
 
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
@@ -744,6 +812,10 @@ enable_oem_action_commit (pstdout_state_t pstate,
   struct pef_action_global_control gc;
   config_err_t ret;
 
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
+
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
                                              cmd_args,
@@ -763,6 +835,10 @@ enable_diagnostic_interrupt_checkout (pstdout_state_t pstate,
 {
   struct pef_action_global_control gc;
   config_err_t ret;
+
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
 
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
@@ -786,6 +862,10 @@ enable_diagnostic_interrupt_commit (pstdout_state_t pstate,
 {
   struct pef_action_global_control gc;
   config_err_t ret;
+
+  assert (kv);
+  assert (ipmi_ctx);
+  assert (cmd_args);
 
   if ((ret = _get_pef_action_global_control (pstate,
                                              ipmi_ctx,
@@ -824,8 +904,8 @@ pef_startup_delay_checkout (pstdout_state_t pstate,
 
   if (ipmi_cmd_get_pef_configuration_parameters_pef_startup_delay (ipmi_ctx,
                                                                    IPMI_GET_PEF_PARAMETER,
-                                                                   CONFIG_SET_SELECTOR,
-                                                                   CONFIG_BLOCK_SELECTOR,
+                                                                   IPMI_PEF_CONFIGURATION_PARAMETERS_NO_SET_SELECTOR,
+                                                                   IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                    obj_cmd_rs) < 0)
     {
       config_err_t ret;
@@ -941,8 +1021,8 @@ pef_alert_startup_delay_checkout (pstdout_state_t pstate,
 
   if (ipmi_cmd_get_pef_configuration_parameters_pef_alert_startup_delay (ipmi_ctx,
                                                                          IPMI_GET_PEF_PARAMETER,
-                                                                         CONFIG_SET_SELECTOR,
-                                                                         CONFIG_BLOCK_SELECTOR,
+                                                                         IPMI_PEF_CONFIGURATION_PARAMETERS_NO_SET_SELECTOR,
+                                                                         IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                          obj_cmd_rs) < 0)
     {
       config_err_t ret;
@@ -1031,5 +1111,3 @@ pef_alert_startup_delay_commit (pstdout_state_t pstate,
     fiid_obj_destroy (obj_cmd_rs);
   return (rv);
 }
-
-

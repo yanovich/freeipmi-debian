@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2007-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-*/
+ * Copyright (C) 2007-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -74,7 +74,7 @@ _get_alert_policy_table (struct ipmi_pef_config_state_data *state_data,
   if (ipmi_cmd_get_pef_configuration_parameters_alert_policy_table (state_data->ipmi_ctx,
                                                                     IPMI_GET_PEF_PARAMETER,
                                                                     alert_policy_entry_number,
-                                                                    CONFIG_BLOCK_SELECTOR,
+                                                                    IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                     obj_cmd_rs) < 0)
     {
       config_err_t ret;
@@ -334,9 +334,15 @@ policy_type_checkout (const char *section_name,
                       struct config_keyvalue *kv,
                       void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -356,9 +362,15 @@ policy_type_commit (const char *section_name,
                     const struct config_keyvalue *kv,
                     void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -377,9 +389,15 @@ policy_enabled_checkout (const char *section_name,
                          struct config_keyvalue *kv,
                          void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -399,9 +417,15 @@ policy_enabled_commit (const char *section_name,
                        const struct config_keyvalue *kv,
                        void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -420,9 +444,15 @@ policy_number_checkout (const char *section_name,
                         struct config_keyvalue *kv,
                         void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -442,9 +472,15 @@ policy_number_commit (const char *section_name,
                       const struct config_keyvalue *kv,
                       void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -463,9 +499,15 @@ destination_selector_checkout (const char *section_name,
                                struct config_keyvalue *kv,
                                void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -485,9 +527,15 @@ destination_selector_commit (const char *section_name,
                              const struct config_keyvalue *kv,
                              void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -506,9 +554,15 @@ channel_number_checkout (const char *section_name,
                          struct config_keyvalue *kv,
                          void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -528,9 +582,15 @@ channel_number_commit (const char *section_name,
                        const struct config_keyvalue *kv,
                        void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -549,9 +609,15 @@ alert_string_set_selector_checkout (const char *section_name,
                                     struct config_keyvalue *kv,
                                     void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -571,9 +637,15 @@ alert_string_set_selector_commit (const char *section_name,
                                   const struct config_keyvalue *kv,
                                   void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -592,9 +664,15 @@ event_specific_alert_string_checkout (const char *section_name,
                                       struct config_keyvalue *kv,
                                       void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -614,9 +692,15 @@ event_specific_alert_string_commit (const char *section_name,
                                     const struct config_keyvalue *kv,
                                     void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_policy_table apt;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_policy_table (state_data,
                                       section_name,
@@ -631,27 +715,19 @@ event_specific_alert_string_commit (const char *section_name,
 }
 
 struct config_section *
-ipmi_pef_config_alert_policy_table_section_get (ipmi_pef_config_state_data_t *state_data, int num)
+ipmi_pef_config_alert_policy_table_section_get (ipmi_pef_config_state_data_t *state_data, unsigned int num)
 {
   struct config_section *section = NULL;
-  uint8_t lan_channel_number;
-  char *strp = NULL;
-  config_err_t ret;
-  char buf[CONFIG_MAX_SECTION_NAME_LEN];
+  char section_name[CONFIG_MAX_SECTION_NAME_LEN];
+  char description[CONFIG_MAX_DESCRIPTION_LEN];
 
-  if (num <= 0)
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "Invalid Num = %d\n",
-                       num);
-      return (NULL);
-    }
+  assert (state_data);
+  assert (num);
 
-  snprintf (buf, CONFIG_MAX_SECTION_NAME_LEN, "Alert_Policy_%d", num);
+  snprintf (section_name, CONFIG_MAX_SECTION_NAME_LEN, "Alert_Policy_%u", num);
 
   if (!(section = config_section_create (state_data->pstate,
-                                         buf,
+                                         section_name,
                                          NULL,
                                          NULL,
                                          0,
@@ -699,35 +775,43 @@ ipmi_pef_config_alert_policy_table_section_get (ipmi_pef_config_state_data_t *st
                               config_number_range_four_bits) < 0)
     goto cleanup;
 
-  ret = get_lan_channel_number(state_data, &lan_channel_number);
-  if (ret == CONFIG_ERR_SUCCESS)
+  if (!state_data->lan_channel_numbers_loaded)
     {
-      if (asprintf (&strp,
-                    "Give a valid number (LAN = %u)",
-                    lan_channel_number) < 0)
-        {
-          if (!strp)
-            {
-              pstdout_perror (state_data->pstate,
-                              "asprintf");
-              goto cleanup;
-            }
-        }
+      if (load_lan_channel_numbers (state_data) != CONFIG_ERR_SUCCESS)
+	goto cleanup;
+    }
+
+  if (state_data->lan_channel_numbers_count > 0)
+    {
+      char tempbuf[CONFIG_MAX_DESCRIPTION_LEN];
+      int i;
+
+      snprintf (description,
+		CONFIG_MAX_DESCRIPTION_LEN,
+		"Give a valid number (LAN = %u",
+		state_data->lan_channel_numbers[0]);
+
+      for (i = 1; i < state_data->lan_channel_numbers_count; i++)
+	{
+	  snprintf (tempbuf,
+		    CONFIG_MAX_DESCRIPTION_LEN,
+		    ", %u",
+		    state_data->lan_channel_numbers[i]);
+	  
+	  strcat (description, tempbuf);
+	}
+
+      strcat (description, ")");
     }
   else
-    {
-      if (!(strp = strdup ("Give a valid number")))
-        {
-          pstdout_perror (state_data->pstate,
-                          "strdup");
-          goto cleanup;
-        }
-    }
+    snprintf (description,
+	      CONFIG_MAX_DESCRIPTION_LEN,
+	      "Give a valid number");
 
   if (config_section_add_key (state_data->pstate,
                               section,
                               "Channel_Number",
-                              strp,
+                              description,
                               0,
                               channel_number_checkout,
                               channel_number_commit,
@@ -754,13 +838,9 @@ ipmi_pef_config_alert_policy_table_section_get (ipmi_pef_config_state_data_t *st
                               config_yes_no_validate) < 0)
     goto cleanup;
 
-  if (strp)
-    free (strp);
   return (section);
 
  cleanup:
-  if (strp)
-    free (strp);
   if (section)
     config_section_destroy (section);
   return (NULL);

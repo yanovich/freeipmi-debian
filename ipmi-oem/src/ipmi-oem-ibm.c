@@ -528,11 +528,11 @@ ipmi_oem_ibm_get_led (ipmi_oem_state_data_t *state_data)
                                0,
                                NULL,
                                0,
-                               1, /* abbreviated_units */
-                               0,
-                               0,
-                               0,
-                               0,
+                               0, /* non_abbreviated_units */
+                               0, /* shared_sensors */
+                               0, /* count_event_only_records */
+                               0, /* count_device_locator_records */
+                               1, /* count_oem_records */
                                NULL,
                                &column_width) < 0)
     goto cleanup;

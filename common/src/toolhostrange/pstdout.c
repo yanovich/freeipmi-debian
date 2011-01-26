@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  $Id: pstdout.c,v 1.7.4.1 2009-12-23 21:24:04 chu11 Exp $
+ *  $Id: pstdout.c,v 1.10 2010-02-10 01:27:44 chu11 Exp $
  *****************************************************************************
  *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2007 The Regents of the University of California.
@@ -13,7 +13,7 @@
  *
  *  Pstdout is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
+ *  Free Software Foundation; either version 3 of the License, or (at your
  *  option) any later version.
  *
  *  Pstdout is distributed in the hope that it will be useful, but
@@ -1525,12 +1525,6 @@ PSTDOUT_PRINTF(pstdout_state_t pstate, const char *format, ...)
   va_list ap;
   int rv;
 
-  if (!pstdout_initialized)
-    {
-      pstdout_errnum = PSTDOUT_ERR_UNINITIALIZED;
-      return -1;
-    }
-
   if (!format)
     {
       pstdout_errnum = PSTDOUT_ERR_PARAMETERS;
@@ -1538,7 +1532,9 @@ PSTDOUT_PRINTF(pstdout_state_t pstate, const char *format, ...)
     }
 
   va_start(ap, format);
-  if (!pstate || pstate->magic != PSTDOUT_STATE_MAGIC)
+  if (!pstate
+      || pstate->magic != PSTDOUT_STATE_MAGIC
+      || !pstdout_initialized)
     rv = vprintf(format, ap);
   else
     rv = _pstdout_print(pstate, 0, stdout, format, ap);
@@ -1552,12 +1548,6 @@ PSTDOUT_FPRINTF(pstdout_state_t pstate, FILE *stream, const char *format, ...)
   va_list ap;
   int rv;
 
-  if (!pstdout_initialized)
-    {
-      pstdout_errnum = PSTDOUT_ERR_UNINITIALIZED;
-      return -1;
-    }
-
   if (!stream || !format)
     {
       pstdout_errnum = PSTDOUT_ERR_PARAMETERS;
@@ -1567,7 +1557,8 @@ PSTDOUT_FPRINTF(pstdout_state_t pstate, FILE *stream, const char *format, ...)
   va_start(ap, format);
   if (!pstate 
       || pstate->magic != PSTDOUT_STATE_MAGIC
-      || (stream != stdout && stream != stderr))
+      || (stream != stdout && stream != stderr)
+      || !pstdout_initialized)
     rv = vfprintf(stream, format, ap);
   else
     rv = _pstdout_print(pstate, 0, stream, format, ap);
@@ -1578,25 +1569,15 @@ PSTDOUT_FPRINTF(pstdout_state_t pstate, FILE *stream, const char *format, ...)
 void 
 PSTDOUT_PERROR(pstdout_state_t pstate, const char *s)
 {
-  if (!pstdout_initialized)
-    {
-      pstdout_errnum = PSTDOUT_ERR_UNINITIALIZED;
-      return;
-    }
-
   if (!s)
     {
       pstdout_errnum = PSTDOUT_ERR_PARAMETERS;
       return;
     }
 
-  if (!pstate || pstate->magic != PSTDOUT_STATE_MAGIC)
-    {
-      pstdout_errnum = PSTDOUT_ERR_PARAMETERS;
-      return;
-    }
-
-  if (!pstate || pstate->magic != PSTDOUT_STATE_MAGIC)
+  if (!pstate
+      || pstate->magic != PSTDOUT_STATE_MAGIC
+      || !pstdout_initialized)
     fprintf(stderr, "%s: %s\n", s, strerror(errno));
   else
     _pstdout_print_wrapper(pstate, 0, stderr, "%s: %s\n", s, strerror(errno));

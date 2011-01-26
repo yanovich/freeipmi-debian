@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifndef _CONFIG_TOOL_SECTION_H_
 #define _CONFIG_TOOL_SECTION_H_
@@ -37,6 +37,17 @@ struct config_section *config_section_create (pstdout_state_t pstate,
                                               Section_Pre_Commit section_pre_commit,
                                               Section_Post_Commit section_post_commit);
 
+/* -1 for channel index indicates do nothing, do same as config_section_create */
+struct config_section *config_section_multi_channel_create (pstdout_state_t pstate,
+							    const char *section_name_base_str,
+							    const char *section_comment,
+							    Section_Pre_Commit section_pre_commit,
+							    Section_Post_Commit section_post_commit,
+							    unsigned int config_flags,
+							    int channel_index,
+							    uint8_t *channel_numbers,
+							    unsigned int channel_numbers_count);
+
 void config_section_destroy (struct config_section *section);
 
 int config_section_add_key (pstdout_state_t pstate,
@@ -47,6 +58,19 @@ int config_section_add_key (pstdout_state_t pstate,
                             Key_Checkout checkout,
                             Key_Commit commit,
                             Key_Validate validate);
+
+/* -1 for channel index indicates do nothing, do same as config_section_add_key */
+int config_section_multi_channel_add_key (pstdout_state_t pstate,
+					  struct config_section *section,
+					  const char *key_name_base_str,
+					  const char *description,
+					  unsigned int flags,
+					  Key_Checkout checkout,
+					  Key_Commit commit,
+					  Key_Validate validate,
+					  int channel_index,
+					  uint8_t *channel_numbers,
+					  unsigned int channel_numbers_count);
 
 int config_section_add_keyvalue (pstdout_state_t pstate,
                                  struct config_section *section,
@@ -65,6 +89,10 @@ int config_section_update_keyvalue_output (pstdout_state_t pstate,
 int config_section_update_keyvalue_output_unsigned_int (pstdout_state_t pstate,
                                                         struct config_keyvalue *keyvalue,
                                                         unsigned int value_output);
+
+int config_section_update_keyvalue_output_hex (pstdout_state_t pstate,
+                                               struct config_keyvalue *keyvalue,
+                                               unsigned int value_output);
 
 int config_section_update_keyvalue_output_double (pstdout_state_t pstate,
                                                   struct config_keyvalue *keyvalue,

@@ -11,9 +11,7 @@ thresholds and sensor events.  This configuration tool is for advanced
 IPMI users and generally not-required for IPMI to function.  Most IPMI
 users will not need to use this tool.  For more general sensor reading
 and/or monitoring, it is recommended that users use
-.B ipmi-sensors(8)
-or
-.B ipmimonitoring(8).
+.B ipmi-sensors(8).
 
 The majority of
 configuration operations require OPERATOR privilege when using
@@ -75,6 +73,8 @@ See GENERAL USE below for a description on how most will want to use
 #include <@top_srcdir@/common/man/manpage-common-debug.man>
 #include <@top_srcdir@/common/man/manpage-common-misc.man>
 #include <@top_srcdir@/common/man/manpage-common-config-tool-options.man>
+#include <@top_srcdir@/common/man/manpage-common-config-tool-options-verbose.man>
+#include <@top_srcdir@/common/man/manpage-common-config-tool-options-very-verbose.man>
 #include <@top_srcdir@/common/man/manpage-common-sdr-options.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-options-header.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-buffer.man>
@@ -121,5 +121,5 @@ Copyright \(co 2008-2010 FreeIPMI Core Team.
 #include <@top_srcdir@/common/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
 freeipmi(7), bmc-config(8), ipmi-pef-config(8),
-ipmi-chassis-config(8), ipmi-sensors(8), ipmimonitoring(8)
+ipmi-chassis-config(8), ipmi-sensors(8)
 #include <@top_srcdir@/common/man/manpage-common-homepage.man>

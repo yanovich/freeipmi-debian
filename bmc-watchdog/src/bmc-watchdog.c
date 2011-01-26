@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  $Id: bmc-watchdog.c,v 1.127.4.5 2010-06-28 20:24:26 chu11 Exp $
+ *  $Id: bmc-watchdog.c,v 1.134 2010-06-28 20:24:30 chu11 Exp $
  *****************************************************************************
  *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2004-2007 The Regents of the University of California.
@@ -13,7 +13,7 @@
  *
  *  Bmc-Watchdog is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
+ *  Free Software Foundation; either version 3 of the License, or (at your
  *  option) any later version.
  *
  *  Bmc-Watchdog is distributed in the hope that it will be useful, but
@@ -1932,7 +1932,7 @@ _daemon_cmd (void)
    * delay up to 100 ms before seeing the countdown value change and
    * be reflected in the Get Watchdog Timer command".
    */
-  if (cmd_args.common.tool_specific_workaround_flags & IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_IGNORE_STATE_FLAG)
+  if (cmd_args.common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_IGNORE_STATE_FLAG)
     _sleep (1);
 
   while (shutdown_flag)
@@ -1974,7 +1974,7 @@ _daemon_cmd (void)
        * to have an operational BMC watchdog, it must function without it.
        * We instead look to see if the timer is changing.
        */
-      if (cmd_args.common.tool_specific_workaround_flags & IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_IGNORE_STATE_FLAG)
+      if (cmd_args.common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_IGNORE_STATE_FLAG)
         {
           if (previous_present_countdown_seconds == present_countdown_seconds)
             {
@@ -2007,7 +2007,7 @@ _daemon_cmd (void)
        * we need to reset the previous_present_countdown_seconds to
        * what it is after the timer reset.
        */
-      if (cmd_args.common.tool_specific_workaround_flags & IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_IGNORE_STATE_FLAG)
+      if (cmd_args.common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_IGNORE_STATE_FLAG)
         {
           /* From 27.7 "Internal delays in the BMC may require software to
            * delay up to 100 ms before seeing the countdown value change and

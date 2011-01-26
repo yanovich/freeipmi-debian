@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -31,6 +31,7 @@
 #include <freeipmi/freeipmi.h>
 
 #include "freeipmi-portability.h"
+#include "parse-common.h"
 #include "pstdout.h"
 #include "tool-config-file-common.h"
 #include "tool-common.h"
@@ -59,23 +60,23 @@ struct cmd_args_config
   int privilege_level;
   int privilege_level_set;
   int tool_option_privilege_level_set;
-  unsigned int workaround_flags;
+  unsigned int workaround_flags_outofband;
+  unsigned int workaround_flags_outofband_2_0;
+  unsigned int workaround_flags_inband;
+  unsigned int section_specific_workaround_flags;
   int workaround_flags_set;
-  int tool_option_workaround_flags_set;
-  unsigned int tool_specific_workaround_flags;
-  int tool_specific_workaround_flags_set;
-  int tool_option_tool_specific_workaround_flags_set;
+  int tool_option_workaround_flags_set; /* for internal parsing check */
 };
 
-int
-config_file_bool (conffile_t cf,
-                  struct conffile_data *data,
-                  char *optionname,
-                  int option_type,
-                  void *option_ptr,
-                  int option_data,
-                  void *app_ptr,
-                  int app_data)
+static int
+_config_file_bool (conffile_t cf,
+                   struct conffile_data *data,
+                   char *optionname,
+                   int option_type,
+                   void *option_ptr,
+                   int option_data,
+                   void *app_ptr,
+                   int app_data)
 {
   int *bool;
 
@@ -86,15 +87,15 @@ config_file_bool (conffile_t cf,
   return (0);
 }
 
-int
-config_file_non_negative_int (conffile_t cf,
-                              struct conffile_data *data,
-                              char *optionname,
-                              int option_type,
-                              void *option_ptr,
-                              int option_data,
-                              void *app_ptr,
-                              int app_data)
+static int
+_config_file_non_negative_int (conffile_t cf,
+                               struct conffile_data *data,
+                               char *optionname,
+                               int option_type,
+                               void *option_ptr,
+                               int option_data,
+                               void *app_ptr,
+                               int app_data)
 {
   int *value;
 
@@ -112,15 +113,15 @@ config_file_non_negative_int (conffile_t cf,
   return (0);
 }
 
-int
-config_file_positive_int (conffile_t cf,
-                          struct conffile_data *data,
-                          char *optionname,
-                          int option_type,
-                          void *option_ptr,
-                          int option_data,
-                          void *app_ptr,
-                          int app_data)
+static int
+_config_file_positive_int (conffile_t cf,
+                           struct conffile_data *data,
+                           char *optionname,
+                           int option_type,
+                           void *option_ptr,
+                           int option_data,
+                           void *app_ptr,
+                           int app_data)
 {
   int *value;
 
@@ -138,15 +139,15 @@ config_file_positive_int (conffile_t cf,
   return (0);
 }
 
-int
-config_file_string (conffile_t cf,
-                    struct conffile_data *data,
-                    char *optionname,
-                    int option_type,
-                    void *option_ptr,
-                    int option_data,
-                    void *app_ptr,
-                    int app_data)
+static int
+_config_file_string (conffile_t cf,
+                     struct conffile_data *data,
+                     char *optionname,
+                     int option_type,
+                     void *option_ptr,
+                     int option_data,
+                     void *app_ptr,
+                     int app_data)
 {
   char **value;
 
@@ -163,15 +164,15 @@ config_file_string (conffile_t cf,
   return (0);
 }
 
-int
-config_file_driver_type (conffile_t cf,
-                         struct conffile_data *data,
-                         char *optionname,
-                         int option_type,
-                         void *option_ptr,
-                         int option_data,
-                         void *app_ptr,
-                         int app_data)
+static int
+_config_file_driver_type (conffile_t cf,
+                          struct conffile_data *data,
+                          char *optionname,
+                          int option_type,
+                          void *option_ptr,
+                          int option_data,
+                          void *app_ptr,
+                          int app_data)
 {
   struct common_cmd_args *cmd_args;
   int tmp;
@@ -197,15 +198,15 @@ config_file_driver_type (conffile_t cf,
   return (0);
 }
 
-int
-config_file_username (conffile_t cf,
-                      struct conffile_data *data,
-                      char *optionname,
-                      int option_type,
-                      void *option_ptr,
-                      int option_data,
-                      void *app_ptr,
-                      int app_data)
+static int
+_config_file_username (conffile_t cf,
+                       struct conffile_data *data,
+                       char *optionname,
+                       int option_type,
+                       void *option_ptr,
+                       int option_data,
+                       void *app_ptr,
+                       int app_data)
 {
   struct cmd_args_config *cmd_args_config;
 
@@ -233,15 +234,15 @@ config_file_username (conffile_t cf,
   return (0);
 }
 
-int
-config_file_password (conffile_t cf,
-                      struct conffile_data *data,
-                      char *optionname,
-                      int option_type,
-                      void *option_ptr,
-                      int option_data,
-                      void *app_ptr,
-                      int app_data)
+static int
+_config_file_password (conffile_t cf,
+                       struct conffile_data *data,
+                       char *optionname,
+                       int option_type,
+                       void *option_ptr,
+                       int option_data,
+                       void *app_ptr,
+                       int app_data)
 {
   struct cmd_args_config *cmd_args_config;
 
@@ -269,15 +270,15 @@ config_file_password (conffile_t cf,
   return (0);
 }
 
-int
-config_file_k_g (conffile_t cf,
-                 struct conffile_data *data,
-                 char *optionname,
-                 int option_type,
-                 void *option_ptr,
-                 int option_data,
-                 void *app_ptr,
-                 int app_data)
+static int
+_config_file_k_g (conffile_t cf,
+                  struct conffile_data *data,
+                  char *optionname,
+                  int option_type,
+                  void *option_ptr,
+                  int option_data,
+                  void *app_ptr,
+                  int app_data)
 {
   struct cmd_args_config *cmd_args_config;
   int rv;
@@ -303,15 +304,15 @@ config_file_k_g (conffile_t cf,
   return (0);
 }
 
-int
-config_file_authentication_type (conffile_t cf,
-                                 struct conffile_data *data,
-                                 char *optionname,
-                                 int option_type,
-                                 void *option_ptr,
-                                 int option_data,
-                                 void *app_ptr,
-                                 int app_data)
+static int
+_config_file_authentication_type (conffile_t cf,
+                                  struct conffile_data *data,
+                                  char *optionname,
+                                  int option_type,
+                                  void *option_ptr,
+                                  int option_data,
+                                  void *app_ptr,
+                                  int app_data)
 {
   struct cmd_args_config *cmd_args_config;
   int tmp;
@@ -336,15 +337,15 @@ config_file_authentication_type (conffile_t cf,
   return (0);
 }
 
-int
-config_file_cipher_suite_id (conffile_t cf,
-                             struct conffile_data *data,
-                             char *optionname,
-                             int option_type,
-                             void *option_ptr,
-                             int option_data,
-                             void *app_ptr,
-                             int app_data)
+static int
+_config_file_cipher_suite_id (conffile_t cf,
+                              struct conffile_data *data,
+                              char *optionname,
+                              int option_type,
+                              void *option_ptr,
+                              int option_data,
+                              void *app_ptr,
+                              int app_data)
 {
   struct cmd_args_config *cmd_args_config;
 
@@ -370,15 +371,15 @@ config_file_cipher_suite_id (conffile_t cf,
   return (0);
 }
 
-int
-config_file_privilege_level (conffile_t cf,
-                             struct conffile_data *data,
-                             char *optionname,
-                             int option_type,
-                             void *option_ptr,
-                             int option_data,
-                             void *app_ptr,
-                             int app_data)
+static int
+_config_file_privilege_level (conffile_t cf,
+                              struct conffile_data *data,
+                              char *optionname,
+                              int option_type,
+                              void *option_ptr,
+                              int option_data,
+                              void *app_ptr,
+                              int app_data)
 {
   struct cmd_args_config *cmd_args_config;
   int tmp;
@@ -403,15 +404,15 @@ config_file_privilege_level (conffile_t cf,
   return (0);
 }
 
-int
-config_file_workaround_flags (conffile_t cf,
-                              struct conffile_data *data,
-                              char *optionname,
-                              int option_type,
-                              void *option_ptr,
-                              int option_data,
-                              void *app_ptr,
-                              int app_data)
+static int
+_config_file_workaround_flags (conffile_t cf,
+                               struct conffile_data *data,
+                               char *optionname,
+                               int option_type,
+                               void *option_ptr,
+                               int option_data,
+                               void *app_ptr,
+                               int app_data)
 {
   struct cmd_args_config *cmd_args_config;
   unsigned int i;
@@ -423,43 +424,50 @@ config_file_workaround_flags (conffile_t cf,
   if (cmd_args_config->tool_option_workaround_flags_set)
     return (0);
 
-  cmd_args_config->workaround_flags = 0;
-  cmd_args_config->tool_specific_workaround_flags = 0;
+  cmd_args_config->workaround_flags_outofband = 0;
+  cmd_args_config->workaround_flags_outofband_2_0 = 0;
+  cmd_args_config->workaround_flags_inband = 0;
+  cmd_args_config->section_specific_workaround_flags = 0;
 
   for (i = 0; i < data->stringlist_len; i++)
     {
-      unsigned int tmp1, tmp2;
+      unsigned int outofband_flags, outofband_2_0_flags, inband_flags, section_flags;
 
-      if (parse_workaround_flags (data->stringlist[i], &tmp1, &tmp2) < 0)
+      if (parse_workaround_flags (data->stringlist[i],
+                                  &outofband_flags,
+                                  &outofband_2_0_flags,
+                                  &inband_flags,
+                                  &section_flags) < 0)
         {
           fprintf (stderr, "Config File Error: invalid value for %s\n", optionname);
           exit (1);
         }
       
-      if (tmp1)
+      if (outofband_flags
+          || outofband_2_0_flags
+          || inband_flags
+          || section_flags)
         {
-          cmd_args_config->workaround_flags |= tmp1;
+          cmd_args_config->workaround_flags_outofband |= outofband_flags;
+          cmd_args_config->workaround_flags_outofband_2_0 |= outofband_2_0_flags;
+          cmd_args_config->workaround_flags_inband |= inband_flags;
+          cmd_args_config->section_specific_workaround_flags |= section_flags;
           cmd_args_config->workaround_flags_set++;
-        }
-      if (tmp2)
-        {
-          cmd_args_config->tool_specific_workaround_flags |= tmp2;
-          cmd_args_config->tool_specific_workaround_flags_set++;
         }
     }
 
   return (0);
 }
 
-int
-config_file_tool_option_username (conffile_t cf,
-                                  struct conffile_data *data,
-                                  char *optionname,
-                                  int option_type,
-                                  void *option_ptr,
-                                  int option_data,
-                                  void *app_ptr,
-                                  int app_data)
+static int
+_config_file_tool_option_username (conffile_t cf,
+                                   struct conffile_data *data,
+                                   char *optionname,
+                                   int option_type,
+                                   void *option_ptr,
+                                   int option_data,
+                                   void *app_ptr,
+                                   int app_data)
 {
   struct cmd_args_config *cmd_args_config;
 
@@ -488,15 +496,15 @@ config_file_tool_option_username (conffile_t cf,
   return (0);
 }
 
-int
-config_file_tool_option_password (conffile_t cf,
-                                  struct conffile_data *data,
-                                  char *optionname,
-                                  int option_type,
-                                  void *option_ptr,
-                                  int option_data,
-                                  void *app_ptr,
-                                  int app_data)
+static int
+_config_file_tool_option_password (conffile_t cf,
+                                   struct conffile_data *data,
+                                   char *optionname,
+                                   int option_type,
+                                   void *option_ptr,
+                                   int option_data,
+                                   void *app_ptr,
+                                   int app_data)
 {
   struct cmd_args_config *cmd_args_config;
 
@@ -525,15 +533,15 @@ config_file_tool_option_password (conffile_t cf,
   return (0);
 }
 
-int
-config_file_tool_option_k_g (conffile_t cf,
-                             struct conffile_data *data,
-                             char *optionname,
-                             int option_type,
-                             void *option_ptr,
-                             int option_data,
-                             void *app_ptr,
-                             int app_data)
+static int
+_config_file_tool_option_k_g (conffile_t cf,
+                              struct conffile_data *data,
+                              char *optionname,
+                              int option_type,
+                              void *option_ptr,
+                              int option_data,
+                              void *app_ptr,
+                              int app_data)
 {
   struct cmd_args_config *cmd_args_config;
   int rv;
@@ -560,15 +568,15 @@ config_file_tool_option_k_g (conffile_t cf,
   return (0);
 }
 
-int
-config_file_tool_option_authentication_type (conffile_t cf,
-                                             struct conffile_data *data,
-                                             char *optionname,
-                                             int option_type,
-                                             void *option_ptr,
-                                             int option_data,
-                                             void *app_ptr,
-                                             int app_data)
+static int
+_config_file_tool_option_authentication_type (conffile_t cf,
+                                              struct conffile_data *data,
+                                              char *optionname,
+                                              int option_type,
+                                              void *option_ptr,
+                                              int option_data,
+                                              void *app_ptr,
+                                              int app_data)
 {
   struct cmd_args_config *cmd_args_config;
   int tmp;
@@ -591,15 +599,15 @@ config_file_tool_option_authentication_type (conffile_t cf,
   return (0);
 }
 
-int
-config_file_tool_option_cipher_suite_id (conffile_t cf,
-                                         struct conffile_data *data,
-                                         char *optionname,
-                                         int option_type,
-                                         void *option_ptr,
-                                         int option_data,
-                                         void *app_ptr,
-                                         int app_data)
+static int
+_config_file_tool_option_cipher_suite_id (conffile_t cf,
+                                          struct conffile_data *data,
+                                          char *optionname,
+                                          int option_type,
+                                          void *option_ptr,
+                                          int option_data,
+                                          void *app_ptr,
+                                          int app_data)
 {
   struct cmd_args_config *cmd_args_config;
 
@@ -623,15 +631,15 @@ config_file_tool_option_cipher_suite_id (conffile_t cf,
   return (0);
 }
 
-int
-config_file_tool_option_privilege_level (conffile_t cf,
-                                         struct conffile_data *data,
-                                         char *optionname,
-                                         int option_type,
-                                         void *option_ptr,
-                                         int option_data,
-                                         void *app_ptr,
-                                         int app_data)
+static int
+_config_file_tool_option_privilege_level (conffile_t cf,
+                                          struct conffile_data *data,
+                                          char *optionname,
+                                          int option_type,
+                                          void *option_ptr,
+                                          int option_data,
+                                          void *app_ptr,
+                                          int app_data)
 {
   struct cmd_args_config *cmd_args_config;
   int tmp;
@@ -654,15 +662,15 @@ config_file_tool_option_privilege_level (conffile_t cf,
   return (0);
 }
 
-int
-config_file_tool_option_workaround_flags (conffile_t cf,
-                                          struct conffile_data *data,
-                                          char *optionname,
-                                          int option_type,
-                                          void *option_ptr,
-                                          int option_data,
-                                          void *app_ptr,
-                                          int app_data)
+static int
+_config_file_tool_option_workaround_flags (conffile_t cf,
+                                           struct conffile_data *data,
+                                           char *optionname,
+                                           int option_type,
+                                           void *option_ptr,
+                                           int option_data,
+                                           void *app_ptr,
+                                           int app_data)
 {
   struct cmd_args_config *cmd_args_config;
   unsigned int i;
@@ -671,46 +679,51 @@ config_file_tool_option_workaround_flags (conffile_t cf,
 
   cmd_args_config = (struct cmd_args_config *)option_ptr;
 
-  cmd_args_config->workaround_flags = 0;
+  cmd_args_config->workaround_flags_outofband = 0;
+  cmd_args_config->workaround_flags_outofband_2_0 = 0;
+  cmd_args_config->workaround_flags_inband = 0;
+  cmd_args_config->section_specific_workaround_flags = 0;
 
   for (i = 0; i < data->stringlist_len; i++)
     {
-      unsigned int tmp1, tmp2;
+      unsigned int outofband_flags, outofband_2_0_flags, inband_flags, section_flags;
 
-      if (parse_workaround_flags (data->stringlist[i], &tmp1, &tmp2) < 0)
+      if (parse_workaround_flags (data->stringlist[i],
+                                  &outofband_flags,
+                                  &outofband_2_0_flags,
+                                  &inband_flags,
+                                  &section_flags) < 0)
         {
           fprintf (stderr, "Config File Error: invalid value for %s\n", optionname);
           exit (1);
         }
       
-      if (tmp1)
+      if (outofband_flags
+          || outofband_2_0_flags
+          || inband_flags
+          || section_flags)
         {
-          cmd_args_config->workaround_flags |= tmp1;
-          cmd_args_config->workaround_flags_set++;
+          cmd_args_config->workaround_flags_outofband |= outofband_flags;
+          cmd_args_config->workaround_flags_outofband_2_0 |= outofband_2_0_flags;
+          cmd_args_config->workaround_flags_inband |= inband_flags;
+          cmd_args_config->section_specific_workaround_flags |= section_flags;
           cmd_args_config->workaround_flags_set++;
           cmd_args_config->tool_option_workaround_flags_set++;
-        }
-      if (tmp2)
-        {
-          cmd_args_config->tool_specific_workaround_flags |= tmp2;
-          cmd_args_config->tool_specific_workaround_flags_set++;
-          cmd_args_config->tool_specific_workaround_flags_set++;
-          cmd_args_config->tool_option_tool_specific_workaround_flags_set++;
         }
     }
 
   return (0);
 }
 
-int
-config_file_fanout (conffile_t cf,
-                    struct conffile_data *data,
-                    char *optionname,
-                    int option_type,
-                    void *option_ptr,
-                    int option_data,
-                    void *app_ptr,
-                    int app_data)
+static int
+_config_file_fanout (conffile_t cf,
+                     struct conffile_data *data,
+                     char *optionname,
+                     int option_type,
+                     void *option_ptr,
+                     int option_data,
+                     void *app_ptr,
+                     int app_data)
 {
   struct hostrange_cmd_args *hostrange_args;
 
@@ -727,87 +740,6 @@ config_file_fanout (conffile_t cf,
 
   hostrange_args->fanout = data->intval;
   return (0);
-}
-
-static int
-_config_file_sensor_record_ids (struct conffile_data *data,
-                                char *optionname,
-                                unsigned int *record_ids,
-                                unsigned int *record_ids_length)
-{
-  unsigned int i;
-
-  assert (data);
-  assert (optionname);
-  assert (record_ids);
-  assert (record_ids_length);
-
-  if (data->intlist_len > CONFIG_FILE_MAX_SENSOR_RECORD_IDS)
-    {
-      fprintf (stderr, "Config File Error: invalid number of arguments for %s\n", optionname);
-      exit (1);
-    }
-
-  for (i = 0; i < data->intlist_len; i++)
-    {
-      if (data->intlist[i] < 0
-          || data->intlist[i] > IPMI_SDR_RECORD_ID_LAST)
-        {
-          fprintf (stderr, "Config File Error: invalid value '%d' for %s\n",
-                   data->intlist[i],
-                   optionname);
-          exit (1);
-        }
-      
-      record_ids[i] = (unsigned int)data->intlist[i];
-      (*record_ids_length)++;
-    }
-
-  return (0);
-}
-
-int
-config_file_ipmi_sensors_record_ids (conffile_t cf,
-                                     struct conffile_data *data,
-                                     char *optionname,
-                                     int option_type,
-                                     void *option_ptr,
-                                     int option_data,
-                                     void *app_ptr,
-                                     int app_data)
-{
-  struct config_file_data_ipmi_sensors *config_file_data;
-
-  assert (option_ptr);
-
-  config_file_data = (struct config_file_data_ipmi_sensors *)option_ptr;
-
-  return (_config_file_sensor_record_ids (data,
-                                          optionname,
-                                          config_file_data->record_ids,
-                                          &(config_file_data->record_ids_length)));
-}
-
-int
-config_file_ipmi_sensors_exclude_record_ids (conffile_t cf,
-                                             struct conffile_data *data,
-                                             char *optionname,
-                                             int option_type,
-                                             void *option_ptr,
-                                             int option_data,
-                                             void *app_ptr,
-                                             int app_data)
-{
-  struct config_file_data_ipmi_sensors *config_file_data;
-
-  assert (option_ptr);
-
-  config_file_data = (struct config_file_data_ipmi_sensors *)option_ptr;
-
-  return (_config_file_sensor_record_ids (data,
-                                          optionname,
-                                          config_file_data->exclude_record_ids,
-                                          &(config_file_data->exclude_record_ids_length)));
 }
 
 static int
@@ -849,15 +781,140 @@ _config_file_sensor_types (struct conffile_data *data,
   return (0);
 }
 
-int
-config_file_ipmi_sensors_sensor_types (conffile_t cf,
-                                       struct conffile_data *data,
-                                       char *optionname,
-                                       int option_type,
-                                       void *option_ptr,
-                                       int option_data,
-                                       void *app_ptr,
-                                       int app_data)
+static int
+_config_file_ipmi_sel_sensor_types (conffile_t cf,
+                                    struct conffile_data *data,
+                                    char *optionname,
+                                    int option_type,
+                                    void *option_ptr,
+                                    int option_data,
+                                    void *app_ptr,
+                                    int app_data)
+{
+  struct config_file_data_ipmi_sel *config_file_data;
+
+  assert (option_ptr);
+
+  config_file_data = (struct config_file_data_ipmi_sel *)option_ptr;
+
+  return (_config_file_sensor_types (data,
+                                     optionname,
+                                     config_file_data->sensor_types,
+                                     &(config_file_data->sensor_types_length)));
+}
+
+static int
+_config_file_ipmi_sel_exclude_sensor_types (conffile_t cf,
+                                            struct conffile_data *data,
+                                            char *optionname,
+                                            int option_type,
+                                            void *option_ptr,
+                                            int option_data,
+                                            void *app_ptr,
+                                            int app_data)
+{
+  struct config_file_data_ipmi_sel *config_file_data;
+
+  assert (option_ptr);
+
+  config_file_data = (struct config_file_data_ipmi_sel *)option_ptr;
+
+  return (_config_file_sensor_types (data,
+                                     optionname,
+                                     config_file_data->exclude_sensor_types,
+                                     &(config_file_data->exclude_sensor_types_length)));
+}
+
+static int
+_config_file_sensor_record_ids (struct conffile_data *data,
+                                char *optionname,
+                                unsigned int *record_ids,
+                                unsigned int *record_ids_length)
+{
+  unsigned int i;
+
+  assert (data);
+  assert (optionname);
+  assert (record_ids);
+  assert (record_ids_length);
+
+  if (data->intlist_len > CONFIG_FILE_MAX_SENSOR_RECORD_IDS)
+    {
+      fprintf (stderr, "Config File Error: invalid number of arguments for %s\n", optionname);
+      exit (1);
+    }
+
+  for (i = 0; i < data->intlist_len; i++)
+    {
+      if (data->intlist[i] < 0
+          || data->intlist[i] > IPMI_SDR_RECORD_ID_LAST)
+        {
+          fprintf (stderr, "Config File Error: invalid value '%d' for %s\n",
+                   data->intlist[i],
+                   optionname);
+          exit (1);
+        }
+      
+      record_ids[i] = (unsigned int)data->intlist[i];
+      (*record_ids_length)++;
+    }
+
+  return (0);
+}
+
+static int
+_config_file_ipmi_sensors_record_ids (conffile_t cf,
+                                      struct conffile_data *data,
+                                      char *optionname,
+                                      int option_type,
+                                      void *option_ptr,
+                                      int option_data,
+                                      void *app_ptr,
+                                      int app_data)
+{
+  struct config_file_data_ipmi_sensors *config_file_data;
+
+  assert (option_ptr);
+
+  config_file_data = (struct config_file_data_ipmi_sensors *)option_ptr;
+
+  return (_config_file_sensor_record_ids (data,
+                                          optionname,
+                                          config_file_data->record_ids,
+                                          &(config_file_data->record_ids_length)));
+}
+
+static int
+_config_file_ipmi_sensors_exclude_record_ids (conffile_t cf,
+                                              struct conffile_data *data,
+                                              char *optionname,
+                                              int option_type,
+                                              void *option_ptr,
+                                              int option_data,
+                                              void *app_ptr,
+                                              int app_data)
+{
+  struct config_file_data_ipmi_sensors *config_file_data;
+
+  assert (option_ptr);
+
+  config_file_data = (struct config_file_data_ipmi_sensors *)option_ptr;
+
+  return (_config_file_sensor_record_ids (data,
+                                          optionname,
+                                          config_file_data->exclude_record_ids,
+                                          &(config_file_data->exclude_record_ids_length)));
+}
+
+static int
+_config_file_ipmi_sensors_sensor_types (conffile_t cf,
+                                        struct conffile_data *data,
+                                        char *optionname,
+                                        int option_type,
+                                        void *option_ptr,
+                                        int option_data,
+                                        void *app_ptr,
+                                        int app_data)
 {
   struct config_file_data_ipmi_sensors *config_file_data;
 
@@ -871,15 +928,15 @@ config_file_ipmi_sensors_sensor_types (conffile_t cf,
                                      &(config_file_data->sensor_types_length)));
 }
 
-int
-config_file_ipmi_sensors_exclude_sensor_types (conffile_t cf,
-                                               struct conffile_data *data,
-                                               char *optionname,
-                                               int option_type,
-                                               void *option_ptr,
-                                               int option_data,
-                                               void *app_ptr,
-                                               int app_data)
+static int
+_config_file_ipmi_sensors_exclude_sensor_types (conffile_t cf,
+                                                struct conffile_data *data,
+                                                char *optionname,
+                                                int option_type,
+                                                void *option_ptr,
+                                                int option_data,
+                                                void *app_ptr,
+                                                int app_data)
 {
   struct config_file_data_ipmi_sensors *config_file_data;
 
@@ -894,14 +951,14 @@ config_file_ipmi_sensors_exclude_sensor_types (conffile_t cf,
 }
 
 static int
-config_file_ipmiconsole_escape_char (conffile_t cf,
-                                     struct conffile_data *data,
-                                     char *optionname,
-                                     int option_type,
-                                     void *option_ptr,
-                                     int option_data,
-                                     void *app_ptr,
-                                     int app_data)
+_config_file_ipmiconsole_escape_char (conffile_t cf,
+                                      struct conffile_data *data,
+                                      char *optionname,
+                                      int option_type,
+                                      void *option_ptr,
+                                      int option_data,
+                                      void *app_ptr,
+                                      int app_data)
 {
   char *chr;
 
@@ -913,103 +970,15 @@ config_file_ipmiconsole_escape_char (conffile_t cf,
   return (0);
 }
 
-int
-config_file_ipmimonitoring_record_ids (conffile_t cf,
-                                       struct conffile_data *data,
-                                       char *optionname,
-                                       int option_type,
-                                       void *option_ptr,
-                                       int option_data,
-                                       void *app_ptr,
-                                       int app_data)
-{
-  struct config_file_data_ipmimonitoring *config_file_data;
-
-  assert (option_ptr);
-
-  config_file_data = (struct config_file_data_ipmimonitoring *)option_ptr;
-
-  return (_config_file_sensor_record_ids (data,
-                                          optionname,
-                                          config_file_data->record_ids,
-                                          &(config_file_data->record_ids_length)));
-}
-
-int
-config_file_ipmimonitoring_exclude_record_ids (conffile_t cf,
-                                               struct conffile_data *data,
-                                               char *optionname,
-                                               int option_type,
-                                               void *option_ptr,
-                                               int option_data,
-                                               void *app_ptr,
-                                               int app_data)
-{
-  struct config_file_data_ipmimonitoring *config_file_data;
-
-  assert (option_ptr);
-
-  config_file_data = (struct config_file_data_ipmimonitoring *)option_ptr;
-
-  return (_config_file_sensor_record_ids (data,
-                                          optionname,
-                                          config_file_data->exclude_record_ids,
-                                          &(config_file_data->exclude_record_ids_length)));
-}
-
-int
-config_file_ipmimonitoring_sensor_types (conffile_t cf,
-                                         struct conffile_data *data,
-                                         char *optionname,
-                                         int option_type,
-                                         void *option_ptr,
-                                         int option_data,
-                                         void *app_ptr,
-                                         int app_data)
-{
-  struct config_file_data_ipmimonitoring *config_file_data;
-
-  assert (option_ptr);
-
-  config_file_data = (struct config_file_data_ipmimonitoring *)option_ptr;
-
-  return (_config_file_sensor_types (data,
-                                     optionname,
-                                     config_file_data->sensor_types,
-                                     &(config_file_data->sensor_types_length)));
-}
-
-int
-config_file_ipmimonitoring_exclude_sensor_types (conffile_t cf,
-                                                 struct conffile_data *data,
-                                                 char *optionname,
-                                                 int option_type,
-                                                 void *option_ptr,
-                                                 int option_data,
-                                                 void *app_ptr,
-                                                 int app_data)
-{
-  struct config_file_data_ipmimonitoring *config_file_data;
-
-  assert (option_ptr);
-
-  config_file_data = (struct config_file_data_ipmimonitoring *)option_ptr;
-
-  return (_config_file_sensor_types (data,
-                                     optionname,
-                                     config_file_data->exclude_sensor_types,
-                                     &(config_file_data->exclude_sensor_types_length)));
-}
-
-int
-config_file_ipmipower_ipmi_version (conffile_t cf,
-                                    struct conffile_data *data,
-                                    char *optionname,
-                                    int option_type,
-                                    void *option_ptr,
-                                    int option_data,
-                                    void *app_ptr,
-                                    int app_data)
+static int
+_config_file_ipmipower_ipmi_version (conffile_t cf,
+                                     struct conffile_data *data,
+                                     char *optionname,
+                                     int option_type,
+                                     void *option_ptr,
+                                     int option_data,
+                                     void *app_ptr,
+                                     int app_data)
 {
   struct common_cmd_args *cmd_args;
   int tmp;
@@ -1169,11 +1138,6 @@ config_file_parse (const char *filename,
     ipmiconsole_cipher_suite_id_count = 0, ipmiconsole_privilege_level_count = 0,
     ipmiconsole_workaround_flags_count = 0;
 
-  int ipmimonitoring_username_count = 0, ipmimonitoring_password_count = 0,
-    ipmimonitoring_k_g_count = 0, ipmimonitoring_authentication_type_count = 0,
-    ipmimonitoring_cipher_suite_id_count = 0, ipmimonitoring_privilege_level_count = 0,
-    ipmimonitoring_workaround_flags_count = 0;
-
   int ipmipower_username_count = 0, ipmipower_password_count = 0,
     ipmipower_k_g_count = 0, ipmipower_authentication_type_count = 0,
     ipmipower_cipher_suite_id_count = 0, ipmipower_privilege_level_count = 0,
@@ -1215,9 +1179,6 @@ config_file_parse (const char *filename,
   struct config_file_data_ipmiconsole ipmiconsole_data;
   struct config_file_data_ipmiconsole *ipmiconsole_data_ptr;
 
-  struct config_file_data_ipmimonitoring ipmimonitoring_data;
-  struct config_file_data_ipmimonitoring *ipmimonitoring_data_ptr;
-
   struct config_file_data_ipmipower ipmipower_data;
   struct config_file_data_ipmipower *ipmipower_data_ptr;
 
@@ -1229,7 +1190,7 @@ config_file_parse (const char *filename,
         "driver-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_driver_type,
+        _config_file_driver_type,
         1,
         0,
         &driver_type_count,
@@ -1240,7 +1201,7 @@ config_file_parse (const char *filename,
         "workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_workaround_flags,
+        _config_file_workaround_flags,
         1,
         0,
         &workaround_flags_count,
@@ -1255,7 +1216,7 @@ config_file_parse (const char *filename,
         "disable-auto-probe",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &disable_auto_probe_count,
@@ -1266,7 +1227,7 @@ config_file_parse (const char *filename,
         "driver-address",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &driver_address_count,
@@ -1277,7 +1238,7 @@ config_file_parse (const char *filename,
         "driver-device",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_string,
+        _config_file_string,
         1,
         0,
         &driver_device_count,
@@ -1288,7 +1249,7 @@ config_file_parse (const char *filename,
         "register-spacing",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &register_spacing_count,
@@ -1303,7 +1264,7 @@ config_file_parse (const char *filename,
         "username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_username,
+        _config_file_username,
         1,
         0,
         &username_count,
@@ -1314,7 +1275,7 @@ config_file_parse (const char *filename,
         "password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_password,
+        _config_file_password,
         1,
         0,
         &password_count,
@@ -1325,7 +1286,7 @@ config_file_parse (const char *filename,
         "k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_k_g,
+        _config_file_k_g,
         1,
         0,
         &k_g_count,
@@ -1337,7 +1298,7 @@ config_file_parse (const char *filename,
         "timeout",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &session_timeout_count,
@@ -1348,7 +1309,7 @@ config_file_parse (const char *filename,
         "session-timeout",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &session_timeout_count,
@@ -1360,7 +1321,7 @@ config_file_parse (const char *filename,
         "retry-timeout",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &retransmission_timeout_count,
@@ -1371,7 +1332,7 @@ config_file_parse (const char *filename,
         "retransmission-timeout",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &retransmission_timeout_count,
@@ -1382,7 +1343,7 @@ config_file_parse (const char *filename,
         "authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_authentication_type,
+        _config_file_authentication_type,
         1,
         0,
         &authentication_type_count,
@@ -1394,7 +1355,7 @@ config_file_parse (const char *filename,
         "cipher_suite_id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_cipher_suite_id,
+        _config_file_cipher_suite_id,
         1,
         0,
         &cipher_suite_id_count,
@@ -1405,7 +1366,7 @@ config_file_parse (const char *filename,
         "cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_cipher_suite_id,
+        _config_file_cipher_suite_id,
         1,
         0,
         &cipher_suite_id_count,
@@ -1417,7 +1378,7 @@ config_file_parse (const char *filename,
         "privilege",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_privilege_level,
+        _config_file_privilege_level,
         1,
         0,
         &privilege_level_count,
@@ -1428,7 +1389,7 @@ config_file_parse (const char *filename,
         "privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_privilege_level,
+        _config_file_privilege_level,
         1,
         0,
         &privilege_level_count,
@@ -1443,7 +1404,7 @@ config_file_parse (const char *filename,
         "quiet-cache",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &quiet_cache_count,
@@ -1454,7 +1415,7 @@ config_file_parse (const char *filename,
         "sdr-cache-directory",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_string,
+        _config_file_string,
         1,
         0,
         &sdr_cache_directory_count,
@@ -1469,7 +1430,7 @@ config_file_parse (const char *filename,
         "buffer-output",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &buffer_output_count,
@@ -1480,7 +1441,7 @@ config_file_parse (const char *filename,
         "consolidate-output",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &consolidate_output_count,
@@ -1491,7 +1452,7 @@ config_file_parse (const char *filename,
         "fanout",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_fanout,
+        _config_file_fanout,
         1,
         0,
         &fanout_count,
@@ -1502,7 +1463,7 @@ config_file_parse (const char *filename,
         "eliminate",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &eliminate_count,
@@ -1513,7 +1474,7 @@ config_file_parse (const char *filename,
         "always-prefix",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &always_prefix_count,
@@ -1535,7 +1496,7 @@ config_file_parse (const char *filename,
         "bmc-config-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &bmc_config_username_count,
@@ -1546,7 +1507,7 @@ config_file_parse (const char *filename,
         "bmc-config-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &bmc_config_password_count,
@@ -1557,7 +1518,7 @@ config_file_parse (const char *filename,
         "bmc-config-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &bmc_config_k_g_count,
@@ -1568,7 +1529,7 @@ config_file_parse (const char *filename,
         "bmc-config-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &bmc_config_authentication_type_count,
@@ -1579,7 +1540,7 @@ config_file_parse (const char *filename,
         "bmc-config-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &bmc_config_cipher_suite_id_count,
@@ -1590,7 +1551,7 @@ config_file_parse (const char *filename,
         "bmc-config-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &bmc_config_privilege_level_count,
@@ -1601,7 +1562,7 @@ config_file_parse (const char *filename,
         "bmc-config-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &bmc_config_workaround_flags_count,
@@ -1612,7 +1573,7 @@ config_file_parse (const char *filename,
         "bmc-config-verbose-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(bmc_config_data.verbose_count_count),
@@ -1630,7 +1591,7 @@ config_file_parse (const char *filename,
         "bmc-device-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &bmc_device_username_count,
@@ -1641,7 +1602,7 @@ config_file_parse (const char *filename,
         "bmc-device-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &bmc_device_password_count,
@@ -1652,7 +1613,7 @@ config_file_parse (const char *filename,
         "bmc-device-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &bmc_device_k_g_count,
@@ -1663,7 +1624,7 @@ config_file_parse (const char *filename,
         "bmc-device-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &bmc_device_authentication_type_count,
@@ -1674,7 +1635,7 @@ config_file_parse (const char *filename,
         "bmc-device-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &bmc_device_cipher_suite_id_count,
@@ -1685,7 +1646,7 @@ config_file_parse (const char *filename,
         "bmc-device-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &bmc_device_privilege_level_count,
@@ -1696,7 +1657,7 @@ config_file_parse (const char *filename,
         "bmc-device-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &bmc_device_workaround_flags_count,
@@ -1714,7 +1675,7 @@ config_file_parse (const char *filename,
         "bmc-info-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &bmc_info_username_count,
@@ -1725,7 +1686,7 @@ config_file_parse (const char *filename,
         "bmc-info-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &bmc_info_password_count,
@@ -1736,7 +1697,7 @@ config_file_parse (const char *filename,
         "bmc-info-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &bmc_info_k_g_count,
@@ -1747,7 +1708,7 @@ config_file_parse (const char *filename,
         "bmc-info-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &bmc_info_authentication_type_count,
@@ -1758,7 +1719,7 @@ config_file_parse (const char *filename,
         "bmc-info-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &bmc_info_cipher_suite_id_count,
@@ -1769,7 +1730,7 @@ config_file_parse (const char *filename,
         "bmc-info-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &bmc_info_privilege_level_count,
@@ -1780,7 +1741,7 @@ config_file_parse (const char *filename,
         "bmc-info-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &bmc_info_workaround_flags_count,
@@ -1791,7 +1752,7 @@ config_file_parse (const char *filename,
         "bmc-info-interpret-oem-data",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(bmc_info_data.interpret_oem_data_count),
@@ -1810,7 +1771,7 @@ config_file_parse (const char *filename,
         "bmc-watchdog-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &bmc_watchdog_workaround_flags_count,
@@ -1821,7 +1782,7 @@ config_file_parse (const char *filename,
         "bmc-watchdog-logfile",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_string,
+        _config_file_string,
         1,
         0,
         &(bmc_watchdog_data.logfile_count),
@@ -1832,7 +1793,7 @@ config_file_parse (const char *filename,
         "bmc-watchdog-no-logging",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(bmc_watchdog_data.no_logging_count),
@@ -1850,7 +1811,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmi_chassis_username_count,
@@ -1861,7 +1822,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmi_chassis_password_count,
@@ -1872,7 +1833,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmi_chassis_k_g_count,
@@ -1883,7 +1844,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmi_chassis_authentication_type_count,
@@ -1894,7 +1855,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmi_chassis_cipher_suite_id_count,
@@ -1905,7 +1866,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmi_chassis_privilege_level_count,
@@ -1916,7 +1877,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmi_chassis_workaround_flags_count,
@@ -1934,7 +1895,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-config-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmi_chassis_config_username_count,
@@ -1945,7 +1906,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-config-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmi_chassis_config_password_count,
@@ -1956,7 +1917,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-config-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmi_chassis_config_k_g_count,
@@ -1967,7 +1928,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-config-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmi_chassis_config_authentication_type_count,
@@ -1978,7 +1939,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-config-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmi_chassis_config_cipher_suite_id_count,
@@ -1989,7 +1950,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-config-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmi_chassis_config_privilege_level_count,
@@ -2000,7 +1961,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-config-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmi_chassis_config_workaround_flags_count,
@@ -2011,7 +1972,7 @@ config_file_parse (const char *filename,
         "ipmi-chassis-config-verbose-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmi_chassis_config_data.verbose_count_count),
@@ -2030,7 +1991,7 @@ config_file_parse (const char *filename,
         "ipmi-dcmi-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmi_dcmi_username_count,
@@ -2041,7 +2002,7 @@ config_file_parse (const char *filename,
         "ipmi-dcmi-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmi_dcmi_password_count,
@@ -2052,7 +2013,7 @@ config_file_parse (const char *filename,
         "ipmi-dcmi-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmi_dcmi_k_g_count,
@@ -2063,7 +2024,7 @@ config_file_parse (const char *filename,
         "ipmi-dcmi-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmi_dcmi_authentication_type_count,
@@ -2074,7 +2035,7 @@ config_file_parse (const char *filename,
         "ipmi-dcmi-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmi_dcmi_cipher_suite_id_count,
@@ -2085,7 +2046,7 @@ config_file_parse (const char *filename,
         "ipmi-dcmi-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmi_dcmi_privilege_level_count,
@@ -2096,7 +2057,7 @@ config_file_parse (const char *filename,
         "ipmi-dcmi-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmi_dcmi_workaround_flags_count,
@@ -2107,7 +2068,7 @@ config_file_parse (const char *filename,
         "ipmi-dcmi-interpret-oem-data",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_dcmi_data.interpret_oem_data_count),
@@ -2126,7 +2087,7 @@ config_file_parse (const char *filename,
         "ipmi-fru-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmi_fru_username_count,
@@ -2137,7 +2098,7 @@ config_file_parse (const char *filename,
         "ipmi-fru-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmi_fru_password_count,
@@ -2148,7 +2109,7 @@ config_file_parse (const char *filename,
         "ipmi-fru-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmi_fru_k_g_count,
@@ -2159,7 +2120,7 @@ config_file_parse (const char *filename,
         "ipmi-fru-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmi_fru_authentication_type_count,
@@ -2170,7 +2131,7 @@ config_file_parse (const char *filename,
         "ipmi-fru-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmi_fru_cipher_suite_id_count,
@@ -2181,7 +2142,7 @@ config_file_parse (const char *filename,
         "ipmi-fru-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmi_fru_privilege_level_count,
@@ -2192,7 +2153,7 @@ config_file_parse (const char *filename,
         "ipmi-fru-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmi_fru_workaround_flags_count,
@@ -2203,7 +2164,7 @@ config_file_parse (const char *filename,
         "ipmi-fru-verbose-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmi_fru_data.verbose_count_count),
@@ -2214,7 +2175,7 @@ config_file_parse (const char *filename,
         "ipmi-fru-skip-checks",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_fru_data.skip_checks_count),
@@ -2225,7 +2186,7 @@ config_file_parse (const char *filename,
         "ipmi-fru-interpret-oem-data",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_fru_data.interpret_oem_data_count),
@@ -2243,7 +2204,7 @@ config_file_parse (const char *filename,
         "ipmi-oem-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmi_oem_username_count,
@@ -2254,7 +2215,7 @@ config_file_parse (const char *filename,
         "ipmi-oem-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmi_oem_password_count,
@@ -2265,7 +2226,7 @@ config_file_parse (const char *filename,
         "ipmi-oem-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmi_oem_k_g_count,
@@ -2276,7 +2237,7 @@ config_file_parse (const char *filename,
         "ipmi-oem-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmi_oem_authentication_type_count,
@@ -2287,7 +2248,7 @@ config_file_parse (const char *filename,
         "ipmi-oem-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmi_oem_cipher_suite_id_count,
@@ -2298,7 +2259,7 @@ config_file_parse (const char *filename,
         "ipmi-oem-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmi_oem_privilege_level_count,
@@ -2309,7 +2270,7 @@ config_file_parse (const char *filename,
         "ipmi-oem-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmi_oem_workaround_flags_count,
@@ -2320,7 +2281,7 @@ config_file_parse (const char *filename,
         "ipmi-oem-verbose-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmi_oem_data.verbose_count_count),
@@ -2339,7 +2300,7 @@ config_file_parse (const char *filename,
         "pef-config-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmi_pef_config_username_count,
@@ -2351,7 +2312,7 @@ config_file_parse (const char *filename,
         "pef-config-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmi_pef_config_password_count,
@@ -2363,7 +2324,7 @@ config_file_parse (const char *filename,
         "pef-config-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmi_pef_config_k_g_count,
@@ -2375,7 +2336,7 @@ config_file_parse (const char *filename,
         "pef-config-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmi_pef_config_authentication_type_count,
@@ -2387,7 +2348,7 @@ config_file_parse (const char *filename,
         "pef-config-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmi_pef_config_cipher_suite_id_count,
@@ -2399,7 +2360,7 @@ config_file_parse (const char *filename,
         "pef-config-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmi_pef_config_privilege_level_count,
@@ -2411,7 +2372,7 @@ config_file_parse (const char *filename,
         "pef-config-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmi_pef_config_workaround_flags_count,
@@ -2423,7 +2384,7 @@ config_file_parse (const char *filename,
         "pef-config-verbose-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmi_pef_config_data.verbose_count_count),
@@ -2434,7 +2395,7 @@ config_file_parse (const char *filename,
         "ipmi-pef-config-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmi_pef_config_username_count,
@@ -2445,7 +2406,7 @@ config_file_parse (const char *filename,
         "ipmi-pef-config-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmi_pef_config_password_count,
@@ -2456,7 +2417,7 @@ config_file_parse (const char *filename,
         "ipmi-pef-config-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmi_pef_config_k_g_count,
@@ -2467,7 +2428,7 @@ config_file_parse (const char *filename,
         "ipmi-pef-config-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmi_pef_config_authentication_type_count,
@@ -2478,7 +2439,7 @@ config_file_parse (const char *filename,
         "ipmi-pef-config-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmi_pef_config_cipher_suite_id_count,
@@ -2489,7 +2450,7 @@ config_file_parse (const char *filename,
         "ipmi-pef-config-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmi_pef_config_privilege_level_count,
@@ -2500,7 +2461,7 @@ config_file_parse (const char *filename,
         "ipmi-pef-config-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmi_pef_config_workaround_flags_count,
@@ -2511,7 +2472,7 @@ config_file_parse (const char *filename,
         "ipmi-pef-config-verbose-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmi_pef_config_data.verbose_count_count),
@@ -2529,7 +2490,7 @@ config_file_parse (const char *filename,
         "ipmi-raw-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmi_raw_username_count,
@@ -2540,7 +2501,7 @@ config_file_parse (const char *filename,
         "ipmi-raw-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmi_raw_password_count,
@@ -2551,7 +2512,7 @@ config_file_parse (const char *filename,
         "ipmi-raw-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmi_raw_k_g_count,
@@ -2562,7 +2523,7 @@ config_file_parse (const char *filename,
         "ipmi-raw-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmi_raw_authentication_type_count,
@@ -2573,7 +2534,7 @@ config_file_parse (const char *filename,
         "ipmi-raw-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmi_raw_cipher_suite_id_count,
@@ -2584,7 +2545,7 @@ config_file_parse (const char *filename,
         "ipmi-raw-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmi_raw_privilege_level_count,
@@ -2595,7 +2556,7 @@ config_file_parse (const char *filename,
         "ipmi-raw-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmi_raw_workaround_flags_count,
@@ -2613,7 +2574,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmi_sel_username_count,
@@ -2624,7 +2585,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmi_sel_password_count,
@@ -2635,7 +2596,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmi_sel_k_g_count,
@@ -2646,7 +2607,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmi_sel_authentication_type_count,
@@ -2657,7 +2618,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmi_sel_cipher_suite_id_count,
@@ -2668,7 +2629,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmi_sel_privilege_level_count,
@@ -2679,7 +2640,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmi_sel_workaround_flags_count,
@@ -2690,7 +2651,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-verbose-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmi_sel_data.verbose_count_count),
@@ -2698,10 +2659,32 @@ config_file_parse (const char *filename,
         0,
       },
       {
+        "ipmi-sel-sensor-types",
+        CONFFILE_OPTION_LIST_STRING,
+        -1,
+        _config_file_ipmi_sel_sensor_types,
+        1,
+        0,
+        &(ipmi_sel_data.sensor_types_count),
+        &(ipmi_sel_data),
+        0,
+      },
+      {
+        "ipmi-sel-exclude-sensor-types",
+        CONFFILE_OPTION_LIST_STRING,
+        -1,
+        _config_file_ipmi_sel_exclude_sensor_types,
+        1,
+        0,
+        &(ipmi_sel_data.exclude_sensor_types_count),
+        &(ipmi_sel_data),
+        0,
+      },
+      {
         "ipmi-sel-system-event-only",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sel_data.system_event_only_count),
@@ -2712,7 +2695,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-oem-event-only",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sel_data.oem_event_only_count),
@@ -2720,10 +2703,43 @@ config_file_parse (const char *filename,
         0,
       },
       {
+        "ipmi-sel-output-manufacturer-id",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sel_data.output_manufacturer_id_count),
+        &(ipmi_sel_data.output_manufacturer_id),
+        0,
+      },
+      {
+        "ipmi-sel-output-output-event-state",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sel_data.output_event_state_count),
+        &(ipmi_sel_data.output_event_state),
+        0,
+      },
+      {
+        "ipmi-sel-event-state-config-file",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_string,
+        1,
+        0,
+        &(ipmi_sel_data.event_state_config_file_count),
+        &(ipmi_sel_data.event_state_config_file),
+        0,
+      },
+      {
         "ipmi-sel-assume-system-event-records",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sel_data.assume_system_event_records_count),
@@ -2734,7 +2750,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-interpret-oem-data",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sel_data.interpret_oem_data_count),
@@ -2745,7 +2761,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-output-oem-event-strings",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sel_data.output_oem_event_strings_count),
@@ -2756,7 +2772,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-entity-sensor-names",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sel_data.entity_sensor_names_count),
@@ -2767,7 +2783,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-no-sensor-type-output",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sel_data.no_sensor_type_output_count),
@@ -2778,7 +2794,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-comma-separated-output",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sel_data.comma_separated_output_count),
@@ -2789,7 +2805,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-no-header-output",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sel_data.no_header_output_count),
@@ -2800,7 +2816,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-non-abbreviated-units",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sel_data.non_abbreviated_units_count),
@@ -2811,7 +2827,7 @@ config_file_parse (const char *filename,
         "ipmi-sel-legacy-output",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sel_data.legacy_output_count),
@@ -2830,7 +2846,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmi_sensors_username_count,
@@ -2841,7 +2857,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmi_sensors_password_count,
@@ -2852,7 +2868,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmi_sensors_k_g_count,
@@ -2863,7 +2879,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmi_sensors_authentication_type_count,
@@ -2874,7 +2890,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmi_sensors_cipher_suite_id_count,
@@ -2885,7 +2901,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmi_sensors_privilege_level_count,
@@ -2896,7 +2912,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmi_sensors_workaround_flags_count,
@@ -2907,7 +2923,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-verbose-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmi_sensors_data.verbose_count_count),
@@ -2918,7 +2934,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-quiet-readings",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sensors_data.quiet_readings_count),
@@ -2929,7 +2945,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-record-ids",
         CONFFILE_OPTION_LIST_INT,
         -1,
-        config_file_ipmi_sensors_record_ids,
+        _config_file_ipmi_sensors_record_ids,
         1,
         0,
         &(ipmi_sensors_data.record_ids_count),
@@ -2940,7 +2956,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-exclude-record-ids",
         CONFFILE_OPTION_LIST_INT,
         -1,
-        config_file_ipmi_sensors_exclude_record_ids,
+        _config_file_ipmi_sensors_exclude_record_ids,
         1,
         0,
         &(ipmi_sensors_data.exclude_record_ids_count),
@@ -2952,7 +2968,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-groups",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_ipmi_sensors_sensor_types,
+        _config_file_ipmi_sensors_sensor_types,
         1,
         0,
         &(ipmi_sensors_data.sensor_types_count),
@@ -2964,7 +2980,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-exclude-groups",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_ipmi_sensors_exclude_sensor_types,
+        _config_file_ipmi_sensors_exclude_sensor_types,
         1,
         0,
         &(ipmi_sensors_data.exclude_sensor_types_count),
@@ -2975,7 +2991,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-sensor-types",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_ipmi_sensors_sensor_types,
+        _config_file_ipmi_sensors_sensor_types,
         1,
         0,
         &(ipmi_sensors_data.sensor_types_count),
@@ -2986,7 +3002,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-exclude-sensor-types",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_ipmi_sensors_exclude_sensor_types,
+        _config_file_ipmi_sensors_exclude_sensor_types,
         1,
         0,
         &(ipmi_sensors_data.exclude_sensor_types_count),
@@ -2997,7 +3013,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-bridge-sensors",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sensors_data.bridge_sensors_count),
@@ -3008,7 +3024,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-shared-sensors",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sensors_data.shared_sensors_count),
@@ -3019,7 +3035,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-interpret-oem-data",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sensors_data.interpret_oem_data_count),
@@ -3030,7 +3046,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-ignore-not-available-sensors",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sensors_data.ignore_not_available_sensors_count),
@@ -3038,10 +3054,56 @@ config_file_parse (const char *filename,
         0,
       },
       {
+        "ipmi-sensors-output-event-bitmask",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.output_event_bitmask_count),
+        &(ipmi_sensors_data.output_event_bitmask),
+        0,
+      },
+      {
+        "ipmi-sensors-output-sensor-state",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.output_sensor_state_count),
+        &(ipmi_sensors_data.output_sensor_state),
+        0,
+      },
+      {
+        "ipmi-sensors-sensor-state-config-file",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_string,
+        1,
+        0,
+        &(ipmi_sensors_data.sensor_state_config_file_count),
+        &(ipmi_sensors_data.sensor_state_config_file),
+        0,
+      },
+      /* legacy - ipmimonitoring option */
+      {
+        "ipmi-sensors-sensor-config-file",
+        CONFFILE_OPTION_STRING,
+        -1,
+        _config_file_string,
+        1,
+        0,
+        &(ipmi_sensors_data.sensor_state_config_file_count),
+        &(ipmi_sensors_data.sensor_state_config_file),
+        0
+      },
+
+      {
         "ipmi-sensors-entity-sensor-names",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sensors_data.entity_sensor_names_count),
@@ -3052,7 +3114,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-no-sensor-type-output",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sensors_data.no_sensor_type_output_count),
@@ -3063,7 +3125,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-comma-separated-output",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sensors_data.comma_separated_output_count),
@@ -3074,7 +3136,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-no-header-output",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sensors_data.no_header_output_count),
@@ -3085,7 +3147,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-non-abbreviated-units",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sensors_data.non_abbreviated_units_count),
@@ -3096,12 +3158,337 @@ config_file_parse (const char *filename,
         "ipmi-sensors-legacy-output",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmi_sensors_data.legacy_output_count),
         &(ipmi_sensors_data.legacy_output),
         0,
+      },
+      {
+        "ipmi-sensors-ipmimonitoring-legacy-output",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.ipmimonitoring_legacy_output_count),
+        &(ipmi_sensors_data.ipmimonitoring_legacy_output),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-username",
+        CONFFILE_OPTION_STRING,
+        -1,
+        _config_file_tool_option_username,
+        1,
+        0,
+        &ipmi_sensors_username_count,
+        &cmd_args_config,
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-password",
+        CONFFILE_OPTION_STRING,
+        -1,
+        _config_file_tool_option_password,
+        1,
+        0,
+        &ipmi_sensors_password_count,
+        &cmd_args_config,
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-k_g",
+        CONFFILE_OPTION_STRING,
+        -1,
+        _config_file_tool_option_k_g,
+        1,
+        0,
+        &ipmi_sensors_k_g_count,
+        &cmd_args_config,
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-authentication-type",
+        CONFFILE_OPTION_STRING,
+        -1,
+        _config_file_tool_option_authentication_type,
+        1,
+        0,
+        &ipmi_sensors_authentication_type_count,
+        &cmd_args_config,
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-cipher-suite-id",
+        CONFFILE_OPTION_INT,
+        -1,
+        _config_file_tool_option_cipher_suite_id,
+        1,
+        0,
+        &ipmi_sensors_cipher_suite_id_count,
+        &cmd_args_config,
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-privilege-level",
+        CONFFILE_OPTION_STRING,
+        -1,
+        _config_file_tool_option_privilege_level,
+        1,
+        0,
+        &ipmi_sensors_privilege_level_count,
+        &cmd_args_config,
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-workaround-flags",
+        CONFFILE_OPTION_LIST_STRING,
+        -1,
+        _config_file_tool_option_workaround_flags,
+        1,
+        0,
+        &ipmi_sensors_workaround_flags_count,
+        &cmd_args_config,
+        0
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-quiet-readings",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.quiet_readings_count),
+        &(ipmi_sensors_data.quiet_readings),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-record-ids",
+        CONFFILE_OPTION_LIST_INT,
+        -1,
+        _config_file_ipmi_sensors_record_ids,
+        1,
+        0,
+        &(ipmi_sensors_data.record_ids_count),
+        &(ipmi_sensors_data),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-exclude-record-ids",
+        CONFFILE_OPTION_LIST_INT,
+        -1,
+        _config_file_ipmi_sensors_exclude_record_ids,
+        1,
+        0,
+        &(ipmi_sensors_data.exclude_record_ids_count),
+        &(ipmi_sensors_data),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      /* maintained for backwards compatability */
+      {
+        "ipmimonitoring-groups",
+        CONFFILE_OPTION_LIST_STRING,
+        -1,
+        _config_file_ipmi_sensors_sensor_types,
+        1,
+        0,
+        &(ipmi_sensors_data.sensor_types_count),
+        &(ipmi_sensors_data),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      /* maintained for backwards compatability */
+      {
+        "ipmimonitoring-exclude-groups",
+        CONFFILE_OPTION_LIST_STRING,
+        -1,
+        _config_file_ipmi_sensors_exclude_sensor_types,
+        1,
+        0,
+        &(ipmi_sensors_data.exclude_sensor_types_count),
+        &(ipmi_sensors_data),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-sensor-types",
+        CONFFILE_OPTION_LIST_STRING,
+        -1,
+        _config_file_ipmi_sensors_sensor_types,
+        1,
+        0,
+        &(ipmi_sensors_data.sensor_types_count),
+        &(ipmi_sensors_data),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-exclude-sensor-types",
+        CONFFILE_OPTION_LIST_STRING,
+        -1,
+        _config_file_ipmi_sensors_exclude_sensor_types,
+        1,
+        0,
+        &(ipmi_sensors_data.exclude_sensor_types_count),
+        &(ipmi_sensors_data),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-bridge-sensors",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.bridge_sensors_count),
+        &(ipmi_sensors_data.bridge_sensors),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-shared-sensors",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.shared_sensors_count),
+        &(ipmi_sensors_data.shared_sensors),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-interpret-oem-data",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.interpret_oem_data_count),
+        &(ipmi_sensors_data.interpret_oem_data),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-ignore-non-interpretable-sensors",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.ignore_not_available_sensors_count),
+        &(ipmi_sensors_data.ignore_not_available_sensors),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-verbose-count",
+        CONFFILE_OPTION_INT,
+        -1,
+        _config_file_non_negative_int,
+        1,
+        0,
+        &(ipmi_sensors_data.verbose_count_count),
+        &(ipmi_sensors_data.verbose_count),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-entity-sensor-names",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.entity_sensor_names_count),
+        &(ipmi_sensors_data.entity_sensor_names),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-no-sensor-type-output",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.no_sensor_type_output_count),
+        &(ipmi_sensors_data.no_sensor_type_output),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-comma-separated-output",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.comma_separated_output_count),
+        &(ipmi_sensors_data.comma_separated_output),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-no-header-output",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.no_header_output_count),
+        &(ipmi_sensors_data.no_header_output),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-non-abbreviated-units",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.non_abbreviated_units_count),
+        &(ipmi_sensors_data.non_abbreviated_units),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-legacy-output",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.ipmimonitoring_legacy_output_count),
+        &(ipmi_sensors_data.ipmimonitoring_legacy_output),
+        0,
+      },
+      /* backwards compatability to ipmimonitoring */
+      {
+        "ipmimonitoring-sensor-config-file",
+        CONFFILE_OPTION_STRING,
+        -1,
+        _config_file_string,
+        1,
+        0,
+        &(ipmi_sensors_data.sensor_state_config_file_count),
+        &(ipmi_sensors_data.sensor_state_config_file),
+        0
       },
     };
 
@@ -3114,7 +3501,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-config-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmi_sensors_config_username_count,
@@ -3125,7 +3512,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-config-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmi_sensors_config_password_count,
@@ -3136,7 +3523,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-config-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmi_sensors_config_k_g_count,
@@ -3147,7 +3534,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-config-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmi_sensors_config_authentication_type_count,
@@ -3158,7 +3545,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-config-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmi_sensors_config_cipher_suite_id_count,
@@ -3169,7 +3556,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-config-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmi_sensors_config_privilege_level_count,
@@ -3180,7 +3567,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-config-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmi_sensors_config_workaround_flags_count,
@@ -3191,7 +3578,7 @@ config_file_parse (const char *filename,
         "ipmi-sensors-config-verbose-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmi_sensors_config_data.verbose_count_count),
@@ -3215,7 +3602,7 @@ config_file_parse (const char *filename,
         "ipmiconsole-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmiconsole_username_count,
@@ -3226,7 +3613,7 @@ config_file_parse (const char *filename,
         "ipmiconsole-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmiconsole_password_count,
@@ -3237,7 +3624,7 @@ config_file_parse (const char *filename,
         "ipmiconsole-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmiconsole_k_g_count,
@@ -3248,7 +3635,7 @@ config_file_parse (const char *filename,
         "ipmiconsole-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmiconsole_authentication_type_count,
@@ -3259,7 +3646,7 @@ config_file_parse (const char *filename,
         "ipmiconsole-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmiconsole_cipher_suite_id_count,
@@ -3270,7 +3657,7 @@ config_file_parse (const char *filename,
         "ipmiconsole-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmiconsole_privilege_level_count,
@@ -3281,7 +3668,7 @@ config_file_parse (const char *filename,
         "ipmiconsole-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmiconsole_workaround_flags_count,
@@ -3293,7 +3680,7 @@ config_file_parse (const char *filename,
         "escape-char",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_ipmiconsole_escape_char,
+        _config_file_ipmiconsole_escape_char,
         1,
         0,
         &(ipmiconsole_data.escape_char_count),
@@ -3304,7 +3691,7 @@ config_file_parse (const char *filename,
         "ipmiconsole-escape-char",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_ipmiconsole_escape_char,
+        _config_file_ipmiconsole_escape_char,
         1,
         0,
         &(ipmiconsole_data.escape_char_count),
@@ -3316,7 +3703,7 @@ config_file_parse (const char *filename,
         "dont-steal",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmiconsole_data.dont_steal_count),
@@ -3327,11 +3714,22 @@ config_file_parse (const char *filename,
         "ipmiconsole-dont-steal",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmiconsole_data.dont_steal_count),
         &(ipmiconsole_data.dont_steal),
+        0,
+      },
+      {
+        "ipmiconsole-serial-keepalive",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmiconsole_data.serial_keepalive_count),
+        &(ipmiconsole_data.serial_keepalive),
         0,
       },
       /* legacy - no ipmiconsole prefix */
@@ -3339,7 +3737,7 @@ config_file_parse (const char *filename,
         "lock-memory",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmiconsole_data.lock_memory_count),
@@ -3350,308 +3748,12 @@ config_file_parse (const char *filename,
         "ipmiconsole-lock-memory",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmiconsole_data.lock_memory_count),
         &(ipmiconsole_data.lock_memory),
         0,
-      },
-    };
-
-  /*
-   * ipmimonitoring
-   */
-
-  struct conffile_option ipmimonitoring_options[] =
-    {
-      {
-        "ipmimonitoring-username",
-        CONFFILE_OPTION_STRING,
-        -1,
-        config_file_tool_option_username,
-        1,
-        0,
-        &ipmimonitoring_username_count,
-        &cmd_args_config,
-        0,
-      },
-      {
-        "ipmimonitoring-password",
-        CONFFILE_OPTION_STRING,
-        -1,
-        config_file_tool_option_password,
-        1,
-        0,
-        &ipmimonitoring_password_count,
-        &cmd_args_config,
-        0,
-      },
-      {
-        "ipmimonitoring-k_g",
-        CONFFILE_OPTION_STRING,
-        -1,
-        config_file_tool_option_k_g,
-        1,
-        0,
-        &ipmimonitoring_k_g_count,
-        &cmd_args_config,
-        0,
-      },
-      {
-        "ipmimonitoring-authentication-type",
-        CONFFILE_OPTION_STRING,
-        -1,
-        config_file_tool_option_authentication_type,
-        1,
-        0,
-        &ipmimonitoring_authentication_type_count,
-        &cmd_args_config,
-        0,
-      },
-      {
-        "ipmimonitoring-cipher-suite-id",
-        CONFFILE_OPTION_INT,
-        -1,
-        config_file_tool_option_cipher_suite_id,
-        1,
-        0,
-        &ipmimonitoring_cipher_suite_id_count,
-        &cmd_args_config,
-        0,
-      },
-      {
-        "ipmimonitoring-privilege-level",
-        CONFFILE_OPTION_STRING,
-        -1,
-        config_file_tool_option_privilege_level,
-        1,
-        0,
-        &ipmimonitoring_privilege_level_count,
-        &cmd_args_config,
-        0,
-      },
-      {
-        "ipmimonitoring-workaround-flags",
-        CONFFILE_OPTION_LIST_STRING,
-        -1,
-        config_file_tool_option_workaround_flags,
-        1,
-        0,
-        &ipmimonitoring_workaround_flags_count,
-        &cmd_args_config,
-        0
-      },
-      {
-        "ipmimonitoring-quiet-readings",
-        CONFFILE_OPTION_BOOL,
-        -1,
-        config_file_bool,
-        1,
-        0,
-        &(ipmimonitoring_data.quiet_readings_count),
-        &(ipmimonitoring_data.quiet_readings),
-        0,
-      },
-      {
-        "ipmimonitoring-record-ids",
-        CONFFILE_OPTION_LIST_INT,
-        -1,
-        config_file_ipmimonitoring_record_ids,
-        1,
-        0,
-        &(ipmimonitoring_data.record_ids_count),
-        &(ipmimonitoring_data),
-        0,
-      },
-      {
-        "ipmimonitoring-exclude-record-ids",
-        CONFFILE_OPTION_LIST_INT,
-        -1,
-        config_file_ipmimonitoring_exclude_record_ids,
-        1,
-        0,
-        &(ipmimonitoring_data.exclude_record_ids_count),
-        &(ipmimonitoring_data),
-        0,
-      },
-      /* maintained for backwards compatability */
-      {
-        "ipmimonitoring-groups",
-        CONFFILE_OPTION_LIST_STRING,
-        -1,
-        config_file_ipmimonitoring_sensor_types,
-        1,
-        0,
-        &(ipmimonitoring_data.sensor_types_count),
-        &(ipmimonitoring_data),
-        0,
-      },
-      /* maintained for backwards compatability */
-      {
-        "ipmimonitoring-exclude-groups",
-        CONFFILE_OPTION_LIST_STRING,
-        -1,
-        config_file_ipmimonitoring_exclude_sensor_types,
-        1,
-        0,
-        &(ipmimonitoring_data.exclude_sensor_types_count),
-        &(ipmimonitoring_data),
-        0,
-      },
-      {
-        "ipmimonitoring-sensor-types",
-        CONFFILE_OPTION_LIST_STRING,
-        -1,
-        config_file_ipmimonitoring_sensor_types,
-        1,
-        0,
-        &(ipmimonitoring_data.sensor_types_count),
-        &(ipmimonitoring_data),
-        0,
-      },
-      {
-        "ipmimonitoring-exclude-sensor-types",
-        CONFFILE_OPTION_LIST_STRING,
-        -1,
-        config_file_ipmimonitoring_exclude_sensor_types,
-        1,
-        0,
-        &(ipmimonitoring_data.exclude_sensor_types_count),
-        &(ipmimonitoring_data),
-        0,
-      },
-      {
-        "ipmimonitoring-bridge-sensors",
-        CONFFILE_OPTION_BOOL,
-        -1,
-        config_file_bool,
-        1,
-        0,
-        &(ipmimonitoring_data.bridge_sensors_count),
-        &(ipmimonitoring_data.bridge_sensors),
-        0,
-      },
-      {
-        "ipmimonitoring-shared-sensors",
-        CONFFILE_OPTION_BOOL,
-        -1,
-        config_file_bool,
-        1,
-        0,
-        &(ipmimonitoring_data.shared_sensors_count),
-        &(ipmimonitoring_data.shared_sensors),
-        0,
-      },
-      {
-        "ipmimonitoring-interpret-oem-data",
-        CONFFILE_OPTION_BOOL,
-        -1,
-        config_file_bool,
-        1,
-        0,
-        &(ipmimonitoring_data.interpret_oem_data_count),
-        &(ipmimonitoring_data.interpret_oem_data),
-        0,
-      },
-      {
-        "ipmimonitoring-ignore-non-interpretable-sensors",
-        CONFFILE_OPTION_BOOL,
-        -1,
-        config_file_bool,
-        1,
-        0,
-        &(ipmimonitoring_data.ignore_non_interpretable_sensors_count),
-        &(ipmimonitoring_data.ignore_non_interpretable_sensors),
-        0,
-      },
-      {
-        "ipmimonitoring-verbose-count",
-        CONFFILE_OPTION_INT,
-        -1,
-        config_file_non_negative_int,
-        1,
-        0,
-        &(ipmimonitoring_data.verbose_count_count),
-        &(ipmimonitoring_data.verbose_count),
-        0,
-      },
-      {
-        "ipmimonitoring-entity-sensor-names",
-        CONFFILE_OPTION_BOOL,
-        -1,
-        config_file_bool,
-        1,
-        0,
-        &(ipmimonitoring_data.entity_sensor_names_count),
-        &(ipmimonitoring_data.entity_sensor_names),
-        0,
-      },
-      {
-        "ipmimonitoring-no-sensor-type-output",
-        CONFFILE_OPTION_BOOL,
-        -1,
-        config_file_bool,
-        1,
-        0,
-        &(ipmimonitoring_data.no_sensor_type_output_count),
-        &(ipmimonitoring_data.no_sensor_type_output),
-        0,
-      },
-      {
-        "ipmimonitoring-comma-separated-output",
-        CONFFILE_OPTION_BOOL,
-        -1,
-        config_file_bool,
-        1,
-        0,
-        &(ipmimonitoring_data.comma_separated_output_count),
-        &(ipmimonitoring_data.comma_separated_output),
-        0,
-      },
-      {
-        "ipmimonitoring-no-header-output",
-        CONFFILE_OPTION_BOOL,
-        -1,
-        config_file_bool,
-        1,
-        0,
-        &(ipmimonitoring_data.no_header_output_count),
-        &(ipmimonitoring_data.no_header_output),
-        0,
-      },
-      {
-        "ipmimonitoring-non-abbreviated-units",
-        CONFFILE_OPTION_BOOL,
-        -1,
-        config_file_bool,
-        1,
-        0,
-        &(ipmimonitoring_data.non_abbreviated_units_count),
-        &(ipmimonitoring_data.non_abbreviated_units),
-        0,
-      },
-      {
-        "ipmimonitoring-legacy-output",
-        CONFFILE_OPTION_BOOL,
-        -1,
-        config_file_bool,
-        1,
-        0,
-        &(ipmimonitoring_data.legacy_output_count),
-        &(ipmimonitoring_data.legacy_output),
-        0,
-      },
-      {
-        "ipmimonitoring-sensor-config-file",
-        CONFFILE_OPTION_STRING,
-        -1,
-        config_file_string,
-        1,
-        0,
-        &(ipmimonitoring_data.sensor_config_file_count),
-        &(ipmimonitoring_data.sensor_config_file),
-        0
       },
     };
 
@@ -3665,7 +3767,7 @@ config_file_parse (const char *filename,
         "ipmipower-username",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_username,
+        _config_file_tool_option_username,
         1,
         0,
         &ipmipower_username_count,
@@ -3676,7 +3778,7 @@ config_file_parse (const char *filename,
         "ipmipower-password",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_password,
+        _config_file_tool_option_password,
         1,
         0,
         &ipmipower_password_count,
@@ -3687,7 +3789,7 @@ config_file_parse (const char *filename,
         "ipmipower-k_g",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_k_g,
+        _config_file_tool_option_k_g,
         1,
         0,
         &ipmipower_k_g_count,
@@ -3698,7 +3800,7 @@ config_file_parse (const char *filename,
         "ipmipower-authentication-type",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_authentication_type,
+        _config_file_tool_option_authentication_type,
         1,
         0,
         &ipmipower_authentication_type_count,
@@ -3709,7 +3811,7 @@ config_file_parse (const char *filename,
         "ipmipower-cipher-suite-id",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_tool_option_cipher_suite_id,
+        _config_file_tool_option_cipher_suite_id,
         1,
         0,
         &ipmipower_cipher_suite_id_count,
@@ -3720,7 +3822,7 @@ config_file_parse (const char *filename,
         "ipmipower-privilege-level",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_tool_option_privilege_level,
+        _config_file_tool_option_privilege_level,
         1,
         0,
         &ipmipower_privilege_level_count,
@@ -3731,7 +3833,7 @@ config_file_parse (const char *filename,
         "ipmipower-workaround-flags",
         CONFFILE_OPTION_LIST_STRING,
         -1,
-        config_file_tool_option_workaround_flags,
+        _config_file_tool_option_workaround_flags,
         1,
         0,
         &ipmipower_workaround_flags_count,
@@ -3743,7 +3845,7 @@ config_file_parse (const char *filename,
         "ipmi-version",
         CONFFILE_OPTION_STRING,
         -1,
-        config_file_ipmipower_ipmi_version,
+        _config_file_ipmipower_ipmi_version,
         1,
         0,
         &driver_type_count,
@@ -3755,7 +3857,7 @@ config_file_parse (const char *filename,
         "on-if-off",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmipower_data.on_if_off_count),
@@ -3766,7 +3868,7 @@ config_file_parse (const char *filename,
         "ipmipower-on-if-off",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmipower_data.on_if_off_count),
@@ -3778,7 +3880,7 @@ config_file_parse (const char *filename,
         "wait-until-on",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmipower_data.wait_until_on_count),
@@ -3789,7 +3891,7 @@ config_file_parse (const char *filename,
         "ipmipower-wait-until-on",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmipower_data.wait_until_on_count),
@@ -3801,7 +3903,7 @@ config_file_parse (const char *filename,
         "wait-until-off",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmipower_data.wait_until_off_count),
@@ -3812,7 +3914,7 @@ config_file_parse (const char *filename,
         "ipmipower-wait-until-off",
         CONFFILE_OPTION_BOOL,
         -1,
-        config_file_bool,
+        _config_file_bool,
         1,
         0,
         &(ipmipower_data.wait_until_off_count),
@@ -3824,7 +3926,7 @@ config_file_parse (const char *filename,
         "retry-wait-timeout",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &(ipmipower_data.retransmission_wait_timeout_count),
@@ -3836,7 +3938,7 @@ config_file_parse (const char *filename,
         "retransmission-wait-timeout",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &(ipmipower_data.retransmission_wait_timeout_count),
@@ -3847,7 +3949,7 @@ config_file_parse (const char *filename,
         "ipmipower-retransmission-wait-timeout",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &(ipmipower_data.retransmission_wait_timeout_count),
@@ -3859,7 +3961,7 @@ config_file_parse (const char *filename,
         "retry-backoff-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &(ipmipower_data.retransmission_backoff_count_count),
@@ -3871,7 +3973,7 @@ config_file_parse (const char *filename,
         "retransmission-backoff-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &(ipmipower_data.retransmission_backoff_count_count),
@@ -3882,7 +3984,7 @@ config_file_parse (const char *filename,
         "ipmipower-retransmission-backoff-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_positive_int,
+        _config_file_positive_int,
         1,
         0,
         &(ipmipower_data.retransmission_backoff_count_count),
@@ -3894,7 +3996,7 @@ config_file_parse (const char *filename,
         "ping-interval",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmipower_data.ping_interval_count),
@@ -3905,7 +4007,7 @@ config_file_parse (const char *filename,
         "ipmipower-ping-interval",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmipower_data.ping_interval_count),
@@ -3917,7 +4019,7 @@ config_file_parse (const char *filename,
         "ping-timeout",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmipower_data.ping_timeout_count),
@@ -3928,7 +4030,7 @@ config_file_parse (const char *filename,
         "ipmipower-ping-timeout",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmipower_data.ping_timeout_count),
@@ -3940,7 +4042,7 @@ config_file_parse (const char *filename,
         "ping-packet-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmipower_data.ping_packet_count_count),
@@ -3951,7 +4053,7 @@ config_file_parse (const char *filename,
         "ipmipower-ping-packet-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmipower_data.ping_packet_count_count),
@@ -3963,7 +4065,7 @@ config_file_parse (const char *filename,
         "ping-percent",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmipower_data.ping_percent_count),
@@ -3974,7 +4076,7 @@ config_file_parse (const char *filename,
         "ipmipower-ping-percent",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmipower_data.ping_percent_count),
@@ -3986,7 +4088,7 @@ config_file_parse (const char *filename,
         "ping-consec-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmipower_data.ping_consec_count_count),
@@ -3997,7 +4099,7 @@ config_file_parse (const char *filename,
         "ipmipower-ping-consec-count",
         CONFFILE_OPTION_INT,
         -1,
-        config_file_non_negative_int,
+        _config_file_non_negative_int,
         1,
         0,
         &(ipmipower_data.ping_consec_count_count),
@@ -4009,6 +4111,7 @@ config_file_parse (const char *filename,
   conffile_t cf = NULL;
   int rv = -1;
   int options_len;
+  int legacy_file_loaded = 0;
 
   assert ((!support
            || (((support & CONFIG_FILE_INBAND)
@@ -4033,7 +4136,6 @@ config_file_parse (const char *filename,
               || ((tool_support & CONFIG_FILE_TOOL_IPMI_SENSORS) && tool_data)
               || ((tool_support & CONFIG_FILE_TOOL_IPMI_SENSORS_CONFIG) && tool_data)
               || ((tool_support & CONFIG_FILE_TOOL_IPMICONSOLE) && tool_data)
-              || ((tool_support & CONFIG_FILE_TOOL_IPMIMONITORING) && tool_data)
               || ((tool_support & CONFIG_FILE_TOOL_IPMIPOWER) && tool_data)));
 
   memset (config_file_options, '\0', sizeof (struct conffile_option));
@@ -4270,17 +4372,6 @@ config_file_parse (const char *filename,
 
   config_file_options_len += options_len;
 
-  options_len = sizeof (ipmimonitoring_options)/sizeof (struct conffile_option);
-  if (!(tool_support & CONFIG_FILE_TOOL_IPMIMONITORING))
-    _ignore_options (ipmimonitoring_options, options_len);
-
-  _copy_options (config_file_options,
-                 config_file_options_len,
-                 ipmimonitoring_options,
-                 options_len);
-
-  config_file_options_len += options_len;
-
   options_len = sizeof (ipmipower_options)/sizeof (struct conffile_option);
   if (!(tool_support & CONFIG_FILE_TOOL_IPMIPOWER))
     _ignore_options (ipmipower_options, options_len);
@@ -4306,7 +4397,6 @@ config_file_parse (const char *filename,
   memset (&ipmi_sensors_data, '\0', sizeof (struct config_file_data_ipmi_sensors));
   memset (&ipmi_sensors_config_data, '\0', sizeof (struct config_file_data_ipmi_sensors_config));
   memset (&ipmiconsole_data, '\0', sizeof (struct config_file_data_ipmiconsole));
-  memset (&ipmimonitoring_data, '\0', sizeof (struct config_file_data_ipmimonitoring));
   memset (&ipmipower_data, '\0', sizeof (struct config_file_data_ipmipower));
   memset (&cmd_args_config, '\0', sizeof (struct cmd_args_config));
 
@@ -4316,45 +4406,61 @@ config_file_parse (const char *filename,
       goto cleanup;
     }
 
-  /* FREEIPMI_CONFIG_FILE_DEFAULT defined in config.h */
+  /* Try legacy file first */
   if (!filename)
-    filename = FREEIPMI_CONFIG_FILE_DEFAULT;
-
-  if (conffile_parse (cf,
-                      filename,
-                      config_file_options,
-                      config_file_options_len,
-                      NULL,
-                      0,
-                      0) < 0)
     {
-      char buf[CONFFILE_MAX_ERRMSGLEN];
-
-      /* don't exit, but return (-1) */
-      if (conffile_errnum (cf) == CONFFILE_ERR_EXIST
-          && no_error_if_not_found)
-        goto cleanup;
-
-      /* Its not an error if the default configuration file doesn't exist */
-      if (!strcmp (filename, FREEIPMI_CONFIG_FILE_DEFAULT)
-          && conffile_errnum (cf) == CONFFILE_ERR_EXIST)
-        goto out;
-
-      if (conffile_errmsg (cf, buf, CONFFILE_MAX_ERRMSGLEN) < 0)
+      if (!conffile_parse (cf,
+                           FREEIPMI_CONFIG_FILE_LEGACY,
+                           config_file_options,
+                           config_file_options_len,
+                           NULL,
+                           0,
+                           0))
+        legacy_file_loaded++;
+    }
+  
+  if (!legacy_file_loaded)
+    {
+      /* FREEIPMI_CONFIG_FILE_DEFAULT defined in config.h */
+      if (!filename)
+        filename = FREEIPMI_CONFIG_FILE_DEFAULT;
+      
+      if (conffile_parse (cf,
+                          filename,
+                          config_file_options,
+                          config_file_options_len,
+                          NULL,
+                          0,
+                          0) < 0)
         {
-          fprintf (stderr, "conffile_parse: %d\n", conffile_errnum (cf));
-          exit (1);
-        }
-      else
-        {
-          if (CONFFILE_IS_PARSE_ERR (conffile_errnum (cf))
-              || conffile_errnum (cf) == CONFFILE_ERR_EXIST
-              || conffile_errnum (cf) == CONFFILE_ERR_OPEN
-              || conffile_errnum (cf) == CONFFILE_ERR_READ)
-            fprintf (stderr, "Config File Error: %s\n", buf);
+          char buf[CONFFILE_MAX_ERRMSGLEN];
+          
+          /* don't exit, but return (-1) */
+          if (conffile_errnum (cf) == CONFFILE_ERR_EXIST
+              && no_error_if_not_found)
+            goto cleanup;
+          
+          /* Its not an error if the default configuration file doesn't exist */
+          if (!strcmp (filename, FREEIPMI_CONFIG_FILE_DEFAULT)
+              && conffile_errnum (cf) == CONFFILE_ERR_EXIST)
+            goto out;
+          
+          if (conffile_errmsg (cf, buf, CONFFILE_MAX_ERRMSGLEN) < 0)
+            {
+              fprintf (stderr, "conffile_parse: %d\n", conffile_errnum (cf));
+              exit (1);
+            }
           else
-            fprintf (stderr, "conffile_parse: %s\n", buf);
-          exit (1);
+            {
+              if (CONFFILE_IS_PARSE_ERR (conffile_errnum (cf))
+                  || conffile_errnum (cf) == CONFFILE_ERR_EXIST
+                  || conffile_errnum (cf) == CONFFILE_ERR_OPEN
+                  || conffile_errnum (cf) == CONFFILE_ERR_READ)
+                fprintf (stderr, "Config File Error: %s\n", buf);
+              else
+                fprintf (stderr, "conffile_parse: %s\n", buf);
+              exit (1);
+            }
         }
     }
 
@@ -4382,10 +4488,12 @@ config_file_parse (const char *filename,
     cmd_args->privilege_level = cmd_args_config.privilege_level;
 
   if (cmd_args_config.workaround_flags_set)
-    cmd_args->workaround_flags = cmd_args_config.workaround_flags;
-
-  if (cmd_args_config.tool_specific_workaround_flags_set)
-    cmd_args->tool_specific_workaround_flags = cmd_args_config.tool_specific_workaround_flags;
+    {
+      cmd_args->workaround_flags_outofband = cmd_args_config.workaround_flags_outofband;
+      cmd_args->workaround_flags_outofband_2_0 = cmd_args_config.workaround_flags_outofband_2_0;
+      cmd_args->workaround_flags_inband = cmd_args_config.workaround_flags_inband;
+      cmd_args->section_specific_workaround_flags = cmd_args_config.section_specific_workaround_flags;
+    }
 
   /* copy tool specific stuff */
 
@@ -4472,13 +4580,6 @@ config_file_parse (const char *filename,
       memcpy (ipmiconsole_data_ptr,
               &ipmiconsole_data,
               sizeof (struct config_file_data_ipmiconsole));
-    }
-  else if (tool_support & CONFIG_FILE_TOOL_IPMIMONITORING)
-    {
-      ipmimonitoring_data_ptr = (struct config_file_data_ipmimonitoring *)tool_data;
-      memcpy (ipmimonitoring_data_ptr,
-              &ipmimonitoring_data,
-              sizeof (struct config_file_data_ipmimonitoring));
     }
   else if (tool_support & CONFIG_FILE_TOOL_IPMIPOWER)
     {
