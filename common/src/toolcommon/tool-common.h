@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifndef _TOOL_COMMON_H
 #define _TOOL_COMMON_H
@@ -23,6 +23,7 @@
 #include <freeipmi/freeipmi.h>
 
 #include "tool-cmdline-common.h"
+#include "parse-common.h"
 
 #define IPMI_OPEN_ERRMSGLEN 1024
 
@@ -38,9 +39,6 @@ ipmi_ctx_t ipmi_open (const char *progname,
 
 /* Check if kg len is decent */
 int check_kg_len (const char *in);
-
-/* Turn an input string into a 20-byte binary k_g key */
-int parse_kg (void *out, unsigned int outlen, const char *in);
 
 /* Turn a 20-byte binary k_g key into an output string */
 char *format_kg (char *out, unsigned int outlen, const void *k_g);

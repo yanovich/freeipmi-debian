@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -33,7 +33,7 @@
 #include "freeipmi/spec/ipmi-channel-spec.h"
 #include "freeipmi/spec/ipmi-ipmb-lun-spec.h"
 #include "freeipmi/spec/ipmi-netfn-spec.h"
-#include "freeipmi/spec/ipmi-serial-modem-parameter-spec.h"
+#include "freeipmi/spec/ipmi-serial-modem-configuration-parameters-spec.h"
 
 #include "ipmi-api-defs.h"
 #include "ipmi-api-trace.h"
@@ -94,6 +94,66 @@ ipmi_cmd_set_serial_modem_configuration (ipmi_ctx_t ctx,
       goto cleanup;
     }
   
+  if (api_ipmi_cmd (ctx,
+                    IPMI_BMC_IPMB_LUN_BMC,
+                    IPMI_NET_FN_TRANSPORT_RQ,
+                    obj_cmd_rq,
+                    obj_cmd_rs) < 0)
+    {
+      ERR_TRACE (ipmi_ctx_errormsg (ctx), ipmi_ctx_errnum (ctx));
+      goto cleanup;
+    }
+
+  rv = 0;
+ cleanup:
+  fiid_obj_destroy (obj_cmd_rq);
+  return (rv);
+}
+
+int
+ipmi_cmd_set_serial_modem_configuration_set_in_progress (ipmi_ctx_t ctx,
+                                                         uint8_t channel_number,
+                                                         uint8_t state,
+                                                         fiid_obj_t obj_cmd_rs)
+{
+  fiid_obj_t obj_cmd_rq = NULL;
+  int rv = -1;
+
+  if (!ctx || ctx->magic != IPMI_CTX_MAGIC)
+    {
+      ERR_TRACE (ipmi_ctx_errormsg (ctx), ipmi_ctx_errnum (ctx));
+      return (-1);
+    }
+
+  if (!IPMI_CHANNEL_NUMBER_VALID (channel_number)
+      || !IPMI_SERIAL_MODEM_CONFIGURATION_PARAMETERS_SET_IN_PROGRESS_VALID (state)
+      || !fiid_obj_valid (obj_cmd_rs))
+    {
+      API_SET_ERRNUM (ctx, IPMI_ERR_PARAMETERS);
+      return (-1);
+    }
+
+  if (FIID_OBJ_TEMPLATE_COMPARE (obj_cmd_rs,
+                                 tmpl_cmd_set_serial_modem_configuration_rs) < 0)
+    {
+      API_FIID_OBJECT_ERROR_TO_API_ERRNUM (ctx, obj_cmd_rs);
+      return (-1);
+    }
+
+  if (!(obj_cmd_rq = fiid_obj_create (tmpl_cmd_set_serial_modem_configuration_set_in_progress_rq)))
+    {
+      API_ERRNO_TO_API_ERRNUM (ctx, errno);
+      goto cleanup;
+    }
+
+  if (fill_cmd_set_serial_modem_configuration_set_in_progress (channel_number,
+                                                               state,
+                                                               obj_cmd_rq) < 0)
+    {
+      API_ERRNO_TO_API_ERRNUM (ctx, errno);
+      goto cleanup;
+    }
+
   if (api_ipmi_cmd (ctx,
                     IPMI_BMC_IPMB_LUN_BMC,
                     IPMI_NET_FN_TRANSPORT_RQ,
@@ -432,6 +492,71 @@ ipmi_cmd_get_serial_modem_configuration (ipmi_ctx_t ctx,
 }
 
 int
+ipmi_cmd_get_serial_modem_configuration_set_in_progress (ipmi_ctx_t ctx,
+                                                         uint8_t channel_number,
+                                                         uint8_t get_parameter,
+                                                         uint8_t set_selector,
+                                                         uint8_t block_selector,
+                                                         fiid_obj_t obj_cmd_rs)
+{
+  fiid_obj_t obj_cmd_rq = NULL;
+  int rv = -1;
+
+  if (!ctx || ctx->magic != IPMI_CTX_MAGIC)
+    {
+      ERR_TRACE (ipmi_ctx_errormsg (ctx), ipmi_ctx_errnum (ctx));
+      return (-1);
+    }
+
+  if (!IPMI_CHANNEL_NUMBER_VALID (channel_number)
+      || !IPMI_GET_SERIAL_MODEM_PARAMETER_VALID (get_parameter)
+      || !fiid_obj_valid (obj_cmd_rs))
+    {
+      API_SET_ERRNUM (ctx, IPMI_ERR_PARAMETERS);
+      return (-1);
+    }
+
+  if (FIID_OBJ_TEMPLATE_COMPARE (obj_cmd_rs,
+                                 tmpl_cmd_get_serial_modem_configuration_set_in_progress_rs) < 0)
+    {
+      API_FIID_OBJECT_ERROR_TO_API_ERRNUM (ctx, obj_cmd_rs);
+      return (-1);
+    }
+
+  if (!(obj_cmd_rq = fiid_obj_create (tmpl_cmd_get_serial_modem_configuration_rq)))
+    {
+      API_ERRNO_TO_API_ERRNUM (ctx, errno);
+      goto cleanup;
+    }
+
+  if (fill_cmd_get_serial_modem_configuration (channel_number,
+                                               get_parameter,
+                                               IPMI_SERIAL_MODEM_CONFIGURATION_PARAMETER_SET_IN_PROGRESS,
+                                               set_selector,
+                                               block_selector,
+                                               obj_cmd_rq) < 0)
+    {
+      API_ERRNO_TO_API_ERRNUM (ctx, errno);
+      goto cleanup;
+    }
+
+  if (api_ipmi_cmd (ctx,
+                    IPMI_BMC_IPMB_LUN_BMC,
+                    IPMI_NET_FN_TRANSPORT_RQ,
+                    obj_cmd_rq,
+                    obj_cmd_rs) < 0)
+    {
+      ERR_TRACE (ipmi_ctx_errormsg (ctx), ipmi_ctx_errnum (ctx));
+      goto cleanup;
+    }
+
+  rv = 0;
+ cleanup:
+  fiid_obj_destroy (obj_cmd_rq);
+  return (rv);
+}
+
+int
 ipmi_cmd_get_serial_modem_configuration_connection_mode (ipmi_ctx_t ctx,
                                                          uint8_t channel_number,
                                                          uint8_t get_parameter,
@@ -471,7 +596,7 @@ ipmi_cmd_get_serial_modem_configuration_connection_mode (ipmi_ctx_t ctx,
 
   if (fill_cmd_get_serial_modem_configuration (channel_number,
                                                get_parameter,
-                                               IPMI_SERIAL_MODEM_PARAMETER_CONNECTION_MODE,
+                                               IPMI_SERIAL_MODEM_CONFIGURATION_PARAMETER_CONNECTION_MODE,
                                                set_selector,
                                                block_selector,
                                                obj_cmd_rq) < 0)
@@ -536,7 +661,7 @@ ipmi_cmd_get_serial_modem_configuration_ipmi_messaging_comm_settings (ipmi_ctx_t
 
   if (fill_cmd_get_serial_modem_configuration (channel_number,
                                                get_parameter,
-                                               IPMI_SERIAL_MODEM_PARAMETER_IPMI_MESSAGING_COMM_SETTINGS,
+                                               IPMI_SERIAL_MODEM_CONFIGURATION_PARAMETER_IPMI_MESSAGING_COMM_SETTINGS,
                                                set_selector,
                                                block_selector,
                                                obj_cmd_rq) < 0)
@@ -601,7 +726,7 @@ ipmi_cmd_get_serial_modem_configuration_call_retry_interval (ipmi_ctx_t ctx,
 
   if (fill_cmd_get_serial_modem_configuration (channel_number,
                                                get_parameter,
-                                               IPMI_SERIAL_MODEM_PARAMETER_CALL_RETRY_INTERVAL,
+                                               IPMI_SERIAL_MODEM_CONFIGURATION_PARAMETER_CALL_RETRY_INTERVAL,
                                                set_selector,
                                                block_selector,
                                                obj_cmd_rq) < 0)
@@ -666,7 +791,7 @@ ipmi_cmd_get_serial_modem_configuration_page_blackout_interval (ipmi_ctx_t ctx,
 
   if (fill_cmd_get_serial_modem_configuration (channel_number,
                                                get_parameter,
-                                               IPMI_SERIAL_MODEM_PARAMETER_PAGE_BLACKOUT_INTERVAL,
+                                               IPMI_SERIAL_MODEM_CONFIGURATION_PARAMETER_PAGE_BLACKOUT_INTERVAL,
                                                set_selector,
                                                block_selector,
                                                obj_cmd_rq) < 0)

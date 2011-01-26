@@ -1,21 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -213,9 +212,13 @@ _sensor_reading_corner_case_checks (ipmi_sensor_read_ctx_t ctx,
       return (-1);
     }
   else if ((ipmi_check_completion_code (obj_cmd_rs,
-                                        IPMI_COMP_CODE_REQUEST_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)
-           || (ipmi_check_completion_code (obj_cmd_rs,
-                                           IPMI_COMP_CODE_COMMAND_ILLEGAL_FOR_SENSOR_OR_RECORD_TYPE) == 1)
+                                        IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1))
+    {
+      SENSOR_READ_SET_ERRNUM (ctx, IPMI_SENSOR_READ_ERR_SENSOR_READING_UNAVAILABLE);
+      return (-1);
+    }
+  else if ((ipmi_check_completion_code (obj_cmd_rs,
+                                        IPMI_COMP_CODE_COMMAND_ILLEGAL_FOR_SENSOR_OR_RECORD_TYPE) == 1)
            || (ipmi_check_completion_code (obj_cmd_rs,
                                            IPMI_COMP_CODE_PARAMETER_OUT_OF_RANGE) == 1)
            || (ipmi_check_completion_code (obj_cmd_rs,
@@ -614,8 +617,6 @@ ipmi_sensor_read (ipmi_sensor_read_ctx_t ctx,
 
   if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_THRESHOLD)
     {
-     
-
       if (record_type == IPMI_SDR_FORMAT_FULL_SENSOR_RECORD)
         {
           int8_t r_exponent, b_exponent;

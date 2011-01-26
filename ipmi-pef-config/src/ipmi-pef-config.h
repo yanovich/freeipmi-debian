@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2007-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-*/
+ * Copyright (C) 2007-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifndef _IPMI_PEF_CONFIG_H
 #define _IPMI_PEF_CONFIG_H
@@ -41,6 +41,8 @@ enum ipmi_pef_config_argp_option_keys
     INFO_KEY = 'i',
   };
 
+#define CHANNEL_NUMBERS_MAX 16
+
 struct ipmi_pef_config_arguments
 {
   struct config_arguments config_args;
@@ -61,18 +63,18 @@ typedef struct ipmi_pef_config_state_data
   pstdout_state_t pstate;
   struct config_section *sections;
 
-  /* achu: caching to make ipmi-pef-config work more quickly */
-  int lan_channel_number_initialized;
-  uint8_t lan_channel_number;
-  int number_of_lan_alert_destinations_initialized;
-  uint8_t number_of_lan_alert_destinations;
-  int number_of_alert_strings_initialized;
-  uint8_t number_of_alert_strings;
-  int number_of_alert_policy_entries_initialized;
-  uint8_t number_of_alert_policy_entries;
-  int number_of_event_filters_initialized;
-  uint8_t number_of_event_filters;
+  /* For multi-channel settings
+   *
+   * base is for base section name (e.g. "Community_String")
+   * channel is for channel suffixed section name (e.g. "Community_String_Channel_1")
+   */
+  unsigned int lan_base_config_flags;
+  unsigned int lan_channel_config_flags;
 
+  /* For channel reading */
+  uint8_t lan_channel_numbers[CHANNEL_NUMBERS_MAX];
+  unsigned int lan_channel_numbers_count;
+  unsigned int lan_channel_numbers_loaded;
 } ipmi_pef_config_state_data_t;
 
 #endif

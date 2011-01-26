@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  $Id: ipmi-fru-inventory-device-cmds-api.c,v 1.17.4.1 2009-12-23 21:24:18 chu11 Exp $
+ *  $Id: ipmi-fru-inventory-device-cmds-api.c,v 1.20 2010-02-08 22:09:40 chu11 Exp $
  *****************************************************************************
  *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2007 The Regents of the University of California.
@@ -13,7 +13,7 @@
  *
  *  Ipmi-fru is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
+ *  Free Software Foundation; either version 3 of the License, or (at your
  *  option) any later version.
  *
  *  Ipmi-fru is distributed in the hope that it will be useful, but
@@ -22,8 +22,7 @@
  *  for more details.
  *
  *  You should have received a copy of the GNU General Public License along
- *  with Ipmi-fru; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+ *  with Ipmi-fru.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
 #ifdef HAVE_CONFIG_H

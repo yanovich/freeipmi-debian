@@ -98,7 +98,8 @@ FreeIPMI is a collection of Intelligent Platform Management
 @acronym{IPMI} system software.  It provides in-band and out-of-band
 software and a development library conforming to the Intelligent
 Platform Management Interface (@acronym{IPMI} v1.5 and v2.0)
-standards.
+standards.  FreeIPMI also supports IPMI-related specifications such as
+the Data Center Management Interface (DCMI) and Intel Node Manager.
 
 @node How did FreeIPMI start?, What operating systems does FreeIPMI run on?, What is FreeIPMI?, Top
 @section How did FreeIPMI start?
@@ -119,8 +120,9 @@ libfreeipmi, and ipmi support in Powerman.  In October 2004, FreeIPMI
 Since the 0.1.0 release, Z Research developers have contributed
 ipmi-chassis, ipmi-raw, ipmi-locate, and portions of ipmi-pef-config.
 LLNL has contributed IPMI 2.0 support, hostrange support, ipmiconsole,
-ipmimonitoring, ipmidetect, ipmi-sensors-config, ipmi-chassis-config,
-bmc-device, ipmi-oem, ipmi-dcmi, and portions of ipmi-pef-config.
+libipmiconsole, ipmidetect, ipmi-sensors-config, ipmi-chassis-config,
+bmc-device, ipmi-oem, ipmi-dcmi, libipmimonitoring, and portions of
+ipmi-pef-config.
 
 (Note: The original FreeIPMI developers from California Digital
 Corp. are now at Zresearch Inc.)
@@ -162,8 +164,8 @@ support the large cluster environments at Lawrence Livermore National
 Laboratory (LLNL).
 
 Scalable parallel execution of many FreeIPMI tools (ipmi-sensors,
-ipmi-sel, bmc-info, ipmimonitoring, etc.) across a cluster is
-supported through hostranged input and output.  For example:
+ipmi-sel, bmc-info, etc.) across a cluster is supported through
+hostranged input and output.  For example:
 
 @example
 # > bmc-info -h "pwopr[0-5]" -u XXX -p XXX --get-device-id -C
@@ -225,11 +227,11 @@ clusters in under a second.
 Ipmiconsole is currently supported by Conman
 (@uref{http://conman.googlecode.com/}) for scalable console management.
 
-Ipmimonitoring interprets sensor readings as well as just reporting
-them.  It can be used for host monitoring IPMI on a cluster.  By
-mapping sensor readings into NOMINAL, WARNING, or CRITICAL states, it
-makes monitoring sensors easier across large numbers of nodes.
-Skummee
+Ipmi-sensors and libipmimonitoring are capable of interpreting sensor
+readings as well as just reporting them.  It can be used for host
+monitoring IPMI sensor severity on a cluster.  By mapping sensor
+readings into NOMINAL, WARNING, or CRITICAL states, it makes
+monitoring sensors easier across large numbers of nodes.  Skummee
 (@uref{http://sourceforge.net/projects/skummee}) currently uses
 libipmimonitoring to monitoring sensors on LLNL clusters of up to 2000
 nodes in size.  FreeIPMI sensor monitoring plugins
@@ -239,6 +241,15 @@ and Nagios
 (@uref{http://www.nagios.org/}) 
 have also been developed and made available for download
 (@uref{http://www.gnu.org/software/freeipmi/download.html}).
+
+Ipmi-sel and libipmimonitoring are capable of interpreting system
+event log (SEL) entries as well as just reporting them.  It can be
+used for host monitoring IPMI event severity on a cluster.  By mapping
+events into NOMINAL, WARNING, or CRITICAL states, it makes monitoring
+system events easier across large numbers of nodes.  Skummee
+(@uref{http://sourceforge.net/projects/skummee}) currently uses
+libipmimonitoring to monitoring the SEL on LLNL clusters of up to 2000
+nodes in size.
 
 The bmc-config, ipmi-chassis-config, ipmi-pef-config,
 ipmi-sensors-config, and configuration file and command-line interface

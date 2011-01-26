@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -53,25 +53,37 @@ static config_err_t enable_user_commit (const char *section_name,
 
 static config_err_t
 _channel_info (bmc_config_state_data_t *state_data,
+	       const char *section_name,
                const char *key_name,
                uint8_t *channel_number)
 {
   config_err_t ret;
+  char *ptr;
 
   assert (state_data);
+  assert (section_name);
   assert (key_name);
   assert (channel_number);
 
+  if ((ptr = stristr (key_name, "Channel_")))
+    {
+      (*channel_number) = atoi (ptr + strlen ("Channel_"));
+      return (CONFIG_ERR_SUCCESS);
+    }
+
   if (stristr (key_name, "Lan")
-      || stristr (key_name, "Enable_User"))
+      || stristr (key_name, "Enable_User")
+      || stristr (key_name, "SOL"))
     {
       if ((ret = get_lan_channel_number (state_data,
+					 section_name,
                                          channel_number)) != CONFIG_ERR_SUCCESS)
         return (ret);
     }
   else
     {
       if ((ret = get_serial_channel_number (state_data,
+					    section_name,
                                             channel_number)) != CONFIG_ERR_SUCCESS)
         return (ret);
     }
@@ -103,6 +115,7 @@ _get_user_access (bmc_config_state_data_t *state_data,
   userid = atoi (section_name + strlen ("User"));
 
   if ((ret = _channel_info (state_data,
+			    section_name,
                             key_name,
                             &channel_number)) != CONFIG_ERR_SUCCESS)
     return (ret);
@@ -266,6 +279,8 @@ _set_user_access (bmc_config_state_data_t *state_data,
   uint8_t channel_number;
   fiid_obj_t obj_cmd_rs = NULL;
   uint64_t val;
+  struct config_section *section;
+  struct config_keyvalue *kvtmp;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
 
@@ -273,10 +288,12 @@ _set_user_access (bmc_config_state_data_t *state_data,
   assert (section_name);
   assert (key_name);
   assert (ua);
+  /* comp_code not necessary for all functions */
 
   userid = atoi (section_name + strlen ("User"));
 
   if ((ret = _channel_info (state_data,
+			    section_name,
                             key_name,
                             &channel_number)) != CONFIG_ERR_SUCCESS)
     return (ret);
@@ -291,18 +308,51 @@ _set_user_access (bmc_config_state_data_t *state_data,
     }
 
   /* achu: special case, because the session limit cannot be
-   * retrieved.  So if we're committing, we have to get the pre-loaded
-   * value and commit it each time.
+   * retrieved.  So if we're committing, we have to get the session
+   * limit value and commit it each time.
    */
-  if (stristr (key_name, "Serial"))
+  if ((section = config_find_section (state_data->sections,
+                                      section_name)))
     {
-      if (state_data->serial_user_session_limit_len)
-        ua->session_limit = state_data->serial_user_session_limit[userid-1];
+      char keynametmp[CONFIG_MAX_KEY_NAME_LEN + 1];
+      int channel_flag = 0;
+      int lan_flag = 0;
+
+      memset (keynametmp, '\0', CONFIG_MAX_KEY_NAME_LEN + 1);
+              
+      if (stristr (key_name, "Channel_"))
+        channel_flag++;
+
+      if (stristr (key_name, "Lan"))
+        lan_flag++;
+
+      if (channel_flag)
+        snprintf (keynametmp,
+                  CONFIG_MAX_KEY_NAME_LEN,
+                  "%s_Session_Limit_Channel_%u",
+                  (lan_flag) ? "Lan" : "Serial",
+                  channel_number);
+      else
+        snprintf (keynametmp,
+                  CONFIG_MAX_KEY_NAME_LEN,
+                  "%s_Session_Limit",
+                  (lan_flag) ? "Lan" : "Serial");
+      
+      if ((kvtmp = config_find_keyvalue (section, keynametmp)))
+        ua->session_limit = atoi (kvtmp->value_input);
     }
-  if (stristr (key_name, "Lan"))
+  else
     {
-      if (state_data->lan_user_session_limit_len)
-        ua->session_limit = state_data->lan_user_session_limit[userid-1];
+      /* This is a fatal error, we're already in this section,
+       * it should be findable
+       */
+      if (state_data->prog_data->args->config_args.common.debug)
+        pstdout_fprintf (state_data->pstate,
+                         stderr,
+                         "Cannot find section '%s'\n",
+                         section_name);
+      
+      goto cleanup;
     }
 
   if (ipmi_cmd_set_user_access (state_data->ipmi_ctx,
@@ -356,12 +406,18 @@ username_checkout (const char *section_name,
                    struct config_keyvalue *kv,
                    void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   fiid_obj_t obj_cmd_rs = NULL;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   uint8_t userid;
   /* achu: *2 b/c of CONFIG_USERNAME_NOT_SET_YET_STR length */
   char username[IPMI_MAX_USER_NAME_LENGTH*2+1];
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   userid = atoi (section_name + strlen ("User"));
 
@@ -392,7 +448,9 @@ username_checkout (const char *section_name,
       /*
        * IPMI Workaround (achu)
        *
-       * Discovered on Sun X4140
+       * Discovered on Sun X4140, Inventec 5441/Dell Xanadu II,
+       * Inventec 5442/Dell Xanadu III, Intel S5500WBV/Penguin Relion
+       * 700
        *
        * Get Username and Get User Payload commands fail with CCh =
        * "Invalid data field in request" if a username was not set
@@ -464,10 +522,17 @@ username_commit (const char *section_name,
                  const struct config_keyvalue *kv,
                  void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
-  uint8_t userid = atoi (section_name + strlen ("User"));
+  bmc_config_state_data_t *state_data;
+  uint8_t userid;
   fiid_obj_t obj_cmd_rs = NULL;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
+  userid = atoi (section_name + strlen ("User"));
 
   /* can't change userid 1 */
   if (userid == 1)
@@ -524,6 +589,11 @@ username_validate (const char *section_name,
                    void *arg)
 {
   uint8_t userid;
+
+  assert (section_name);
+  assert (key_name);
+  assert (value);
+
   userid = atoi (section_name + strlen ("User"));
 
   if (userid == 1)
@@ -585,8 +655,8 @@ _check_bmc_user_password (bmc_config_state_data_t *state_data,
         }
       comp_code = val;
 
-      if (comp_code == IPMI_COMP_CODE_PASSWORD_TEST_FAILED_PASSWORD_SIZE_CORRECT
-          || comp_code == IPMI_COMP_CODE_PASSWORD_TEST_FAILED_PASSWORD_SIZE_INCORRECT)
+      if (comp_code == IPMI_COMP_CODE_SET_USER_PASSWORD_COMMAND_PASSWORD_TEST_FAILED_PASSWORD_SIZE_CORRECT
+          || comp_code == IPMI_COMP_CODE_SET_USER_PASSWORD_COMMAND_PASSWORD_TEST_FAILED_PASSWORD_SIZE_INCORRECT)
         {
           *is_same = 0;
           goto done;
@@ -623,14 +693,22 @@ password_checkout (const char *section_name,
                    struct config_keyvalue *kv,
                    void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   char *str = "";
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   if (state_data->prog_data->args->config_args.action == CONFIG_ACTION_DIFF)
     {
-      uint8_t userid = atoi (section_name + strlen ("User"));
+      uint8_t userid;
       int is_same;
       config_err_t ret;
+
+      userid = atoi (section_name + strlen ("User"));
 
       /* special case for diff, since we can't get the password, and
        * return it, we'll check to see if the password is the same.
@@ -677,11 +755,18 @@ password_commit (const char *section_name,
                  const struct config_keyvalue *kv,
                  void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
-  uint8_t userid = atoi (section_name + strlen ("User"));
+  bmc_config_state_data_t *state_data;
+  uint8_t userid;
   fiid_obj_t obj_cmd_rs = NULL;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
+  userid = atoi (section_name + strlen ("User"));
 
   if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_user_password_rs)))
     {
@@ -782,16 +867,25 @@ password_validate (const char *section_name,
                    const char *value,
                    void *arg)
 {
+  bmc_config_state_data_t *state_data;
+      
+  assert (section_name);
+  assert (key_name);
+  assert (value);
+  assert (arg);
+
+  state_data = (bmc_config_state_data_t *)arg;
 
   if (strlen (value) > IPMI_2_0_MAX_PASSWORD_LENGTH)
     return (CONFIG_VALIDATE_INVALID_VALUE);
   
   if (strlen (value) > IPMI_1_5_MAX_PASSWORD_LENGTH)
     {
-      bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
-      uint8_t userid = atoi (section_name + strlen ("User"));
+      uint8_t userid;
       config_err_t ret;
       int is_same;
+
+      userid = atoi (section_name + strlen ("User"));
 
       /* if _check_bmc_user_password() fails, that means IPMI 2.0
        * isn't supported, so this password is too long 
@@ -817,11 +911,18 @@ password20_checkout (const char *section_name,
                      struct config_keyvalue *kv,
                      void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
-  uint8_t userid = atoi (section_name + strlen ("User"));
+  bmc_config_state_data_t *state_data;
+  uint8_t userid;
   char *str = "";
   config_err_t ret;
   int is_same;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
+  userid = atoi (section_name + strlen ("User"));
 
   /*
    * IPMI Workaround (achu)
@@ -877,10 +978,17 @@ password20_commit (const char *section_name,
                    const struct config_keyvalue *kv,
                    void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
-  uint8_t userid = atoi (section_name + strlen ("User"));
+  bmc_config_state_data_t *state_data;
+  uint8_t userid;
   fiid_obj_t obj_cmd_rs = NULL;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
+  userid = atoi (section_name + strlen ("User"));
 
   if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_user_password_rs)))
     {
@@ -928,6 +1036,10 @@ password20_validate (const char *section_name,
                      const char *value,
                      void *arg)
 {
+  assert (section_name);
+  assert (key_name);
+  assert (value);
+
   if (strlen (value) <= IPMI_2_0_MAX_PASSWORD_LENGTH)
     return (CONFIG_VALIDATE_VALID_VALUE);
   return (CONFIG_VALIDATE_INVALID_VALUE);
@@ -938,10 +1050,16 @@ enable_user_checkout (const char *section_name,
                       struct config_keyvalue *kv,
                       void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   if ((ret = _get_user_access (state_data,
                                section_name,
@@ -990,8 +1108,8 @@ enable_user_commit (const char *section_name,
                     const struct config_keyvalue *kv,
                     void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
-  int userid = atoi (section_name + strlen ("User"));
+  bmc_config_state_data_t *state_data;
+  uint8_t userid;
   fiid_obj_t obj_cmd_rq = NULL;
   fiid_obj_t obj_cmd_rs = NULL;
   char password[IPMI_1_5_MAX_PASSWORD_LENGTH];
@@ -999,6 +1117,13 @@ enable_user_commit (const char *section_name,
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
   int node_busy_retry_count = 0;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
+  userid = atoi (section_name + strlen ("User"));
 
   if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_user_password_rs)))
     {
@@ -1204,10 +1329,16 @@ lan_enable_ipmi_messaging_checkout (const char *section_name,
                                     struct config_keyvalue *kv,
                                     void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   if ((ret = _get_user_access (state_data,
                                section_name,
@@ -1240,10 +1371,16 @@ lan_enable_ipmi_messaging_commit (const char *section_name,
                                   const struct config_keyvalue *kv,
                                   void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   if ((ret = _get_user_access (state_data,
                                section_name,
@@ -1266,10 +1403,16 @@ lan_enable_link_auth_checkout (const char *section_name,
                                struct config_keyvalue *kv,
                                void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   if ((ret = _get_user_access (state_data,
                                section_name,
@@ -1302,10 +1445,16 @@ lan_enable_link_auth_commit (const char *section_name,
                              const struct config_keyvalue *kv,
                              void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   /* ignore username_not_set_yet return value, if username_not_set_yet
    * conditions arise, we should get an error appriately (b/c the user
@@ -1332,10 +1481,16 @@ lan_enable_restricted_to_callback_checkout (const char *section_name,
                                             struct config_keyvalue *kv,
                                             void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   if ((ret = _get_user_access (state_data,
                                section_name,
@@ -1368,10 +1523,16 @@ lan_enable_restricted_to_callback_commit (const char *section_name,
                                           const struct config_keyvalue *kv,
                                           void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   /* ignore username_not_set_yet return value, if username_not_set_yet
    * conditions arise, we should get an error appriately (b/c the user
@@ -1398,10 +1559,16 @@ lan_privilege_limit_checkout (const char *section_name,
                               struct config_keyvalue *kv,
                               void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   if ((ret = _get_user_access (state_data,
                                section_name,
@@ -1434,10 +1601,16 @@ lan_privilege_limit_commit (const char *section_name,
                             const struct config_keyvalue *kv,
                             void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   /* ignore username_not_set_yet return value, if username_not_set_yet
    * conditions arise, we should get an error appriately (b/c the user
@@ -1464,7 +1637,13 @@ lan_session_limit_checkout (const char *section_name,
                             struct config_keyvalue *kv,
                             void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   /* Special case: There is no way to check out this value */
   if (config_section_update_keyvalue_output (state_data->pstate,
@@ -1480,10 +1659,16 @@ lan_session_limit_commit (const char *section_name,
                           const struct config_keyvalue *kv,
                           void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   /* ignore username_not_set_yet return value, if username_not_set_yet
    * conditions arise, we should get an error appriately (b/c the user
@@ -1509,13 +1694,26 @@ sol_payload_access_checkout (const char *section_name,
                              struct config_keyvalue *kv,
                              void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
-  int userid = atoi (section_name + strlen ("User"));
+  bmc_config_state_data_t *state_data;
+  uint8_t userid;
   fiid_obj_t obj_cmd_rs = NULL;
   uint64_t val;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
   uint8_t channel_number;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
+  userid = atoi (section_name + strlen ("User"));
+
+  if ((ret = _channel_info (state_data,
+			    section_name,
+                            kv->key->key_name,
+                            &channel_number)) != CONFIG_ERR_SUCCESS)
+    return (ret);
 
   if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_get_user_payload_access_rs)))
     {
@@ -1523,12 +1721,6 @@ sol_payload_access_checkout (const char *section_name,
                        stderr,
                        "fiid_obj_create: %s\n",
                        strerror (errno));
-      goto cleanup;
-    }
-
-  if ((ret = get_lan_channel_number (state_data, &channel_number)) != CONFIG_ERR_SUCCESS)
-    {
-      rv = ret;
       goto cleanup;
     }
 
@@ -1602,13 +1794,26 @@ sol_payload_access_commit (const char *section_name,
                            const struct config_keyvalue *kv,
                            void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
-  int userid = atoi (section_name + strlen ("User"));
+  bmc_config_state_data_t *state_data;
+  uint8_t userid;
   fiid_obj_t obj_cmd_rs = NULL;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
   uint8_t channel_number;
   uint8_t operation;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
+  userid = atoi (section_name + strlen ("User"));
+
+  if ((ret = _channel_info (state_data,
+			    section_name,
+                            kv->key->key_name,
+                            &channel_number)) != CONFIG_ERR_SUCCESS)
+    return (ret);
 
   if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_user_payload_access_rs)))
     {
@@ -1616,12 +1821,6 @@ sol_payload_access_commit (const char *section_name,
                        stderr,
                        "fiid_obj_create: %s\n",
                        strerror (errno));
-      goto cleanup;
-    }
-
-  if ((ret = get_lan_channel_number (state_data, &channel_number)) != CONFIG_ERR_SUCCESS)
-    {
-      rv = ret;
       goto cleanup;
     }
 
@@ -1676,10 +1875,16 @@ serial_enable_ipmi_messaging_checkout (const char *section_name,
                                        struct config_keyvalue *kv,
                                        void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   if ((ret = _get_user_access (state_data,
                                section_name,
@@ -1712,10 +1917,16 @@ serial_enable_ipmi_messaging_commit (const char *section_name,
                                      const struct config_keyvalue *kv,
                                      void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   /* ignore username_not_set_yet return value, if username_not_set_yet
    * conditions arise, we should get an error appriately (b/c the user
@@ -1742,10 +1953,16 @@ serial_enable_link_auth_checkout (const char *section_name,
                                   struct config_keyvalue *kv,
                                   void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   if ((ret = _get_user_access (state_data,
                                section_name,
@@ -1778,10 +1995,16 @@ serial_enable_link_auth_commit (const char *section_name,
                                 const struct config_keyvalue *kv,
                                 void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   /* ignore username_not_set_yet return value, if username_not_set_yet
    * conditions arise, we should get an error appriately (b/c the user
@@ -1808,10 +2031,16 @@ serial_enable_restricted_to_callback_checkout (const char *section_name,
                                                struct config_keyvalue *kv,
                                                void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   if ((ret = _get_user_access (state_data,
                                section_name,
@@ -1844,10 +2073,16 @@ serial_enable_restricted_to_callback_commit (const char *section_name,
                                              const struct config_keyvalue *kv,
                                              void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   /* ignore username_not_set_yet return value, if username_not_set_yet
    * conditions arise, we should get an error appriately (b/c the user
@@ -1874,10 +2109,16 @@ serial_privilege_limit_checkout (const char *section_name,
                                  struct config_keyvalue *kv,
                                  void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   if ((ret = _get_user_access (state_data,
                                section_name,
@@ -1910,10 +2151,16 @@ serial_privilege_limit_commit (const char *section_name,
                                const struct config_keyvalue *kv,
                                void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   /* ignore username_not_set_yet return value, if username_not_set_yet
    * conditions arise, we should get an error appriately (b/c the user
@@ -1940,7 +2187,13 @@ serial_session_limit_checkout (const char *section_name,
                                struct config_keyvalue *kv,
                                void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   /* Special case: There is no way to check out this value */
   if (config_section_update_keyvalue_output (state_data->pstate,
@@ -1956,11 +2209,17 @@ serial_session_limit_commit (const char *section_name,
                              const struct config_keyvalue *kv,
                              void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct user_access ua;
   unsigned int username_not_set_yet = 0;
   config_err_t ret;
   uint8_t comp_code = 0;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
 
   /* ignore username_not_set_yet return value, if username_not_set_yet
    * conditions arise, we should get an error appriately (b/c the user
@@ -1995,7 +2254,7 @@ serial_session_limit_commit (const char *section_name,
 }
 
 struct config_section *
-bmc_config_user_section_get (bmc_config_state_data_t *state_data, int userid)
+bmc_config_user_section_get (bmc_config_state_data_t *state_data, unsigned int userid)
 {
   struct config_section *section = NULL;
   char section_name[CONFIG_MAX_SECTION_NAME_LEN];
@@ -2029,18 +2288,15 @@ bmc_config_user_section_get (bmc_config_state_data_t *state_data, int userid)
     "fields being read/written.  If this is the case, those fields will be set to "
     "%s.";
   char section_comment[4096];
-  unsigned int verbose_flags = 0;
+  unsigned int serial_config_flags = 0;
+  unsigned int config_flags;
+  int index_max;
+  int i;
 
-  if (userid <= 0)
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "Invalid Userid = %d\n",
-                       userid);
-      return (NULL);
-    }
+  assert (state_data);
+  assert (userid);
 
-  snprintf (section_name, CONFIG_MAX_SECTION_NAME_LEN, "User%d", userid);
+  snprintf (section_name, CONFIG_MAX_SECTION_NAME_LEN, "User%u", userid);
 
   if (userid == 1)
     {
@@ -2072,17 +2328,17 @@ bmc_config_user_section_get (bmc_config_state_data_t *state_data, int userid)
         goto cleanup;
     }
 
-  if (state_data->prog_data->args->config_args.verbose_count)
-    verbose_flags = 0;
-  else
-    verbose_flags = CONFIG_DO_NOT_CHECKOUT;
+  /* serial not checked out by default */
+
+  if (!state_data->prog_data->args->config_args.verbose_count)
+    serial_config_flags = CONFIG_DO_NOT_CHECKOUT;
 
   /* userid 1 is the NULL username, so comment it out by default */
   if (config_section_add_key (state_data->pstate,
                               section,
                               "Username",
                               "Give Username",
-                              (userid == 1) ? (CONFIG_CHECKOUT_KEY_COMMENTED_OUT | CONFIG_READABLE_ONLY) : 0 | CONFIG_USERNAME_NOT_SET_YET,
+                              (userid == 1) ? (CONFIG_CHECKOUT_KEY_COMMENTED_OUT | CONFIG_READABLE_ONLY) : CONFIG_USERNAME_NOT_SET_YET,
                               username_checkout,
                               username_commit,
                               username_validate) < 0)
@@ -2123,137 +2379,216 @@ bmc_config_user_section_get (bmc_config_state_data_t *state_data, int userid)
                               password20_validate) < 0)
     goto cleanup;
 
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Lan_Enable_IPMI_Msgs",
-                              "Possible values: Yes/No",
-                              CONFIG_USERNAME_NOT_SET_YET,
-                              lan_enable_ipmi_messaging_checkout,
-                              lan_enable_ipmi_messaging_commit,
-                              config_yes_no_validate) < 0)
-    goto cleanup;
+  /* b/c loop goes from -1 and up, need to make unsigned int an int
+   *
+   * even if count is 0, make sure to go through loop atleast once, so
+   * fields can fail appropriately for end user on operation
+   * (e.g. checkout).
+   */
 
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Lan_Enable_Link_Auth",
-                              "Possible values: Yes/No",
-                              CONFIG_USERNAME_NOT_SET_YET,
-                              lan_enable_link_auth_checkout,
-                              lan_enable_link_auth_commit,
-                              config_yes_no_validate) < 0)
-    goto cleanup;
+  if (state_data->lan_channel_numbers_count > 1)
+    index_max = state_data->lan_channel_numbers_count;
+  else
+    index_max = 0;
 
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Lan_Enable_Restricted_to_Callback",
-                              "Possible values: Yes/No",
-                              CONFIG_USERNAME_NOT_SET_YET,
-                              lan_enable_restricted_to_callback_checkout,
-                              lan_enable_restricted_to_callback_commit,
-                              config_yes_no_validate) < 0)
-    goto cleanup;
+  for (i = -1; i < index_max; i++)
+    {
+      if (i < 0)
+	config_flags = state_data->lan_base_config_flags;
+      else
+	config_flags = state_data->lan_channel_config_flags;
 
-  /* achu: For backwards compatability to bmc-config in 0.2.0 */
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Lan_Enable_Restrict_to_Callback",
-                              "Possible values: Yes/No",
-                              CONFIG_DO_NOT_CHECKOUT | CONFIG_USERNAME_NOT_SET_YET,
-                              lan_enable_restricted_to_callback_checkout,
-                              lan_enable_restricted_to_callback_commit,
-                              config_yes_no_validate) < 0)
-    goto cleanup;
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Lan_Enable_IPMI_Msgs",
+						"Possible values: Yes/No",
+						config_flags | CONFIG_USERNAME_NOT_SET_YET,
+						lan_enable_ipmi_messaging_checkout,
+						lan_enable_ipmi_messaging_commit,
+						config_yes_no_validate,
+						i,
+						state_data->lan_channel_numbers,
+						state_data->lan_channel_numbers_count) < 0)
+	goto cleanup;
 
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Lan_Privilege_Limit",
-                              "Possible values: Callback/User/Operator/Administrator/OEM_Proprietary/No_Access",
-                              CONFIG_USERNAME_NOT_SET_YET,
-                              lan_privilege_limit_checkout,
-                              lan_privilege_limit_commit,
-                              get_privilege_limit_number_validate) < 0)
-    goto cleanup;
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Lan_Enable_Link_Auth",
+						"Possible values: Yes/No",
+						config_flags | CONFIG_USERNAME_NOT_SET_YET,
+						lan_enable_link_auth_checkout,
+						lan_enable_link_auth_commit,
+						config_yes_no_validate,
+						i,
+						state_data->lan_channel_numbers,
+						state_data->lan_channel_numbers_count) < 0)
+	goto cleanup;
 
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Lan_Session_Limit",
-                              "Possible values: 0-17, 0 is unlimited; May be reset to 0 if not specified",
-                              CONFIG_CHECKOUT_KEY_COMMENTED_OUT_IF_VALUE_EMPTY | CONFIG_USERNAME_NOT_SET_YET,
-                              lan_session_limit_checkout,
-                              lan_session_limit_commit,
-                              config_number_range_four_bits) < 0)
-    goto cleanup;
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Lan_Enable_Restricted_to_Callback",
+						"Possible values: Yes/No",
+						config_flags | CONFIG_USERNAME_NOT_SET_YET,
+						lan_enable_restricted_to_callback_checkout,
+						lan_enable_restricted_to_callback_commit,
+						config_yes_no_validate,
+						i,
+						state_data->lan_channel_numbers,
+						state_data->lan_channel_numbers_count) < 0)
+	goto cleanup;
+      
+      /* achu: For backwards compatability to bmc-config in 0.2.0 */
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Lan_Enable_Restrict_to_Callback",
+						"Possible values: Yes/No",
+						config_flags | CONFIG_DO_NOT_CHECKOUT | CONFIG_USERNAME_NOT_SET_YET,
+						lan_enable_restricted_to_callback_checkout,
+						lan_enable_restricted_to_callback_commit,
+						config_yes_no_validate,
+						i,
+						state_data->lan_channel_numbers,
+						state_data->lan_channel_numbers_count) < 0)
+	goto cleanup;
 
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "SOL_Payload_Access",
-                              "Possible values: Yes/No",
-                              CONFIG_USERNAME_NOT_SET_YET,
-                              sol_payload_access_checkout,
-                              sol_payload_access_commit,
-                              config_yes_no_validate) < 0)
-    goto cleanup;
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Lan_Privilege_Limit",
+						"Possible values: Callback/User/Operator/Administrator/OEM_Proprietary/No_Access",
+						config_flags | CONFIG_USERNAME_NOT_SET_YET,
+						lan_privilege_limit_checkout,
+						lan_privilege_limit_commit,
+						get_privilege_limit_number_validate,
+						i,
+						state_data->lan_channel_numbers,
+						state_data->lan_channel_numbers_count) < 0)
+	goto cleanup;
+      
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Lan_Session_Limit",
+						"Possible values: 0-17, 0 is unlimited; May be reset to 0 if not specified",
+						config_flags | CONFIG_CHECKOUT_KEY_COMMENTED_OUT_IF_VALUE_EMPTY | CONFIG_USERNAME_NOT_SET_YET,
+						lan_session_limit_checkout,
+						lan_session_limit_commit,
+						config_number_range_four_bits,
+						i,
+						state_data->lan_channel_numbers,
+						state_data->lan_channel_numbers_count) < 0)
+	goto cleanup;
+      
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"SOL_Payload_Access",
+						"Possible values: Yes/No",
+						config_flags | CONFIG_USERNAME_NOT_SET_YET,
+						sol_payload_access_checkout,
+						sol_payload_access_commit,
+						config_yes_no_validate,
+						i,
+						state_data->lan_channel_numbers,
+						state_data->lan_channel_numbers_count) < 0)
+	goto cleanup;
+    }
 
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Serial_Enable_IPMI_Msgs",
-                              "Possible values: Yes/No",
-                              verbose_flags | CONFIG_USERNAME_NOT_SET_YET,
-                              serial_enable_ipmi_messaging_checkout,
-                              serial_enable_ipmi_messaging_commit,
-                              config_yes_no_validate) < 0)
-    goto cleanup;
+  /* b/c loop goes from -1 and up, need to make unsigned int an int
+   *
+   * even if count is 0, make sure to go through loop atleast once, so
+   * fields can fail appropriately for end user on operation
+   * (e.g. checkout).
+   */
 
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Serial_Enable_Link_Auth",
-                              "Possible values: Yes/No",
-                              verbose_flags | CONFIG_USERNAME_NOT_SET_YET,
-                              serial_enable_link_auth_checkout,
-                              serial_enable_link_auth_commit,
-                              config_yes_no_validate) < 0)
-    goto cleanup;
+  if (state_data->serial_channel_numbers_count > 1)
+    index_max = state_data->serial_channel_numbers_count;
+  else
+    index_max = 0;
 
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Serial_Enable_Restricted_to_Callback",
-                              "Possible values: Yes/No",
-                              verbose_flags | CONFIG_USERNAME_NOT_SET_YET,
-                              serial_enable_restricted_to_callback_checkout,
-                              serial_enable_restricted_to_callback_commit,
-                              config_yes_no_validate) < 0)
-    goto cleanup;
+  for (i = -1; i < index_max; i++)
+    {
+      if (i < 0)
+        config_flags = serial_config_flags | state_data->serial_base_config_flags;
+      else
+        config_flags = serial_config_flags | state_data->serial_channel_config_flags;
 
-  /* achu: For backwards compatability to bmc-config in 0.2.0 */
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Serial_Enable_Restrict_to_Callback",
-                              "Possible values: Yes/No",
-                              CONFIG_DO_NOT_CHECKOUT | CONFIG_USERNAME_NOT_SET_YET,
-                              serial_enable_restricted_to_callback_checkout,
-                              serial_enable_restricted_to_callback_commit,
-                              config_yes_no_validate) < 0)
-    goto cleanup;
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Serial_Enable_IPMI_Msgs",
+						"Possible values: Yes/No",
+						config_flags | CONFIG_USERNAME_NOT_SET_YET,
+						serial_enable_ipmi_messaging_checkout,
+						serial_enable_ipmi_messaging_commit,
+						config_yes_no_validate,
+						i,
+						state_data->serial_channel_numbers,
+						state_data->serial_channel_numbers_count) < 0)
+	goto cleanup;
 
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Serial_Privilege_Limit",
-                              "Possible values: Callback/User/Operator/Administrator/OEM_Proprietary/No_Access",
-                              verbose_flags | CONFIG_USERNAME_NOT_SET_YET,
-                              serial_privilege_limit_checkout,
-                              serial_privilege_limit_commit,
-                              get_privilege_limit_number_validate) < 0)
-    goto cleanup;
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Serial_Enable_Link_Auth",
+						"Possible values: Yes/No",
+						config_flags | CONFIG_USERNAME_NOT_SET_YET,
+						serial_enable_link_auth_checkout,
+						serial_enable_link_auth_commit,
+						config_yes_no_validate,
+						i,
+						state_data->serial_channel_numbers,
+						state_data->serial_channel_numbers_count) < 0)
+	goto cleanup;
+      
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Serial_Enable_Restricted_to_Callback",
+						"Possible values: Yes/No",
+						config_flags | CONFIG_USERNAME_NOT_SET_YET,
+						serial_enable_restricted_to_callback_checkout,
+						serial_enable_restricted_to_callback_commit,
+						config_yes_no_validate,
+						i,
+						state_data->serial_channel_numbers,
+						state_data->serial_channel_numbers_count) < 0)
+	goto cleanup;
 
-  if (config_section_add_key (state_data->pstate,
-                              section,
-                              "Serial_Session_Limit",
-                              "Possible values: 0-17, 0 is unlimited; May be reset to 0 if not specified",
-                              CONFIG_CHECKOUT_KEY_COMMENTED_OUT_IF_VALUE_EMPTY | verbose_flags | CONFIG_USERNAME_NOT_SET_YET,
-                              serial_session_limit_checkout,
-                              serial_session_limit_commit,
-                              config_number_range_one_byte) < 0)
-    goto cleanup;
+      /* achu: For backwards compatability to bmc-config in 0.2.0 */
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Serial_Enable_Restrict_to_Callback",
+						"Possible values: Yes/No",
+						config_flags | CONFIG_DO_NOT_CHECKOUT | CONFIG_USERNAME_NOT_SET_YET,
+						serial_enable_restricted_to_callback_checkout,
+						serial_enable_restricted_to_callback_commit,
+						config_yes_no_validate,
+						i,
+						state_data->serial_channel_numbers,
+						state_data->serial_channel_numbers_count) < 0)
+	goto cleanup;
+
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Serial_Privilege_Limit",
+						"Possible values: Callback/User/Operator/Administrator/OEM_Proprietary/No_Access",
+						config_flags | CONFIG_USERNAME_NOT_SET_YET,
+						serial_privilege_limit_checkout,
+						serial_privilege_limit_commit,
+						get_privilege_limit_number_validate,
+						i,
+						state_data->serial_channel_numbers,
+						state_data->serial_channel_numbers_count) < 0)
+	goto cleanup;
+      
+      if (config_section_multi_channel_add_key (state_data->pstate,
+						section,
+						"Serial_Session_Limit",
+						"Possible values: 0-17, 0 is unlimited; May be reset to 0 if not specified",
+						config_flags | CONFIG_CHECKOUT_KEY_COMMENTED_OUT_IF_VALUE_EMPTY | CONFIG_USERNAME_NOT_SET_YET,
+						serial_session_limit_checkout,
+						serial_session_limit_commit,
+						config_number_range_one_byte,
+						i,
+						state_data->serial_channel_numbers,
+						state_data->serial_channel_numbers_count) < 0)
+	goto cleanup;
+    }
 
   return (section);
 

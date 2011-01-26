@@ -2,29 +2,22 @@ SUBDIRS = src
 
 MANS_CPP = \
 	ipmidetect.8 \
-	ipmidetect.conf.5 \
-	ipmidetectd.8 \
-	ipmidetectd.conf.5 \
-	libipmidetect.3
+	ipmidetect.conf.5
 
 $(MANS_CPP): $(MANS_CPP:%=%.pre)
 	$(CPP) -C -P -I. $@.pre  $@
 
-dist_man_MANS = $(MANS_CPP)
+dist_man_MANS = $(MANS_CPP) ipmi-detect.8
 
 CLEANFILES = $(MANS_CPP) *~
 
 DISTCLEANFILES = $(MANS_CPP) $(MANS_CPP:%=%.pre) .deps/*.P
 
-EXTRA_DIST = ipmidetectd.init ipmidetectd.conf
+EXTRA_DIST = ipmidetect.conf ipmi-detect.8
 
-install-data-local: $(INSTALL_INIT_SCRIPTS)
-	$(INSTALL) -m 644 $(srcdir)/ipmidetectd.conf $(DESTDIR)$(sysconfdir)/ipmidetectd.conf
-
-install-init-scripts:
-	$(INSTALL) -m 755 -d $(DESTDIR)$(sysconfdir)/init.d
-	$(INSTALL) -m 755 $(srcdir)/ipmidetectd.init $(DESTDIR)$(sysconfdir)/init.d/ipmidetectd
+install-data-local:
+	$(INSTALL) -m 755 -d $(DESTDIR)$(FREEIPMI_SYSCONFDIR)
+	$(INSTALL) -m 644 $(srcdir)/ipmidetect.conf $(DESTDIR)$(IPMIDETECT_CONFIG_FILE_DEFAULT)
 
 uninstall-local:
-	$(RM) -f $(DESTDIR)$(sysconfdir)/init.d/ipmidetectd
-	$(RM) -f $(DESTDIR)$(sysconfdir)/ipmidetectd.conf
+	$(RM) -f $(DESTDIR)$(IPMIDETECT_CONFIG_FILE_DEFAULT)

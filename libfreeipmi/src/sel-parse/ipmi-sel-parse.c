@@ -1,21 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -80,12 +79,6 @@ ipmi_sel_parse_ctx_t
 ipmi_sel_parse_ctx_create (ipmi_ctx_t ipmi_ctx, ipmi_sdr_cache_ctx_t sdr_cache_ctx)
 {
   struct ipmi_sel_parse_ctx *ctx = NULL;
-
-  if (!ipmi_ctx)
-    {
-      SET_ERRNO (EINVAL);
-      return (NULL);
-    }
 
   if (!(ctx = (ipmi_sel_parse_ctx_t)malloc (sizeof (struct ipmi_sel_parse_ctx))))
     {
@@ -576,17 +569,17 @@ _sel_entry_dump (ipmi_sel_parse_ctx_t ctx, struct ipmi_sel_parse_entry *sel_pars
    * and want the hex output
    */
   if (ipmi_dump_hex (STDERR_FILENO,
-                     ctx->debug_prefix,
-                     hdrbuf,
-                     NULL,
-                     sel_parse_entry->sel_event_record,
-                     sel_parse_entry->sel_event_record_len) < 0)
+		     ctx->debug_prefix,
+		     hdrbuf,
+		     NULL,
+		     sel_parse_entry->sel_event_record,
+		     sel_parse_entry->sel_event_record_len) < 0)
     {
       SEL_PARSE_ERRNO_TO_SEL_PARSE_ERRNUM (ctx, errno);
       goto cleanup;
     }
 #endif
-  
+
  cleanup:
   fiid_obj_destroy (obj_sel_record);
 }
@@ -605,6 +598,7 @@ _get_sel_entry (ipmi_sel_parse_ctx_t ctx,
 
   assert (ctx);
   assert (ctx->magic == IPMI_SEL_PARSE_CTX_MAGIC);
+  assert (ctx->ipmi_ctx);
   assert (fiid_obj_valid (obj_cmd_rs) == 1);
   assert (fiid_obj_template_compare (obj_cmd_rs, tmpl_cmd_get_sel_entry_rs) == 1);
   assert (reservation_id);
@@ -712,6 +706,12 @@ ipmi_sel_parse (ipmi_sel_parse_ctx_t ctx,
       return (-1);
     }
 
+  if (!ctx->ipmi_ctx)
+    {
+      SEL_PARSE_SET_ERRNUM (ctx, IPMI_SEL_PARSE_ERR_IPMI_ERROR);
+      return (-1);
+    }
+
   if (record_id_start > record_id_last)
     {
       SEL_PARSE_SET_ERRNUM (ctx, IPMI_SEL_PARSE_ERR_PARAMETERS);
@@ -742,7 +742,7 @@ ipmi_sel_parse (ipmi_sel_parse_ctx_t ctx,
 	{
           if (ipmi_ctx_errnum (ctx->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
               && ipmi_check_completion_code (obj_cmd_rs,
-                                             IPMI_COMP_CODE_REQUEST_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)
+                                             IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)
             {
               /* If the sel is empty it's not really an error */
               goto out;
@@ -786,7 +786,7 @@ ipmi_sel_parse (ipmi_sel_parse_ctx_t ctx,
 	{
           if (ipmi_ctx_errnum (ctx->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
               && ipmi_check_completion_code (obj_cmd_rs,
-                                             IPMI_COMP_CODE_REQUEST_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)
+                                             IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)
             {
               /* If the sel is empty it's not really an error */
               goto out;
@@ -849,7 +849,7 @@ ipmi_sel_parse (ipmi_sel_parse_ctx_t ctx,
           if (record_id == IPMI_SEL_GET_RECORD_ID_FIRST_ENTRY
               && ipmi_ctx_errnum (ctx->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
               && ipmi_check_completion_code (obj_cmd_rs,
-                                             IPMI_COMP_CODE_REQUEST_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)
+                                             IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)
             {
               /* If the sel is empty it's not really an error */
               goto out;
@@ -858,7 +858,7 @@ ipmi_sel_parse (ipmi_sel_parse_ctx_t ctx,
                    && !parsed_atleast_one_entry
                    && ipmi_ctx_errnum (ctx->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
                    && ipmi_check_completion_code (obj_cmd_rs,
-                                                  IPMI_COMP_CODE_REQUEST_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)
+                                                  IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)
             {
               /* user input a starting record id, we didn't find something yet, so iterate until we do */
               next_record_id = record_id + 1;
@@ -958,6 +958,12 @@ ipmi_sel_parse_record_ids (ipmi_sel_parse_ctx_t ctx,
       return (-1);
     }
 
+  if (!ctx->ipmi_ctx)
+    {
+      SEL_PARSE_SET_ERRNUM (ctx, IPMI_SEL_PARSE_ERR_IPMI_ERROR);
+      return (-1);
+    }
+
   if (!record_ids || !record_ids_len)
     {
       SEL_PARSE_SET_ERRNUM (ctx, IPMI_SEL_PARSE_ERR_PARAMETERS);
@@ -984,7 +990,7 @@ ipmi_sel_parse_record_ids (ipmi_sel_parse_ctx_t ctx,
         {
           if (ipmi_ctx_errnum (ctx->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
               && ipmi_check_completion_code (obj_cmd_rs,
-                                             IPMI_COMP_CODE_REQUEST_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)
+                                             IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)
             {
               /* record not available, ok continue on */
               continue;
@@ -1937,7 +1943,7 @@ ipmi_sel_parse_delete_sel_entry (ipmi_sel_parse_ctx_t ctx, uint16_t record_id)
                                      obj_cmd_rs) < 0)
         {
           if (ipmi_ctx_errnum (ctx->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
-              && (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_REQUEST_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1
+              && (ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1
                   || ipmi_check_completion_code (obj_cmd_rs, IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST) == 1))
             {
               SEL_PARSE_SET_ERRNUM (ctx, IPMI_SEL_PARSE_ERR_NOT_FOUND);

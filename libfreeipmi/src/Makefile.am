@@ -6,8 +6,10 @@ SUBDIRS = \
 	fiid \
 	fru-parse \
 	interface \
+	interpret \
 	libcommon \
 	locate \
+	payload \
 	record-format \
 	sdr-cache \
 	sdr-parse \
@@ -44,8 +46,10 @@ libfreeipmi_la_LIBADD = \
 	$(top_builddir)/libfreeipmi/src/fiid/libfiid.la \
 	$(top_builddir)/libfreeipmi/src/fru-parse/libfruparse.la \
 	$(top_builddir)/libfreeipmi/src/interface/libinterface.la \
+	$(top_builddir)/libfreeipmi/src/interpret/libinterpret.la \
 	$(top_builddir)/libfreeipmi/src/libcommon/libcommon.la \
 	$(top_builddir)/libfreeipmi/src/locate/liblocate.la \
+	$(top_builddir)/libfreeipmi/src/payload/libpayload.la \
 	$(top_builddir)/libfreeipmi/src/record-format/librecordformat.la \
 	$(top_builddir)/libfreeipmi/src/sdr-cache/libsdrcache.la \
 	$(top_builddir)/libfreeipmi/src/sdr-parse/libsdrparse.la \
@@ -84,10 +88,16 @@ $(top_builddir)/libfreeipmi/src/fru-parse/libfruparse.la : force-dependency-chec
 $(top_builddir)/libfreeipmi/src/interface/libinterface.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
+$(top_builddir)/libfreeipmi/src/interpret/libinterpret.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
 $(top_builddir)/libfreeipmi/src/libcommon/libcommon.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/libfreeipmi/src/locate/liblocate.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/libfreeipmi/src/payload/libpayload.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/libfreeipmi/src/record-format/librecordformat.la : force-dependency-check

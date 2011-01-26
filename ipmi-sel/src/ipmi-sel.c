@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -51,7 +51,6 @@
 #include "tool-sdr-cache-common.h"
 #include "tool-sensor-common.h"
 
-#define IPMI_SEL_RECORD_SIZE   16
 #define IPMI_SEL_OUTPUT_BUFLEN 4096
 
 #define IPMI_SEL_NA_STRING     "N/A"
@@ -390,6 +389,17 @@ _flush_cache (ipmi_sel_state_data_t *state_data)
 }
 
 static int
+_list_sensor_types (ipmi_sel_state_data_t *state_data)
+{
+  assert (state_data);
+
+  if (list_sensor_types (state_data->pstate) < 0)
+    return (-1);
+
+  return (0);
+}
+
+static int
 _clear_entries (ipmi_sel_state_data_t *state_data)
 {
   int rv = -1;
@@ -507,7 +517,7 @@ _sel_parse_err_handle (ipmi_sel_state_data_t *state_data, char *func)
 static int
 _hex_output (ipmi_sel_state_data_t *state_data)
 {
-  uint8_t record_data[IPMI_SEL_RECORD_SIZE];
+  uint8_t record_data[IPMI_SEL_RECORD_MAX_RECORD_LENGTH];
   int record_data_len;
   int rv = -1;
 
@@ -515,7 +525,7 @@ _hex_output (ipmi_sel_state_data_t *state_data)
 
   if ((record_data_len = ipmi_sel_parse_read_record (state_data->sel_parse_ctx,
                                                      record_data,
-                                                     IPMI_SEL_RECORD_SIZE)) < 0)
+                                                     IPMI_SEL_RECORD_MAX_RECORD_LENGTH)) < 0)
     {
       if (_sel_parse_err_handle (state_data, "ipmi_sel_parse_read_record") < 0)
         goto cleanup;
@@ -523,7 +533,7 @@ _hex_output (ipmi_sel_state_data_t *state_data)
     }
 
   if (state_data->prog_data->args->common.debug
-      && record_data_len < IPMI_SEL_RECORD_SIZE)
+      && record_data_len < IPMI_SEL_RECORD_MAX_RECORD_LENGTH)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
@@ -865,6 +875,24 @@ _normal_output_date_and_time (ipmi_sel_state_data_t *state_data, unsigned int fl
  * return (-1) on error
  */
 static int
+_normal_output_not_available_date_and_time (ipmi_sel_state_data_t *state_data, unsigned int flags)
+{
+  assert (state_data);
+  assert (!state_data->prog_data->args->legacy_output);
+
+  if (state_data->prog_data->args->comma_separated_output)
+    pstdout_printf (state_data->pstate, ",%s,%s", IPMI_SEL_NA_STRING, IPMI_SEL_NA_STRING);
+  else
+    pstdout_printf (state_data->pstate, " | %-11s | %-8s", IPMI_SEL_NA_STRING, IPMI_SEL_NA_STRING);
+
+  return (1);
+}
+
+/* return 1 on success
+ * return (0) on non-success, but don't fail
+ * return (-1) on error
+ */
+static int
 _normal_output_sensor_name_and_type (ipmi_sel_state_data_t *state_data, unsigned int flags)
 {
   char fmt[IPMI_SEL_FMT_BUFLEN + 1];
@@ -1032,6 +1060,104 @@ _normal_output_sensor_name_and_type (ipmi_sel_state_data_t *state_data, unsigned
  * return (-1) on error
  */
 static int
+_normal_output_not_available_sensor_name_and_type (ipmi_sel_state_data_t *state_data, unsigned int flags)
+{
+  char fmt[IPMI_SEL_FMT_BUFLEN + 1];
+
+  assert (state_data);
+  assert (!state_data->prog_data->args->legacy_output);
+
+  memset (fmt, '\0', IPMI_SEL_FMT_BUFLEN + 1);
+  if (state_data->prog_data->args->comma_separated_output)
+    snprintf (fmt,
+              IPMI_SEL_FMT_BUFLEN,
+              ",%%s");
+  else
+    snprintf (fmt,
+              IPMI_SEL_FMT_BUFLEN,
+              " | %%-%ds",
+              state_data->column_width.sensor_name);
+
+  pstdout_printf (state_data->pstate, fmt, IPMI_SEL_NA_STRING);
+
+  if (!state_data->prog_data->args->no_sensor_type_output)
+    {
+      memset (fmt, '\0', IPMI_SEL_FMT_BUFLEN + 1);
+      if (state_data->prog_data->args->comma_separated_output)
+        snprintf (fmt,
+                  IPMI_SEL_FMT_BUFLEN,
+                  ",%%s");
+      else
+        snprintf (fmt,
+                  IPMI_SEL_FMT_BUFLEN,
+                  " | %%-%ds",
+                  state_data->column_width.sensor_type);
+      
+      pstdout_printf (state_data->pstate, fmt, IPMI_SEL_NA_STRING);
+    }
+
+  return (1);
+}
+
+/* return 1 on success
+ * return (0) on non-success, but don't fail
+ * return (-1) on error
+ */
+static int
+_normal_output_event_state (ipmi_sel_state_data_t *state_data, unsigned int flags)
+{
+  uint8_t record_data[IPMI_SEL_RECORD_MAX_RECORD_LENGTH];
+  int record_data_len;
+  unsigned int sel_state;
+  char *sel_state_str = NULL;
+
+  assert (state_data);
+  assert (!state_data->prog_data->args->legacy_output);
+  assert (state_data->prog_data->args->output_event_state);
+
+  if ((record_data_len = ipmi_sel_parse_read_record (state_data->sel_parse_ctx,
+                                                     record_data,
+                                                     IPMI_SEL_RECORD_MAX_RECORD_LENGTH)) < 0)
+    {
+      if (_sel_parse_err_handle (state_data, "ipmi_sel_parse_read_record") < 0)
+        return (-1);
+      return (0);
+    }
+
+  if (ipmi_interpret_sel (state_data->interpret_ctx,
+                          record_data,
+                          record_data_len,
+                          &sel_state) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_interpret_sel: %s\n",
+                       ipmi_interpret_ctx_errormsg (state_data->interpret_ctx));
+      return (-1);
+    }
+
+  if (sel_state == IPMI_INTERPRET_STATE_NOMINAL)
+    sel_state_str = "Nominal";
+  else if (sel_state == IPMI_INTERPRET_STATE_WARNING)
+    sel_state_str = "Warning";
+  else if (sel_state == IPMI_INTERPRET_STATE_CRITICAL)
+    sel_state_str = "Critical";
+  else
+    sel_state_str = IPMI_SEL_NA_STRING;
+
+  if (state_data->prog_data->args->comma_separated_output)
+    pstdout_printf (state_data->pstate, ",%s", sel_state_str);
+  else
+    pstdout_printf (state_data->pstate, " | %-8s", sel_state_str);
+
+  return (1);
+}
+
+/* return 1 on success
+ * return (0) on non-success, but don't fail
+ * return (-1) on error
+ */
+static int
 _normal_output_event_direction (ipmi_sel_state_data_t *state_data, unsigned int flags)
 {
   char outbuf[IPMI_SEL_OUTPUT_BUFLEN+1];
@@ -1076,6 +1202,61 @@ _normal_output_event_direction (ipmi_sel_state_data_t *state_data, unsigned int 
  * return (-1) on error
  */
 static int
+_normal_output_not_available_event_direction (ipmi_sel_state_data_t *state_data, unsigned int flags)
+{
+  assert (state_data);
+  assert (!state_data->prog_data->args->legacy_output);
+  assert (state_data->prog_data->args->verbose_count >= 1);
+
+  if (state_data->prog_data->args->comma_separated_output)
+    pstdout_printf (state_data->pstate, ",%s", IPMI_SEL_NA_STRING);
+  else
+    pstdout_printf (state_data->pstate, " | %-17s", IPMI_SEL_NA_STRING);
+
+  return (1);
+}
+
+/* return length written into buffer on success (may be zero)
+ * return (-1) on error
+ */
+static int
+_output_oem_event_strings (ipmi_sel_state_data_t *state_data,
+                           char *outbuf,
+                           unsigned int outbuflen,
+                           unsigned int flags)
+{
+  unsigned int len;
+  int ret;
+
+  assert (state_data);
+  assert (!state_data->prog_data->args->legacy_output);
+
+  if ((ret = ipmi_sel_parse_read_record_string (state_data->sel_parse_ctx,
+                                                "%O",
+                                                outbuf,
+                                                outbuflen,
+                                                flags)) < 0)
+    {
+      if (_sel_parse_err_handle (state_data, "ipmi_sel_parse_read_record_string") < 0)
+        return (-1);
+      return (0);
+    }
+
+  len = strlen (outbuf);
+  
+  /* we don't count N/A as a valid string to be returned */
+  
+  if (len && strcmp (outbuf, IPMI_SEL_NA_STRING))
+    return (ret);
+  
+  return (0);
+}
+
+/* return 1 on success
+ * return (0) on non-success, but don't fail
+ * return (-1) on error
+ */
+static int
 _normal_output_event (ipmi_sel_state_data_t *state_data, unsigned int flags)
 {
   char fmtbuf[IPMI_SEL_OUTPUT_BUFLEN+1];
@@ -1098,27 +1279,18 @@ _normal_output_event (ipmi_sel_state_data_t *state_data, unsigned int flags)
 
   if (state_data->prog_data->args->output_oem_event_strings)
     {
-      unsigned int len;
-
       memset (outbuf, '\0', IPMI_SEL_OUTPUT_BUFLEN+1);
-      if ((outbuf_len = ipmi_sel_parse_read_record_string (state_data->sel_parse_ctx,
-                                                           "%O",
-                                                           outbuf,
-                                                           IPMI_SEL_OUTPUT_BUFLEN,
-                                                           flags)) < 0)
-        {
-          if (_sel_parse_err_handle (state_data, "ipmi_sel_parse_read_record_string") < 0)
-            return (-1);
-          return (0);
-        }
+        if ((outbuf_len = _output_oem_event_strings (state_data,
+                                                   outbuf,
+                                                   IPMI_SEL_OUTPUT_BUFLEN,
+                                                   flags)) < 0)
+        return (-1);
 
-      len = strlen (outbuf);
-
-      if (len && strcmp (outbuf, IPMI_SEL_NA_STRING))
+      if (outbuf_len)
         read_oem_event_string++;
     }
 
-  if (!read_oem_event_string)
+  if (!outbuf_len)
     {
       memset (outbuf, '\0', IPMI_SEL_OUTPUT_BUFLEN+1);
       if ((outbuf_len = ipmi_sel_parse_read_record_string (state_data->sel_parse_ctx,
@@ -1322,95 +1494,58 @@ output:
  * return (-1) on error
  */
 static int
-_normal_output_manufacturer_id (ipmi_sel_state_data_t *state_data, unsigned int flags)
+_normal_output_oem_data (ipmi_sel_state_data_t *state_data,
+                         int record_has_manufacturer_id,
+                         unsigned int flags)
 {
   char outbuf[IPMI_SEL_OUTPUT_BUFLEN+1];
-  int outbuf_len;
-
+  int outbuf_len = 0;
+  
   assert (state_data);
   assert (!state_data->prog_data->args->legacy_output);
-
-  memset (outbuf, '\0', IPMI_SEL_OUTPUT_BUFLEN+1);
-  if ((outbuf_len = ipmi_sel_parse_read_record_string (state_data->sel_parse_ctx,
-                                                       "%m",
-                                                       outbuf,
-                                                       IPMI_SEL_OUTPUT_BUFLEN,
-                                                       flags)) < 0)
-    {
-      if (_sel_parse_err_handle (state_data, "ipmi_sel_parse_read_record_string") < 0)
-        return (-1);
-      return (0);
-    }
-
-  if (state_data->prog_data->args->comma_separated_output)
-    {
-      if (outbuf_len)
-        pstdout_printf (state_data->pstate, ",%s", outbuf);
-      else
-        pstdout_printf (state_data->pstate, ",%s", IPMI_SEL_NA_STRING);
-    }
-  else
-    {
-      if (outbuf_len)
-        pstdout_printf (state_data->pstate, " | %-16s", outbuf);
-      else
-        pstdout_printf (state_data->pstate, " | %-16s", IPMI_SEL_NA_STRING);
-    }
-
-  return (1);
-}
-
-/* return 1 on success
- * return (0) on non-success, but don't fail
- * return (-1) on error
- */
-static int
-_normal_output_oem_data (ipmi_sel_state_data_t *state_data, unsigned int flags)
-{
-  char outbuf[IPMI_SEL_OUTPUT_BUFLEN+1];
-  int read_oem_event_string = 0;
-  int outbuf_len;
-
-  assert (state_data);
-  assert (!state_data->prog_data->args->legacy_output);
-
+  
   if (state_data->prog_data->args->output_oem_event_strings)
     {
-      unsigned int len;
-      
       memset (outbuf, '\0', IPMI_SEL_OUTPUT_BUFLEN+1);
-      if ((outbuf_len = ipmi_sel_parse_read_record_string (state_data->sel_parse_ctx,
-                                                           "%O",
-                                                           outbuf,
-                                                           IPMI_SEL_OUTPUT_BUFLEN,
-                                                           flags)) < 0)
-        {
-          if (_sel_parse_err_handle (state_data, "ipmi_sel_parse_read_record_string") < 0)
-            return (-1);
-          return (0);
-        }
-      
-      len = strlen (outbuf);
-      
-      if (len && strcmp (outbuf, IPMI_SEL_NA_STRING))
-        read_oem_event_string++;
+      if ((outbuf_len = _output_oem_event_strings (state_data,
+                                                   outbuf,
+                                                   IPMI_SEL_OUTPUT_BUFLEN,
+                                                   flags)) < 0)
+        return (-1);
     }
 
-  if (!read_oem_event_string)
+  if (!outbuf_len)
     {
       memset (outbuf, '\0', IPMI_SEL_OUTPUT_BUFLEN+1);
-      if ((outbuf_len = ipmi_sel_parse_read_record_string (state_data->sel_parse_ctx,
-                                                           "%o",
-                                                           outbuf,
-                                                           IPMI_SEL_OUTPUT_BUFLEN,
-                                                           flags)) < 0)
+      if (state_data->prog_data->args->output_manufacturer_id
+          && record_has_manufacturer_id)
         {
-          if (_sel_parse_err_handle (state_data, "ipmi_sel_parse_read_record_string") < 0)
-            return (-1);
-          return (0);
+          if ((outbuf_len = ipmi_sel_parse_read_record_string (state_data->sel_parse_ctx,
+                                                               "%m ; %o",
+                                                               outbuf,
+                                                               IPMI_SEL_OUTPUT_BUFLEN,
+                                                               flags)) < 0)
+            {
+              if (_sel_parse_err_handle (state_data, "ipmi_sel_parse_read_record_string") < 0)
+                return (-1);
+              return (0);
+            }
+        }
+      else
+        {
+          if ((outbuf_len = ipmi_sel_parse_read_record_string (state_data->sel_parse_ctx,
+                                                               "%o",
+                                                               outbuf,
+                                                               IPMI_SEL_OUTPUT_BUFLEN,
+                                                               flags)) < 0)
+            {
+              if (_sel_parse_err_handle (state_data, "ipmi_sel_parse_read_record_string") < 0)
+                return (-1);
+              return (0);
+            }
         }
     }
-  
+
   if (state_data->prog_data->args->comma_separated_output)
     {
       if (outbuf_len)
@@ -1458,6 +1593,11 @@ _normal_output (ipmi_sel_state_data_t *state_data, uint8_t record_type)
                             SENSORS_HEADER_NAME_STR,
                             SENSORS_HEADER_TYPE_STR);
 
+          if (state_data->prog_data->args->output_event_state)
+            pstdout_printf (state_data->pstate,
+                            ",%s",
+                            SENSORS_HEADER_STATE_STR);
+
           if (state_data->prog_data->args->verbose_count >= 1)
             pstdout_printf (state_data->pstate, ",Event Direction");
           
@@ -1497,6 +1637,11 @@ _normal_output (ipmi_sel_state_data_t *state_data, uint8_t record_type)
                               SENSORS_HEADER_TYPE_STR);
             }
           
+          if (state_data->prog_data->args->output_event_state)
+            pstdout_printf (state_data->pstate,
+                            " | %s   ",
+                            SENSORS_HEADER_STATE_STR);
+
           if (state_data->prog_data->args->verbose_count >= 1)
             pstdout_printf (state_data->pstate, " | Event Direction  ");
           
@@ -1550,6 +1695,15 @@ _normal_output (ipmi_sel_state_data_t *state_data, uint8_t record_type)
       if (!ret)
         goto newline_out;
 
+      if (state_data->prog_data->args->output_event_state)
+        {
+          if ((ret = _normal_output_event_state (state_data, flags)) < 0)
+            goto cleanup;
+
+          if (!ret)
+            goto newline_out;
+        }
+
       if (state_data->prog_data->args->verbose_count >= 1)
         {
           if ((ret = _normal_output_event_direction (state_data, flags)) < 0)
@@ -1579,13 +1733,31 @@ _normal_output (ipmi_sel_state_data_t *state_data, uint8_t record_type)
       if (!ret)
         goto newline_out;
 
-      if ((ret = _normal_output_manufacturer_id (state_data, flags)) < 0)
+      if ((ret = _normal_output_not_available_sensor_name_and_type (state_data, flags)) < 0)
         goto cleanup;
 
       if (!ret)
         goto newline_out;
 
-      if ((ret = _normal_output_oem_data (state_data, flags)) < 0)
+      if (state_data->prog_data->args->output_event_state)
+        {
+          if ((ret = _normal_output_event_state (state_data, flags)) < 0)
+            goto cleanup;
+
+          if (!ret)
+            goto newline_out;
+        }
+
+      if (state_data->prog_data->args->verbose_count >= 1)
+        {
+          if ((ret = _normal_output_not_available_event_direction (state_data, flags)) < 0)
+            goto cleanup;
+
+          if (!ret)
+            goto newline_out;
+        }
+
+      if ((ret = _normal_output_oem_data (state_data, 1, flags)) < 0)
         goto cleanup;
 
       if (!ret)
@@ -1599,7 +1771,37 @@ _normal_output (ipmi_sel_state_data_t *state_data, uint8_t record_type)
       if (!ret)
         goto out;
 
-      if ((ret = _normal_output_oem_data (state_data, flags)) < 0)
+      if ((ret = _normal_output_not_available_date_and_time (state_data, flags)) < 0)
+        goto cleanup;
+
+      if (!ret)
+        goto newline_out;
+
+      if ((ret = _normal_output_not_available_sensor_name_and_type (state_data, flags)) < 0)
+        goto cleanup;
+
+      if (!ret)
+        goto newline_out;
+
+      if (state_data->prog_data->args->output_event_state)
+        {
+          if ((ret = _normal_output_event_state (state_data, flags)) < 0)
+            goto cleanup;
+
+          if (!ret)
+            goto newline_out;
+        }
+
+      if (state_data->prog_data->args->verbose_count >= 1)
+        {
+          if ((ret = _normal_output_not_available_event_direction (state_data, flags)) < 0)
+            goto cleanup;
+
+          if (!ret)
+            goto newline_out;
+        }
+
+      if ((ret = _normal_output_oem_data (state_data, 0, flags)) < 0)
         goto cleanup;
 
       if (!ret)
@@ -1628,7 +1830,6 @@ _sel_parse_callback (ipmi_sel_parse_ctx_t ctx, void *callback_data)
   ipmi_sel_state_data_t *state_data;
   uint8_t record_type;
   int record_type_class;
-  int display_flag = 1;
   int rv = -1;
 
   assert (ctx);
@@ -1657,22 +1858,55 @@ _sel_parse_callback (ipmi_sel_parse_ctx_t ctx, void *callback_data)
           for (i = 0; i < state_data->prog_data->args->exclude_display_record_list_length; i++)
             {
               if (state_data->prog_data->args->exclude_display_record_list[i] == record_id)
-                {
-                  display_flag = 0;
-                  break;
-                }
+                goto out;
             }
         }
       else
         {
           if (record_id >= state_data->prog_data->args->exclude_display_range1
               && record_id <= state_data->prog_data->args->exclude_display_range2)
-            display_flag = 0;
+            goto out;
         }
     }
 
-  if (!display_flag)
-    goto out;
+  if (state_data->prog_data->args->sensor_types_length
+      || state_data->prog_data->args->exclude_sensor_types_length)
+    {
+      uint8_t sensor_type;
+      int flag;
+
+      if (ipmi_sel_parse_read_sensor_type (state_data->sel_parse_ctx,
+                                           &sensor_type) < 0)
+        {
+          if (_sel_parse_err_handle (state_data, "ipmi_sel_parse_read_record_type") < 0)
+            goto cleanup;
+          goto out;
+        }
+
+      if (state_data->prog_data->args->sensor_types_length)
+        {
+          if ((flag = sensor_type_listed (state_data->pstate,
+                                          sensor_type,
+                                          state_data->prog_data->args->sensor_types,
+                                          state_data->prog_data->args->sensor_types_length)) < 0)
+            goto cleanup;
+          
+          if (!flag)
+            goto out;
+        }
+
+      if (state_data->prog_data->args->exclude_sensor_types_length)
+        {
+          if ((flag = sensor_type_listed (state_data->pstate,
+                                          sensor_type,
+                                          state_data->prog_data->args->exclude_sensor_types,
+                                          state_data->prog_data->args->exclude_sensor_types_length)) < 0)
+            goto cleanup;
+
+          if (flag)
+            goto out;
+        }
+    }
 
   if (ipmi_sel_parse_read_record_type (state_data->sel_parse_ctx,
                                        &record_type) < 0)
@@ -1703,6 +1937,45 @@ _sel_parse_callback (ipmi_sel_parse_ctx_t ctx, void *callback_data)
       && record_type_class != IPMI_SEL_RECORD_TYPE_CLASS_TIMESTAMPED_OEM_RECORD
       && record_type_class != IPMI_SEL_RECORD_TYPE_CLASS_NON_TIMESTAMPED_OEM_RECORD)
     goto out;
+
+  if ((state_data->prog_data->args->date_range
+       || state_data->prog_data->args->exclude_date_range)
+      && (record_type_class == IPMI_SEL_RECORD_TYPE_CLASS_SYSTEM_EVENT_RECORD
+          || record_type_class == IPMI_SEL_RECORD_TYPE_CLASS_TIMESTAMPED_OEM_RECORD))
+    {
+      uint32_t timestamp;
+      
+      if (ipmi_sel_parse_read_timestamp (state_data->sel_parse_ctx,
+                                         &timestamp) < 0)
+        {
+          if (_sel_parse_err_handle (state_data, "ipmi_sel_parse_read_timestamp") < 0)
+            goto cleanup;
+          goto out;
+        }
+      
+      if (state_data->prog_data->args->date_range)
+        {
+          if (timestamp < state_data->prog_data->args->date_range1
+              || timestamp > state_data->prog_data->args->date_range2)
+            goto out;
+        }
+
+      if (state_data->prog_data->args->exclude_date_range)
+        {
+          if (timestamp >= state_data->prog_data->args->exclude_date_range1
+              && timestamp <= state_data->prog_data->args->exclude_date_range2)
+            goto out;
+        }
+    }
+
+  /* Special case, if there is no timestamp, filter it out */
+  if (state_data->prog_data->args->date_range
+      && record_type_class == IPMI_SEL_RECORD_TYPE_CLASS_NON_TIMESTAMPED_OEM_RECORD)
+    {
+      if (state_data->prog_data->args->date_range)
+        goto out;
+    }
+  
 
   if (state_data->prog_data->args->hex_dump)
     {
@@ -1876,7 +2149,7 @@ _display_sel_records (ipmi_sel_state_data_t *state_data)
                                        0,
                                        NULL,
                                        0,
-                                       !state_data->prog_data->args->non_abbreviated_units,
+                                       state_data->prog_data->args->non_abbreviated_units,
                                        (entity_ptr) ? 1 : 0, /* shared_sensors */
                                        1, /* count_event_only_records */
                                        0, /* count_device_locator_records */
@@ -2033,6 +2306,29 @@ _display_sel_records (ipmi_sel_state_data_t *state_data)
                            "ipmi_sel_parse_ctx_set_ipmi_version: %s\n",
                            ipmi_sel_parse_ctx_errormsg (state_data->sel_parse_ctx));
           goto cleanup;
+        }
+
+      if (args->output_event_state)
+        {
+          if (ipmi_interpret_ctx_set_manufacturer_id (state_data->interpret_ctx,
+                                                      state_data->oem_data.manufacturer_id) < 0)
+            {
+              pstdout_fprintf (state_data->pstate,
+                               stderr,
+                               "ipmi_interpret_ctx_set_manufacturer_id: %s\n",
+                               ipmi_interpret_ctx_errormsg (state_data->interpret_ctx));
+              goto cleanup;
+            }
+
+          if (ipmi_interpret_ctx_set_product_id (state_data->interpret_ctx,
+                                                 state_data->oem_data.product_id) < 0)
+            {
+              pstdout_fprintf (state_data->pstate,
+                               stderr,
+                               "ipmi_interpret_ctx_set_product_id: %s\n",
+                               ipmi_interpret_ctx_errormsg (state_data->interpret_ctx));
+              goto cleanup;
+            }
         }
     }
 
@@ -2220,6 +2516,9 @@ run_cmd_args (ipmi_sel_state_data_t *state_data)
   if (args->sdr.flush_cache)
     return (_flush_cache (state_data));
 
+  if (args->list_sensor_types)
+    return (_list_sensor_types (state_data));
+
   if (args->clear)
     return (_clear_entries (state_data));
 
@@ -2339,6 +2638,79 @@ _ipmi_sel (pstdout_state_t pstate,
         }
     }
 
+  if (prog_data->args->output_event_state)
+    {
+      unsigned int flags = 0;
+
+      if (!(state_data.interpret_ctx = ipmi_interpret_ctx_create ()))
+        {
+          pstdout_perror (pstate, "ipmi_interpret_ctx_create()");
+          exit_code = EXIT_FAILURE;
+          goto cleanup;
+        }
+
+      if (prog_data->args->event_state_config_file)
+        {
+          if (ipmi_interpret_load_sel_config (state_data.interpret_ctx,
+                                              prog_data->args->event_state_config_file) < 0)
+            {
+              if (ipmi_interpret_ctx_errnum (state_data.interpret_ctx) == IPMI_INTERPRET_ERR_SEL_CONFIG_FILE_DOES_NOT_EXIST)
+                pstdout_fprintf (pstate,
+                                 stderr,
+                                 "event state config file '%s' does not exist\n",
+                                 prog_data->args->event_state_config_file);
+              else if (ipmi_interpret_ctx_errnum (state_data.interpret_ctx) == IPMI_INTERPRET_ERR_SEL_CONFIG_FILE_PARSE)
+                pstdout_fprintf (pstate,
+                                 stderr,
+                                 "event state config file '%s' parse error\n",
+                                 prog_data->args->event_state_config_file);
+              else
+                pstdout_fprintf (pstate,
+                                 stderr,
+                                 "ipmi_interpret_load_sel_config: %s\n",
+                                 ipmi_interpret_ctx_errormsg (state_data.interpret_ctx));
+              exit_code = EXIT_FAILURE;
+              goto cleanup;
+            }
+        }
+      else
+        {
+          if (ipmi_interpret_load_sel_config (state_data.interpret_ctx, NULL) < 0)
+            {
+              if (ipmi_interpret_ctx_errnum (state_data.interpret_ctx) == IPMI_INTERPRET_ERR_SEL_CONFIG_FILE_PARSE)
+                pstdout_fprintf (pstate,
+                                 stderr,
+                                 "event state config file parse error\n");
+              else
+                pstdout_fprintf (pstate,
+                                 stderr,
+                                 "ipmi_interpret_load_sel_config: %s\n",
+                                 ipmi_interpret_ctx_errormsg (state_data.interpret_ctx));
+              exit_code = EXIT_FAILURE;
+              goto cleanup;
+            }
+        }
+
+      if (prog_data->args->assume_system_event_records)
+        flags |= IPMI_INTERPRET_FLAGS_SEL_ASSUME_SYSTEM_EVENT_RECORDS;
+
+      if (prog_data->args->interpret_oem_data)
+        flags |= IPMI_INTERPRET_FLAGS_INTERPRET_OEM_DATA;
+
+      if (flags)
+        {
+          if (ipmi_interpret_ctx_set_flags (state_data.interpret_ctx, flags) < 0)
+            {
+              pstdout_fprintf (pstate,
+                               stderr,
+                               "ipmi_interpret_ctx_set_flags: %s\n",
+                               ipmi_interpret_ctx_errormsg (state_data.interpret_ctx));
+              exit_code = EXIT_FAILURE;
+              goto cleanup;
+            }
+        }
+    }
+
   if (run_cmd_args (&state_data) < 0)
     {
       exit_code = EXIT_FAILURE;
@@ -2378,7 +2750,7 @@ main (int argc, char **argv)
   prog_data.args = &cmd_args;
 
   /* Special case, if user specified workaround via flags instead of option */
-  if (prog_data.args->common.tool_specific_workaround_flags & IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_ASSUME_SYSTEM_EVENT)
+  if (prog_data.args->common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_ASSUME_SYSTEM_EVENT)
     prog_data.args->assume_system_event_records = 1;
   
   if ((hosts_count = pstdout_setup (&(prog_data.args->common.hostname),

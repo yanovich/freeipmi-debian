@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -53,9 +53,6 @@ config_checkout_section (pstdout_state_t pstate,
   assert (cmd_args);
   assert (fp);
 
-  if (section->flags & CONFIG_DO_NOT_CHECKOUT)
-    return (CONFIG_ERR_SUCCESS);
-
   /* if no keyvalues specified by user, we want to checkout all keys,
    * so build keyvalues list appropriately
    */
@@ -86,7 +83,8 @@ config_checkout_section (pstdout_state_t pstate,
    * us.
    */
   if (section->section_comment_section_name
-      && section->section_comment)
+      && section->section_comment
+      && all_keys_if_none_specified)
     {
       if (config_section_comments (pstate,
                                    section->section_comment_section_name,
@@ -134,7 +132,7 @@ config_checkout_section (pstdout_state_t pstate,
 
       if (CONFIG_IS_NON_FATAL_ERROR (this_ret))
         {
-          if (cmd_args->verbose_count)
+          if (cmd_args->verbose_count > 1)
             {
               if (this_ret == CONFIG_ERR_NON_FATAL_ERROR_NOT_SUPPORTED)
                 PSTDOUT_FPRINTF (pstate,
@@ -271,21 +269,25 @@ config_checkout (pstdout_state_t pstate,
   s = sections;
   while (s)
     {
-      if ((ret = config_checkout_section (pstate,
-                                          s,
-                                          cmd_args,
-                                          all_keys_if_none_specified,
-                                          fp,
-                                          line_length,
-                                          arg)) != CONFIG_ERR_SUCCESS)
-        {
-          if (ret == CONFIG_ERR_FATAL_ERROR)
-            {
-              rv = CONFIG_ERR_FATAL_ERROR;
-              break;
-            }
-          rv = ret;
-        }
+      if (!(s->flags & CONFIG_DO_NOT_CHECKOUT)
+	  || !all_keys_if_none_specified)
+	{
+	  if ((ret = config_checkout_section (pstate,
+					      s,
+					      cmd_args,
+					      all_keys_if_none_specified,
+					      fp,
+					      line_length,
+					      arg)) != CONFIG_ERR_SUCCESS)
+	    {
+	      if (ret == CONFIG_ERR_FATAL_ERROR)
+		{
+		  rv = CONFIG_ERR_FATAL_ERROR;
+		  break;
+		}
+	      rv = ret;
+	    }
+	}
       s = s->next;
     }
 

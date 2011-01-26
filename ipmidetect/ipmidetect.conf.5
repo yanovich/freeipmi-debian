@@ -1,7 +1,7 @@
 
 
 .\"#############################################################################
-.\"$Id: ipmidetect.conf.5.pre.in,v 1.11.20.1 2009-12-23 21:24:11 chu11 Exp $
+.\"$Id: ipmidetect.conf.5.pre.in,v 1.13 2010-02-08 22:02:30 chu11 Exp $
 .\"#############################################################################
 .\"  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
 .\"  Copyright (C) 2007 The Regents of the University of California.
@@ -14,7 +14,7 @@
 .\"
 .\"  Ipmidetect is free software; you can redistribute it and/or modify it under
 .\"  the terms of the GNU General Public License as published by the Free
-.\"  Software Foundation; either version 2 of the License, or (at your option)
+.\"  Software Foundation; either version 3 of the License, or (at your option)
 .\"  any later version.
 .\"
 .\"  Ipmidetect is distributed in the hope that it will be useful, but WITHOUT
@@ -25,7 +25,7 @@
 .\"  You should have received a copy of the GNU General Public License along
 .\"  with Ipmidetect.  If not, see <http://www.gnu.org/licenses/>.
 .\"############################################################################
-.TH IPMIDETECT.CONF 5 "2010-12-06" "LLNL" "LIBIPMIDETECT"
+.TH IPMIDETECT.CONF 5 "2011-01-20" "LLNL" "LIBIPMIDETECT"
 .SH "NAME"
 ipmidetect.conf \- specify alternate default values for the ipmidetect library
 .SH "DESCRIPTION"
@@ -34,7 +34,7 @@ default values used in the
 .BR ipmidetect_load_data(3)
 API function.
 .LP
-The configuration file is stored at /usr/local/etc/ipmidetect.conf.
+The configuration file is stored at /usr/local/etc/freeipmi//ipmidetect.conf.
 
 .SH "CONFIGURATION OPTIONS"
 The following are a list of configuration options that can be
@@ -56,7 +56,7 @@ Specify the port.
 .I timeout_len seconds
 Specify the timeout length in seconds.
 .SH "FILES"
-/usr/local/etc/ipmidetect.conf
+/usr/local/etc/freeipmi//ipmidetect.conf
 .SH "REPORTING BUGS"
 Report bugs to <freeipmi\-users@gnu.org> or <freeipmi\-devel@gnu.org>.
 .SH COPYRIGHT

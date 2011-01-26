@@ -3,7 +3,7 @@
 #
 
 %define name freeipmi
-%define version 0.8.12
+%define version 1.0.1
 %if %{?_with_debug:1}%{!?_with_debug:0}
 %define release 1.debug%{?dist}
 %else
@@ -169,8 +169,12 @@ fi
 
 %files
 %defattr(-,root,root)
-%attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ipmi_monitoring_sensors.conf
-%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/freeipmi.conf
+%dir %{_sysconfdir}/freeipmi/
+%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/freeipmi/freeipmi.conf
+%attr(0644,root,root) %config(noreplace) %{_sysconfdir}/freeipmi/freeipmi_interpret_sel.conf
+%attr(0644,root,root) %config(noreplace) %{_sysconfdir}/freeipmi/freeipmi_interpret_sensor.conf
+%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/freeipmi/ipmidetect.conf
+%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/freeipmi/libipmiconsole.conf
 %doc %{_datadir}/doc/%{name}/AUTHORS
 %doc %{_datadir}/doc/%{name}/COPYING
 %doc %{_datadir}/doc/%{name}/ChangeLog
@@ -185,7 +189,6 @@ fi
 %doc %{_infodir}/*
 %doc %{_datadir}/doc/%{name}/COPYING.ipmiping
 %doc %{_datadir}/doc/%{name}/COPYING.ipmipower
-%doc %{_datadir}/doc/%{name}/COPYING.rmcpping
 %doc %{_datadir}/doc/%{name}/COPYING.ipmiconsole
 %doc %{_datadir}/doc/%{name}/COPYING.ipmimonitoring
 %doc %{_datadir}/doc/%{name}/COPYING.pstdout
@@ -196,7 +199,6 @@ fi
 %doc %{_datadir}/doc/%{name}/COPYING.ZRESEARCH
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmiping
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmipower
-%doc %{_datadir}/doc/%{name}/DISCLAIMER.rmcpping
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmiconsole
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmimonitoring
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.pstdout
@@ -205,13 +207,13 @@ fi
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmi-dcmi
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmiping.UC
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmipower.UC
-%doc %{_datadir}/doc/%{name}/DISCLAIMER.rmcpping.UC
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmiconsole.UC
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmimonitoring.UC
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.pstdout.UC
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmidetect.UC
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmi-fru.UC
 %doc %{_datadir}/doc/%{name}/freeipmi-coding.txt
+%doc %{_datadir}/doc/%{name}/freeipmi-design.txt
 %doc %{_datadir}/doc/%{name}/freeipmi-hostrange.txt
 %doc %{_datadir}/doc/%{name}/freeipmi-libraries.txt
 %doc %{_datadir}/doc/%{name}/freeipmi-bugs-issues-and-workarounds.txt
@@ -236,14 +238,19 @@ fi
 %{_sbindir}/ipmi-sensors
 %{_sbindir}/ipmi-sensors-config
 %{_sbindir}/ipmiping
+%{_sbindir}/ipmi-ping
 %{_sbindir}/ipmipower
+%{_sbindir}/ipmi-power
 %{_sbindir}/rmcpping
+%{_sbindir}/rmcp-ping
 %{_sbindir}/ipmiconsole
+%{_sbindir}/ipmi-console
 %{_sbindir}/ipmimonitoring
 %{_sbindir}/ipmi-chassis
 %{_sbindir}/ipmi-chassis-config
 %{_sbindir}/ipmi-dcmi
 %{_sbindir}/ipmidetect
+%{_sbindir}/ipmi-detect
 %{_mandir}/man8/bmc-config.8*
 %{_mandir}/man5/bmc-config.conf.5*
 %{_mandir}/man8/bmc-info.8*
@@ -258,23 +265,31 @@ fi
 %{_mandir}/man8/ipmi-sensors.8*
 %{_mandir}/man8/ipmi-sensors-config.8*
 %{_mandir}/man8/ipmiping.8*
+%{_mandir}/man8/ipmi-ping.8*
 %{_mandir}/man8/ipmipower.8*
+%{_mandir}/man8/ipmi-power.8*
 %{_mandir}/man5/ipmipower.conf.5*
 %{_mandir}/man8/rmcpping.8*
+%{_mandir}/man8/rmcp-ping.8*
 %{_mandir}/man8/ipmiconsole.8*
+%{_mandir}/man8/ipmi-console.8*
 %{_mandir}/man5/ipmiconsole.conf.5*
 %{_mandir}/man8/ipmimonitoring.8*
 %{_mandir}/man5/ipmi_monitoring_sensors.conf.5*
 %{_mandir}/man5/ipmimonitoring_sensors.conf.5*
 %{_mandir}/man5/ipmimonitoring.conf.5*
 %{_mandir}/man5/libipmimonitoring.conf.5*
+%{_mandir}/man5/freeipmi_interpret_sel.conf.5*
+%{_mandir}/man5/freeipmi_interpret_sensor.conf.5*
 %{_mandir}/man8/ipmi-chassis.8*
 %{_mandir}/man8/ipmi-chassis-config.8*
 %{_mandir}/man8/ipmi-dcmi.8*
 %{_mandir}/man8/ipmidetect.8*
+%{_mandir}/man8/ipmi-detect.8*
 %{_mandir}/man5/freeipmi.conf.5*
 %{_mandir}/man5/ipmidetect.conf.5*
 %{_mandir}/man7/freeipmi.7*
+%{_mandir}/man5/libipmiconsole.conf.5*
 %dir %{_localstatedir}/cache/ipmimonitoringsdrcache
 
 %files devel
@@ -291,7 +306,9 @@ fi
 %dir %{_includedir}/freeipmi/fiid
 %dir %{_includedir}/freeipmi/fru-parse
 %dir %{_includedir}/freeipmi/interface
+%dir %{_includedir}/freeipmi/interpret
 %dir %{_includedir}/freeipmi/locate
+%dir %{_includedir}/freeipmi/payload
 %dir %{_includedir}/freeipmi/record-format
 %dir %{_includedir}/freeipmi/sdr-cache
 %dir %{_includedir}/freeipmi/sdr-parse
@@ -302,7 +319,7 @@ fi
 %dir %{_includedir}/freeipmi/util
 %{_includedir}/ipmiconsole.h
 %{_includedir}/ipmidetect.h
-%{_includedir}/ipmi_monitoring.h
+%{_includedir}/ipmi_monitoring*.h
 %{_includedir}/freeipmi/*.h
 %{_includedir}/freeipmi/api/*.h
 %{_includedir}/freeipmi/cmds/*.h
@@ -311,7 +328,9 @@ fi
 %{_includedir}/freeipmi/fiid/*.h
 %{_includedir}/freeipmi/fru-parse/*.h
 %{_includedir}/freeipmi/interface/*.h
+%{_includedir}/freeipmi/interpret/*.h
 %{_includedir}/freeipmi/locate/*.h
+%{_includedir}/freeipmi/payload/*.h
 %{_includedir}/freeipmi/record-format/*.h
 %{_includedir}/freeipmi/sdr-cache/*.h
 %{_includedir}/freeipmi/sdr-parse/*.h
@@ -337,12 +356,20 @@ fi
 %files ipmidetectd
 %defattr(-,root,root)
 %config(noreplace) %{_initrddir}/ipmidetectd
-%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ipmidetectd.conf
+%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/freeipmi/ipmidetectd.conf
 %{_sbindir}/ipmidetectd
 %{_mandir}/man5/ipmidetectd.conf.5*
 %{_mandir}/man8/ipmidetectd.8*
 
 %changelog
+* Fri Nov 5 2010 Albert Chu <chu11@llnl.gov> 0.9.0
+- Add interpret sub-library.
+- Support new config files.
+- Support /etc/freeipmi/ config dir.
+- Support new ipmi_monitoring*.h files.
+- Support new manpages.
+- Support new compatability symlinks/manpages.
+
 * Wed Sep 30 2009 Albert Chu <chu11@llnl.gov> 0.8.0
 - Update for dcmi.
 - Update for renaming of pef-config.
@@ -385,7 +412,7 @@ fi
 - Obsolete old subpackage freeipmi-ipmimonitoring.
 
 * Tue Dec 18 2007 Albert Chu <chu11@llnl.gov> 0.6.0
-- Use %{version} instead of 0.8.12 for substitution in paths.
+- Use %{version} instead of 1.0.1 for substitution in paths.
 
 * Fri Dec 14 2007 Albert Chu <chu11@llnl.gov> 0.6.0
 - Update packaging for libfreeipmi reorganization

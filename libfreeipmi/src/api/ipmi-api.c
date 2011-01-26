@@ -1,21 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -409,11 +408,11 @@ ipmi_ctx_open_outofband (ipmi_ctx_t ctx,
                          unsigned int workaround_flags,
                          unsigned int flags)
 {
-  unsigned int workaround_flags_mask = (IPMI_WORKAROUND_FLAGS_ACCEPT_SESSION_ID_ZERO
-                                        | IPMI_WORKAROUND_FLAGS_FORCE_PERMSG_AUTHENTICATION
-                                        | IPMI_WORKAROUND_FLAGS_CHECK_UNEXPECTED_AUTHCODE
-                                        | IPMI_WORKAROUND_FLAGS_BIG_ENDIAN_SEQUENCE_NUMBER
-                                        | IPMI_WORKAROUND_FLAGS_AUTHENTICATION_CAPABILITIES);
+  unsigned int workaround_flags_mask = (IPMI_WORKAROUND_FLAGS_OUTOFBAND_AUTHENTICATION_CAPABILITIES
+                                        | IPMI_WORKAROUND_FLAGS_OUTOFBAND_ACCEPT_SESSION_ID_ZERO
+                                        | IPMI_WORKAROUND_FLAGS_OUTOFBAND_FORCE_PERMSG_AUTHENTICATION
+                                        | IPMI_WORKAROUND_FLAGS_OUTOFBAND_CHECK_UNEXPECTED_AUTHCODE
+                                        | IPMI_WORKAROUND_FLAGS_OUTOFBAND_BIG_ENDIAN_SEQUENCE_NUMBER);
   unsigned int flags_mask = (IPMI_FLAGS_DEBUG_DUMP
                              | IPMI_FLAGS_NO_VALID_CHECK);
 
@@ -443,7 +442,7 @@ ipmi_ctx_open_outofband (ipmi_ctx_t ctx,
     }
 
   ctx->type = IPMI_DEVICE_LAN;
-  ctx->workaround_flags = workaround_flags;
+  ctx->workaround_flags_outofband = workaround_flags;
   ctx->flags = flags;
 
   if (_setup_hostname (ctx, hostname) < 0)
@@ -550,12 +549,12 @@ ipmi_ctx_open_outofband_2_0 (ipmi_ctx_t ctx,
                              unsigned int workaround_flags,
                              unsigned int flags)
 {
-  unsigned int workaround_flags_mask = (IPMI_WORKAROUND_FLAGS_AUTHENTICATION_CAPABILITIES
-                                        | IPMI_WORKAROUND_FLAGS_INTEL_2_0_SESSION
-                                        | IPMI_WORKAROUND_FLAGS_SUPERMICRO_2_0_SESSION
-                                        | IPMI_WORKAROUND_FLAGS_SUN_2_0_SESSION
-                                        | IPMI_WORKAROUND_FLAGS_OPEN_SESSION_PRIVILEGE
-					| IPMI_WORKAROUND_FLAGS_NON_EMPTY_INTEGRITY_CHECK_VALUE);
+  unsigned int workaround_flags_mask = (IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_AUTHENTICATION_CAPABILITIES
+                                        | IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION
+                                        | IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUPERMICRO_2_0_SESSION
+                                        | IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUN_2_0_SESSION
+                                        | IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_OPEN_SESSION_PRIVILEGE
+					| IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE);
   unsigned int flags_mask = (IPMI_FLAGS_DEBUG_DUMP
                              | IPMI_FLAGS_NO_VALID_CHECK);
 
@@ -595,7 +594,7 @@ ipmi_ctx_open_outofband_2_0 (ipmi_ctx_t ctx,
     }
 
   ctx->type = IPMI_DEVICE_LAN_2_0;
-  ctx->workaround_flags = workaround_flags;
+  ctx->workaround_flags_outofband_2_0 = workaround_flags;
   ctx->flags = flags;
 
   if (_setup_hostname (ctx, hostname) < 0)
@@ -627,10 +626,29 @@ ipmi_ctx_open_outofband_2_0 (ipmi_ctx_t ctx,
   ctx->io.outofband.k_g_configured = 0;
   if (k_g && k_g_len)
     {
+      unsigned int i;
+      int all_zeroes = 1;
+
       memcpy (ctx->io.outofband.k_g,
               k_g,
               k_g_len);
+
       ctx->io.outofband.k_g_configured++;
+
+      /* Special case, check to make sure user didn't input zero as a
+       * k_g key.
+       */
+      for (i = 0; i < IPMI_MAX_K_G_LENGTH; i++)
+        {
+          if (k_g[i] != 0)
+            {
+              all_zeroes = 0;
+              break;
+            }
+        }
+      
+      if (all_zeroes)
+        ctx->io.outofband.k_g_configured = 0;
     }
 
   ctx->io.outofband.cipher_suite_id = cipher_suite_id;
@@ -749,7 +767,7 @@ ipmi_ctx_open_inband (ipmi_ctx_t ctx,
   struct ipmi_locate_info locate_info;
   unsigned int seedp;
   unsigned int temp_flags = 0;
-  unsigned int workaround_flags_mask = (IPMI_WORKAROUND_FLAGS_ASSUME_IO_BASE_ADDRESS);
+  unsigned int workaround_flags_mask = (IPMI_WORKAROUND_FLAGS_INBAND_ASSUME_IO_BASE_ADDRESS);
   unsigned int flags_mask = (IPMI_FLAGS_NONBLOCKING
                              | IPMI_FLAGS_DEBUG_DUMP
                              | IPMI_FLAGS_NO_VALID_CHECK);
@@ -780,7 +798,7 @@ ipmi_ctx_open_inband (ipmi_ctx_t ctx,
       return (-1);
     }
 
-  ctx->workaround_flags = workaround_flags;
+  ctx->workaround_flags_inband = workaround_flags;
   ctx->flags = flags;
 
   ctx->io.inband.kcs_ctx = NULL;
@@ -850,7 +868,7 @@ ipmi_ctx_open_inband (ipmi_ctx_t ctx,
        * The system uses KCS w/ an I/O base address, but the bit is
        * set incorrectly.  Ignore it if specified by the user.
        */
-      if (!(workaround_flags & IPMI_WORKAROUND_FLAGS_ASSUME_IO_BASE_ADDRESS))
+      if (!(ctx->workaround_flags_inband & IPMI_WORKAROUND_FLAGS_INBAND_ASSUME_IO_BASE_ADDRESS))
         {
           /* At this point we only support SYSTEM_IO, i.e. inb/outb style IO.
            * If we cant find the bass address, we better exit.

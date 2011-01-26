@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -31,8 +31,8 @@
 #include <freeipmi/freeipmi.h>
 
 #include "ipmi-sensors.h"
+#include "ipmi-sensors-oem-intel-node-manager.h"
 #include "ipmi-sensors-output-common.h"
-#include "ipmi-sensors-util.h"
 
 #include "freeipmi-portability.h"
 #include "pstdout.h"
@@ -56,27 +56,27 @@ _get_record_type_string (ipmi_sensors_state_data_t *state_data,
   switch (record_type)
     {
     case IPMI_SDR_FORMAT_FULL_SENSOR_RECORD:
-      return (IPMI_SDR_FORMAT_FULL_SENSOR_RECORD_NAME);
+      return "Full Sensor Record";
     case IPMI_SDR_FORMAT_COMPACT_SENSOR_RECORD:
-      return (IPMI_SDR_FORMAT_COMPACT_SENSOR_RECORD_NAME);
+      return "Compact Sensor Record";
     case IPMI_SDR_FORMAT_EVENT_ONLY_RECORD:
-      return (IPMI_SDR_FORMAT_EVENT_ONLY_RECORD_NAME);
+      return "Event-Only Record";
     case IPMI_SDR_FORMAT_ENTITY_ASSOCIATION_RECORD:
-      return (IPMI_SDR_FORMAT_ENTITY_ASSOCIATION_RECORD_NAME);
+      return "Entity Association Record";
     case IPMI_SDR_FORMAT_DEVICE_RELATIVE_ENTITY_ASSOCIATION_RECORD:
-      return (IPMI_SDR_FORMAT_DEVICE_RELATIVE_ENTITY_ASSOCIATION_RECORD_NAME);
+      return "Device-relative Entity Association Record";
     case IPMI_SDR_FORMAT_GENERIC_DEVICE_LOCATOR_RECORD:
-      return (IPMI_SDR_FORMAT_GENERIC_DEVICE_LOCATOR_RECORD_NAME);
+      return "Generic Device Locator Record";
     case IPMI_SDR_FORMAT_FRU_DEVICE_LOCATOR_RECORD:
-      return (IPMI_SDR_FORMAT_FRU_DEVICE_LOCATOR_RECORD_NAME);
+      return "FRU Device Locator Record";
     case IPMI_SDR_FORMAT_MANAGEMENT_CONTROLLER_DEVICE_LOCATOR_RECORD:
-      return (IPMI_SDR_FORMAT_MANAGEMENT_CONTROLLER_DEVICE_LOCATOR_RECORD_NAME);
+      return "Management Controller Device Locator Record";
     case IPMI_SDR_FORMAT_MANAGEMENT_CONTROLLER_CONFIRMATION_RECORD:
-      return (IPMI_SDR_FORMAT_MANAGEMENT_CONTROLLER_CONFIRMATION_RECORD_NAME);
+      return "Management Controller Confirmation Record";
     case IPMI_SDR_FORMAT_BMC_MESSAGE_CHANNEL_INFO_RECORD:
-      return (IPMI_SDR_FORMAT_BMC_MESSAGE_CHANNEL_INFO_RECORD_NAME);
+      return "BMC Message Channel Info Record";
     case IPMI_SDR_FORMAT_OEM_RECORD:
-      return (IPMI_SDR_FORMAT_OEM_RECORD_NAME);
+      return "OEM Record";
     default:
       break;
     }
@@ -92,10 +92,7 @@ _abbreviated_units_flag (ipmi_sensors_state_data_t *state_data)
   if (state_data->prog_data->args->legacy_output)
     return (0);
 
-  if (state_data->prog_data->args->non_abbreviated_units)
-    return (0);
-
-  return (1);
+  return (state_data->prog_data->args->non_abbreviated_units);
 }
 
 static int
@@ -866,7 +863,7 @@ _detailed_output_hysteresis (ipmi_sensors_state_data_t *state_data,
           && (ipmi_check_completion_code (obj_cmd_rs,
                                           IPMI_COMP_CODE_COMMAND_ILLEGAL_FOR_SENSOR_OR_RECORD_TYPE) == 1
               || ipmi_check_completion_code (obj_cmd_rs,
-                                             IPMI_COMP_CODE_REQUEST_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1))
+                                             IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1))
         {
           /* The hysteresis cannot be gathered for one reason or
            * another, maybe b/c its a OEM sensor or something.  Output
@@ -1053,6 +1050,9 @@ _detailed_output_event_enable (ipmi_sensors_state_data_t *state_data,
   unsigned int assertion_event_message_list_len = 0;
   char **deassertion_event_message_list = NULL;
   unsigned int deassertion_event_message_list_len = 0;
+  uint32_t manufacturer_id = 0;
+  uint16_t product_id = 0;
+  unsigned int event_message_flags = IPMI_GET_EVENT_MESSAGES_FLAGS_DEFAULT;
   unsigned int i;
   int field_flag;
   int rv = -1;
@@ -1137,7 +1137,7 @@ _detailed_output_event_enable (ipmi_sensors_state_data_t *state_data,
           && (ipmi_check_completion_code (obj_cmd_rs,
                                           IPMI_COMP_CODE_COMMAND_ILLEGAL_FOR_SENSOR_OR_RECORD_TYPE) == 1
               || ipmi_check_completion_code (obj_cmd_rs,
-                                             IPMI_COMP_CODE_REQUEST_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1
+                                             IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1
 	      || ipmi_check_completion_code (obj_cmd_rs,
 					     IPMI_COMP_CODE_COMMAND_RESPONSE_COULD_NOT_BE_PROVIDED) == 1))
         {
@@ -1221,6 +1221,16 @@ _detailed_output_event_enable (ipmi_sensors_state_data_t *state_data,
       goto cleanup;
     }
 
+  if (!state_data->prog_data->args->verbose_count)
+    event_message_flags |= IPMI_GET_EVENT_MESSAGES_FLAGS_SHORT;
+
+  if (state_data->prog_data->args->interpret_oem_data)
+    {
+      manufacturer_id = state_data->oem_data.manufacturer_id;
+      product_id = state_data->oem_data.product_id;
+      event_message_flags |= IPMI_GET_EVENT_MESSAGES_FLAGS_INTERPRET_OEM_DATA;
+    }
+
   /* achu: According to the spec, bytes 3-6 of the packet should exist
    * if all event messages are not disabled and sensor scanning is not
    * disabled.
@@ -1240,29 +1250,26 @@ _detailed_output_event_enable (ipmi_sensors_state_data_t *state_data,
 
   if (field_flag)
     {
-      if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_THRESHOLD
-          || event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_GENERIC_DISCRETE)
+      if (ipmi_get_event_messages (event_reading_type_code,
+                                   sensor_type,
+                                   event_bitmask,
+                                   manufacturer_id,
+                                   product_id,
+                                   &assertion_event_message_list,
+                                   &assertion_event_message_list_len,
+                                   IPMI_SENSORS_NONE_STRING,
+                                   event_message_flags) < 0)
         {
-          if (get_generic_event_message_list (state_data,
-                                              &assertion_event_message_list,
-                                              &assertion_event_message_list_len,
-                                              event_reading_type_code,
-                                              event_bitmask,
-                                              IPMI_SENSORS_NONE_STRING) < 0)
-            goto cleanup;
-        }
-      else
-        {
-          if (get_sensor_specific_event_message_list (state_data,
-                                                      &assertion_event_message_list,
-                                                      &assertion_event_message_list_len,
-                                                      sensor_type,
-                                                      event_bitmask,
-                                                      IPMI_SENSORS_NONE_STRING) < 0)
-            goto cleanup;
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_get_event_messages: %s\n",
+                           strerror (errno));
+          goto cleanup;
         }
 
       if (ipmi_sensors_output_event_message_list (state_data,
+                                                  IPMI_SENSORS_EVENT_NORMAL,
+                                                  event_bitmask,
                                                   assertion_event_message_list,
                                                   assertion_event_message_list_len,
                                                   IPMI_SENSORS_ASSERTION_EVENT_PREFIX_OUTPUT,
@@ -1284,29 +1291,26 @@ _detailed_output_event_enable (ipmi_sensors_state_data_t *state_data,
 
   if (field_flag)
     {
-      if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_THRESHOLD
-          || event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_GENERIC_DISCRETE)
+      if (ipmi_get_event_messages (event_reading_type_code,
+                                   sensor_type,
+                                   event_bitmask,
+                                   manufacturer_id,
+                                   product_id,
+                                   &deassertion_event_message_list,
+                                   &deassertion_event_message_list_len,
+                                   IPMI_SENSORS_NONE_STRING,
+                                   event_message_flags) < 0)
         {
-          if (get_generic_event_message_list (state_data,
-                                              &deassertion_event_message_list,
-                                              &deassertion_event_message_list_len,
-                                              event_reading_type_code,
-                                              event_bitmask,
-                                              IPMI_SENSORS_NONE_STRING) < 0)
-            goto cleanup;
-        }
-      else
-        {
-          if (get_sensor_specific_event_message_list (state_data,
-                                                      &deassertion_event_message_list,
-                                                      &deassertion_event_message_list_len,
-                                                      sensor_type,
-                                                      event_bitmask,
-                                                      IPMI_SENSORS_NONE_STRING) < 0)
-            goto cleanup;
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_get_event_messages: %s\n",
+                           strerror (errno));
+          goto cleanup;
         }
 
       if (ipmi_sensors_output_event_message_list (state_data,
+                                                  IPMI_SENSORS_EVENT_NORMAL,
+                                                  event_bitmask,
                                                   deassertion_event_message_list,
                                                   deassertion_event_message_list_len,
                                                   IPMI_SENSORS_DEASSERTION_EVENT_PREFIX_OUTPUT,
@@ -1334,6 +1338,8 @@ _detailed_output_event_enable (ipmi_sensors_state_data_t *state_data,
 
 static int
 _detailed_output_event_message_list (ipmi_sensors_state_data_t *state_data,
+                                     int event_message_output_type,
+                                     uint16_t sensor_event_bitmask,
                                      char **event_message_list,
                                      unsigned int event_message_list_len)
 {
@@ -1341,6 +1347,8 @@ _detailed_output_event_message_list (ipmi_sensors_state_data_t *state_data,
   assert (state_data->prog_data->args->verbose_count >= 1);
 
   if (ipmi_sensors_output_event_message_list (state_data,
+                                              event_message_output_type,
+                                              sensor_event_bitmask,
                                               event_message_list,
                                               event_message_list_len,
                                               IPMI_SENSORS_SENSOR_EVENT_PREFIX_OUTPUT,
@@ -1405,6 +1413,37 @@ _analog_data_format_string (ipmi_sensors_state_data_t *state_data, uint8_t analo
 }
 
 static int
+_detailed_output_sensor_state (ipmi_sensors_state_data_t *state_data,
+                               const void *sdr_record,
+                               unsigned int sdr_record_len,
+                               int event_message_output_type,
+                               uint16_t sensor_event_bitmask)
+{
+  assert (state_data);
+  assert (sdr_record);
+  assert (sdr_record_len);
+  
+  if (state_data->prog_data->args->output_sensor_state)
+    {
+      char *sensor_state_str = NULL;
+      
+      if (ipmi_sensors_get_sensor_state (state_data,
+                                         sdr_record,
+                                         sdr_record_len,
+                                         event_message_output_type,
+                                         sensor_event_bitmask,
+                                         &sensor_state_str) < 0)
+        return (-1);
+      
+      pstdout_printf (state_data->pstate,
+                      "Sensor State: %s\n",
+                      sensor_state_str);
+    }
+  
+  return (0);
+}
+
+static int
 _detailed_output_full_record (ipmi_sensors_state_data_t *state_data,
                               const void *sdr_record,
                               unsigned int sdr_record_len,
@@ -1412,6 +1451,8 @@ _detailed_output_full_record (ipmi_sensors_state_data_t *state_data,
                               uint8_t record_type,
                               uint16_t record_id,
                               double *reading,
+                              int event_message_output_type,
+                              uint16_t sensor_event_bitmask,
                               char **event_message_list,
                               unsigned int event_message_list_len)
 {
@@ -1422,6 +1463,7 @@ _detailed_output_full_record (ipmi_sensors_state_data_t *state_data,
   assert (state_data);
   assert (sdr_record);
   assert (sdr_record_len);
+  assert (IPMI_SENSORS_EVENT_VALID (event_message_output_type));
   assert (state_data->prog_data->args->verbose_count >= 1);
 
   if (_detailed_output_header (state_data,
@@ -1555,6 +1597,14 @@ _detailed_output_full_record (ipmi_sensors_state_data_t *state_data,
         return (-1);
     }
 
+
+  if (_detailed_output_sensor_state (state_data,
+                                     sdr_record,
+                                     sdr_record_len,
+                                     event_message_output_type,
+                                     sensor_event_bitmask) < 0)
+    return (-1);
+
   if (state_data->prog_data->args->legacy_output)
     {
       if (reading)
@@ -1581,8 +1631,10 @@ _detailed_output_full_record (ipmi_sensors_state_data_t *state_data,
                         "Sensor Reading: %s\n",
                         IPMI_SENSORS_NA_STRING_OUTPUT);
     }
-
+  
   if (_detailed_output_event_message_list (state_data,
+                                           event_message_output_type,
+                                           sensor_event_bitmask,
                                            event_message_list,
                                            event_message_list_len) < 0)
     return (-1);
@@ -1599,12 +1651,15 @@ _detailed_output_compact_record (ipmi_sensors_state_data_t *state_data,
 				 uint8_t sensor_number,
                                  uint8_t record_type,
                                  uint16_t record_id,
+                                 int event_message_output_type,
+                                 uint16_t sensor_event_bitmask,
                                  char **event_message_list,
                                  unsigned int event_message_list_len)
 {
   assert (state_data);
   assert (sdr_record);
   assert (sdr_record_len);
+  assert (IPMI_SENSORS_EVENT_VALID (event_message_output_type));
   assert (state_data->prog_data->args->verbose_count >= 1);
 
   if (_detailed_output_header (state_data,
@@ -1679,7 +1734,16 @@ _detailed_output_compact_record (ipmi_sensors_state_data_t *state_data,
                         "Entity Instance Sharing: Same for all records\n");
     }
 
+  if (_detailed_output_sensor_state (state_data,
+                                     sdr_record,
+                                     sdr_record_len,
+                                     event_message_output_type,
+                                     sensor_event_bitmask) < 0)
+    return (-1);
+
   if (_detailed_output_event_message_list (state_data,
+                                           event_message_output_type,
+                                           sensor_event_bitmask,
                                            event_message_list,
                                            event_message_list_len) < 0)
     return (-1);
@@ -2327,34 +2391,97 @@ _detailed_output_oem_record (ipmi_sensors_state_data_t *state_data,
                                            record_id) < 0)
     return (-1);
 
-
   if (_output_manufacturer_id (state_data,
                                sdr_record,
                                sdr_record_len) < 0)
     return (-1);
 
-  if ((len = ipmi_sdr_parse_oem_data (state_data->sdr_parse_ctx,
-                                      sdr_record,
-                                      sdr_record_len,
-                                      oem_data,
-                                      IPMI_SENSORS_OEM_DATA_LEN)) < 0)
+  /* OEM Interpreation
+   *
+   * Handle Intel Node Manager special case
+   */
+  if (state_data->prog_data->args->interpret_oem_data
+      && ((state_data->oem_data.manufacturer_id == IPMI_IANA_ENTERPRISE_ID_INTEL
+           && state_data->oem_data.product_id == IPMI_INTEL_PRODUCT_ID_S5500WB)
+          || (state_data->oem_data.manufacturer_id == IPMI_IANA_ENTERPRISE_ID_INVENTEC
+              && (state_data->oem_data.product_id == IPMI_INVENTEC_PRODUCT_ID_5441
+                  || state_data->oem_data.product_id == IPMI_INVENTEC_PRODUCT_ID_5442))
+          || (state_data->oem_data.manufacturer_id == IPMI_IANA_ENTERPRISE_ID_QUANTA
+              && state_data->oem_data.product_id == IPMI_QUANTA_PRODUCT_ID_S99Q))
+      && state_data->intel_node_manager.node_manager_data_found)
     {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "ipmi_sdr_parse_oem_data: %s\n",
-                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
-      return (-1);
+      uint8_t nm_device_slave_address;
+      uint8_t sensor_owner_lun;
+      uint8_t channel_number;
+      uint8_t nm_health_event_sensor_number;
+      uint8_t nm_exception_event_sensor_number;
+      uint8_t nm_operational_capabilities_sensor_number;
+      uint8_t nm_alert_threshold_exceeded_sensor_number;
+      int ret;
+
+      if ((ret = ipmi_sensors_oem_parse_intel_node_manager (state_data,
+                                                            sdr_record,
+                                                            sdr_record_len,
+                                                            &nm_device_slave_address,
+                                                            &sensor_owner_lun,
+                                                            &channel_number,
+                                                            &nm_health_event_sensor_number,
+                                                            &nm_exception_event_sensor_number,
+                                                            &nm_operational_capabilities_sensor_number,
+                                                            &nm_alert_threshold_exceeded_sensor_number)) < 0)
+        return (-1);
+
+      if (!ret)
+        goto oem_normal_output;
+
+      pstdout_printf (state_data->pstate,
+                      "Node Manager Device Slave Address: %Xh\n",
+                      nm_device_slave_address);
+      pstdout_printf (state_data->pstate,
+                      "Sensor Owner LUN: %Xh\n",
+                      sensor_owner_lun);
+      pstdout_printf (state_data->pstate,
+                      "Channel Number: %Xh\n",
+                      channel_number);
+      pstdout_printf (state_data->pstate,
+                      "Node Manager Health Event Sensor Number: %u\n",
+                      nm_health_event_sensor_number);
+      pstdout_printf (state_data->pstate,
+                      "Node Manager Exception Event Sensor Number: %u\n",
+                      nm_exception_event_sensor_number);
+      pstdout_printf (state_data->pstate,
+                      "Node Manager Operational Capabilities Sensor Number: %u\n",
+                      nm_operational_capabilities_sensor_number);
+      pstdout_printf (state_data->pstate,
+                      "Node Manager Alert Threshold Exceeded Sensor Number: %u\n",
+                      nm_alert_threshold_exceeded_sensor_number);
     }
+  else
+    {
+    oem_normal_output:
+      if ((len = ipmi_sdr_parse_oem_data (state_data->sdr_parse_ctx,
+                                          sdr_record,
+                                          sdr_record_len,
+                                          oem_data,
+                                          IPMI_SENSORS_OEM_DATA_LEN)) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_sdr_parse_oem_data: %s\n",
+                           ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+          return (-1);
+        }
 
-  pstdout_printf (state_data->pstate,
-                  "OEM Data: ");
-
-  for (i = 0; i < len; i++)
-    pstdout_printf (state_data->pstate,
-                    "%02X ",
-                    oem_data[i]);
-  pstdout_printf (state_data->pstate, "\n");
-
+      pstdout_printf (state_data->pstate,
+                      "OEM Data: ");
+      
+      for (i = 0; i < len; i++)
+        pstdout_printf (state_data->pstate,
+                        "%02X ",
+                        oem_data[i]);
+      pstdout_printf (state_data->pstate, "\n");
+    }
+      
   pstdout_printf (state_data->pstate, "\n");
 
   return (0);
@@ -2366,6 +2493,8 @@ ipmi_sensors_detailed_output (ipmi_sensors_state_data_t *state_data,
                               unsigned int sdr_record_len,
                               uint8_t sensor_number,
                               double *reading,
+                              int event_message_output_type,
+                              uint16_t sensor_event_bitmask,
                               char **event_message_list,
                               unsigned int event_message_list_len)
 {
@@ -2375,6 +2504,7 @@ ipmi_sensors_detailed_output (ipmi_sensors_state_data_t *state_data,
   assert (state_data);
   assert (sdr_record);
   assert (sdr_record_len);
+  assert (IPMI_SENSORS_EVENT_VALID (event_message_output_type));
   assert (state_data->prog_data->args->verbose_count >= 1);
 
   if (ipmi_sdr_parse_record_id_and_type (state_data->sdr_parse_ctx,
@@ -2402,6 +2532,8 @@ ipmi_sensors_detailed_output (ipmi_sensors_state_data_t *state_data,
                                                 record_type,
                                                 record_id,
                                                 reading,
+                                                event_message_output_type,
+                                                sensor_event_bitmask,
                                                 event_message_list,
                                                 event_message_list_len));
         case IPMI_SDR_FORMAT_COMPACT_SENSOR_RECORD:
@@ -2411,6 +2543,8 @@ ipmi_sensors_detailed_output (ipmi_sensors_state_data_t *state_data,
                                                    sensor_number,
                                                    record_type,
                                                    record_id,
+                                                   event_message_output_type,
+                                                   sensor_event_bitmask,
                                                    event_message_list,
                                                    event_message_list_len));
         case IPMI_SDR_FORMAT_EVENT_ONLY_RECORD:
@@ -2491,6 +2625,8 @@ ipmi_sensors_detailed_output (ipmi_sensors_state_data_t *state_data,
                                                 record_type,
                                                 record_id,
                                                 reading,
+                                                event_message_output_type,
+                                                sensor_event_bitmask,
                                                 event_message_list,
                                                 event_message_list_len));
         case IPMI_SDR_FORMAT_COMPACT_SENSOR_RECORD:
@@ -2500,6 +2636,8 @@ ipmi_sensors_detailed_output (ipmi_sensors_state_data_t *state_data,
                                                    sensor_number,
                                                    record_type,
                                                    record_id,
+                                                   event_message_output_type,
+                                                   sensor_event_bitmask,
                                                    event_message_list,
                                                    event_message_list_len));
         case IPMI_SDR_FORMAT_EVENT_ONLY_RECORD:

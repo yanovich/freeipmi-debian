@@ -1,5 +1,5 @@
 ##*****************************************************************************
-## $Id: Makefile.am,v 1.60.2.1 2009-12-17 00:16:48 chu11 Exp $
+## $Id: Makefile.am,v 1.63 2010-07-29 20:20:49 chu11 Exp $
 ##*****************************************************************************
 
 nobase_include_HEADERS = \
@@ -12,6 +12,7 @@ nobase_include_HEADERS = \
 	freeipmi/api/ipmi-fru-inventory-device-cmds-api.h \
 	freeipmi/api/ipmi-lan-cmds-api.h \
 	freeipmi/api/ipmi-messaging-support-cmds-api.h \
+	freeipmi/api/ipmi-oem-intel-node-manager-cmds-api.h \
 	freeipmi/api/ipmi-pef-and-alerting-cmds-api.h \
 	freeipmi/api/ipmi-rmcpplus-support-and-payload-cmds-api.h \
 	freeipmi/api/ipmi-sdr-repository-cmds-api.h \
@@ -28,6 +29,7 @@ nobase_include_HEADERS = \
 	freeipmi/cmds/ipmi-fru-inventory-device-cmds.h \
 	freeipmi/cmds/ipmi-lan-cmds.h \
 	freeipmi/cmds/ipmi-messaging-support-cmds.h \
+	freeipmi/cmds/ipmi-oem-intel-node-manager-cmds.h \
 	freeipmi/cmds/ipmi-pef-and-alerting-cmds.h \
 	freeipmi/cmds/ipmi-rmcpplus-support-and-payload-cmds.h \
 	freeipmi/cmds/ipmi-sdr-repository-cmds.h \
@@ -48,7 +50,9 @@ nobase_include_HEADERS = \
 	freeipmi/interface/ipmi-kcs-interface.h \
 	freeipmi/interface/ipmi-lan-interface.h \
 	freeipmi/interface/ipmi-rmcpplus-interface.h \
+	freeipmi/interpret/ipmi-interpret.h \
 	freeipmi/locate/ipmi-locate.h \
+	freeipmi/payload/ipmi-sol-payload.h \
 	freeipmi/record-format/ipmi-cipher-suite-record-format.h \
 	freeipmi/record-format/ipmi-fru-information-record-format.h \
 	freeipmi/record-format/ipmi-sdr-record-format.h \
@@ -60,8 +64,6 @@ nobase_include_HEADERS = \
 	freeipmi/sensor-read/ipmi-sensor-read.h \
 	freeipmi/spec/ipmi-authentication-type-spec.h \
 	freeipmi/spec/ipmi-channel-spec.h \
-	freeipmi/spec/ipmi-chassis-boot-options-parameter-spec.h \
-	freeipmi/spec/ipmi-chassis-boot-options-parameter-oem-spec.h \
 	freeipmi/spec/ipmi-cmd-spec.h \
 	freeipmi/spec/ipmi-cmd-dcmi-spec.h \
 	freeipmi/spec/ipmi-cmd-oem-spec.h \
@@ -77,12 +79,12 @@ nobase_include_HEADERS = \
 	freeipmi/spec/ipmi-fru-language-codes-spec.h \
 	freeipmi/spec/ipmi-iana-enterprise-numbers-spec.h \
 	freeipmi/spec/ipmi-ipmb-lun-spec.h \
-	freeipmi/spec/ipmi-lan-parameter-spec.h \
-	freeipmi/spec/ipmi-lan-parameter-oem-spec.h \
+	freeipmi/spec/ipmi-lan-configuration-parameters-spec.h \
+	freeipmi/spec/ipmi-lan-configuration-parameters-oem-spec.h \
 	freeipmi/spec/ipmi-netfn-spec.h \
 	freeipmi/spec/ipmi-netfn-oem-spec.h \
-	freeipmi/spec/ipmi-pef-parameter-spec.h \
-	freeipmi/spec/ipmi-pef-parameter-oem-spec.h \
+	freeipmi/spec/ipmi-pef-configuration-parameters-spec.h \
+	freeipmi/spec/ipmi-pef-configuration-parameters-oem-spec.h \
 	freeipmi/spec/ipmi-privilege-level-spec.h \
 	freeipmi/spec/ipmi-product-id-spec.h \
 	freeipmi/spec/ipmi-rmcpplus-status-spec.h \
@@ -92,14 +94,16 @@ nobase_include_HEADERS = \
 	freeipmi/spec/ipmi-sensor-types-spec.h \
 	freeipmi/spec/ipmi-sensor-types-oem-spec.h \
 	freeipmi/spec/ipmi-sensor-units-spec.h \
-	freeipmi/spec/ipmi-serial-modem-parameter-spec.h \
-	freeipmi/spec/ipmi-serial-modem-parameter-oem-spec.h \
+	freeipmi/spec/ipmi-serial-modem-configuration-parameters-spec.h \
+	freeipmi/spec/ipmi-serial-modem-configuration-parameters-oem-spec.h \
 	freeipmi/spec/ipmi-slave-address-spec.h \
 	freeipmi/spec/ipmi-slave-address-oem-spec.h \
-	freeipmi/spec/ipmi-sol-parameter-spec.h \
-	freeipmi/spec/ipmi-sol-parameter-oem-spec.h \
-	freeipmi/spec/ipmi-system-info-parameter-spec.h \
-	freeipmi/spec/ipmi-system-info-parameter-oem-spec.h \
+	freeipmi/spec/ipmi-sol-configuration-parameters-spec.h \
+	freeipmi/spec/ipmi-sol-configuration-parameters-oem-spec.h \
+	freeipmi/spec/ipmi-system-boot-option-parameters-spec.h \
+	freeipmi/spec/ipmi-system-boot-option-parameters-oem-spec.h \
+	freeipmi/spec/ipmi-system-info-parameters-spec.h \
+	freeipmi/spec/ipmi-system-info-parameters-oem-spec.h \
 	freeipmi/spec/ipmi-system-software-id-spec.h \
 	freeipmi/templates/ipmi-bmc-watchdog-timer-cmds-templates.h \
 	freeipmi/templates/ipmi-chassis-cmds-templates.h \
@@ -109,6 +113,7 @@ nobase_include_HEADERS = \
 	freeipmi/templates/ipmi-fru-inventory-device-cmds-templates.h \
 	freeipmi/templates/ipmi-lan-cmds-templates.h \
 	freeipmi/templates/ipmi-messaging-support-cmds-templates.h \
+	freeipmi/templates/ipmi-oem-intel-node-manager-cmds-templates.h \
 	freeipmi/templates/ipmi-pef-and-alerting-cmds-templates.h \
 	freeipmi/templates/ipmi-rmcpplus-support-and-payload-cmds-templates.h \
 	freeipmi/templates/ipmi-sdr-repository-cmds-templates.h \
@@ -116,6 +121,7 @@ nobase_include_HEADERS = \
 	freeipmi/templates/ipmi-sensor-cmds-templates.h \
 	freeipmi/templates/ipmi-serial-modem-cmds-templates.h \
 	freeipmi/templates/ipmi-sol-cmds-templates.h \
+	freeipmi/templates/ipmi-sol-payload-templates.h \
 	freeipmi/templates/rmcp-cmds-templates.h \
 	freeipmi/templates/ipmi-ipmb-interface-templates.h \
 	freeipmi/templates/ipmi-kcs-interface-templates.h \

@@ -10,11 +10,10 @@ is used to view and manage System Event Log (SEL) entries.  SEL
 records store system event information and may be useful for debugging
 problems.
 
-Some timestamps in the SEL may report a date of 1-Jan-1970.  This
-timestamp is not necessarily incorrect.  It usually indicates a
-hardware event that occurred before a timestamp in firmware has been
-initialized.  For example, certain hardware components will have their
-internal clocks reset during a power cycle.
+.B Ipmi-sel
+does not inform the user if an event is particularly good or bad, just
+that the event occurred.  Users may wish to use the
+\fB\-\-output\-event\-state\fR option to output the analyzed state.
 
 #include <@top_srcdir@/common/man/manpage-common-table-of-contents.man>
 To perform some advanced SEL management, please see
@@ -54,20 +53,55 @@ names.
 \fB\-i\fR, \fB\-\-info\fR
 Show general information about the SEL.
 .TP
-\fB\-\-display\fR=\fBREC\-LIST\fR
+\fB\-\-display\fR=\fIRECORD\-IDS\-LIST\fR
 Display SEL records by record id.  Accepts space or comma separated lists.
 .TP
-\fB\-\-exclude\-display\fR=\fBREC\-LIST\fR
+\fB\-\-exclude\-display\fR=\fIRECORD\-IDS\-LIST\fR
 Exclude display of SEL records by record id.  Accepts space or comma
 separated lists.
 .TP
-\fB\-\-display-range\fR=\fBSTART\-END\fR
+\fB\-\-display-range\fR=\fISTART\-END\fR
 Display SEL records from record id START to END.
 .TP
-\fB\-\-exclude\-display-range\fR=\fBSTART\-END\fR
+\fB\-\-exclude\-display-range\fR=\fISTART\-END\fR
 Exclude display of SEL records from record id START to END.
 .TP
-\fB\-\-tail\fR=\fBcount\fR
+\fB\-\-date\-range\fR=\fIDATE\-DATE\fR
+Display SEL records with events occurring in the specified date range.
+Dates may be specified in MM/DD/YYYY or MM-DD-YYYY format.  The month
+may be specified as a numeral or its abbreviated string name.  The
+current local system time can be specified with "now".  Note that
+non-timestamped records will not be displayed automatically because
+they do not possess a timestamp.
+.TP
+\fB\-\-exclude\-date\-range\fR=\fIDATE\-DATE\fR
+Exclude display of SEL records with events occurring in the specified
+date range.  Dates may be specified in MM/DD/YYYY or MM-DD-YYYY
+format.  The month may be specified as a numeral or its abbreviated
+string name.  The current local system time can be specified with
+"now".  Note that non-timestamped records will be displayed
+automatically because they do not possess a timestamp.
+.TP
+\fB\-t\fR \fISENSOR\-TYPE\-LIST\fR, \fB\-\-sensor\-types\fR=\fISENSOR\-TYPE\-LIST\fR
+Specify sensor types to show sensor outputs for.  Multiple types can
+be separated by commas or spaces.  A special command line type of
+"all", will indicate all types should be shown (may be useful for
+overriding configured defaults).  Users may specify sensor types by
+string (see \fB\-\-list\-sensor\-types\fR below) or by number (decimal
+or hex).
+.TP
+\fB\-T\fR \fISENSOR\-TYPE\-LIST\fR, \fB\-\-exclude\-sensor\-types\fR=\fISENSOR\-TYPE\-LIST\fR
+Specify sensor types to not show sensor outputs for.  Multiple types
+can be eparated by commas or spaces.  A special command line type of
+"no", will indicate no types should be excluded (may be useful for
+overriding configured defaults).  Users may specify sensor types by
+string (see \fB\-\-list\-sensor\-types\fR below) or by number (decimal
+or hex).
+.TP
+\fB\-L\fR, \fB\-\-list\-sensor\-types\fR
+List sensor types.
+.TP
+\fB\-\-tail\fR=\fIcount\fR
 Display approximately the last \fIcount\fR SEL records.  The display
 count is calculated by approximating the record ids of the last SEL
 records.  It's correctness depends highly on the SEL implementation by
@@ -76,11 +110,11 @@ the vendor.
 \fB\-\-clear\fR
 Clear SEL.
 .TP
-\fB\-\-delete\fR=\fBREC\-LIST\fR
+\fB\-\-delete\fR=\fIRECORD\-IDS\-LIST\fR
 Delete records by record id in the SEL.  Accepts space or comma
 separated lists.
 .TP
-\fB\-\-delete-range\fR=\fBSTART\-END\fR
+\fB\-\-delete-range\fR=\fISTART\-END\fR
 Delete record ids from START to END in the SEL.
 .TP
 \fB\-\-system\-event\-only\fR
@@ -88,6 +122,23 @@ Output only system event records (i.e. don't output OEM records).
 .TP
 \fB\-\-oem\-only\fR
 Output only OEM event records.
+.TP
+\fB\-\-output\-manufacturer\-id\fR
+For OEM SEL record types, output the manufacturer ID along with event
+data when available.
+.TP
+\fB\-\-output\-event\-state\fR
+Output event state in output.  This will add an additional output
+reporting if an event should be viewed as NOMINAL, WARNING, or CRITICAL.
+The event state is an interpreted value based on the configuration
+file @INTERPRET_SEL_CONFIG_FILE_DEFAULT@ and the event direction.
+See
+.B freeipmi_interpret_sel.conf(5)
+for more information.
+.TP
+\fB\-\-event\-state\-config\-file\fR=\fIFILE\fR
+Specify an alternate event state configuration file.  Option ignored
+if \fB\-\-output\-event\-state\fR not specified.
 .TP
 \fB\-\-hex\-dump\fR
 Hex-dump SEL entries.
@@ -133,6 +184,18 @@ systems.
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-options.man>
 #include <@top_srcdir@/common/man/manpage-common-hostranged-text-localhost.man>
 #include <@top_srcdir@/common/man/manpage-common-troubleshooting.man>
+
+.SH "IPMI-SEL TROUBLESHOOTING"
+Some timestamps in the SEL may report a date of 1-Jan-1970.  This
+timestamp is not necessarily incorrect.  It usually indicates a
+hardware event that occurred before a timestamp in firmware has been
+initialized.  For example, certain hardware components will have their
+internal clocks reset during a power cycle.
+.LP
+However, if the internal clock of the SEL appears to be regularly
+incorrect, you may need to set the SEL time.  This can be done using
+.B bmc-device(8).
+
 #include <@top_srcdir@/common/man/manpage-common-workaround-heading-text.man>
 #include <@top_srcdir@/common/man/manpage-common-workaround-inband-text.man>
 #include <@top_srcdir@/common/man/manpage-common-workaround-outofband-text.man>
@@ -181,5 +244,5 @@ Delete SEL entries in the range 12 to 42 on the local machine.
 Copyright \(co 2003-2010 FreeIPMI Core Team.  
 #include <@top_srcdir@/common/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
-freeipmi(7), bmc-config(8), bmc-device(8)
+freeipmi(7), bmc-config(8), bmc-device(8), freeipmi_interpret_sel.conf(5)
 #include <@top_srcdir@/common/man/manpage-common-homepage.man>

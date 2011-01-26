@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -32,7 +32,6 @@
 
 #include "ipmi-sensors.h"
 #include "ipmi-sensors-output-common.h"
-#include "ipmi-sensors-util.h"
 
 #include "freeipmi-portability.h"
 #include "pstdout.h"
@@ -43,6 +42,8 @@
 
 int
 ipmi_sensors_output_event_message_list (ipmi_sensors_state_data_t *state_data,
+                                        int event_message_output_type,
+                                        uint16_t sensor_event_bitmask,
                                         char **event_message_list,
                                         unsigned int event_message_list_len,
                                         char *prefix,
@@ -52,6 +53,7 @@ ipmi_sensors_output_event_message_list (ipmi_sensors_state_data_t *state_data,
   unsigned int i;
 
   assert (state_data);
+  assert (IPMI_SENSORS_EVENT_VALID (event_message_output_type));
 
   if (prefix)
     pstdout_printf (state_data->pstate, "%s", prefix);
@@ -69,61 +71,86 @@ ipmi_sensors_output_event_message_list (ipmi_sensors_state_data_t *state_data,
         strcat (spcbuf, " ");
     }
 
-  if (event_message_list)
+  if (event_message_output_type == IPMI_SENSORS_EVENT_NA)
     {
-      if (event_message_list_len >= 1)
-        {
-          if (state_data->prog_data->args->legacy_output)
-            pstdout_printf (state_data->pstate,
-                            "[%s]",
-                            event_message_list[0]);
-          else
-            {
-              if (!strcmp (event_message_list[0], IPMI_SENSORS_NA_STRING))
-                pstdout_printf (state_data->pstate,
-                                "%s",
-                                event_message_list[0]);
-              else
-                pstdout_printf (state_data->pstate,
-                                "'%s'",
-                                event_message_list[0]);
-            }
-        }
-
-      for (i = 1; i < event_message_list_len; i++)
-        {
-          if (each_on_newline)
-            pstdout_printf (state_data->pstate,
-                            "\n");
-          if (state_data->prog_data->args->legacy_output)
-            pstdout_printf (state_data->pstate,
-                            "%s[%s]",
-                            spcbuf,
-                            event_message_list[i]);
-          else if (prefix)
-            pstdout_printf (state_data->pstate,
-                            "%s'%s'",
-                            prefix,
-                            event_message_list[i]);
-          else
-            pstdout_printf (state_data->pstate,
-                            " '%s'",
-                            event_message_list[i]);
-        }
-
-      pstdout_printf (state_data->pstate,
-                      "\n");
+      if (state_data->prog_data->args->legacy_output)
+        pstdout_printf (state_data->pstate,
+                        "[%s]\n",
+                        IPMI_SENSORS_NA_STRING_OUTPUT);
+      else if (state_data->prog_data->args->ipmimonitoring_legacy_output)
+        pstdout_printf (state_data->pstate,
+                        "%s\n",
+                        IPMIMONITORING_NA_STRING_LEGACY);
+      else
+        pstdout_printf (state_data->pstate,
+                        "%s\n",
+                        IPMI_SENSORS_NA_STRING_OUTPUT);
     }
-  else
+  else if (event_message_output_type == IPMI_SENSORS_EVENT_UNKNOWN)
     {
       if (state_data->prog_data->args->legacy_output)
         pstdout_printf (state_data->pstate,
                         "[%s]\n",
                         "Unknown");
+      else if (state_data->prog_data->args->ipmimonitoring_legacy_output)
+        pstdout_printf (state_data->pstate,
+                        "'%s'\n",
+                        IPMIMONITORING_NA_STRING_LEGACY);
       else
         pstdout_printf (state_data->pstate,
                         "%s\n",
                         "Unknown");
+    }
+  else
+    {
+      if (state_data->prog_data->args->legacy_output)
+        pstdout_printf (state_data->pstate,
+                        "[%s]",
+                        event_message_list[0]);
+      else if (state_data->prog_data->args->ipmimonitoring_legacy_output)
+        pstdout_printf (state_data->pstate,
+                        "'%s'",
+                        event_message_list[0]);
+      else if (state_data->prog_data->args->output_event_bitmask)
+        pstdout_printf (state_data->pstate,
+                        "%04Xh",
+                        sensor_event_bitmask);
+      else
+        pstdout_printf (state_data->pstate,
+                        "'%s'",
+                        event_message_list[0]);
+
+      if (event_message_list_len > 1)
+        {
+          for (i = 1; i < event_message_list_len; i++)
+            {
+              if (each_on_newline)
+                pstdout_printf (state_data->pstate,
+                                "\n");
+              
+              if (state_data->prog_data->args->legacy_output)
+                pstdout_printf (state_data->pstate,
+                                "%s[%s]",
+                                spcbuf,
+                                event_message_list[i]);
+              else if (state_data->prog_data->args->ipmimonitoring_legacy_output)
+                pstdout_printf (state_data->pstate,
+                                " '%s'",
+                                event_message_list[i]);
+              else if (prefix)
+                pstdout_printf (state_data->pstate,
+                                "%s'%s'",
+                                prefix,
+                                event_message_list[i]);
+              else
+                pstdout_printf (state_data->pstate,
+                                " '%s'",
+                                event_message_list[i]);
+            }
+        }
+      
+      pstdout_printf (state_data->pstate,
+                      "\n");
     }
 
   return (0);
@@ -537,7 +564,7 @@ ipmi_sensors_get_thresholds (ipmi_sensors_state_data_t *state_data,
           && (ipmi_check_completion_code (obj_cmd_rs,
                                           IPMI_COMP_CODE_COMMAND_ILLEGAL_FOR_SENSOR_OR_RECORD_TYPE) == 1
               || ipmi_check_completion_code (obj_cmd_rs,
-                                             IPMI_COMP_CODE_REQUEST_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1))
+                                             IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1))
         {
           /* The thresholds cannot be gathered for one reason or
            * another, maybe b/c its a OEM sensor or something.  We can
@@ -915,4 +942,77 @@ ipmi_sensors_get_thresholds (ipmi_sensors_state_data_t *state_data,
         free (tmp_upper_non_recoverable_threshold);
     }
   return (rv);
+}
+
+int
+ipmi_sensors_get_sensor_state (ipmi_sensors_state_data_t *state_data,
+                               const void *sdr_record,
+                               unsigned int sdr_record_len,
+                               int event_message_output_type,
+                               uint16_t sensor_event_bitmask,
+                               char **sensor_state_str)
+{
+  assert (state_data);
+  assert (state_data->prog_data->args->output_sensor_state);
+  assert (sdr_record);
+  assert (sdr_record_len);
+  assert (IPMI_SENSORS_EVENT_VALID (event_message_output_type));
+  assert (sensor_state_str);
+
+  if (event_message_output_type == IPMI_SENSORS_EVENT_NORMAL)
+    {
+      uint8_t sensor_type;
+      uint8_t event_reading_type_code;
+      unsigned int sensor_state;
+
+      if (ipmi_sdr_parse_sensor_type (state_data->sdr_parse_ctx,
+                                      sdr_record,
+                                      sdr_record_len,
+                                      &sensor_type) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_sdr_parse_sensor_type: %s\n",
+                           ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+          return (-1);
+        }
+      
+      if (ipmi_sdr_parse_event_reading_type_code (state_data->sdr_parse_ctx,
+                                                  sdr_record,
+                                                  sdr_record_len,
+                                                  &event_reading_type_code) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_sdr_parse_event_reading_type_code: %s\n",
+                           ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+          return (-1);
+        }
+      
+      if (ipmi_interpret_sensor (state_data->interpret_ctx,
+                                 event_reading_type_code,
+                                 sensor_type,
+                                 sensor_event_bitmask,
+                                 &sensor_state) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_interpret_sensor: %s\n",
+                           ipmi_interpret_ctx_errormsg (state_data->interpret_ctx));
+          return (-1);
+        }
+      
+      if (sensor_state == IPMI_INTERPRET_STATE_NOMINAL)
+        (*sensor_state_str) = "Nominal";
+      else if (sensor_state == IPMI_INTERPRET_STATE_WARNING)
+        (*sensor_state_str) = "Warning";
+      else if (sensor_state == IPMI_INTERPRET_STATE_CRITICAL)
+        (*sensor_state_str) = "Critical";
+      else
+        (*sensor_state_str) = IPMI_SENSORS_NA_STRING;
+    }
+  else
+    (*sensor_state_str) = IPMI_SENSORS_NA_STRING;
+
+  return (0);
 }

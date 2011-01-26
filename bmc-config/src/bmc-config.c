@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -48,25 +48,26 @@ _bmc_config_state_data_init (bmc_config_state_data_t *state_data)
   state_data->ipmi_ctx = NULL;
   state_data->sections = NULL;
 
-  state_data->lan_user_session_limit_len = 0;
-  state_data->lan_user_session_limit = NULL;
-  state_data->serial_user_session_limit_len = 0;
-  state_data->serial_user_session_limit = NULL;
-
   state_data->enable_user_after_password_len = 0;
   state_data->enable_user_after_password = NULL;
 
   state_data->authentication_type_initialized = 0;
+  state_data->authentication_type_channel_number = 0;
 
   state_data->cipher_suite_entry_count = 0;
   state_data->cipher_suite_entry_count_set = 0;
   state_data->cipher_suite_id_supported_set = 0;
   state_data->cipher_suite_priv_set = 0;
+  state_data->cipher_suite_channel_number = 0;
 
-  state_data->lan_channel_number_initialized = 0;
-  state_data->serial_channel_number_initialized = 0;
-  state_data->sol_channel_number_initialized = 0;
-  state_data->number_of_users_initialized = 0;
+  state_data->lan_channel_numbers_count = 0;
+  state_data->lan_channel_numbers_loaded = 0;
+  state_data->serial_channel_numbers_count = 0;
+  state_data->serial_channel_numbers_loaded = 0;
+
+  state_data->sol_channel_numbers_count = 0;
+  state_data->sol_channel_numbers_unique_count = 0;
+  state_data->sol_channel_numbers_loaded = 0;
 }
 
 static int
@@ -239,11 +240,7 @@ _bmc_config (pstdout_state_t pstate,
 
   /* Special case(s): 
    *
-   * A) There is no way to checkout the user session limit, so we have
-   * to store before hand it if we intend to commit it (along with the
-   * other calls to set user access that commit things)
-   *
-   * B) On some motherboards, the "Enable_User" must come after the
+   * On some motherboards, the "Enable_User" must come after the
    * "Password" configure.  So we store information for this fact.
    * See workaround details in user section code.
    */
@@ -263,14 +260,9 @@ _bmc_config (pstdout_state_t pstate,
 
       if (user_count)
         {
-          unsigned int lan_session_limit_found = 0;
-          unsigned int serial_session_limit_found = 0;
           unsigned int enable_user_found = 0;
           unsigned int datasize;
 
-          /* Two, is the user configuring anything these special cases
-           * care about?
-           */
           section = state_data.sections;
           while (section)
             {
@@ -285,48 +277,12 @@ _bmc_config (pstdout_state_t pstate,
                   if (userid < user_count)
                     {
                       if ((kv = config_find_keyvalue (section,
-                                                      "Lan_Session_Limit")))
-                        lan_session_limit_found = 1;
-
-                      if ((kv = config_find_keyvalue (section,
-                                                      "Serial_Session_Limit")))
-                        serial_session_limit_found = 1;
-
-                      if ((kv = config_find_keyvalue (section,
                                                       "Enable_User")))
                         enable_user_found = 1;
                     }
                 }
 
               section = section->next;
-            }
-
-          if (lan_session_limit_found)
-            {
-              datasize = sizeof (uint8_t) * user_count;
-              
-              if (!(state_data.lan_user_session_limit = (uint8_t *)malloc (datasize)))
-                {
-                  pstdout_perror (pstate,
-                                  "malloc");
-                  goto cleanup;
-                }
-              state_data.lan_user_session_limit_len = user_count;
-              memset (state_data.lan_user_session_limit, '\0', datasize);
-            }
-
-          if (serial_session_limit_found)
-            {
-              datasize = sizeof (uint8_t) * user_count;
-              
-              if (!(state_data.serial_user_session_limit = (uint8_t *)malloc (datasize)))
-                {
-                  pstdout_perror (pstate,
-                                  "malloc");
-                  goto cleanup;
-                }
-              state_data.serial_user_session_limit_len = user_count;
-              memset (state_data.serial_user_session_limit, '\0', datasize);
             }
 
           if (enable_user_found)
@@ -341,43 +297,6 @@ _bmc_config (pstdout_state_t pstate,
                 }
               state_data.enable_user_after_password_len = user_count;
               memset (state_data.enable_user_after_password, '\0', datasize);
-            }
-          
-          /* Third, store the info we care about */
-          if (lan_session_limit_found 
-              || serial_session_limit_found)
-            {
-              section = state_data.sections;
-              while (section)
-                {
-                  struct config_keyvalue *kv;
-                  
-                  if (stristr (section->section_name, "User"))
-                    {
-                      uint8_t userid;
-                      
-                      userid = atoi (section->section_name + strlen ("User"));
-                      
-                      if (userid < user_count)
-                        {
-                          if (lan_session_limit_found)
-                            {
-                              if ((kv = config_find_keyvalue (section,
-                                                              "Lan_Session_Limit")))
-                                state_data.lan_user_session_limit[userid-1] = atoi (kv->value_input);
-                            }
-                             
-                          if (serial_session_limit_found)
-                            {
-                              if ((kv = config_find_keyvalue (section,
-                                                              "Serial_Session_Limit")))
-                                state_data.serial_user_session_limit[userid-1] = atoi (kv->value_input);
-                            }
-                        }
-                    }
-                
-                  section = section->next;
-                }
             }
         }
     }
@@ -416,79 +335,80 @@ _bmc_config (pstdout_state_t pstate,
         }
     }
 
-  switch (prog_data->args->config_args.action) {
-  case CONFIG_ACTION_CHECKOUT:
-    if (prog_data->args->config_args.section_strs)
-      {
-        struct config_section_str *sstr;
+  switch (prog_data->args->config_args.action)
+    {
+    case CONFIG_ACTION_CHECKOUT:
+      if (prog_data->args->config_args.section_strs)
+	{
+	  struct config_section_str *sstr;
+	  
+	  /* note: argp validation catches if user specified --section
+	   * and --keypair, so all_keys_if_none_specified should be '1'.
+	   */
 
-        /* note: argp validation catches if user specified --section
-         * and --keypair, so all_keys_if_none_specified should be '1'.
-         */
+	  sstr = prog_data->args->config_args.section_strs;
+	  while (sstr)
+	    {
+	      struct config_section *s;
+	      config_err_t this_ret;
 
-        sstr = prog_data->args->config_args.section_strs;
-        while (sstr)
-          {
-            struct config_section *s;
-            config_err_t this_ret;
+	      if (!(s = config_find_section (state_data.sections,
+					     sstr->section_name)))
+		{
+		  pstdout_fprintf (pstate,
+				   stderr,
+				   "## FATAL: Cannot checkout section '%s'\n",
+				   sstr->section_name);
+		  continue;
+		}
 
-            if (!(s = config_find_section (state_data.sections,
-                                           sstr->section_name)))
-              {
-                pstdout_fprintf (pstate,
-                                 stderr,
-                                 "## FATAL: Cannot checkout section '%s'\n",
-                                 sstr->section_name);
-                continue;
-              }
+	      this_ret = config_checkout_section (pstate,
+						  s,
+						  &(prog_data->args->config_args),
+						  1,
+						  fp,
+						  0,
+						  &state_data);
+	      if (this_ret != CONFIG_ERR_SUCCESS)
+		ret = this_ret;
+	      if (ret == CONFIG_ERR_FATAL_ERROR)
+		break;
 
-            this_ret = config_checkout_section (pstate,
-                                                s,
-                                                &(prog_data->args->config_args),
-                                                1,
-                                                fp,
-                                                0,
-                                                &state_data);
-            if (this_ret != CONFIG_ERR_SUCCESS)
-              ret = this_ret;
-            if (ret == CONFIG_ERR_FATAL_ERROR)
-              break;
+	      sstr = sstr->next;
+	    }
+	}
+      else
+	{
+	  int all_keys_if_none_specified = 0;
 
-            sstr = sstr->next;
-          }
-      }
-    else
-      {
-        int all_keys_if_none_specified = 0;
+	  if (!prog_data->args->config_args.keypairs)
+	    all_keys_if_none_specified++;
 
-        if (!prog_data->args->config_args.keypairs)
-          all_keys_if_none_specified++;
-
-        ret = config_checkout (pstate,
-                               state_data.sections,
-                               &(prog_data->args->config_args),
-                               all_keys_if_none_specified,
-                               fp,
-                               0,
-                               &state_data);
-      }
-    break;
-  case CONFIG_ACTION_COMMIT:
-    ret = config_commit (pstate,
-                         state_data.sections,
-                         &(prog_data->args->config_args),
-                         &state_data);
-    break;
-  case CONFIG_ACTION_DIFF:
-    ret = config_diff (pstate,
-                       state_data.sections,
-                       &(prog_data->args->config_args),
-                       &state_data);
-    break;
-  case CONFIG_ACTION_LIST_SECTIONS:
-    ret = config_output_sections_list (pstate, state_data.sections);
-    break;
-  }
+	  ret = config_checkout (pstate,
+				 state_data.sections,
+				 &(prog_data->args->config_args),
+				 all_keys_if_none_specified,
+				 fp,
+				 0,
+				 &state_data);
+	}
+      break;
+    case CONFIG_ACTION_COMMIT:
+      ret = config_commit (pstate,
+			   state_data.sections,
+			   &(prog_data->args->config_args),
+			   &state_data);
+      break;
+    case CONFIG_ACTION_DIFF:
+      ret = config_diff (pstate,
+			 state_data.sections,
+			 &(prog_data->args->config_args),
+			 &state_data);
+      break;
+    case CONFIG_ACTION_LIST_SECTIONS:
+      ret = config_output_sections_list (pstate, state_data.sections);
+      break;
+    }
 
   if (ret == CONFIG_ERR_FATAL_ERROR || ret == CONFIG_ERR_NON_FATAL_ERROR)
     {
@@ -503,10 +423,6 @@ _bmc_config (pstdout_state_t pstate,
       ipmi_ctx_close (state_data.ipmi_ctx);
       ipmi_ctx_destroy (state_data.ipmi_ctx);
     }
-  if (state_data.lan_user_session_limit)
-    free (state_data.lan_user_session_limit);
-  if (state_data.serial_user_session_limit)
-    free (state_data.serial_user_session_limit);
   if (file_opened)
     fclose (fp);
   if (state_data.sections)

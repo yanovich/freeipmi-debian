@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  $Id: ipmipower_packet.c,v 1.124.2.2 2010-06-11 16:29:21 chu11 Exp $
+ *  $Id: ipmipower_packet.c,v 1.127 2010-06-11 16:29:34 chu11 Exp $
  *****************************************************************************
  *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
@@ -12,7 +12,7 @@
  *
  *  Ipmipower is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
+ *  Free Software Foundation; either version 3 of the License, or (at your
  *  option) any later version.
  *
  *  Ipmipower is distributed in the hope that it will be useful, but
@@ -692,7 +692,7 @@ ipmipower_packet_create (ipmipower_powercmd_t ip,
        * Table 13-11 in the IPMI 2.0 spec.
        */
       if (pkt == RAKP_MESSAGE_1_REQ
-          && (cmd_args.common.workaround_flags & IPMI_TOOL_WORKAROUND_FLAGS_INTEL_2_0_SESSION))
+          && (cmd_args.common.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION))
         {
           memset (username_buf, '\0', IPMI_MAX_USER_NAME_LENGTH+1);
           if (username)
@@ -1039,7 +1039,7 @@ ipmipower_packet_create (ipmipower_powercmd_t ip,
        * same workaround.
        */
 
-      if (cmd_args.common.workaround_flags & IPMI_TOOL_WORKAROUND_FLAGS_INTEL_2_0_SESSION)
+      if (cmd_args.common.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION)
         name_only_lookup = IPMI_USER_NAME_PRIVILEGE_LOOKUP;
       else
         name_only_lookup = ip->name_only_lookup;
@@ -1056,7 +1056,7 @@ ipmipower_packet_create (ipmipower_powercmd_t ip,
        * password to 16 bytes when generating keys, hashes, etc.  So we
        * have to do the same when generating keys, hashes, etc.
        */
-      if ((cmd_args.common.workaround_flags & IPMI_TOOL_WORKAROUND_FLAGS_INTEL_2_0_SESSION)
+      if ((cmd_args.common.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION)
           && ip->authentication_algorithm == IPMI_AUTHENTICATION_ALGORITHM_RAKP_HMAC_MD5
           && password_len > IPMI_1_5_MAX_PASSWORD_LENGTH)
         password_len = IPMI_1_5_MAX_PASSWORD_LENGTH;
@@ -1337,21 +1337,21 @@ ipmipower_packet_errmsg (ipmipower_powercmd_t ip, packet_type_t pkt)
                && comp_code == IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST)
         return (MSG_TYPE_IPMI_2_0_UNAVAILABLE);
       else if (pkt == GET_SESSION_CHALLENGE_RES
-               && (comp_code == IPMI_COMP_CODE_INVALID_USERNAME
-                   || comp_code == IPMI_COMP_CODE_NULL_USERNAME_NOT_ENABLED))
+               && (comp_code == IPMI_COMP_CODE_GET_SESSION_CHALLENGE_INVALID_USERNAME
+                   || comp_code == IPMI_COMP_CODE_GET_SESSION_CHALLENGE_NULL_USERNAME_NOT_ENABLED))
         return (MSG_TYPE_USERNAME_INVALID);
       else if (pkt == ACTIVATE_SESSION_RES
-               && comp_code == IPMI_COMP_CODE_EXCEEDS_PRIVILEGE_LEVEL)
+               && comp_code == IPMI_COMP_CODE_ACTIVATE_SESSION_EXCEEDS_PRIVILEGE_LEVEL)
         return (MSG_TYPE_PRIVILEGE_LEVEL_CANNOT_BE_OBTAINED);
       else if (pkt == ACTIVATE_SESSION_RES
-               && (comp_code == IPMI_COMP_CODE_NO_SESSION_SLOT_AVAILABLE
-                   || comp_code == IPMI_COMP_CODE_NO_SLOT_AVAILABLE_FOR_GIVEN_USER
-                   || comp_code == IPMI_COMP_CODE_NO_SLOT_AVAILABLE_TO_SUPPORT_USER))
+               && (comp_code == IPMI_COMP_CODE_ACTIVATE_SESSION_NO_SESSION_SLOT_AVAILABLE
+                   || comp_code == IPMI_COMP_CODE_ACTIVATE_SESSION_NO_SLOT_AVAILABLE_FOR_GIVEN_USER
+                   || comp_code == IPMI_COMP_CODE_ACTIVATE_SESSION_NO_SLOT_AVAILABLE_TO_SUPPORT_USER))
         return (MSG_TYPE_BMC_BUSY);
       else if (pkt == SET_SESSION_PRIVILEGE_LEVEL_RES
-               && (comp_code == IPMI_COMP_CODE_RQ_LEVEL_NOT_AVAILABLE_FOR_USER
-                   || comp_code == IPMI_COMP_CODE_RQ_LEVEL_EXCEEDS_USER_PRIVILEGE_LIMIT
-                   || comp_code == IPMI_COMP_CODE_CANNOT_DISABLE_USER_LEVEL_AUTHENTICATION))
+               && (comp_code == IPMI_COMP_CODE_SET_SESSION_PRIVILEGE_LEVEL_REQUESTED_LEVEL_NOT_AVAILABLE_FOR_USER
+                   || comp_code == IPMI_COMP_CODE_SET_SESSION_PRIVILEGE_LEVEL_REQUESTED_LEVEL_EXCEEDS_USER_PRIVILEGE_LIMIT
+                   || comp_code == IPMI_COMP_CODE_SET_SESSION_PRIVILEGE_LEVEL_CANNOT_DISABLE_USER_LEVEL_AUTHENTICATION))
         return (MSG_TYPE_PRIVILEGE_LEVEL_CANNOT_BE_OBTAINED);
 #if 0
       /* Should not reach this point, should be handled by other code */

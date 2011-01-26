@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2008-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-*/
+ * Copyright (C) 2008-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -36,6 +36,7 @@
 #include "ipmi-oem-fujitsu.h"
 #include "ipmi-oem-ibm.h"
 #include "ipmi-oem-intel.h"
+#include "ipmi-oem-intelnm.h"
 #include "ipmi-oem-inventec.h"
 #include "ipmi-oem-quanta.h"
 #include "ipmi-oem-sun.h"
@@ -447,11 +448,57 @@ struct ipmi_oem_command oem_ibm[] =
 struct ipmi_oem_command oem_intel[] =
   {
     {
+      "get-smtp-config",
+      "[channel-number]",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intel_get_smtp_config
+    },
+    {
+      "set-smtp-config",
+      "[channel-number] KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intel_set_smtp_config
+    },
+    {
       "restore-configuration",
       NULL,
       0,
       IPMI_OEM_COMMAND_FLAGS_DEFAULT,
       ipmi_oem_intel_restore_configuration
+    },
+    {
+      NULL,
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      NULL
+    },
+  };
+
+struct ipmi_oem_command oem_intelnm[] =
+  {
+    {
+      "get-node-manager-statistics",
+      "[domainid=num] [policyid=num]",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intelnm_get_node_manager_statistics
+    },
+    {
+      "reset-node-manager-statistics",
+      "[domainid=num] [policyid=num]",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intelnm_reset_node_manager_statistics
+    },
+    {
+      "get-node-manager-version",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_intelnm_get_node_manager_version
     },
     {
       NULL,
@@ -984,6 +1031,10 @@ struct ipmi_oem_id oem_cb[] =
     {
       "Intel",
       oem_intel
+    },
+    {
+      "Intelnm",
+      oem_intelnm
     },
     {
       "Inventec",

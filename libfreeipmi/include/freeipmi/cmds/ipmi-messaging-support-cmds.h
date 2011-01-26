@@ -1,19 +1,19 @@
 /*
-   Copyright (C) 2003-2010 FreeIPMI Core Team
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
  */
 
 #ifndef _IPMI_MESSAGING_SUPPORT_CMDS_H
@@ -123,6 +123,18 @@ extern "C" {
 #define IPMI_GET_SYSTEM_INFO_PARAMETER_VALID(__val) \
   (((__val) == IPMI_GET_SYSTEM_INFO_PARAMETER       \
     || (__val) == IPMI_GET_SYSTEM_INFO_PARAMETER_REVISION_ONLY) ? 1 : 0)
+
+#define IPMI_SYSTEM_INFO_PARAMETERS_NO_SET_SELECTOR                            0x0
+#define IPMI_SYSTEM_INFO_PARAMETERS_NO_BLOCK_SELECTOR                          0x0
+
+#define IPMI_SYSTEM_INFO_PARAMETERS_SET_COMPLETE                              0x00
+#define IPMI_SYSTEM_INFO_PARAMETERS_SET_IN_PROGRESS                           0x01
+#define IPMI_SYSTEM_INFO_PARAMETERS_SET_COMMIT_WRITE                          0x02
+
+#define IPMI_SYSTEM_INFO_PARAMETERS_SET_IN_PROGRESS_VALID(__value) \
+  (((__value) == IPMI_SYSTEM_INFO_PARAMETERS_SET_COMPLETE          \
+    || (__value) == IPMI_SYSTEM_INFO_PARAMETERS_SET_IN_PROGRESS    \
+    || (__value) == IPMI_SYSTEM_INFO_PARAMETERS_SET_COMMIT_WRITE) ? 1 : 0)
 
 #define IPMI_SYSTEM_INFO_ENCODING_ASCII_LATIN1         0x0
 #define IPMI_SYSTEM_INFO_ENCODING_UTF_8                0x1
@@ -332,6 +344,7 @@ extern fiid_template_t tmpl_cmd_get_device_guid_format_rs;
 extern fiid_template_t tmpl_cmd_set_system_info_parameters_rq;
 extern fiid_template_t tmpl_cmd_set_system_info_parameters_rs;
 
+extern fiid_template_t tmpl_cmd_set_system_info_parameters_set_in_progress_rq;
 extern fiid_template_t tmpl_cmd_set_system_info_parameters_system_firmware_version_first_set_rq;
 extern fiid_template_t tmpl_cmd_set_system_info_parameters_system_firmware_version_rq;
 extern fiid_template_t tmpl_cmd_set_system_info_parameters_system_name_first_set_rq;
@@ -344,6 +357,7 @@ extern fiid_template_t tmpl_cmd_set_system_info_parameters_primary_operating_sys
 extern fiid_template_t tmpl_cmd_get_system_info_parameters_rq;
 extern fiid_template_t tmpl_cmd_get_system_info_parameters_rs;
 
+extern fiid_template_t tmpl_cmd_get_system_info_parameters_set_in_progress_rs;
 extern fiid_template_t tmpl_cmd_get_system_info_parameters_system_firmware_version_first_set_rs;
 extern fiid_template_t tmpl_cmd_get_system_info_parameters_system_firmware_version_rs;
 extern fiid_template_t tmpl_cmd_get_system_info_parameters_system_name_first_set_rs;
@@ -451,6 +465,9 @@ int fill_cmd_set_system_info_parameters (uint8_t parameter_selector,
                                          unsigned int configuration_parameter_data_len,
                                          fiid_obj_t obj_cmd_rq);
   
+int fill_cmd_set_system_info_parameters_set_in_progress (uint8_t state,
+                                                         fiid_obj_t obj_cmd_rq);
+
 int fill_cmd_set_system_info_parameters_system_firmware_version_first_set (uint8_t set_selector,
                                                                            uint8_t encoding,
                                                                            uint8_t string_length,

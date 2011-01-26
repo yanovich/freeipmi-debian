@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -36,11 +36,10 @@
 #include <freeipmi/freeipmi.h>
 
 #include "freeipmi-portability.h"
+#include "parse-common.h"
 #include "pstdout.h"
 #include "tool-common.h"
 #include "tool-cmdline-common.h"
-
-#define WORKAROUND_FLAG_BUFLEN 1024
 
 error_t
 cmdline_config_file_parse (int key, char *arg, struct argp_state *state)
@@ -72,175 +71,6 @@ cmdline_config_file_parse (int key, char *arg, struct argp_state *state)
   return (0);
 }
 
-int
-parse_inband_driver_type (const char *str)
-{
-  assert (str);
-
-  if (strcasecmp (str, "kcs") == 0)
-    return (IPMI_DEVICE_KCS);
-  else if (strcasecmp (str, "ssif") == 0)
-    return (IPMI_DEVICE_SSIF);
-  /* support "open" for those that might be used to
-   * ipmitool.
-   */
-  else if (strcasecmp (str, "open") == 0
-           || strcasecmp (str, "openipmi") == 0)
-    return (IPMI_DEVICE_OPENIPMI);
-  /* support "bmc" for those that might be used to
-   * ipmitool.
-   */
-  else if (strcasecmp (str, "bmc") == 0
-           || strcasecmp (str, "sunbmc") == 0)
-    return (IPMI_DEVICE_SUNBMC);
-
-  return (-1);
-}
-
-int
-parse_outofband_driver_type (const char *str)
-{
-  assert (str);
-
-  if (strcasecmp (str, "lan") == 0)
-    return (IPMI_DEVICE_LAN);
-  /* support "lanplus" for those that might be used to ipmitool.
-   * support typo variants to ease.
-   */
-  else if (strcasecmp (str, "lanplus") == 0
-           || strcasecmp (str, "lan_2_0") == 0
-           || strcasecmp (str, "lan20") == 0
-           || strcasecmp (str, "lan_20") == 0
-           || strcasecmp (str, "lan2_0") == 0
-           || strcasecmp (str, "lan2_0") == 0)
-    return (IPMI_DEVICE_LAN_2_0);
-
-  return (-1);
-}
-
-int
-parse_driver_type (const char *str)
-{
-  int ret;
-
-  assert (str);
-
-  if ((ret = parse_inband_driver_type (str)) < 0)
-    ret = parse_outofband_driver_type (str);
-
-  return (ret);
-}
-
-int
-parse_authentication_type (const char *str)
-{
-  assert (str);
-
-  if (strcasecmp (str, IPMI_AUTHENTICATION_TYPE_NONE_STR) == 0)
-    return (IPMI_AUTHENTICATION_TYPE_NONE);
-  /* keep "plain" for backwards compatability */
-  else if (strcasecmp (str, IPMI_AUTHENTICATION_TYPE_STRAIGHT_PASSWORD_KEY_STR_OLD) == 0
-           || strcasecmp (str, IPMI_AUTHENTICATION_TYPE_STRAIGHT_PASSWORD_KEY_STR) == 0)
-    return (IPMI_AUTHENTICATION_TYPE_STRAIGHT_PASSWORD_KEY);
-  else if (strcasecmp (str, IPMI_AUTHENTICATION_TYPE_MD2_STR) == 0)
-    return (IPMI_AUTHENTICATION_TYPE_MD2);
-  else if (strcasecmp (str, IPMI_AUTHENTICATION_TYPE_MD5_STR) == 0)
-    return (IPMI_AUTHENTICATION_TYPE_MD5);
-
-  return (-1);
-}
-
-int
-parse_privilege_level (const char *str)
-{
-  assert (str);
-
-  if (strcasecmp (str, IPMI_PRIVILEGE_LEVEL_USER_STR) == 0)
-    return (IPMI_PRIVILEGE_LEVEL_USER);
-  else if (strcasecmp (str, IPMI_PRIVILEGE_LEVEL_OPERATOR_STR) == 0)
-    return (IPMI_PRIVILEGE_LEVEL_OPERATOR);
-  else if (strcasecmp (str, IPMI_PRIVILEGE_LEVEL_ADMIN_STR) == 0
-           || strcasecmp (str, IPMI_PRIVILEGE_LEVEL_ADMIN_STR2) == 0)
-    return (IPMI_PRIVILEGE_LEVEL_ADMIN);
-
-  return (-1);
-}
-
-int
-parse_workaround_flags (const char *str,
-                        unsigned int *workaround_flags,
-                        unsigned int *tool_specific_workaround_flags)
-{
-  char buf[WORKAROUND_FLAG_BUFLEN+1];
-  char *tok;
-
-  assert (str);
-  assert (workaround_flags);
-
-  memset (buf, '\0', WORKAROUND_FLAG_BUFLEN+1);
-  strncpy (buf, str, WORKAROUND_FLAG_BUFLEN);
-
-  (*workaround_flags) = 0;
-  if (tool_specific_workaround_flags)
-    (*tool_specific_workaround_flags) = 0;
-
-  tok = strtok (buf, ",");
-  while (tok)
-    {
-      if (!strcasecmp (tok, IPMI_TOOL_WORKAROUND_FLAGS_ACCEPT_SESSION_ID_ZERO_STR))
-        (*workaround_flags) |= IPMI_TOOL_WORKAROUND_FLAGS_ACCEPT_SESSION_ID_ZERO;
-      else if (!strcasecmp (tok, IPMI_TOOL_WORKAROUND_FLAGS_FORCE_PERMSG_AUTHENTICATION_STR))
-        (*workaround_flags) |= IPMI_TOOL_WORKAROUND_FLAGS_FORCE_PERMSG_AUTHENTICATION;
-      else if (!strcasecmp (tok, IPMI_TOOL_WORKAROUND_FLAGS_CHECK_UNEXPECTED_AUTHCODE_STR))
-        (*workaround_flags) |= IPMI_TOOL_WORKAROUND_FLAGS_CHECK_UNEXPECTED_AUTHCODE;
-      else if (!strcasecmp (tok, IPMI_TOOL_WORKAROUND_FLAGS_BIG_ENDIAN_SEQUENCE_NUMBER_STR))
-        (*workaround_flags) |= IPMI_TOOL_WORKAROUND_FLAGS_BIG_ENDIAN_SEQUENCE_NUMBER;
-      else if (!strcasecmp (tok, IPMI_TOOL_WORKAROUND_FLAGS_AUTHENTICATION_CAPABILITIES_STR))
-        (*workaround_flags) |= IPMI_TOOL_WORKAROUND_FLAGS_AUTHENTICATION_CAPABILITIES;
-      else if (!strcasecmp (tok, IPMI_TOOL_WORKAROUND_FLAGS_INTEL_2_0_SESSION_STR))
-        (*workaround_flags) |= IPMI_TOOL_WORKAROUND_FLAGS_INTEL_2_0_SESSION;
-      else if (!strcasecmp (tok, IPMI_TOOL_WORKAROUND_FLAGS_SUPERMICRO_2_0_SESSION_STR))
-        (*workaround_flags) |= IPMI_TOOL_WORKAROUND_FLAGS_SUPERMICRO_2_0_SESSION;
-      else if (!strcasecmp (tok, IPMI_TOOL_WORKAROUND_FLAGS_SUN_2_0_SESSION_STR))
-        (*workaround_flags) |= IPMI_TOOL_WORKAROUND_FLAGS_SUN_2_0_SESSION;
-      else if (!strcasecmp (tok, IPMI_TOOL_WORKAROUND_FLAGS_OPEN_SESSION_PRIVILEGE_STR))
-        (*workaround_flags) |= IPMI_TOOL_WORKAROUND_FLAGS_OPEN_SESSION_PRIVILEGE;
-      else if (!strcasecmp (tok, IPMI_TOOL_WORKAROUND_FLAGS_NON_EMPTY_INTEGRITY_CHECK_VALUE_STR))
-        (*workaround_flags) |= IPMI_TOOL_WORKAROUND_FLAGS_NON_EMPTY_INTEGRITY_CHECK_VALUE;
-      else if (!strcasecmp (tok, IPMI_TOOL_WORKAROUND_FLAGS_ASSUME_IO_BASE_ADDRESS_STR))
-        (*workaround_flags) |= IPMI_TOOL_WORKAROUND_FLAGS_ASSUME_IO_BASE_ADDRESS;
-      else if (tool_specific_workaround_flags
-               && !strcasecmp (tok, IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_IGNORE_SOL_PAYLOAD_SIZE_STR))
-        (*tool_specific_workaround_flags) |= IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_IGNORE_SOL_PAYLOAD_SIZE;
-      else if (tool_specific_workaround_flags
-               && !strcasecmp (tok, IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_IGNORE_SOL_PORT_STR))
-        (*tool_specific_workaround_flags) |= IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_IGNORE_SOL_PORT;
-      else if (tool_specific_workaround_flags
-               && !strcasecmp (tok, IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_SKIP_SOL_ACTIVATION_STATUS_STR))
-        (*tool_specific_workaround_flags) |= IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_SKIP_SOL_ACTIVATION_STATUS;
-      else if (tool_specific_workaround_flags
-               && !strcasecmp (tok, IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_SKIP_CHECKS_STR))
-        (*tool_specific_workaround_flags) |= IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_SKIP_CHECKS;
-      else if (tool_specific_workaround_flags
-               && !strcasecmp (tok, IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_ASSUME_SYSTEM_EVENT_STR))
-        (*tool_specific_workaround_flags) |= IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_ASSUME_SYSTEM_EVENT;
-      else if (tool_specific_workaround_flags
-               && !strcasecmp (tok, IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_SLOW_COMMIT_STR))
-        (*tool_specific_workaround_flags) |= IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_SLOW_COMMIT;
-      else if (tool_specific_workaround_flags
-               && !strcasecmp (tok, IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_VERY_SLOW_COMMIT_STR))
-        (*tool_specific_workaround_flags) |= IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_VERY_SLOW_COMMIT;
-      else if (tool_specific_workaround_flags
-               && !strcasecmp (tok, IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_IGNORE_STATE_FLAG_STR))
-        (*tool_specific_workaround_flags) |= IPMI_TOOL_SPECIFIC_WORKAROUND_FLAGS_IGNORE_STATE_FLAG;
-      else
-        return (-1);
-      tok = strtok (NULL, ",");
-    }
-
-  return (0);
-}
-
 /* From David Wheeler's Secure Programming Guide */
 static void *
 __secure_memset (void *s, int c, size_t n)
@@ -264,7 +94,7 @@ common_parse_opt (int key,
 {
   char *ptr;
   int tmp;
-  unsigned int tmp1, tmp2;
+  unsigned int outofband_flags, outofband_2_0_flags, inband_flags, section_flags;
   int n;
 
   switch (key)
@@ -390,56 +220,56 @@ common_parse_opt (int key,
       break;
     case ARGP_K_G_KEY:
       {
-    int rv;
-
-    if (cmd_args->k_g_len)
-      {
-        memset (cmd_args->k_g, '\0', IPMI_MAX_K_G_LENGTH + 1);
-        cmd_args->k_g_len = 0;
-      }
-
-    if ((rv = check_kg_len (arg)) < 0)
-      {
-        fprintf (stderr, "k_g too long\n");
-        exit (1);
-      }
-
-    if ((rv = parse_kg (cmd_args->k_g, IPMI_MAX_K_G_LENGTH + 1, arg)) < 0)
-      {
-        fprintf (stderr, "k_g input formatted incorrectly\n");
-        exit (1);
-      }
-    if (rv > 0)
-      cmd_args->k_g_len = rv;
-    n = strlen (arg);
-    __secure_memset (arg, '\0', n);
+        int rv;
+        
+        if (cmd_args->k_g_len)
+          {
+            memset (cmd_args->k_g, '\0', IPMI_MAX_K_G_LENGTH + 1);
+            cmd_args->k_g_len = 0;
+          }
+        
+        if ((rv = check_kg_len (arg)) < 0)
+          {
+            fprintf (stderr, "k_g too long\n");
+            exit (1);
+          }
+        
+        if ((rv = parse_kg (cmd_args->k_g, IPMI_MAX_K_G_LENGTH + 1, arg)) < 0)
+          {
+            fprintf (stderr, "k_g input formatted incorrectly\n");
+            exit (1);
+          }
+        if (rv > 0)
+          cmd_args->k_g_len = rv;
+        n = strlen (arg);
+        __secure_memset (arg, '\0', n);
       }
       break;
     case ARGP_K_G_PROMPT_KEY:
       {
-    int rv;
-
-    if (cmd_args->k_g_len)
-      {
-        memset (cmd_args->k_g, '\0', IPMI_MAX_K_G_LENGTH + 1);
-        cmd_args->k_g_len = 0;
-      }
-
-    arg = getpass ("K_g: ");
-
-    if ((rv = check_kg_len (arg)) < 0)
-      {
-        fprintf (stderr, "k_g too long\n");
-        exit (1);
-      }
-
-    if ((rv = parse_kg (cmd_args->k_g, IPMI_MAX_K_G_LENGTH + 1, arg)) < 0)
-      {
-        fprintf (stderr, "k_g input formatted incorrectly\n");
-        exit (1);
-      }
-    if (rv > 0)
-      cmd_args->k_g_len = rv;
+        int rv;
+        
+        if (cmd_args->k_g_len)
+          {
+            memset (cmd_args->k_g, '\0', IPMI_MAX_K_G_LENGTH + 1);
+            cmd_args->k_g_len = 0;
+          }
+        
+        arg = getpass ("K_g: ");
+        
+        if ((rv = check_kg_len (arg)) < 0)
+          {
+            fprintf (stderr, "k_g too long\n");
+            exit (1);
+          }
+        
+        if ((rv = parse_kg (cmd_args->k_g, IPMI_MAX_K_G_LENGTH + 1, arg)) < 0)
+          {
+            fprintf (stderr, "k_g input formatted incorrectly\n");
+            exit (1);
+          }
+        if (rv > 0)
+          cmd_args->k_g_len = rv;
       }
       break;
       /* ARGP_TIMEOUT_KEY for backwards compatability */
@@ -512,13 +342,19 @@ common_parse_opt (int key,
       /* ignore config option - should have been parsed earlier */
       break;
     case ARGP_WORKAROUND_FLAGS_KEY:
-      if (parse_workaround_flags (arg, &tmp1, &tmp2) < 0)
+      if (parse_workaround_flags (arg,
+                                  &outofband_flags,
+                                  &outofband_2_0_flags,
+                                  &inband_flags,
+                                  &section_flags) < 0)
         {
           fprintf (stderr, "invalid workaround flags\n");
           exit (1);
         }
-      cmd_args->workaround_flags |= tmp1;
-      cmd_args->tool_specific_workaround_flags |= tmp2;
+      cmd_args->workaround_flags_outofband |= outofband_flags;
+      cmd_args->workaround_flags_outofband_2_0 |= outofband_2_0_flags;
+      cmd_args->workaround_flags_inband |= inband_flags;
+      cmd_args->section_specific_workaround_flags |= section_flags;
       break;
     case ARGP_DEBUG_KEY:
       cmd_args->debug++;
@@ -626,8 +462,10 @@ _init_common_cmd_args (struct common_cmd_args *cmd_args)
   cmd_args->cipher_suite_id = 3;
   /* privilege_level set by parent function */
   cmd_args->config_file = NULL;
-  cmd_args->workaround_flags = 0;
-  cmd_args->tool_specific_workaround_flags = 0;
+  cmd_args->workaround_flags_outofband = 0;
+  cmd_args->workaround_flags_outofband_2_0 = 0;
+  cmd_args->workaround_flags_inband = 0;
+  cmd_args->section_specific_workaround_flags = 0;
   cmd_args->debug = 0;
 }
 
@@ -683,16 +521,8 @@ free_common_cmd_args (struct common_cmd_args *cmd_args)
 }
 
 void
-verify_common_cmd_args (struct common_cmd_args *cmd_args)
+verify_common_cmd_args_inband (struct common_cmd_args *cmd_args)
 {
-  if ((cmd_args->driver_type == IPMI_DEVICE_LAN
-       || cmd_args->driver_type == IPMI_DEVICE_LAN_2_0)
-      && !cmd_args->hostname)
-    {
-      fprintf (stderr, "hostname not specified\n");
-      exit (1);
-    }
-
   if (cmd_args->driver_device)
     {
       if (access (cmd_args->driver_device, R_OK|W_OK) < 0)
@@ -703,25 +533,66 @@ verify_common_cmd_args (struct common_cmd_args *cmd_args)
         }
     }
 
-  if (cmd_args->hostname)
-    {
-      /* We default to IPMI 1.5 if the user doesn't specify LAN vs. LAN_2_0 */
+}
 
-      if (cmd_args->driver_type != IPMI_DEVICE_LAN_2_0
-          && cmd_args->password
-          && strlen (cmd_args->password) > IPMI_1_5_MAX_PASSWORD_LENGTH)
-        {
-          fprintf (stderr, "password too long\n");
-          exit (1);
-        }
-      /* else, 2_0 password length was checked in argp_parse() previously */
+void
+verify_common_cmd_args_outofband (struct common_cmd_args *cmd_args, int check_hostname)
+{
+  if (check_hostname
+      && (cmd_args->driver_type == IPMI_DEVICE_LAN
+          || cmd_args->driver_type == IPMI_DEVICE_LAN_2_0)
+      && !cmd_args->hostname)
+    {
+      fprintf (stderr, "hostname not specified\n");
+      exit (1);
     }
+
+  /* We default to IPMI 1.5 if the user doesn't specify LAN vs. LAN_2_0 */
+
+  if (((cmd_args->hostname
+        && cmd_args->driver_type == IPMI_DEVICE_UNKNOWN)
+       || cmd_args->driver_type == IPMI_DEVICE_LAN)
+      && cmd_args->password
+      && strlen (cmd_args->password) > IPMI_1_5_MAX_PASSWORD_LENGTH)
+    {
+      fprintf (stderr, "password too long\n");
+      exit (1);
+    }
+  /* else, 2_0 password length was checked in argp_parse() previously */
 
   if (cmd_args->retransmission_timeout > cmd_args->session_timeout)
     {
       fprintf (stderr, "retransmission timeout larger than session timeout\n");
       exit (1);
     }
+
+  if (cmd_args->k_g_len)
+    {
+      unsigned int i;
+      int all_zeroes = 1;
+
+      /* Special case, check to make sure user didn't input zero as a
+       * k_g key.
+       */
+      for (i = 0; i < IPMI_MAX_K_G_LENGTH; i++)
+        {
+          if (cmd_args->k_g[i] != 0)
+            {
+              all_zeroes = 0;
+              break;
+            }
+        }
+      
+      if (all_zeroes)
+        cmd_args->k_g_len = 0;
+    }
+}
+
+void
+verify_common_cmd_args (struct common_cmd_args *cmd_args)
+{
+  verify_common_cmd_args_inband (cmd_args);
+  verify_common_cmd_args_outofband (cmd_args, 1);
 }
 
 void

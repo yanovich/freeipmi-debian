@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #ifndef _CONFIG_TOOL_COMMON_H_
 #define _CONFIG_TOOL_COMMON_H_
@@ -57,6 +57,7 @@
 #define CONFIG_READABLE_ONLY                                    0x08
 #define CONFIG_UNDEFINED                                        0x10
 #define CONFIG_USERNAME_NOT_SET_YET                             0x20
+#define CONFIG_DO_NOT_LIST                                      0x40
 
 #define CONFIG_USERNAME_NOT_SET_YET_STR     "<username-not-set-yet>"
 
@@ -66,10 +67,8 @@
 #define CONFIG_OUTPUT_BUFLEN                               8192
 
 #define CONFIG_MAX_SECTION_NAME_LEN                        128
+#define CONFIG_MAX_KEY_NAME_LEN                            128
 #define CONFIG_MAX_DESCRIPTION_LEN                         1024
-
-#define CONFIG_SET_SELECTOR      0x0
-#define CONFIG_BLOCK_SELECTOR    0x0
 
 #define same(a,b) (strcasecmp (a,b) == 0)
 
@@ -129,6 +128,12 @@ struct config_arguments
 
   int verbose_count;
   char *filename;
+  uint8_t lan_channel_number;
+  int lan_channel_number_set;
+  uint8_t serial_channel_number;
+  int serial_channel_number_set;
+  uint8_t sol_channel_number;
+  int sol_channel_number_set;
   struct config_keypair *keypairs;
   struct config_section_str *section_strs;
 };

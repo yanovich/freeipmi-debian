@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([freeipmi],[0.8.12],[freeipmi-devel@gnu.org])
-AC_REVISION([$Id: configure.ac,v 1.185.2.30 2010-08-06 17:06:38 chu11 Exp $])
+AC_INIT([freeipmi],[1.0.1],[freeipmi-devel@gnu.org])
+AC_REVISION([$Id: configure.ac,v 1.208 2010-08-06 21:02:29 chu11 Exp $])
 
 dnl We require a modern autoconf and automake
 AC_PREREQ([2.57])
@@ -29,6 +29,7 @@ AC_CONFIG_FILES([
         common/src/configtool/Makefile
         common/src/debugutil/Makefile
         common/src/miscutil/Makefile
+        common/src/parsecommon/Makefile
         common/src/pingtool/Makefile
         common/src/portability/Makefile
         common/src/toolcommon/Makefile
@@ -39,8 +40,11 @@ AC_CONFIG_FILES([
         contrib/Makefile
         contrib/ganglia/Makefile
         contrib/nagios/Makefile
+        examples/Makefile
         libfreeipmi/Makefile 
         libfreeipmi/libfreeipmi.3.pre
+        libfreeipmi/freeipmi_interpret_sensor.conf.5.pre
+        libfreeipmi/freeipmi_interpret_sel.conf.5.pre
         libfreeipmi/include/Makefile 
 	libfreeipmi/src/Makefile 
         libfreeipmi/src/api/Makefile
@@ -50,8 +54,10 @@ AC_CONFIG_FILES([
         libfreeipmi/src/fiid/Makefile
         libfreeipmi/src/fru-parse/Makefile
         libfreeipmi/src/interface/Makefile
+        libfreeipmi/src/interpret/Makefile
         libfreeipmi/src/libcommon/Makefile
         libfreeipmi/src/locate/Makefile
+        libfreeipmi/src/payload/Makefile
         libfreeipmi/src/record-format/Makefile
         libfreeipmi/src/sdr-cache/Makefile
         libfreeipmi/src/sdr-parse/Makefile
@@ -59,6 +65,20 @@ AC_CONFIG_FILES([
         libfreeipmi/src/sensor-read/Makefile
         libfreeipmi/src/spec/Makefile
         libfreeipmi/src/util/Makefile
+	libipmiconsole/Makefile
+        libipmiconsole/libipmiconsole.3.pre
+        libipmiconsole/libipmiconsole.conf.5.pre
+	libipmiconsole/src/Makefile
+	libipmimonitoring/Makefile
+        libipmimonitoring/src/Makefile
+        libipmimonitoring/ipmi_monitoring_sensors.conf.5.pre
+        libipmimonitoring/ipmimonitoring_sensors.conf.5.pre
+        libipmimonitoring/ipmimonitoring.conf.5.pre
+        libipmimonitoring/libipmimonitoring.conf.5.pre
+        libipmimonitoring/libipmimonitoring.3.pre
+        libipmidetect/Makefile
+        libipmidetect/libipmidetect.3.pre
+        libipmidetect/src/Makefile
 	bmc-config/Makefile 
  	bmc-config/bmc-config.8.pre 
         bmc-config/bmc-config.conf.5.pre
@@ -102,36 +122,22 @@ AC_CONFIG_FILES([
         ipmi-sensors/Makefile 
 	ipmi-sensors/ipmi-sensors.8.pre
         ipmi-sensors/src/Makefile 
+        ipmi-sensors/src/ipmimonitoring
         ipmi-sensors-config/Makefile 
 	ipmi-sensors-config/ipmi-sensors-config.8.pre
         ipmi-sensors-config/src/Makefile 
 	ipmiconsole/Makefile 
 	ipmiconsole/ipmiconsole.8.pre
         ipmiconsole/ipmiconsole.conf.5.pre
-        ipmiconsole/libipmiconsole.3.pre
         ipmiconsole/src/Makefile
-	ipmiconsole/src/libipmiconsole/Makefile
-        ipmiconsole/src/ipmiconsole/Makefile
         ipmidetect/Makefile
         ipmidetect/ipmidetect.8.pre
         ipmidetect/ipmidetect.conf.5.pre
-        ipmidetect/ipmidetectd.8.pre
-        ipmidetect/ipmidetectd.conf.5.pre
-        ipmidetect/libipmidetect.3.pre
         ipmidetect/src/Makefile
-        ipmidetect/src/ipmidetect/Makefile
-        ipmidetect/src/ipmidetectd/Makefile
-        ipmidetect/src/libipmidetect/Makefile
-	ipmimonitoring/Makefile
-        ipmimonitoring/src/Makefile
-	ipmimonitoring/ipmimonitoring.8.pre
-        ipmimonitoring/ipmi_monitoring_sensors.conf.5.pre
-        ipmimonitoring/ipmimonitoring_sensors.conf.5.pre
-        ipmimonitoring/ipmimonitoring.conf.5.pre
-        ipmimonitoring/libipmimonitoring.conf.5.pre
-        ipmimonitoring/libipmimonitoring.3.pre
-        ipmimonitoring/src/libipmimonitoring/Makefile 
-        ipmimonitoring/src/ipmimonitoring/Makefile
+        ipmidetectd/Makefile
+        ipmidetectd/ipmidetectd.8.pre
+        ipmidetectd/ipmidetectd.conf.5.pre
+        ipmidetectd/src/Makefile
         ipmiping/Makefile 
         ipmiping/ipmiping.8.pre
         ipmiping/src/Makefile
@@ -159,9 +165,9 @@ AC_SUBST([ISODATE])
 #
 # If any interfaces have been removed, set age = 0
 #
-LIBFREEIPMI_CURRENT=10
-LIBFREEIPMI_REVISION=5
-LIBFREEIPMI_AGE=0
+LIBFREEIPMI_CURRENT=11
+LIBFREEIPMI_REVISION=0
+LIBFREEIPMI_AGE=1
 
 LIBFREEIPMI_VERSION=$LIBFREEIPMI_CURRENT.$LIBFREEIPMI_REVISION.$LIBFREEIPMI_AGE
 AC_SUBST([LIBFREEIPMI_VERSION])
@@ -198,8 +204,8 @@ AC_SUBST([LIBIPMICONSOLE_VERSION_INFO])
 #
 # If any interfaces have been removed, set age = 0
 #
-LIBIPMIMONITORING_CURRENT=4
-LIBIPMIMONITORING_REVISION=1
+LIBIPMIMONITORING_CURRENT=5
+LIBIPMIMONITORING_REVISION=0
 LIBIPMIMONITORING_AGE=0
 LIBIPMIMONITORING_VERSION_INFO=$LIBIPMIMONITORING_CURRENT:$LIBIPMIMONITORING_REVISION:$LIBIPMIMONITORING_AGE
 AC_SUBST([LIBIPMIMONITORING_VERSION_INFO])
@@ -617,12 +623,24 @@ AC_TRY_COMPILE([#include <stdlib.h>],
 ACX_PTHREAD([], AC_MSG_ERROR([Posix threads required to build libipmiconsole]))
 
 dnl Misc checks and build options
+
+FREEIPMI_SYSCONFDIR=${sysconfdir}/freeipmi/
+AC_SUBST(FREEIPMI_SYSCONFDIR)
+
 AC_FREEIPMI_CONFIG_FILE
 AC_BMC_WATCHDOG_LOGFILE_DEFAULT
 AC_IPMI_MONITORING_SDR_CACHE_DIR
+dnl legacy
 AC_IPMI_MONITORING_SENSOR_CONFIG_FILE
+dnl legacy
+AC_IPMIPOWER_CONFIG_FILE
+dnl legacy
+AC_IPMICONSOLE_CONFIG_FILE
+AC_INTERPRET_SENSOR_CONFIG_FILE
+AC_INTERPRET_SEL_CONFIG_FILE
 AC_IPMIDETECT_CONFIG_FILE
 AC_IPMIDETECTD_CONFIG_FILE
+AC_LIBIPMICONSOLE_CONFIG_FILE
 AC_DONT_CHECK_FOR_ROOT
 
 dnl Checks for things needed in lib argp
@@ -632,6 +650,13 @@ AC_CHECK_DECLS([program_invocation_name, program_invocation_short_name],
 dnl Check for variables
 
 dnl Macro definitions
+
+dnl Misc substitutions
+dnl Must expand nested unquoting
+IPMIMONITORINGSBINDIR_TMP1="`eval echo ${sbindir}`"
+IPMIMONITORINGSBINDIR_TMP2="`echo $IPMIMONITORINGSBINDIR_TMP1 | sed 's/^NONE/$ac_default_prefix/'`"
+IPMIMONITORINGSBINDIR="`eval echo $IPMIMONITORINGSBINDIR_TMP2`"
+AC_SUBST([IPMIMONITORINGSBINDIR])
 
 dnl Check for random number paths
 

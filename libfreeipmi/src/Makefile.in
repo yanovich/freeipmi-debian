@@ -42,10 +42,15 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sdr_cache_dir.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sensor_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -73,8 +78,10 @@ libfreeipmi_la_DEPENDENCIES =  \
 	$(top_builddir)/libfreeipmi/src/fiid/libfiid.la \
 	$(top_builddir)/libfreeipmi/src/fru-parse/libfruparse.la \
 	$(top_builddir)/libfreeipmi/src/interface/libinterface.la \
+	$(top_builddir)/libfreeipmi/src/interpret/libinterpret.la \
 	$(top_builddir)/libfreeipmi/src/libcommon/libcommon.la \
 	$(top_builddir)/libfreeipmi/src/locate/liblocate.la \
+	$(top_builddir)/libfreeipmi/src/payload/libpayload.la \
 	$(top_builddir)/libfreeipmi/src/record-format/librecordformat.la \
 	$(top_builddir)/libfreeipmi/src/sdr-cache/libsdrcache.la \
 	$(top_builddir)/libfreeipmi/src/sdr-parse/libsdrparse.la \
@@ -137,6 +144,7 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 FREEIPMI_CONFIG_FILE_DEFAULT = @FREEIPMI_CONFIG_FILE_DEFAULT@
+FREEIPMI_SYSCONFDIR = @FREEIPMI_SYSCONFDIR@
 GCRYPT_LIBS = @GCRYPT_LIBS@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
@@ -146,14 +154,20 @@ INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTERPRET_SEL_CONFIG_FILE_DEFAULT = @INTERPRET_SEL_CONFIG_FILE_DEFAULT@
+INTERPRET_SENSOR_CONFIG_FILE_DEFAULT = @INTERPRET_SENSOR_CONFIG_FILE_DEFAULT@
+IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
+IPMIMONITORINGSBINDIR = @IPMIMONITORINGSBINDIR@
+IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
-IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT = @IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT@
+IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
 LDFLAGS = @LDFLAGS@
 LIBFREEIPMI_VERSION = @LIBFREEIPMI_VERSION@
 LIBFREEIPMI_VERSION_INFO = @LIBFREEIPMI_VERSION_INFO@
+LIBIPMICONSOLE_CONFIG_FILE_DEFAULT = @LIBIPMICONSOLE_CONFIG_FILE_DEFAULT@
 LIBIPMICONSOLE_VERSION_INFO = @LIBIPMICONSOLE_VERSION_INFO@
 LIBIPMIDETECT_VERSION_INFO = @LIBIPMIDETECT_VERSION_INFO@
 LIBIPMIMONITORING_VERSION_INFO = @LIBIPMIMONITORING_VERSION_INFO@
@@ -236,8 +250,10 @@ SUBDIRS = \
 	fiid \
 	fru-parse \
 	interface \
+	interpret \
 	libcommon \
 	locate \
+	payload \
 	record-format \
 	sdr-cache \
 	sdr-parse \
@@ -270,8 +286,10 @@ libfreeipmi_la_LIBADD = \
 	$(top_builddir)/libfreeipmi/src/fiid/libfiid.la \
 	$(top_builddir)/libfreeipmi/src/fru-parse/libfruparse.la \
 	$(top_builddir)/libfreeipmi/src/interface/libinterface.la \
+	$(top_builddir)/libfreeipmi/src/interpret/libinterpret.la \
 	$(top_builddir)/libfreeipmi/src/libcommon/libcommon.la \
 	$(top_builddir)/libfreeipmi/src/locate/liblocate.la \
+	$(top_builddir)/libfreeipmi/src/payload/libpayload.la \
 	$(top_builddir)/libfreeipmi/src/record-format/librecordformat.la \
 	$(top_builddir)/libfreeipmi/src/sdr-cache/libsdrcache.la \
 	$(top_builddir)/libfreeipmi/src/sdr-parse/libsdrparse.la \
@@ -663,10 +681,16 @@ $(top_builddir)/libfreeipmi/src/fru-parse/libfruparse.la : force-dependency-chec
 $(top_builddir)/libfreeipmi/src/interface/libinterface.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
+$(top_builddir)/libfreeipmi/src/interpret/libinterpret.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
 $(top_builddir)/libfreeipmi/src/libcommon/libcommon.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/libfreeipmi/src/locate/liblocate.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/libfreeipmi/src/payload/libpayload.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/libfreeipmi/src/record-format/librecordformat.la : force-dependency-check

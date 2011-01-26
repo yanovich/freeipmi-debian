@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -37,12 +37,11 @@
 
 #define BMC_CONFIG_FIELD_LENGTH_MAX 128
 
-#define BMC_CONFIG_MAX_KEY_NAME_LEN 128
-
 #define BMC_CONFIG_PRIVILEGE_LEVEL_SUPPORTED_BUT_NOT_READABLE 0xFF
 
 static config_err_t
-_rmcpplus_cipher_suite_id_privilege_setup (bmc_config_state_data_t *state_data)
+_rmcpplus_cipher_suite_id_privilege_setup (bmc_config_state_data_t *state_data,
+					   const char *section_name)
 {
   fiid_obj_t obj_cmd_count_rs = NULL;
   fiid_obj_t obj_cmd_id_rs = NULL;
@@ -54,22 +53,25 @@ _rmcpplus_cipher_suite_id_privilege_setup (bmc_config_state_data_t *state_data)
   unsigned int i;
 
   assert (state_data);
+  assert (section_name);
 
-  if (state_data->cipher_suite_entry_count_set
-      && state_data->cipher_suite_id_supported_set
-      && state_data->cipher_suite_priv_set)
-    return (CONFIG_ERR_SUCCESS);
-
-  if ((ret = get_lan_channel_number (state_data, &channel_number)) != CONFIG_ERR_SUCCESS)
+  if ((ret = get_lan_channel_number (state_data, section_name, &channel_number)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
       goto cleanup;
     }
 
+  if (state_data->cipher_suite_entry_count_set
+      && state_data->cipher_suite_id_supported_set
+      && state_data->cipher_suite_priv_set
+      && state_data->cipher_suite_channel_number == channel_number)
+    return (CONFIG_ERR_SUCCESS);
+
   state_data->cipher_suite_entry_count = 0;
   state_data->cipher_suite_entry_count_set = 0;
   state_data->cipher_suite_id_supported_set = 0;
   state_data->cipher_suite_priv_set = 0;
+  state_data->cipher_suite_channel_number = channel_number;
 
   memset (state_data->cipher_suite_id_supported, '\0', sizeof (state_data->cipher_suite_id_supported));
   memset (state_data->cipher_suite_priv, '\0', sizeof (state_data->cipher_suite_priv));
@@ -88,8 +90,8 @@ _rmcpplus_cipher_suite_id_privilege_setup (bmc_config_state_data_t *state_data)
       if (ipmi_cmd_get_lan_configuration_parameters_rmcpplus_messaging_cipher_suite_entry_support (state_data->ipmi_ctx,
                                                                                                    channel_number,
                                                                                                    IPMI_GET_LAN_PARAMETER,
-                                                                                                   CONFIG_SET_SELECTOR,
-                                                                                                   CONFIG_BLOCK_SELECTOR,
+                                                                                                   IPMI_LAN_CONFIGURATION_PARAMETERS_NO_SET_SELECTOR,
+                                                                                                   IPMI_LAN_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                                                    obj_cmd_count_rs) < 0)
         {
           if (state_data->prog_data->args->config_args.common.debug)
@@ -137,8 +139,8 @@ _rmcpplus_cipher_suite_id_privilege_setup (bmc_config_state_data_t *state_data)
       if (ipmi_cmd_get_lan_configuration_parameters_rmcpplus_messaging_cipher_suite_entries (state_data->ipmi_ctx,
                                                                                              channel_number,
                                                                                              IPMI_GET_LAN_PARAMETER,
-                                                                                             CONFIG_SET_SELECTOR,
-                                                                                             CONFIG_BLOCK_SELECTOR,
+                                                                                             IPMI_LAN_CONFIGURATION_PARAMETERS_NO_SET_SELECTOR,
+                                                                                             IPMI_LAN_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                                              obj_cmd_id_rs) < 0)
         {
           if (state_data->prog_data->args->config_args.common.debug)
@@ -196,8 +198,8 @@ _rmcpplus_cipher_suite_id_privilege_setup (bmc_config_state_data_t *state_data)
       if (ipmi_cmd_get_lan_configuration_parameters_rmcpplus_messaging_cipher_suite_privilege_levels (state_data->ipmi_ctx,
                                                                                                       channel_number,
                                                                                                       IPMI_GET_LAN_PARAMETER,
-                                                                                                      CONFIG_SET_SELECTOR,
-                                                                                                      CONFIG_BLOCK_SELECTOR,
+                                                                                                      IPMI_LAN_CONFIGURATION_PARAMETERS_NO_SET_SELECTOR,
+                                                                                                      IPMI_LAN_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                                                       obj_cmd_priv_rs) < 0)
         {
           if (state_data->prog_data->args->config_args.common.debug)
@@ -271,7 +273,7 @@ _rmcpplus_cipher_suite_id_privilege_setup (bmc_config_state_data_t *state_data)
 		  if (id_found)
 		    val = BMC_CONFIG_PRIVILEGE_LEVEL_SUPPORTED_BUT_NOT_READABLE;
 		  else
-		    val = 0;	/* unspecified */
+		    val = IPMI_PRIVILEGE_LEVEL_UNSPECIFIED;
 		}
             }
           
@@ -295,13 +297,19 @@ id_checkout (const char *section_name,
              void *arg,
              int id)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   config_err_t ret;
   uint8_t privilege;
   unsigned int i;
   int id_found = 0;
 
-  if ((ret = _rmcpplus_cipher_suite_id_privilege_setup (state_data)) != CONFIG_ERR_SUCCESS)
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
+
+  if ((ret = _rmcpplus_cipher_suite_id_privilege_setup (state_data, section_name)) != CONFIG_ERR_SUCCESS)
     return (ret);
 
   for (i = 0; i < state_data->cipher_suite_entry_count; i++)
@@ -351,7 +359,7 @@ id_commit (const char *section_name,
            void *arg,
            int id)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   fiid_obj_t obj_cmd_rs = NULL;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   config_err_t ret;
@@ -360,7 +368,13 @@ id_commit (const char *section_name,
   uint8_t privilege;
   unsigned int i;
 
-  if ((ret = _rmcpplus_cipher_suite_id_privilege_setup (state_data)) != CONFIG_ERR_SUCCESS)
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (bmc_config_state_data_t *)arg;
+
+  if ((ret = _rmcpplus_cipher_suite_id_privilege_setup (state_data, section_name)) != CONFIG_ERR_SUCCESS)
     return (ret);
 
   if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_lan_configuration_parameters_rs)))
@@ -372,7 +386,7 @@ id_commit (const char *section_name,
       goto cleanup;
     }
 
-  if ((ret = get_lan_channel_number (state_data, &channel_number)) != CONFIG_ERR_SUCCESS)
+  if ((ret = get_lan_channel_number (state_data, section_name, &channel_number)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
       goto cleanup;
@@ -408,13 +422,13 @@ id_commit (const char *section_name,
           if ((section = config_find_section (state_data->sections,
                                               section_name)))
             {
-              char keynametmp[BMC_CONFIG_MAX_KEY_NAME_LEN + 1];
+              char keynametmp[CONFIG_MAX_KEY_NAME_LEN + 1];
               struct config_keyvalue *kvtmp;
               
-              memset (keynametmp, '\0', BMC_CONFIG_MAX_KEY_NAME_LEN + 1);
+              memset (keynametmp, '\0', CONFIG_MAX_KEY_NAME_LEN + 1);
               
               snprintf (keynametmp,
-                        BMC_CONFIG_MAX_KEY_NAME_LEN,
+                        CONFIG_MAX_KEY_NAME_LEN,
                         "Maximum_Privilege_Cipher_Suite_Id_%u",
                         i);
 
@@ -512,7 +526,9 @@ id_commit_cb (const char *section_name,
 }
 
 struct config_section *
-bmc_config_rmcpplus_conf_privilege_section_get (bmc_config_state_data_t *state_data)
+bmc_config_rmcpplus_conf_privilege_section_get (bmc_config_state_data_t *state_data,
+						unsigned int config_flags,
+						int channel_index)
 {
   struct config_section *section = NULL;
   char *section_comment =
@@ -525,14 +541,19 @@ bmc_config_rmcpplus_conf_privilege_section_get (bmc_config_state_data_t *state_d
     "algorithms for IPMI 2.0.  Typically, the highest privilege level any "
     "username configured should set for support under a cipher suite ID. "
     "This is typically \"Administrator\".";
+  char *section_name_base_str = "Rmcpplus_Conf_Privilege";
 
-  if (!(section = config_section_create (state_data->pstate,
-                                         "Rmcpplus_Conf_Privilege",
-                                         "Rmcpplus_Conf_Privilege",
-                                         section_comment,
-                                         0,
-                                         NULL,
-                                         NULL)))
+  assert (state_data);
+  
+  if (!(section = config_section_multi_channel_create (state_data->pstate,
+						       section_name_base_str,
+						       section_comment,
+						       NULL,
+						       NULL,
+						       config_flags,
+						       channel_index,
+						       state_data->lan_channel_numbers,
+						       state_data->lan_channel_numbers_count)))
     goto cleanup;
 
   if (config_section_add_key (state_data->pstate,

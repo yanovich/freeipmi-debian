@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -334,23 +334,23 @@ config_ipv4_address_string2int (pstdout_state_t pstate,
 {
   unsigned int b1, b2, b3, b4;
   uint64_t val;
-  int rv;
+  int ret;
 
   assert (src && dest);
 
-  if ((rv = sscanf (src,
-                    "%u.%u.%u.%u",
-                    &b1,
-                    &b2,
-                    &b3,
-                    &b4)) < 0)
+  if ((ret = sscanf (src,
+                     "%u.%u.%u.%u",
+                     &b1,
+                     &b2,
+                     &b3,
+                     &b4)) < 0)
     {
       PSTDOUT_PERROR (pstate,
                       "sscanf");
       return (-1);
     }
 
-  if (rv != 4)
+  if (ret != 4)
     {
       PSTDOUT_FPRINTF (pstate,
                        stderr,
@@ -376,25 +376,25 @@ config_mac_address_string2int (pstdout_state_t pstate,
 {
   unsigned int b1, b2, b3, b4, b5, b6;
   uint64_t val;
-  int rv;
+  int ret;
 
   assert (src && dest);
 
-  if ((rv = sscanf (src,
-                    "%02X:%02X:%02X:%02X:%02X:%02X",
-                    &b1,
-                    &b2,
-                    &b3,
-                    &b4,
-                    &b5,
-                    &b6)) < 0)
+  if ((ret = sscanf (src,
+                     "%02X:%02X:%02X:%02X:%02X:%02X",
+                     &b1,
+                     &b2,
+                     &b3,
+                     &b4,
+                     &b5,
+                     &b6)) < 0)
     {
       PSTDOUT_PERROR (pstate,
                       "sscanf");
       return (-1);
     }
 
-  if (rv != 6)
+  if (ret != 6)
     {
       PSTDOUT_FPRINTF (pstate,
                        stderr,
@@ -513,23 +513,23 @@ config_is_config_param_non_fatal_error (ipmi_ctx_t ipmi_ctx,
 
   /* should all be the same, this is just to check */
 
-  assert (IPMI_COMP_CODE_SET_LAN_PARAMETER_NOT_SUPPORTED == IPMI_COMP_CODE_SET_PEF_PARAMETER_NOT_SUPPORTED);
-  assert (IPMI_COMP_CODE_SET_LAN_PARAMETER_NOT_SUPPORTED == IPMI_COMP_CODE_SET_SOL_PARAMETER_NOT_SUPPORTED);
-  assert (IPMI_COMP_CODE_SET_LAN_PARAMETER_NOT_SUPPORTED == IPMI_COMP_CODE_SET_BOOT_OPTION_PARAMETER_NOT_SUPPORTED);
+  assert (IPMI_COMP_CODE_SET_LAN_CONFIGURATION_PARAMETERS_PARAMETER_NOT_SUPPORTED == IPMI_COMP_CODE_SET_PEF_CONFIGURATION_PARAMETERS_PARAMETER_NOT_SUPPORTED);
+  assert (IPMI_COMP_CODE_SET_LAN_CONFIGURATION_PARAMETERS_PARAMETER_NOT_SUPPORTED == IPMI_COMP_CODE_SET_SOL_CONFIGURATION_PARAMETERS_PARAMETER_NOT_SUPPORTED);
+  assert (IPMI_COMP_CODE_SET_LAN_CONFIGURATION_PARAMETERS_PARAMETER_NOT_SUPPORTED == IPMI_COMP_CODE_SET_BOOT_OPTIONS_PARAMETER_NOT_SUPPORTED);
 
-  assert (IPMI_COMP_CODE_SET_LAN_WRITE_READ_ONLY_PARAMETER == IPMI_COMP_CODE_SET_PEF_WRITE_READ_ONLY_PARAMETER);
-  assert (IPMI_COMP_CODE_SET_LAN_WRITE_READ_ONLY_PARAMETER == IPMI_COMP_CODE_SET_SOL_WRITE_READ_ONLY_PARAMETER);
-  assert (IPMI_COMP_CODE_SET_LAN_WRITE_READ_ONLY_PARAMETER == IPMI_COMP_CODE_SET_BOOT_OPTION_WRITE_READ_ONLY_PARAMETER);
+  assert (IPMI_COMP_CODE_SET_LAN_CONFIGURATION_PARAMETERS_WRITE_READ_ONLY_PARAMETER == IPMI_COMP_CODE_SET_PEF_CONFIGURATION_PARAMETERS_WRITE_READ_ONLY_PARAMETER);
+  assert (IPMI_COMP_CODE_SET_LAN_CONFIGURATION_PARAMETERS_WRITE_READ_ONLY_PARAMETER == IPMI_COMP_CODE_SET_SOL_CONFIGURATION_PARAMETERS_WRITE_READ_ONLY_PARAMETER);
+  assert (IPMI_COMP_CODE_SET_LAN_CONFIGURATION_PARAMETERS_WRITE_READ_ONLY_PARAMETER == IPMI_COMP_CODE_SET_BOOT_OPTIONS_WRITE_READ_ONLY_PARAMETER);
   
   if (!IPMI_ERRNUM_IS_FATAL_ERROR (ipmi_ctx))
     {
       if (ipmi_ctx_errnum (ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
           && ipmi_check_completion_code (obj_cmd_rs,
-                                         IPMI_COMP_CODE_SET_LAN_WRITE_READ_ONLY_PARAMETER) == 1)
+                                         IPMI_COMP_CODE_SET_LAN_CONFIGURATION_PARAMETERS_WRITE_READ_ONLY_PARAMETER) == 1)
         (*non_fatal_err) = CONFIG_ERR_NON_FATAL_ERROR_READ_ONLY;
       else if (ipmi_ctx_errnum (ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
                && ipmi_check_completion_code (obj_cmd_rs,
-                                              IPMI_COMP_CODE_SET_LAN_PARAMETER_NOT_SUPPORTED) == 1)
+                                              IPMI_COMP_CODE_SET_LAN_CONFIGURATION_PARAMETERS_PARAMETER_NOT_SUPPORTED) == 1)
         (*non_fatal_err) = CONFIG_ERR_NON_FATAL_ERROR_NOT_SUPPORTED;
       else if (ipmi_ctx_errnum (ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
                && (ipmi_check_completion_code (obj_cmd_rs,

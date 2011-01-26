@@ -1,6 +1,6 @@
 
 
-.TH IPMI-SENSORS 8 "2010-12-06" "IPMI Sensors version 0.8.12" "System Commands"
+.TH IPMI-SENSORS 8 "2011-01-20" "IPMI Sensors version 1.0.1" "System Commands"
 .SH "NAME"
 ipmi-sensors \- display IPMI sensor information
 .SH "SYNOPSIS"
@@ -16,10 +16,9 @@ the verbose options specified below.
 
 .B Ipmi-sensors
 does not inform the user if a problem exists with a particular sensor
-because sensor readings and events are not analyzed. Users may wish
-to consider
-.B ipmimonitoring(8)
-for sensor analysis.
+because sensor readings and events are not analyzed by default. Users
+may wish to use the \fB\-\-output\-sensor\-state\fR option to output
+the analyzed sensor state.
 
 Some sensors may have a sensor reading or sensor event of "N/A" if
 the information is unavailable. This is typical of a sensor that
@@ -47,7 +46,7 @@ To perform some advanced SDR management, please see
 The following options are general options for configuring IPMI
 communication and executing general tool commands.
 .TP
-\fB\-D\fR, \fB\-\-driver\-type\fR=\fIIPMIDRIVER\fR
+\fB\-D\fR \fIIPMIDRIVER\fR, \fB\-\-driver\-type\fR=\fIIPMIDRIVER\fR
 Specify the driver type to use instead of doing an auto selection.
 The currently available outofband drivers are LAN and LAN_2_0, which
 perform IPMI 1.5 and IPMI 2.0 respectively. The currently available
@@ -69,18 +68,18 @@ probed path.
 Specify the in-band driver register spacing instead of the
 probed value.
 .TP
-\fB\-h\fR, \fB\-\-hostname\fR=\fIIPMIHOST1,IPMIHOST2,...\fR
+\fB\-h\fR \fIIPMIHOST1,IPMIHOST2,...\fR, \fB\-\-hostname\fR=\fIIPMIHOST1,IPMIHOST2,...\fR
 Specify the remote host(s) to communicate with. Multiple hostnames
 may be separated by comma or may be specified in a range format; see
 HOSTRANGED SUPPORT below.
 .TP
-\fB\-u\fR, \fB\-\-username\fR=\fIUSERNAME\fR
+\fB\-u\fR \fIUSERNAME\fR, \fB\-\-username\fR=\fIUSERNAME\fR
 Specify the username to use when authenticating with the remote host.
 If not specified, a null (i.e. anonymous) username is assumed. The
 user must have atleast OPERATOR privileges in order for this tool to
 operate fully.
 .TP
-\fB\-p\fR, \fB\-\-password\fR=\fIPASSWORD\fR
+\fB\-p\fR \fIPASSWORD\fR, \fB\-\-password\fR=\fIPASSWORD\fR
 Specify the password to use when authenticationg with the remote host.
 If not specified, a null password is assumed. Maximum password length
 is 16 for IPMI 1.5 and 20 for IPMI 2.0.
@@ -89,7 +88,7 @@ is 16 for IPMI 1.5 and 20 for IPMI 2.0.
 Prompt for password to avoid possibility of listing
 it in process lists.
 .TP
-\fB\-k\fR, \fB\-\-k-g\fR=\fIK_G\fR
+\fB\-k\fR \fIK_G\fR, \fB\-\-k-g\fR=\fIK_G\fR
 Specify the K_g BMC key to use when authenticating with the remote
 host for IPMI 2.0. If not specified, a null key is assumed. To input
 the key in hexadecimal form, prefix the string with '0x'. E.g., the
@@ -108,12 +107,12 @@ Specify the packet retransmission timeout in milliseconds. Defaults
 to 1000 milliseconds (1 second) if not specified. The retransmission
 timeout cannot be larger than the session timeout.
 .TP
-\fB\-a\fR, \fB\-\-authentication\-type\fR=\fIAUTHENTICATION-TYPE\fR
+\fB\-a\fR \fIAUTHENTICATION\-TYPE\fR, \fB\-\-authentication\-type\fR=\fIAUTHENTICATION\-TYPE\fR
 Specify the IPMI 1.5 authentication type to use. The currently
 available authentication types are NONE, STRAIGHT_PASSWORD_KEY, MD2,
 and MD5. Defaults to MD5 if not specified.
 .TP
-\fB\-I\fR, \fB\-\-cipher\-suite-id\fR=\fICIPHER-SUITE-ID\fR
+\fB\-I\fR \fICIPHER-SUITE-ID\fR, \fB\-\-cipher\-suite-id\fR=\fICIPHER-SUITE-ID\fR
 Specify the IPMI 2.0 cipher suite ID to use. The Cipher Suite ID
 identifies a set of authentication, integrity, and confidentiality
 algorithms to use for IPMI 2.0 communication. The authentication
@@ -167,7 +166,7 @@ specified. The following cipher suite ids are currently supported:
 .\" .sp
 .\" 19 - Authentication Algorithm = HMAC-SHA256; Integrity Algorithm = HMAC_SHA256_128; Confidentiality Algorithm = xRC4-40
 .TP
-\fB\-l\fR, \fB\-\-privilege\-level\fR=\fIPRIVILEGE\-LEVEL\fR
+\fB\-l\fR \fIPRIVILEGE\-LEVEL\fR, \fB\-\-privilege\-level\fR=\fIPRIVILEGE\-LEVEL\fR
 Specify the privilege level to be used. The currently available
 privilege levels are USER, OPERATOR, and ADMIN. Defaults to OPERATOR
 if not specified.
@@ -213,7 +212,7 @@ Do not output sensor reading values by default. This option is
 particularly useful if you want to use hostranged output across a
 cluster and want to consolidate the output.
 .TP
-\fB\-r\fR "RECORD-IDS-LIST", \fB\-\-record\-ids\fR=\fB"RECORD-IDS-LIST"\fR
+\fB\-r\fR \fIRECORD\-IDS\-LIST\fR, \fB\-\-record\-ids\fR=\fIRECORD\-IDS\-LIST\fR
 Specify sensors to show by record id. Multiple record ids can be
 separated by commas or spaces. If both \fB\-\-record\-ids\fR and
 \fB\-\-sensor\-types\fR are specified, \fB\-\-record\-ids\fR takes
@@ -221,24 +220,28 @@ precedence. A special command line record id of "all", will indicate
 all record ids should be shown (may be useful for overriding
 configured defaults).
 .TP
-\fB\-R\fR "RECORD-IDS-LIST", \fB\-\-exclude\-record\-ids\fR=\fB"RECORD-IDS-LIST"\fR
+\fB\-R\fR \fIRECORD\-IDS\-LIST\fR, \fB\-\-exclude\-record\-ids\fR=\fIRECORD\-IDS\-LIST\fR
 Specify sensors to not show by record id. Multiple record ids can be
 separated by commas or spaces. A special command line record id of
 "none", will indicate no record ids should be excluded (may be useful
 for overriding configured defaults).
 .TP
-\fB\-t\fR "SENSOR-TYPE-LIST", \fB\-\-sensor\-types\fR=\fISENSOR\-TYPE\-LIST\fR
-Specify sensor types to show sensor outputs for. Multiple types can
+\fB\-t\fR \fISENSOR\-TYPE\-LIST\fR, \fB\-\-sensor\-types\fR=\fISENSOR\-TYPE\-LIST\fR
+Specify sensor types to show outputs for. Multiple types can
 be separated by commas or spaces. If both \fB\-\-record\-ids\fR and
 \fB\-\-sensor\-types\fR are specified, \fB\-\-record\-ids\fR takes precedence.
 A special command line type of "all", will indicate all types should
-be shown (may be useful for overriding configured defaults).
+be shown (may be useful for overriding configured defaults). Users
+may specify sensor types by string (see \fB\-\-list\-sensor\-types\fR
+below) or by number (decimal or hex).
 .TP
-\fB\-T\fR "SENSOR-TYPE-LIST", \fB\-\-exclude\-sensor\-types\fR=\fISENSOR\-TYPE\-LIST\fR
-Specify sensor types to not show sensor outputs for. Multiple types
+\fB\-T\fR \fISENSOR\-TYPE\-LIST\fR, \fB\-\-exclude\-sensor\-types\fR=\fISENSOR\-TYPE\-LIST\fR
+Specify sensor types to not show outputs for. Multiple types
 can be eparated by commas or spaces. A special command line type of
 "none", will indicate no types should be excluded (may be useful for
-overriding configured defaults).
+overriding configured defaults). Users may specify sensor types by
+string (see \fB\-\-list\-sensor\-types\fR below) or by number (decimal
+or hex).
 .TP
 \fB\-L\fR, \fB\-\-list\-sensor\-types\fR
 List sensor types.
@@ -269,6 +272,26 @@ below for confirmed supported motherboard interpretations.
 \fB\-\-ignore\-not\-available\-sensors\fR
 Ignore not-available (i.e. N/A) sensors in output.
 .TP
+\fB\-\-output\-event\-bitmask\fR
+Output event bitmask value instead of the string representation.
+.TP
+\fB\-\-output\-sensor\-state\fR
+Output sensor state in output. This will add an additional output
+reporting if a sensor is in a NOMINAL, WARNING, or CRITICAL state.
+The sensor state is an interpreted value based on the current sensor
+event. The sensor state interpretations are determined by the
+configuration file /usr/local/etc/freeipmi//freeipmi_interpret_sensor.conf.
+See
+.B freeipmi_interpret_sensor.conf(5)
+for more information.
+This option gives identical output to the sensor state
+previously output by
+.B ipmimonitoring(8).
+.TP
+\fB\-\-sensor\-state\-config\-file\fR=\fIFILE\fR
+Specify an alternate sensor state configuration file. Option ignored
+if \fB\-\-output\-sensor\-state\fR not specified.
+.TP
 \fB\-\-entity\-sensor\-names
 Output sensor names prefixed with their entity id and instance number
 when appropriate. This may be necessary on some motherboards to help
@@ -294,9 +317,14 @@ Do not output column headers. May be useful in scripting.
 Output non-abbreviated units (e.g. 'Amps' instead of 'A'). May aid in
 disambiguation of units (e.g. 'C' for Celsius or Coulombs).
 .TP
-\fB\-\-legacy-output\fR
+\fB\-\-legacy\-output\fR
 Output in legacy format. Newer options may not be applicable to
-leagcy output.
+legacy output.
+.TP
+\fB\-\-ipmimonitoring\-legacy\-output\fR
+Output legacy format of legacy
+.B ipmimonitoring
+tool. Newer options may not be applicable to legacy output.
 .SH "SDR CACHE OPTIONS"
 This tool requires access to the sensor data repository (SDR) cache
 for general operation. By default, SDR data will be downloaded and
@@ -343,7 +371,7 @@ user breaks out of the program early, all currently consolidated
 output will be dumped. See HOSTRANGED SUPPORT below for additional
 information.
 .TP
-\fB\-F\fR, \fB\-\-fanout\fR
+\fB\-F\fR \fINUM\fR, \fB\-\-fanout\fR=\fINUM\fR
 Specify multiple host fanout. A "sliding window" (or fanout)
 algorithm is used for parallel IPMI communication so that slower nodes
 or timed out nodes will not impede parallel communication. The
@@ -494,6 +522,15 @@ command line.
 .LP
 Please see WORKAROUNDS below to also if there are any vendor specific
 bugs that have been discovered and worked around.
+.SH "IPMI-SENSORS TROUBLESHOOTING"
+The following are common issues for given error messages specifically
+for
+.B ipmi-sensors.
+.LP
+"sensor config file parse error" - A parse error was found in the
+sensor state configuration file.
+Please see
+.B freeipmi_interpret_sensor.conf(5).
 .SH "WORKAROUNDS"
 With so many different vendors implementing their own IPMI solutions,
 different vendors may implement their IPMI protocols incorrectly. The
@@ -517,6 +554,16 @@ communicate with system I/O rather than being memory-mapped. This
 will work around systems that report invalid base addresses. Those
 hitting this issue may see "device not supported" or "could not find
 inband device" errors.  Issue observed on HP ProLiant DL145 G1.
+.LP
+"authcap" - This workaround option will skip early checks for username
+capabilities, authentication capabilities, and K_g support and allow
+IPMI authentication to succeed. It works around multiple issues in
+which the remote system does not properly report username
+capabilities, authentication capabilities, or K_g status. Those
+hitting this issue may see "username invalid", "authentication type
+unavailable for attempted privilege level", or "k_g invalid" errors.
+Issue observed on Asus P5M2/P5MT-R/RS162-E4/RX4, Intel SR1520ML/X38ML,
+and Sun Fire 2200/4150/4450 with ELOM.
 .LP
 "idzero" - This workaround option will allow empty session IDs to be
 accepted by the client. It works around IPMI sessions that report
@@ -545,16 +592,6 @@ It works around IPMI 1.5 session sequence numbers that are the wrong
 endian. Those hitting this issue may see "session timeout" errors.
 Issue observed on some Sun ILOM 1.0/2.0 (depends on service processor
 endian).
-.LP
-"authcap" - This workaround option will skip early checks for username
-capabilities, authentication capabilities, and K_g support and allow
-IPMI authentication to succeed. It works around multiple issues in
-which the remote system does not properly report username
-capabilities, authentication capabilities, or K_g status. Those
-hitting this issue may see "username invalid", "authentication type
-unavailable for attempted privilege level", or "k_g invalid" errors.
-Issue observed on Asus P5M2/P5MT-R/RS162-E4/RX4, Intel SR1520ML/X38ML,
-and Sun Fire 2200/4150/4450 with ELOM.
 .LP
 "intel20" - This workaround option will work around several Intel IPMI
 2.0 authentication issues. The issues covered include padding of
@@ -657,10 +694,10 @@ Copyright \(co 2003-2010 FreeIPMI Core Team.
 .PP
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at
+the Free Software Foundation; either version 3 of the License, or (at
 your option) any later version.
 .SH "SEE ALSO"
-freeipmi(7), bmc-config(8), bmc-device(8), ipmimonitoring(8),
-ipmi-sensors-config(8)
+freeipmi(7), bmc-config(8), bmc-device(8), ipmi-sensors-config(8),
+freeipmi_interpret_sensor.conf(5)
 .PP
 http://www.gnu.org/software/freeipmi/

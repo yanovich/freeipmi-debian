@@ -39,6 +39,11 @@ EXTRA_DIST = \
 	manpage-common-sdr-options.man \
 	manpage-common-ignore-sdr-cache.man \
 	manpage-common-config-tool-options.man \
+	manpage-common-config-tool-options-verbose.man \
+	manpage-common-config-tool-options-very-verbose.man \
+	manpage-common-config-tool-options-lan-channel-number.man \
+	manpage-common-config-tool-options-serial-channel-number.man \
+	manpage-common-config-tool-options-sol-channel-number.man \
 	manpage-common-config-tool-general-use.man \
 	manpage-common-troubleshooting.man \
 	manpage-common-troubleshooting-lan-only.man \
@@ -47,11 +52,11 @@ EXTRA_DIST = \
 	manpage-common-reporting-bugs.man \
 	manpage-common-gpl-library-text.man \
 	manpage-common-gpl-program-text.man \
+	manpage-common-gpl-freeipmi-text.man \
 	manpage-common-ping-options.man \
 	manpage-common-ping-origin.man \
 	manpage-common-table-of-contents.man \
 	manpage-common-homepage.man \
-	manpage-common-sensor-common.man \
 	manpage-common-interpret-oem-data.man \
 	manpage-common-oem-interpretation.man \
 	manpage-common-entity-sensor-names.man \

@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2007-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-*/
+ * Copyright (C) 2007-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -40,6 +40,8 @@
    artificial max for the sake of ipmi-pef-config.
 */
 #define PEF_ALERT_STRING_MAX_LEN 64
+
+#define PEF_ALERT_STRING_BLOCK_SIZE 16
 
 struct alert_string_keys {
   uint8_t event_filter_number;
@@ -74,7 +76,7 @@ _get_alert_string_keys (ipmi_pef_config_state_data_t *state_data,
   if (ipmi_cmd_get_pef_configuration_parameters_alert_string_keys (state_data->ipmi_ctx,
                                                                    IPMI_GET_PEF_PARAMETER,
                                                                    string_selector,
-                                                                   CONFIG_BLOCK_SELECTOR,
+                                                                   IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                    obj_cmd_rs) < 0)
     {
       config_err_t ret;
@@ -176,9 +178,15 @@ event_filter_number_checkout (const char *section_name,
                               struct config_keyvalue *kv,
                               void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_string_keys ask;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_string_keys (state_data,
                                      section_name,
@@ -198,9 +206,15 @@ event_filter_number_commit (const char *section_name,
                             const struct config_keyvalue *kv,
                             void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_string_keys ask;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_string_keys (state_data,
                                      section_name,
@@ -219,9 +233,15 @@ alert_string_set_checkout (const char *section_name,
                            struct config_keyvalue *kv,
                            void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_string_keys ask;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_string_keys (state_data,
                                      section_name,
@@ -241,9 +261,15 @@ alert_string_set_commit (const char *section_name,
                          const struct config_keyvalue *kv,
                          void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   struct alert_string_keys ask;
   config_err_t ret;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   if ((ret = _get_alert_string_keys (state_data,
                                      section_name,
@@ -262,13 +288,19 @@ alert_string_checkout (const char *section_name,
                        struct config_keyvalue *kv,
                        void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   char alert_string[PEF_ALERT_STRING_MAX_LEN+1];
   uint8_t string_selector;
   fiid_obj_t obj_cmd_rs = NULL;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
   unsigned int blocks;
   unsigned int i;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   string_selector = atoi (section_name + strlen ("Alert_String_"));
 
@@ -283,10 +315,10 @@ alert_string_checkout (const char *section_name,
       goto cleanup;
     }
 
-  if (!((PEF_ALERT_STRING_MAX_LEN) % 16))
-    blocks = (PEF_ALERT_STRING_MAX_LEN)/16;
+  if (!((PEF_ALERT_STRING_MAX_LEN) % PEF_ALERT_STRING_BLOCK_SIZE))
+    blocks = (PEF_ALERT_STRING_MAX_LEN)/PEF_ALERT_STRING_BLOCK_SIZE;
   else
-    blocks = (PEF_ALERT_STRING_MAX_LEN)/16 + 1;
+    blocks = (PEF_ALERT_STRING_MAX_LEN)/PEF_ALERT_STRING_BLOCK_SIZE + 1;
 
   for (i = 0; i < blocks; i++)
     {
@@ -326,8 +358,8 @@ alert_string_checkout (const char *section_name,
        */
       if (fiid_obj_get_data (obj_cmd_rs,
                              "string_data",
-                             alert_string + (i * 16),
-                             PEF_ALERT_STRING_MAX_LEN - (i * 16)) < 0)
+                             alert_string + (i * PEF_ALERT_STRING_BLOCK_SIZE),
+                             PEF_ALERT_STRING_MAX_LEN - (i * PEF_ALERT_STRING_BLOCK_SIZE)) < 0)
         {
           pstdout_fprintf (state_data->pstate,
                            stderr,
@@ -337,9 +369,9 @@ alert_string_checkout (const char *section_name,
         }
 
       /* Check if we've found a nul character */
-      for (j = 0; j < 16; j++)
+      for (j = 0; j < PEF_ALERT_STRING_BLOCK_SIZE; j++)
         {
-          if (!((alert_string + (i * 16))[j]))
+          if (!((alert_string + (i * PEF_ALERT_STRING_BLOCK_SIZE))[j]))
             goto done;
         }
     }
@@ -362,7 +394,7 @@ alert_string_commit (const char *section_name,
                      const struct config_keyvalue *kv,
                      void *arg)
 {
-  ipmi_pef_config_state_data_t *state_data = (ipmi_pef_config_state_data_t *)arg;
+  ipmi_pef_config_state_data_t *state_data;
   uint8_t string_selector;
   fiid_obj_t obj_cmd_rs = NULL;
   config_err_t rv = CONFIG_ERR_FATAL_ERROR;
@@ -371,6 +403,12 @@ alert_string_commit (const char *section_name,
   unsigned int alert_string_buf_len = 0;
   unsigned int blocks;
   unsigned int i;
+
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+  
+  state_data = (ipmi_pef_config_state_data_t *)arg;
 
   string_selector = atoi (section_name + strlen ("Alert_String_"));
 
@@ -399,24 +437,24 @@ alert_string_commit (const char *section_name,
   if (alert_string_len)
     memcpy (alert_string_buf, kv->value_input, alert_string_len);
 
-  if (!((alert_string_buf_len) % 16))
-    blocks = (alert_string_buf_len)/16;
+  if (!((alert_string_buf_len) % PEF_ALERT_STRING_BLOCK_SIZE))
+    blocks = (alert_string_buf_len)/PEF_ALERT_STRING_BLOCK_SIZE;
   else
-    blocks = (alert_string_buf_len)/16 + 1;
+    blocks = (alert_string_buf_len)/PEF_ALERT_STRING_BLOCK_SIZE + 1;
 
   for (i = 0; i < blocks; i++)
     {
       uint8_t len_to_write;
 
-      if ((alert_string_buf_len - (i * 16)) < 16)
-        len_to_write = alert_string_buf_len - (i * 16);
+      if ((alert_string_buf_len - (i * PEF_ALERT_STRING_BLOCK_SIZE)) < PEF_ALERT_STRING_BLOCK_SIZE)
+        len_to_write = alert_string_buf_len - (i * PEF_ALERT_STRING_BLOCK_SIZE);
       else
-        len_to_write = 16;
+        len_to_write = PEF_ALERT_STRING_BLOCK_SIZE;
 
       if (ipmi_cmd_set_pef_configuration_parameters_alert_strings (state_data->ipmi_ctx,
                                                                    string_selector,
                                                                    i+1,
-                                                                   alert_string_buf + (i * 16),
+                                                                   alert_string_buf + (i * PEF_ALERT_STRING_BLOCK_SIZE),
                                                                    len_to_write,
                                                                    obj_cmd_rs) < 0)
         {

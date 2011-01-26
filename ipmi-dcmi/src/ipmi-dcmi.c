@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  $Id: ipmi-dcmi.c,v 1.4.2.9 2010-05-17 17:42:54 chu11 Exp $
+ *  $Id: ipmi-dcmi.c,v 1.15 2010-07-27 18:01:43 chu11 Exp $
  *****************************************************************************
  *  Copyright (C) 2009-2010 Lawrence Livermore National Security, LLC.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
@@ -12,7 +12,7 @@
  *
  *  Ipmi-Dcmi is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
+ *  Free Software Foundation; either version 3 of the License, or (at your
  *  option) any later version.
  *
  *  Ipmi-Dcmi is distributed in the hope that it will be useful, but
@@ -58,8 +58,6 @@
 #include "tool-hostrange-common.h"
 
 #define IPMI_DCMI_ROLLING_AVERAGE_TIME_PERIOD_BUFLEN 4096
-
-#define IPMI_DCMI_MAX_ASSET_TAG_LENGTH  512
 
 #define IPMI_DCMI_MAX_RECORD_IDS_BUFLEN 1024
 
@@ -257,48 +255,48 @@ _supported_dcmi_capabilities (ipmi_dcmi_state_data_t *state_data)
     }
 
   if (FIID_OBJ_GET (obj_cmd_rs,
-                    "optional_platform_capabilities.power_management",
+                    "optional_platform_capabilities.power_management_monitoring_support",
                     &val) < 0)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
-                       "fiid_obj_get: 'optional_platform_capabilities.power_management': %s\n",
+                       "fiid_obj_get: 'optional_platform_capabilities.power_management_monitoring_support': %s\n",
                        fiid_obj_errormsg (obj_cmd_rs));
       goto cleanup;
     }
 
   pstdout_printf (state_data->pstate,
-                  "Power Management                                   : %s\n",
-                  val ? "Compliant with DCMI Specification" : "Not Compliant with DCMI Specification");
-
-  if (FIID_OBJ_GET (obj_cmd_rs,
-                    "manageability_access_capabilities.in_band_kcs_channel_available",
-                    &val) < 0)
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "fiid_obj_get: 'manageability_access_capabilities.in_band_kcs_channel_available': %s\n",
-                       fiid_obj_errormsg (obj_cmd_rs));
-      goto cleanup;
-    }
-
-  pstdout_printf (state_data->pstate,
-                  "In-band KCS Channel                                : %s\n",
+                  "Power Management / Monitoring Support              : %s\n",
                   val ? "Available" : "Not present");
 
   if (FIID_OBJ_GET (obj_cmd_rs,
-                    "manageability_access_capabilities.out_of_band_serial_tmode_available",
+                    "manageability_access_capabilities.in_band_system_interface_channel_available",
                     &val) < 0)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
-                       "fiid_obj_get: 'manageability_access_capabilities.out_of_band_serial_tmode_available': %s\n",
+                       "fiid_obj_get: 'manageability_access_capabilities.in_band_system_interface_channel_available': %s\n",
                        fiid_obj_errormsg (obj_cmd_rs));
       goto cleanup;
     }
 
   pstdout_printf (state_data->pstate,
-                  "Out-Of-Band Serial TMODE                           : %s\n",
+                  "In-band System Interface Channel                   : %s\n",
+                  val ? "Available" : "Not present");
+
+  if (FIID_OBJ_GET (obj_cmd_rs,
+                    "manageability_access_capabilities.serial_tmode_available",
+                    &val) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_get: 'manageability_access_capabilities.serial_tmode_available': %s\n",
+                       fiid_obj_errormsg (obj_cmd_rs));
+      goto cleanup;
+    }
+
+  pstdout_printf (state_data->pstate,
+                  "Serial TMODE                                       : %s\n",
                   val ? "Available" : "Not present");
 
   if (FIID_OBJ_GET (obj_cmd_rs,
@@ -432,6 +430,40 @@ _mandatory_platform_attributes (ipmi_dcmi_state_data_t *state_data)
                   "Number of SEL entries                              : %u\n",
                   number_of_sel_entries);
 
+  /* In DCMI v1.1 */
+  if (parameter_revision >= 0x02)
+    {
+      if (FIID_OBJ_GET (obj_cmd_rs,
+                        "sel_attributes.record_level_sel_flush_upon_rollover",
+                        &val) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get: 'sel_attributes.record_level_sel_flush_upon_rollover': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+      
+      pstdout_printf (state_data->pstate,
+                      "Record Level SEL Flush upon Rollover               : %s\n",
+                      val ? "Available" : "Not present");
+
+      if (FIID_OBJ_GET (obj_cmd_rs,
+                        "sel_attributes.entire_sel_flush_upon_rollover",
+                        &val) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get: 'sel_attributes.entire_sel_flush_upon_rollover': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+      
+      pstdout_printf (state_data->pstate,
+                      "Entire SEL Flush upon Rollover                     : %s\n",
+                      val ? "Available" : "Not present");
+    }
+  
   if (FIID_OBJ_GET (obj_cmd_rs,
                     "sel_attributes.sel_automatic_rollover_enabled",
                     &val) < 0)
@@ -443,14 +475,6 @@ _mandatory_platform_attributes (ipmi_dcmi_state_data_t *state_data)
       goto cleanup;
     }
 
-  /* achu: spec field is "SEL automatic rollover enabled" with 0b =
-   * "Not Present" and 1b = "Available'.  The english doesn't make
-   * sense here.  Does this flag mean "enabled" vs. "disabled" or
-   * "available" vs. "unavailable."
-   *
-   * Since this entire command is more about "what is available",
-   * instead of a "current state", I will assume the later.
-   */
   pstdout_printf (state_data->pstate,
                   "SEL automatic rollover                             : %s\n",
                   val ? "Available" : "Not present");
@@ -1004,6 +1028,576 @@ get_dcmi_capability_info (ipmi_dcmi_state_data_t *state_data)
 }
 
 static int
+get_asset_tag (ipmi_dcmi_state_data_t *state_data)
+{
+  fiid_obj_t obj_cmd_rs = NULL;
+  uint8_t asset_tag_data[IPMI_DCMI_MAX_ASSET_TAG_LENGTH + 1];
+  int data_len;
+  unsigned int offset = 0;
+  uint8_t total_asset_tag_length = 0;
+  uint8_t bytes_to_read = IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_READ_MAX;
+  int rv = -1;
+
+  assert (state_data);
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_dcmi_get_asset_tag_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
+
+  memset (asset_tag_data, '\0', IPMI_DCMI_MAX_ASSET_TAG_LENGTH + 1);
+
+  while (1)
+    {
+      uint64_t val;
+
+      if (!offset
+          || ((total_asset_tag_length - offset) >= IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_READ_MAX))
+        bytes_to_read = IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_READ_MAX;
+      else 
+        bytes_to_read = total_asset_tag_length - offset;
+      
+      if (ipmi_cmd_dcmi_get_asset_tag (state_data->ipmi_ctx,
+                                       offset,
+                                       bytes_to_read,
+                                       obj_cmd_rs) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_cmd_dcmi_get_asset_tag: %s\n",
+                           ipmi_ctx_errormsg (state_data->ipmi_ctx));
+          goto cleanup;
+        }
+
+      if (FIID_OBJ_GET (obj_cmd_rs,
+                        "total_asset_tag_length",
+                        &val) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get: 'total_asset_tag_length': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+      total_asset_tag_length = val;
+
+      if (!total_asset_tag_length)
+        break;
+
+      if ((data_len = fiid_obj_get_data (obj_cmd_rs,
+                                         "data",
+                                         asset_tag_data + offset,
+                                         IPMI_DCMI_MAX_ASSET_TAG_LENGTH - offset)) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get_data: 'data': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+      offset += data_len;
+
+      if (offset >= total_asset_tag_length)
+        break;
+    }
+
+  if (total_asset_tag_length)
+    {
+      /* Handle special case UTF-8 encoding w/ BOM prefix */
+      if (asset_tag_data[0] == IPMI_DCMI_ASSET_TAG_UTF8_BOM_BYTE0
+          && asset_tag_data[1] == IPMI_DCMI_ASSET_TAG_UTF8_BOM_BYTE1
+          && asset_tag_data[2] == IPMI_DCMI_ASSET_TAG_UTF8_BOM_BYTE2)
+	/* achu: I think this is right for UTF-8 in libc and is
+	 * portable, but I would be some systems won't like this.
+	 */
+        pstdout_printf (state_data->pstate,
+                        "%ls\n",
+                        &asset_tag_data[3]);
+      else
+        pstdout_printf (state_data->pstate,
+                        "%s\n",
+                        asset_tag_data);
+    }
+
+  rv = 0;
+ cleanup:
+  fiid_obj_destroy (obj_cmd_rs);
+  return (rv);
+}
+
+static int
+set_asset_tag (ipmi_dcmi_state_data_t *state_data)
+{
+  fiid_obj_t obj_cmd_rs = NULL;
+  unsigned int offset = 0;
+  char data_buf[IPMI_DCMI_MAX_ASSET_TAG_LENGTH + 1];
+  unsigned int data_len = IPMI_DCMI_MAX_ASSET_TAG_LENGTH;
+  uint8_t bytes_to_write = IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_WRITE_MAX;
+  int rv = -1;
+
+  assert (state_data);
+
+  /* achu:
+   *
+   * DCMI 1.1 spec is unclear, I am assuming the
+   * "total_asset_tag_length_written" is the number of bytes just
+   * written.
+   *
+   * I am assuming we need to clear the entire buffer, so we write the
+   * full buffer, NUL byte extended.
+   */
+
+  memset (data_buf, '\0', IPMI_DCMI_MAX_ASSET_TAG_LENGTH + 1);
+
+  memcpy (data_buf,
+          state_data->prog_data->args->set_asset_tag_arg,
+          strlen (state_data->prog_data->args->set_asset_tag_arg));
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_dcmi_set_asset_tag_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
+
+  while (1)
+    {
+      uint64_t val;
+
+      if (!offset
+          || ((data_len - offset) >= IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_WRITE_MAX))
+        bytes_to_write = IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_WRITE_MAX;
+      else 
+        bytes_to_write = data_len - offset;
+      
+      if (ipmi_cmd_dcmi_set_asset_tag (state_data->ipmi_ctx,
+                                       offset,
+                                       bytes_to_write,
+                                       data_buf,
+                                       data_len,
+                                       obj_cmd_rs) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_cmd_dcmi_set_asset_tag: %s\n",
+                           ipmi_ctx_errormsg (state_data->ipmi_ctx));
+          goto cleanup;
+        }
+
+      if (FIID_OBJ_GET (obj_cmd_rs,
+                        "total_asset_tag_length_written",
+                        &val) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get: 'total_asset_tag_length': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+
+      /* make sure response is reasonable, some vendors may return the
+       * max length of the internal buffer.  If we get an unreasonable
+       * number, just assume bytes_to_write is what is added to the
+       * offset.
+       */
+      if (val > bytes_to_write)
+        offset += bytes_to_write;
+      else
+        offset += val;
+
+      if (offset >= data_len)
+        break;
+    }
+
+  rv = 0;
+ cleanup:
+  fiid_obj_destroy (obj_cmd_rs);
+  return (rv);
+}
+
+static int
+get_management_controller_identifier_string (ipmi_dcmi_state_data_t *state_data)
+{
+  fiid_obj_t obj_cmd_rs = NULL;
+  uint8_t management_controller_identifier_string_data[IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH];
+  int data_len;
+  unsigned int offset = 0;
+  uint8_t total_length = 0;
+  uint8_t bytes_to_read = IPMI_DCMI_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_NUMBER_OF_BYTES_TO_READ_MAX;
+  int rv = -1;
+
+  assert (state_data);
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_dcmi_get_management_controller_identifier_string_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
+
+  memset (management_controller_identifier_string_data, '\0', IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH);
+
+  while (1)
+    {
+      uint64_t val;
+
+      if (!offset
+          || ((total_length - offset) >= IPMI_DCMI_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_NUMBER_OF_BYTES_TO_READ_MAX))
+        bytes_to_read = IPMI_DCMI_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_NUMBER_OF_BYTES_TO_READ_MAX;
+      else 
+        bytes_to_read = total_length - offset;
+      
+      if (ipmi_cmd_dcmi_get_management_controller_identifier_string (state_data->ipmi_ctx,
+                                       offset,
+                                       bytes_to_read,
+                                       obj_cmd_rs) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_cmd_dcmi_get_management_controller_identifier_string: %s\n",
+                           ipmi_ctx_errormsg (state_data->ipmi_ctx));
+          goto cleanup;
+        }
+
+      if (FIID_OBJ_GET (obj_cmd_rs,
+                        "total_length",
+                        &val) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get: 'total_length': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+      total_length = val;
+
+      if (!total_length)
+        break;
+
+      if ((data_len = fiid_obj_get_data (obj_cmd_rs,
+                                         "data",
+                                         management_controller_identifier_string_data + offset,
+                                         IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH - offset)) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get_data: 'data': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+      offset += data_len;
+
+      if (offset >= total_length)
+        break;
+    }
+
+  if (total_length)
+    pstdout_printf (state_data->pstate,
+                    "%s\n",
+                    management_controller_identifier_string_data);
+
+  rv = 0;
+ cleanup:
+  fiid_obj_destroy (obj_cmd_rs);
+  return (rv);
+}
+
+static int
+set_management_controller_identifier_string (ipmi_dcmi_state_data_t *state_data)
+{
+  fiid_obj_t obj_cmd_rs = NULL;
+  unsigned int offset = 0;
+  char data_buf[IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH];
+  unsigned int data_len = IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH;
+  uint8_t bytes_to_write = IPMI_DCMI_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_NUMBER_OF_BYTES_TO_WRITE_MAX;
+  int rv = -1;
+
+  assert (state_data);
+
+  /* achu:
+   *
+   * DCMI 1.1 spec is unclear, I am assuming the
+   * "total_length_written" is the number of bytes just written.
+   *
+   * I am assuming we need to clear the entire buffer, so we write the
+   * full buffer, NUL byte extended.
+   *
+   * Note that IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH
+   * length includes the NUL byte, so max string length is really
+   * (IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH - 1)
+   */
+
+  memset (data_buf, '\0', IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH);
+
+  memcpy (data_buf,
+          state_data->prog_data->args->set_management_controller_identifier_string_arg,
+          strlen (state_data->prog_data->args->set_management_controller_identifier_string_arg));
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_dcmi_set_management_controller_identifier_string_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
+
+  while (1)
+    {
+      uint64_t val;
+
+      if (!offset
+          || ((data_len - offset) >= IPMI_DCMI_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_NUMBER_OF_BYTES_TO_WRITE_MAX))
+        bytes_to_write = IPMI_DCMI_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_NUMBER_OF_BYTES_TO_WRITE_MAX;
+      else 
+        bytes_to_write = data_len - offset;
+      
+      if (ipmi_cmd_dcmi_set_management_controller_identifier_string (state_data->ipmi_ctx,
+                                                                     offset,
+                                                                     bytes_to_write,
+                                                                     data_buf,
+                                                                     data_len,
+                                                                     obj_cmd_rs) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_cmd_dcmi_set_management_controller_identifier_string: %s\n",
+                           ipmi_ctx_errormsg (state_data->ipmi_ctx));
+          goto cleanup;
+        }
+
+      if (FIID_OBJ_GET (obj_cmd_rs,
+                        "total_length_written",
+                        &val) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get: 'total_management_controller_identifier_string_length': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+
+      /* make sure response is reasonable, some vendors may return the
+       * max length of the internal buffer.  If we get an unreasonable
+       * number, just assume bytes_to_write is what is added to the
+       * offset.
+       */
+      if (val > bytes_to_write)
+        offset += bytes_to_write;
+      else
+        offset += val;
+
+      if (offset >= data_len)
+        break;
+    }
+
+  rv = 0;
+ cleanup:
+  fiid_obj_destroy (obj_cmd_rs);
+  return (rv);
+}
+
+static char *
+_entity_string (uint8_t entity_id)
+{
+  assert (IPMI_DCMI_ENTITY_ID_VALID (entity_id));
+
+  if (entity_id == IPMI_DCMI_ENTITY_ID_INLET_TEMPERATURE)
+    return IPMI_DCMI_ENTITY_ID_INLET_TEMPERATURE_STR;
+  else if (entity_id == IPMI_DCMI_ENTITY_ID_CPU_TEMPERATURE)
+    return IPMI_DCMI_ENTITY_ID_CPU_TEMPERATURE_STR;
+  else
+    return IPMI_DCMI_ENTITY_ID_BASEBOARD_TEMPERATURE_STR;
+}
+
+static int
+_sensor_info_output (ipmi_dcmi_state_data_t *state_data,
+                     uint8_t sensor_type,
+                     uint8_t entity_id)
+{
+  fiid_obj_t obj_cmd_rs = NULL;
+  uint8_t entity_instance_start = 0x01; /* starts at 1, not 0 */
+  unsigned int total_entity_instances_parsed = 0;
+  int rv = -1;
+
+  assert (state_data);
+  assert (IPMI_SENSOR_TYPE_VALID (sensor_type));
+  assert (IPMI_DCMI_ENTITY_ID_VALID (entity_id));
+  
+  pstdout_printf (state_data->pstate,
+                  "%s SDR Record IDs\n",
+                  _entity_string (entity_id));
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_dcmi_get_dcmi_sensor_info_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
+
+  while (1)
+    {
+      uint64_t val;
+      uint8_t total_number_of_available_instances;
+      uint8_t number_of_record_ids_in_this_response;
+      uint8_t sdr_record_ids[IPMI_DCMI_MAX_RECORD_IDS_BUFLEN];
+      int sdr_record_ids_len;
+      int i;
+
+      fiid_obj_clear (obj_cmd_rs);
+
+      if (ipmi_cmd_dcmi_get_dcmi_sensor_info (state_data->ipmi_ctx,
+                                              sensor_type,
+                                              entity_id,
+                                              IPMI_DCMI_ENTITY_INSTANCE_ALL,
+                                              entity_instance_start,
+                                              obj_cmd_rs) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "ipmi_cmd_dcmi_get_dcmi_sensor_info: %s\n",
+                           ipmi_ctx_errormsg (state_data->ipmi_ctx));
+          goto cleanup;
+        }
+
+      if (FIID_OBJ_GET (obj_cmd_rs,
+                        "total_number_of_available_instances",
+                        &val) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get: 'total_number_of_available_instances': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+      total_number_of_available_instances = val;
+
+      if (!total_number_of_available_instances)
+        break;
+
+      if (FIID_OBJ_GET (obj_cmd_rs,
+                        "number_of_record_ids_in_this_response",
+                        &val) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get: 'number_of_record_ids_in_this_response': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+      number_of_record_ids_in_this_response = val;
+
+      if (!number_of_record_ids_in_this_response)
+        break;
+
+      if ((sdr_record_ids_len = fiid_obj_get_data (obj_cmd_rs,
+                                                   "sdr_record_ids",
+                                                   sdr_record_ids,
+                                                   IPMI_DCMI_MAX_RECORD_IDS_BUFLEN)) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get_data: 'sdr_record_ids': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+      
+      if (sdr_record_ids_len % 2)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "invalid sdr_record_ids length returned: %u\n",
+                           sdr_record_ids_len);
+          goto cleanup;
+        }
+
+      if (number_of_record_ids_in_this_response != (sdr_record_ids_len / 2))
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "invalid sdr_record_ids returned: %u != %u\n",
+                           number_of_record_ids_in_this_response,
+                           (sdr_record_ids_len / 2));
+          goto cleanup;
+        }
+
+      for (i = 0; i < (sdr_record_ids_len / 2); i += 2)
+        {
+          uint16_t record_id = 0;
+          
+          record_id |= sdr_record_ids[0];
+          record_id |= (sdr_record_ids[1] << 8);
+          
+          pstdout_printf (state_data->pstate,
+                          "%u\n",
+                          record_id);
+          total_entity_instances_parsed++;
+        }
+      
+      /* achu: entity IDs are returned sequentially?  If not, I'm not
+       * sure how this API can even work, you wouldn't know where to
+       * start the next time around.  Hopefully this is a correct
+       * assumption
+       */
+      /* HLiebig: Note: Intel simply increments the offset by 8 (max number of 
+       * SDR Id's per response.
+       * See dcmitool from www.intel.com/go/DCMI (a modified ipmitool)
+       */
+  
+      entity_instance_start += number_of_record_ids_in_this_response;
+
+      if (total_entity_instances_parsed >= total_number_of_available_instances)
+        break;
+    }
+
+  rv = 0;
+ cleanup:
+  fiid_obj_destroy (obj_cmd_rs);
+  return (rv);
+}
+
+static int
+get_dcmi_sensor_info (ipmi_dcmi_state_data_t *state_data)
+{
+  int rv = -1;
+
+  assert (state_data);
+
+  if (_sensor_info_output (state_data,
+                           IPMI_SENSOR_TYPE_TEMPERATURE,
+                           IPMI_DCMI_ENTITY_ID_INLET_TEMPERATURE) < 0)
+    goto cleanup;
+
+  pstdout_printf (state_data->pstate, "\n");
+
+  if (_sensor_info_output (state_data,
+                           IPMI_SENSOR_TYPE_TEMPERATURE,
+                           IPMI_DCMI_ENTITY_ID_CPU_TEMPERATURE) < 0)
+    goto cleanup;
+  
+  pstdout_printf (state_data->pstate, "\n");
+
+  if (_sensor_info_output (state_data,
+                           IPMI_SENSOR_TYPE_TEMPERATURE,
+                           IPMI_DCMI_ENTITY_ID_BASEBOARD_TEMPERATURE) < 0)
+    goto cleanup;
+
+  rv = 0;
+ cleanup:
+  return (rv);
+}
+
+static int
 _output_power_statistics (ipmi_dcmi_state_data_t *state_data,
                           uint8_t mode,
                           uint8_t mode_attributes)
@@ -1266,17 +1860,17 @@ _get_power_limit (ipmi_dcmi_state_data_t *state_data,
    *
    * The DCMI spec indicates a potential completion code for the "Get
    * Power Limit" command as "No Set Power Limit" (0x80).  FreeIPMI
-   * interpreted this to mean the "Set Power Limit" command was not
-   * available.  Atleast one vendor interpreted this to mean "No Power
-   * Limit Set".  One can consider this an English interpretation
-   * issue of 'No set *POWER LIMIT*' vs. 'No *SET POWER LIMIT*'
-   * (i.e. is "set" a noun or a verb here).  Confounding this issue is
-   * the fact that the example implementation in Intel's DCMItool
-   * implements the former, while the DCMI Conformance test suite
-   * implements the later.  In addition to this, with the later
-   * interpretation, it need not be an indication of an error, but
-   * rather a flag.  So the rest of the packet can be completely full
-   * of legitimate data.
+   * originally interpreted this to mean the "Set Power Limit" command
+   * was not available.  Atleast one vendor interpreted this to mean
+   * "No Power Limit Set".  One can consider this an English
+   * interpretation issue of 'No set POWER LIMIT' vs. 'No SET POWER
+   * LIMIT' (i.e. is "set" a verb or part of a proper noun referencing
+   * the DCMI command).  Confounding this issue is the fact that the
+   * example implementation in Intel's DCMItool implements the former,
+   * while the DCMI Conformance test suite implements the later.  In
+   * addition to this, with the later interpretation, it need not be
+   * an indication of an error, but rather a flag.  So the rest of the
+   * packet can be completely full of legitimate data.
    *
    * So how do we handle this?
    *
@@ -1418,14 +2012,28 @@ get_power_limit (ipmi_dcmi_state_data_t *state_data)
     }
 
   /* XXX: figure out OEM specifics, and list details given manufacturer ID/product ID */
+  /* 
 
-  if (!exception_actions)
+  From Holger Liebig at Fujitsu
+
+  "Regarding OEM exception action we currently do support 'continue'
+  (0x02) and 'shutdown' (0x03) in addition to the 'hard power off'."
+
+  But I don't know what the manufacturer ID and product ID are, so we leave it out for now.
+
+  */
+
+  if (exception_actions == IPMI_DCMI_EXCEPTION_ACTION_NO_ACTION)
     pstdout_printf (state_data->pstate,
-                    "Exception Actions                                 : None (%Xh)\n",
+                    "Exception Actions                                 : No Action (%Xh)\n",
                     exception_actions);
   else if (exception_actions == IPMI_DCMI_EXCEPTION_ACTION_HARD_POWER_OFF_SYSTEM)
     pstdout_printf (state_data->pstate,
                     "Exception Actions                                 : Hard Power Off system (%Xh)\n",
+                    exception_actions);
+  else if (exception_actions == IPMI_DCMI_EXCEPTION_ACTION_LOG_EVENT_TO_SEL_ONLY)
+    pstdout_printf (state_data->pstate,
+                    "Exception Actions                                 : Log event to SEL only (%Xh)\n",
                     exception_actions);
   else if ((exception_actions >= IPMI_DCMI_EXCEPTION_ACTION_OEM_MIN)
            && (exception_actions <= IPMI_DCMI_EXCEPTION_ACTION_OEM_MAX))
@@ -1486,19 +2094,20 @@ set_power_limit (ipmi_dcmi_state_data_t *state_data)
     {
       /* IPMI Workaround/Interpretation
        *
-       * The DCMI spec indicates a potential completion code for the "Get
-       * Power Limit" command as "No Set Power Limit" (0x80).  FreeIPMI
-       * interpreted this to mean the "Set Power Limit" command was not
-       * available.  Atleast one vendor interpreted this to mean "No Power
-       * Limit Set".  One can consider this an English interpretation
-       * issue of 'No set *POWER LIMIT*' vs. 'No *SET POWER LIMIT*'
-       * (i.e. is "set" a noun or a verb here).  Confounding this issue is
-       * the fact that the example implementation in Intel's DCMItool
-       * implements the former, while the DCMI Conformance test suite
-       * implements the later.  In addition to this, with the later
-       * interpretation, it need not be an indication of an error, but
-       * rather a flag.  So the rest of the packet can be completely full
-       * of legitimate data.
+       * The DCMI spec indicates a potential completion code for the
+       * "Get Power Limit" command as "No Set Power Limit" (0x80).
+       * FreeIPMI originally interpreted this to mean the "Set Power
+       * Limit" command was not available.  Atleast one vendor
+       * interpreted this to mean "No Power Limit Set".  One can
+       * consider this an English interpretation issue of 'No set
+       * POWER LIMIT' vs. 'No SET POWER LIMIT' (i.e. is "set" a verb
+       * or part of a proper noun referencing the DCMI command).
+       * Confounding this issue is the fact that the example
+       * implementation in Intel's DCMItool implements the former,
+       * while the DCMI Conformance test suite implements the later.
+       * In addition to this, with the later interpretation, it need
+       * not be an indication of an error, but rather a flag.  So the
+       * rest of the packet can be completely full of legitimate data.
        * 
        * So we will do the following.
        *
@@ -1637,298 +2246,6 @@ activate_deactivate_power_limit (ipmi_dcmi_state_data_t *state_data)
 }
 
 static int
-get_asset_tag (ipmi_dcmi_state_data_t *state_data)
-{
-  fiid_obj_t obj_cmd_rs = NULL;
-  uint8_t asset_tag_data[IPMI_DCMI_MAX_ASSET_TAG_LENGTH + 1];
-  int asset_tag_data_len;
-  unsigned int asset_tag_data_offset = 0;
-  uint8_t total_asset_tag_length = 0;
-  uint8_t bytes_to_read = IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_READ_MAX;
-  ipmi_fru_parse_ctx_t fru_parse_ctx = NULL;
-  int rv = -1;
-
-  assert (state_data);
-
-  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_dcmi_get_asset_tag_rs)))
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "fiid_obj_create: %s\n",
-                       strerror (errno));
-      goto cleanup;
-    }
-
-  memset (asset_tag_data, '\0', IPMI_DCMI_MAX_ASSET_TAG_LENGTH + 1);
-
-  while (1)
-    {
-      uint64_t val;
-
-      if (!asset_tag_data_offset
-          || ((total_asset_tag_length - asset_tag_data_offset) >= IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_READ_MAX))
-        bytes_to_read = IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_READ_MAX;
-      else 
-        bytes_to_read = total_asset_tag_length - asset_tag_data_offset;
-      
-      if (ipmi_cmd_dcmi_get_asset_tag (state_data->ipmi_ctx,
-                                       asset_tag_data_offset,
-                                       bytes_to_read,
-                                       obj_cmd_rs) < 0)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "ipmi_cmd_dcmi_get_asset_tag: %s\n",
-                           ipmi_ctx_errormsg (state_data->ipmi_ctx));
-          goto cleanup;
-        }
-
-      if (FIID_OBJ_GET (obj_cmd_rs,
-                        "total_asset_tag_length",
-                        &val) < 0)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "fiid_obj_get: 'total_asset_tag_length': %s\n",
-                           fiid_obj_errormsg (obj_cmd_rs));
-          goto cleanup;
-        }
-      total_asset_tag_length = val;
-
-      if (!total_asset_tag_length)
-        break;
-
-      if ((asset_tag_data_len = fiid_obj_get_data (obj_cmd_rs,
-                                                   "data",
-                                                   asset_tag_data + asset_tag_data_offset,
-                                                   IPMI_DCMI_MAX_ASSET_TAG_LENGTH - asset_tag_data_offset)) < 0)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "fiid_obj_get_data: 'data': %s\n",
-                           fiid_obj_errormsg (obj_cmd_rs));
-          goto cleanup;
-        }
-      asset_tag_data_offset += asset_tag_data_len;
-
-      if (asset_tag_data_offset >= total_asset_tag_length)
-        break;
-    }
-
-  /* HLiebig:
-   *
-   * Output as simple English/Latin-1 string, nothing is specified in the 
-   * DCMI 1.0 spec. 
-   *
-   * achu:
-   *
-   * Spec suggests it is not encoded as FRU string, but this is not the case.
-   */
-  if (total_asset_tag_length)
-    pstdout_printf (state_data->pstate,
-                    "%s\n",
-                    asset_tag_data);
-
-  rv = 0;
- cleanup:
-  ipmi_fru_parse_ctx_destroy (fru_parse_ctx);
-  fiid_obj_destroy (obj_cmd_rs);
-  return (rv);
-}
-
-static char *
-_entity_string (uint8_t entity_id)
-{
-  assert (IPMI_DCMI_ENTITY_ID_VALID (entity_id));
-
-  if (entity_id == IPMI_DCMI_ENTITY_ID_INLET_TEMPERATURE)
-    return IPMI_DCMI_ENTITY_ID_INLET_TEMPERATURE_STR;
-  else if (entity_id == IPMI_DCMI_ENTITY_ID_CPU_TEMPERATURE)
-    return IPMI_DCMI_ENTITY_ID_CPU_TEMPERATURE_STR;
-  else
-    return IPMI_DCMI_ENTITY_ID_BASEBOARD_TEMPERATURE_STR;
-}
-
-static int
-_sensor_info_output (ipmi_dcmi_state_data_t *state_data,
-                     uint8_t sensor_type,
-                     uint8_t entity_id)
-{
-  fiid_obj_t obj_cmd_rs = NULL;
-  uint8_t entity_instance_start = 0x01; /* starts at 1, not 0 */
-  unsigned int total_entity_instances_parsed = 0;
-  int rv = -1;
-
-  assert (state_data);
-  assert (IPMI_SENSOR_TYPE_VALID (sensor_type));
-  assert (IPMI_DCMI_ENTITY_ID_VALID (entity_id));
-  
-  pstdout_printf (state_data->pstate,
-                  "%s SDR Record IDs\n",
-                  _entity_string (entity_id));
-
-  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_dcmi_get_dcmi_sensor_info_rs)))
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "fiid_obj_create: %s\n",
-                       strerror (errno));
-      goto cleanup;
-    }
-
-  while (1)
-    {
-      uint64_t val;
-      uint8_t total_number_of_available_instances;
-      uint8_t number_of_record_ids_in_this_response;
-      uint8_t sdr_record_ids[IPMI_DCMI_MAX_RECORD_IDS_BUFLEN];
-      int sdr_record_ids_len;
-      int i;
-
-      fiid_obj_clear (obj_cmd_rs);
-
-      if (ipmi_cmd_dcmi_get_dcmi_sensor_info (state_data->ipmi_ctx,
-                                              sensor_type,
-                                              entity_id,
-                                              IPMI_DCMI_ENTITY_INSTANCE_ALL,
-                                              entity_instance_start,
-                                              obj_cmd_rs) < 0)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "ipmi_cmd_dcmi_get_dcmi_sensor_info: %s\n",
-                           ipmi_ctx_errormsg (state_data->ipmi_ctx));
-          goto cleanup;
-        }
-
-      if (FIID_OBJ_GET (obj_cmd_rs,
-                        "total_number_of_available_instances",
-                        &val) < 0)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "fiid_obj_get: 'total_number_of_available_instances': %s\n",
-                           fiid_obj_errormsg (obj_cmd_rs));
-          goto cleanup;
-        }
-      total_number_of_available_instances = val;
-
-      if (!total_number_of_available_instances)
-        break;
-
-      if (FIID_OBJ_GET (obj_cmd_rs,
-                        "number_of_record_ids_in_this_response",
-                        &val) < 0)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "fiid_obj_get: 'number_of_record_ids_in_this_response': %s\n",
-                           fiid_obj_errormsg (obj_cmd_rs));
-          goto cleanup;
-        }
-      number_of_record_ids_in_this_response = val;
-
-      if (!number_of_record_ids_in_this_response)
-        break;
-
-      if ((sdr_record_ids_len = fiid_obj_get_data (obj_cmd_rs,
-                                                   "sdr_record_ids",
-                                                   sdr_record_ids,
-                                                   IPMI_DCMI_MAX_RECORD_IDS_BUFLEN)) < 0)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "fiid_obj_get_data: 'sdr_record_ids': %s\n",
-                           fiid_obj_errormsg (obj_cmd_rs));
-          goto cleanup;
-        }
-      
-      if (sdr_record_ids_len % 2)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "invalid sdr_record_ids length returned: %u\n",
-                           sdr_record_ids_len);
-          goto cleanup;
-        }
-
-      if (number_of_record_ids_in_this_response != (sdr_record_ids_len / 2))
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "invalid sdr_record_ids returned: %u != %u\n",
-                           number_of_record_ids_in_this_response,
-                           (sdr_record_ids_len / 2));
-          goto cleanup;
-        }
-
-      for (i = 0; i < (sdr_record_ids_len / 2); i += 2)
-        {
-          uint16_t record_id = 0;
-          
-          record_id |= sdr_record_ids[0];
-          record_id |= (sdr_record_ids[1] << 8);
-          
-          pstdout_printf (state_data->pstate,
-                          "%u\n",
-                          record_id);
-          total_entity_instances_parsed++;
-        }
-      
-      /* achu: entity IDs are returned sequentially?  If not, I'm not
-       * sure how this API can even work, you wouldn't know where to
-       * start the next time around.  Hopefully this is a correct
-       * assumption
-       */
-      /* HLiebig: Note: Intel simply increments the offset by 8 (max number of 
-       * SDR Id's per response.
-       * See dcmitool from www.intel.com/go/DCMI (a modified ipmitool)
-       */
-  
-      entity_instance_start += number_of_record_ids_in_this_response;
-
-      if (total_entity_instances_parsed >= total_number_of_available_instances)
-        break;
-    }
-
-  rv = 0;
- cleanup:
-  fiid_obj_destroy (obj_cmd_rs);
-  return (rv);
-}
-
-static int
-get_dcmi_sensor_info (ipmi_dcmi_state_data_t *state_data)
-{
-  int rv = -1;
-
-  assert (state_data);
-
-  if (_sensor_info_output (state_data,
-                           IPMI_SENSOR_TYPE_TEMPERATURE,
-                           IPMI_DCMI_ENTITY_ID_INLET_TEMPERATURE) < 0)
-    goto cleanup;
-
-  pstdout_printf (state_data->pstate, "\n");
-
-  if (_sensor_info_output (state_data,
-                           IPMI_SENSOR_TYPE_TEMPERATURE,
-                           IPMI_DCMI_ENTITY_ID_CPU_TEMPERATURE) < 0)
-    goto cleanup;
-  
-  pstdout_printf (state_data->pstate, "\n");
-
-  if (_sensor_info_output (state_data,
-                           IPMI_SENSOR_TYPE_TEMPERATURE,
-                           IPMI_DCMI_ENTITY_ID_BASEBOARD_TEMPERATURE) < 0)
-    goto cleanup;
-
-  rv = 0;
- cleanup:
-  return (rv);
-}
-
-static int
 run_cmd_args (ipmi_dcmi_state_data_t *state_data)
 {
   struct ipmi_dcmi_arguments *args;
@@ -1955,6 +2272,21 @@ run_cmd_args (ipmi_dcmi_state_data_t *state_data)
   if (args->get_enhanced_system_power_statistics)
     return (get_enhanced_system_power_statistics (state_data));
 
+  if (args->get_asset_tag)
+    return (get_asset_tag (state_data));
+
+  if (args->set_asset_tag)
+    return (set_asset_tag (state_data));
+
+  if (args->get_management_controller_identifier_string)
+    return (get_management_controller_identifier_string (state_data));
+
+  if (args->set_management_controller_identifier_string)
+    return (set_management_controller_identifier_string (state_data));
+
+  if (args->get_dcmi_sensor_info)
+    return (get_dcmi_sensor_info (state_data));
+
   if (args->get_power_limit)
     return (get_power_limit (state_data));
 
@@ -1963,12 +2295,6 @@ run_cmd_args (ipmi_dcmi_state_data_t *state_data)
 
   if (args->activate_deactivate_power_limit)
     return (activate_deactivate_power_limit (state_data));
-
-  if (args->get_asset_tag)
-    return (get_asset_tag (state_data));
-
-  if (args->get_dcmi_sensor_info)
-    return (get_dcmi_sensor_info (state_data));
 
   rv = 0;
  cleanup:

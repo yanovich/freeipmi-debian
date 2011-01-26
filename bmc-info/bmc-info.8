@@ -1,6 +1,6 @@
 
 
-.TH BMC-INFO 8 "2010-12-06" "bmc-info 0.8.12" "System Commands"
+.TH BMC-INFO 8 "2011-01-20" "bmc-info 1.0.1" "System Commands"
 .SH "NAME"
 bmc-info \- display BMC information
 .SH "SYNOPSIS"
@@ -19,7 +19,7 @@ issues. For a general introduction to FreeIPMI please see
 The following options are general options for configuring IPMI
 communication and executing general tool commands.
 .TP
-\fB\-D\fR, \fB\-\-driver\-type\fR=\fIIPMIDRIVER\fR
+\fB\-D\fR \fIIPMIDRIVER\fR, \fB\-\-driver\-type\fR=\fIIPMIDRIVER\fR
 Specify the driver type to use instead of doing an auto selection.
 The currently available outofband drivers are LAN and LAN_2_0, which
 perform IPMI 1.5 and IPMI 2.0 respectively. The currently available
@@ -41,18 +41,18 @@ probed path.
 Specify the in-band driver register spacing instead of the
 probed value.
 .TP
-\fB\-h\fR, \fB\-\-hostname\fR=\fIIPMIHOST1,IPMIHOST2,...\fR
+\fB\-h\fR \fIIPMIHOST1,IPMIHOST2,...\fR, \fB\-\-hostname\fR=\fIIPMIHOST1,IPMIHOST2,...\fR
 Specify the remote host(s) to communicate with. Multiple hostnames
 may be separated by comma or may be specified in a range format; see
 HOSTRANGED SUPPORT below.
 .TP
-\fB\-u\fR, \fB\-\-username\fR=\fIUSERNAME\fR
+\fB\-u\fR \fIUSERNAME\fR, \fB\-\-username\fR=\fIUSERNAME\fR
 Specify the username to use when authenticating with the remote host.
 If not specified, a null (i.e. anonymous) username is assumed. The
 user must have atleast USER privileges in order for this tool to
 operate fully.
 .TP
-\fB\-p\fR, \fB\-\-password\fR=\fIPASSWORD\fR
+\fB\-p\fR \fIPASSWORD\fR, \fB\-\-password\fR=\fIPASSWORD\fR
 Specify the password to use when authenticationg with the remote host.
 If not specified, a null password is assumed. Maximum password length
 is 16 for IPMI 1.5 and 20 for IPMI 2.0.
@@ -61,7 +61,7 @@ is 16 for IPMI 1.5 and 20 for IPMI 2.0.
 Prompt for password to avoid possibility of listing
 it in process lists.
 .TP
-\fB\-k\fR, \fB\-\-k-g\fR=\fIK_G\fR
+\fB\-k\fR \fIK_G\fR, \fB\-\-k-g\fR=\fIK_G\fR
 Specify the K_g BMC key to use when authenticating with the remote
 host for IPMI 2.0. If not specified, a null key is assumed. To input
 the key in hexadecimal form, prefix the string with '0x'. E.g., the
@@ -80,12 +80,12 @@ Specify the packet retransmission timeout in milliseconds. Defaults
 to 1000 milliseconds (1 second) if not specified. The retransmission
 timeout cannot be larger than the session timeout.
 .TP
-\fB\-a\fR, \fB\-\-authentication\-type\fR=\fIAUTHENTICATION-TYPE\fR
+\fB\-a\fR \fIAUTHENTICATION\-TYPE\fR, \fB\-\-authentication\-type\fR=\fIAUTHENTICATION\-TYPE\fR
 Specify the IPMI 1.5 authentication type to use. The currently
 available authentication types are NONE, STRAIGHT_PASSWORD_KEY, MD2,
 and MD5. Defaults to MD5 if not specified.
 .TP
-\fB\-I\fR, \fB\-\-cipher\-suite-id\fR=\fICIPHER-SUITE-ID\fR
+\fB\-I\fR \fICIPHER-SUITE-ID\fR, \fB\-\-cipher\-suite-id\fR=\fICIPHER-SUITE-ID\fR
 Specify the IPMI 2.0 cipher suite ID to use. The Cipher Suite ID
 identifies a set of authentication, integrity, and confidentiality
 algorithms to use for IPMI 2.0 communication. The authentication
@@ -139,7 +139,7 @@ specified. The following cipher suite ids are currently supported:
 .\" .sp
 .\" 19 - Authentication Algorithm = HMAC-SHA256; Integrity Algorithm = HMAC_SHA256_128; Confidentiality Algorithm = xRC4-40
 .TP
-\fB\-l\fR, \fB\-\-privilege\-level\fR=\fIPRIVILEGE\-LEVEL\fR
+\fB\-l\fR \fIPRIVILEGE\-LEVEL\fR, \fB\-\-privilege\-level\fR=\fIPRIVILEGE\-LEVEL\fR
 Specify the privilege level to be used. The currently available
 privilege levels are USER, OPERATOR, and ADMIN. Defaults to USER if
 not specified.
@@ -207,7 +207,7 @@ user breaks out of the program early, all currently consolidated
 output will be dumped. See HOSTRANGED SUPPORT below for additional
 information.
 .TP
-\fB\-F\fR, \fB\-\-fanout\fR
+\fB\-F\fR \fINUM\fR, \fB\-\-fanout\fR=\fINUM\fR
 Specify multiple host fanout. A "sliding window" (or fanout)
 algorithm is used for parallel IPMI communication so that slower nodes
 or timed out nodes will not impede parallel communication. The
@@ -382,6 +382,16 @@ will work around systems that report invalid base addresses. Those
 hitting this issue may see "device not supported" or "could not find
 inband device" errors.  Issue observed on HP ProLiant DL145 G1.
 .LP
+"authcap" - This workaround option will skip early checks for username
+capabilities, authentication capabilities, and K_g support and allow
+IPMI authentication to succeed. It works around multiple issues in
+which the remote system does not properly report username
+capabilities, authentication capabilities, or K_g status. Those
+hitting this issue may see "username invalid", "authentication type
+unavailable for attempted privilege level", or "k_g invalid" errors.
+Issue observed on Asus P5M2/P5MT-R/RS162-E4/RX4, Intel SR1520ML/X38ML,
+and Sun Fire 2200/4150/4450 with ELOM.
+.LP
 "idzero" - This workaround option will allow empty session IDs to be
 accepted by the client. It works around IPMI sessions that report
 empty session IDs to the client. Those hitting this issue may see
@@ -409,16 +419,6 @@ It works around IPMI 1.5 session sequence numbers that are the wrong
 endian. Those hitting this issue may see "session timeout" errors.
 Issue observed on some Sun ILOM 1.0/2.0 (depends on service processor
 endian).
-.LP
-"authcap" - This workaround option will skip early checks for username
-capabilities, authentication capabilities, and K_g support and allow
-IPMI authentication to succeed. It works around multiple issues in
-which the remote system does not properly report username
-capabilities, authentication capabilities, or K_g status. Those
-hitting this issue may see "username invalid", "authentication type
-unavailable for attempted privilege level", or "k_g invalid" errors.
-Issue observed on Asus P5M2/P5MT-R/RS162-E4/RX4, Intel SR1520ML/X38ML,
-and Sun Fire 2200/4150/4450 with ELOM.
 .LP
 "intel20" - This workaround option will work around several Intel IPMI
 2.0 authentication issues. The issues covered include padding of
@@ -502,7 +502,7 @@ Copyright \(co 2003-2010 FreeIPMI Core Team.
 .PP
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at
+the Free Software Foundation; either version 3 of the License, or (at
 your option) any later version.
 .SH "SEE ALSO"
 freeipmi.conf(5), freeipmi(7), bmc-config(8)

@@ -1,19 +1,19 @@
 /*
-   Copyright (C) 2003-2010 FreeIPMI Core Team
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
  */
 
 #ifndef _IPMI_LAN_CMDS_H
@@ -25,6 +25,18 @@ extern "C" {
 
 #include <stdint.h>
 #include <freeipmi/fiid/fiid.h>
+
+#define IPMI_LAN_CONFIGURATION_PARAMETERS_NO_SET_SELECTOR               0x0
+#define IPMI_LAN_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR             0x0
+
+#define IPMI_LAN_CONFIGURATION_PARAMETERS_SET_COMPLETE                 0x00
+#define IPMI_LAN_CONFIGURATION_PARAMETERS_SET_IN_PROGRESS              0x01
+#define IPMI_LAN_CONFIGURATION_PARAMETERS_SET_COMMIT_WRITE             0x02
+
+#define IPMI_LAN_CONFIGURATION_PARAMETERS_SET_IN_PROGRESS_VALID(__value) \
+  (((__value) == IPMI_LAN_CONFIGURATION_PARAMETERS_SET_COMPLETE          \
+    || (__value) == IPMI_LAN_CONFIGURATION_PARAMETERS_SET_IN_PROGRESS    \
+    || (__value) == IPMI_LAN_CONFIGURATION_PARAMETERS_SET_COMMIT_WRITE) ? 1 : 0)
 
 #define IPMI_AUTHENTICATION_TYPE_SUPPORTED             0x1
 #define IPMI_AUTHENTICATION_TYPE_UNSUPPORTED           0x0
@@ -156,11 +168,15 @@ extern "C" {
 extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_rq;
 extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_rs;
 
+extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_set_in_progress_rq;
 extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_authentication_type_enables_rq;
 extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_ip_address_rq;
 extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_ip_address_source_rq;
 extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_mac_address_rq;
 extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_subnet_mask_rq;
+extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_ipv4_header_parameters_rq;
+extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_primary_rmcp_port_number_rq;
+extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_secondary_rmcp_port_number_rq;
 extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_bmc_generated_arp_control_rq;
 extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_gratuitous_arp_interval_rq;
 extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_default_gateway_address_rq;
@@ -178,12 +194,16 @@ extern fiid_template_t tmpl_cmd_set_lan_configuration_parameters_bad_password_th
 extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_rq;
 extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_rs;
 
+extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_set_in_progress_rs;
 extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_authentication_type_support_rs;
 extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_authentication_type_enables_rs;
 extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_ip_address_rs;
 extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_ip_address_source_rs;
 extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_mac_address_rs;
 extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_subnet_mask_rs;
+extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_ipv4_header_parameters_rs;
+extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_primary_rmcp_port_number_rs;
+extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_secondary_rmcp_port_number_rs;
 extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_bmc_generated_arp_control_rs;
 extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_gratuitous_arp_interval_rs;
 extern fiid_template_t tmpl_cmd_get_lan_configuration_parameters_default_gateway_address_rs;
@@ -213,6 +233,10 @@ int fill_cmd_set_lan_configuration_parameters (uint8_t channel_number,
                                                unsigned int configuration_parameter_data_len,
                                                fiid_obj_t obj_cmd_rq);
   
+int fill_cmd_set_lan_configuration_parameters_set_in_progress (uint8_t channel_number,
+                                                               uint8_t state,
+                                                               fiid_obj_t obj_cmd_rq);
+
 int fill_cmd_set_lan_configuration_parameters_authentication_type_enables (uint8_t channel_number,
                                                                            uint8_t callback_level_none,
                                                                            uint8_t callback_level_md2,
@@ -256,6 +280,21 @@ int fill_cmd_set_lan_configuration_parameters_mac_address (uint8_t channel_numbe
 int fill_cmd_set_lan_configuration_parameters_subnet_mask (uint8_t channel_number,
                                                            uint32_t subnet_mask,
                                                            fiid_obj_t obj_cmd_rq);
+
+int fill_cmd_set_lan_configuration_parameters_ipv4_header_parameters (uint8_t channel_number,
+                                                                      uint8_t time_to_live,
+                                                                      uint8_t flags,
+                                                                      uint8_t type_of_service,
+                                                                      uint8_t precedence,
+                                                                      fiid_obj_t obj_cmd_rq);
+
+int fill_cmd_set_lan_configuration_parameters_primary_rmcp_port_number (uint8_t channel_number,
+                                                                        uint16_t primary_rmcp_port_number,
+                                                                        fiid_obj_t obj_cmd_rq);
+
+int fill_cmd_set_lan_configuration_parameters_secondary_rmcp_port_number (uint8_t channel_number,
+                                                                          uint16_t secondary_rmcp_port_number,
+                                                                          fiid_obj_t obj_cmd_rq);
 
 int fill_cmd_set_lan_configuration_parameters_bmc_generated_arp_control (uint8_t channel_number,
                                                                          uint8_t bmc_generated_gratuitous_arps,

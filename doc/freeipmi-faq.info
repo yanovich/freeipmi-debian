@@ -1,7 +1,7 @@
 This is freeipmi-faq.info, produced by makeinfo version 4.8 from
 freeipmi-faq.texi.
 
-   This manual is for FreeIPMI (version 0.8.12, 17 September 2010).
+   This manual is for FreeIPMI (version 1.0.1, 20 January 2011).
 Copyright (C) 2006-2010 FreeIPMI Core Team
 
      Permission is granted to copy, distribute and/or modify this
@@ -22,8 +22,8 @@ File: freeipmi-faq.info,  Node: Top,  Next: What is IPMI,  Prev: (dir),  Up: (di
 
    Frequently Asked Questions on *FreeIPMI*
 
-   This edition of the documentation was last updated on 6 December
-2010 for release 0.8.12 of the FreeIPMI.
+   This edition of the documentation was last updated on 20 January
+2011 for release 1.0.1 of the FreeIPMI.
 
 * Menu:
 
@@ -71,7 +71,9 @@ File: freeipmi-faq.info,  Node: What is FreeIPMI?,  Next: How did FreeIPMI start
 FreeIPMI is a collection of Intelligent Platform Management IPMI system
 software.  It provides in-band and out-of-band software and a
 development library conforming to the Intelligent Platform Management
-Interface (IPMI v1.5 and v2.0) standards.
+Interface (IPMI v1.5 and v2.0) standards.  FreeIPMI also supports
+IPMI-related specifications such as the Data Center Management
+Interface (DCMI) and Intel Node Manager.
 
 
 File: freeipmi-faq.info,  Node: How did FreeIPMI start?,  Next: What operating systems does FreeIPMI run on?,  Prev: What is FreeIPMI?,  Up: Top
@@ -95,8 +97,9 @@ libfreeipmi, and ipmi support in Powerman.  In October 2004, FreeIPMI
    Since the 0.1.0 release, Z Research developers have contributed
 ipmi-chassis, ipmi-raw, ipmi-locate, and portions of ipmi-pef-config.
 LLNL has contributed IPMI 2.0 support, hostrange support, ipmiconsole,
-ipmimonitoring, ipmidetect, ipmi-sensors-config, ipmi-chassis-config,
-bmc-device, ipmi-oem, ipmi-dcmi, and portions of ipmi-pef-config.
+libipmiconsole, ipmidetect, ipmi-sensors-config, ipmi-chassis-config,
+bmc-device, ipmi-oem, ipmi-dcmi, libipmimonitoring, and portions of
+ipmi-pef-config.
 
    (Note: The original FreeIPMI developers from California Digital
 Corp. are now at Zresearch Inc.)
@@ -149,8 +152,8 @@ support the large cluster environments at Lawrence Livermore National
 Laboratory (LLNL).
 
    Scalable parallel execution of many FreeIPMI tools (ipmi-sensors,
-ipmi-sel, bmc-info, ipmimonitoring, etc.) across a cluster is supported
-through hostranged input and output.  For example:
+ipmi-sel, bmc-info, etc.) across a cluster is supported through
+hostranged input and output.  For example:
 
      # > bmc-info -h "pwopr[0-5]" -u XXX -p XXX --get-device-id -C
      ----------------
@@ -210,16 +213,26 @@ clusters in under a second.
    Ipmiconsole is currently supported by Conman
 (`http://conman.googlecode.com/') for scalable console management.
 
-   Ipmimonitoring interprets sensor readings as well as just reporting
-them.  It can be used for host monitoring IPMI on a cluster.  By
-mapping sensor readings into NOMINAL, WARNING, or CRITICAL states, it
-makes monitoring sensors easier across large numbers of nodes.  Skummee
+   Ipmi-sensors and libipmimonitoring are capable of interpreting sensor
+readings as well as just reporting them.  It can be used for host
+monitoring IPMI sensor severity on a cluster.  By mapping sensor
+readings into NOMINAL, WARNING, or CRITICAL states, it makes monitoring
+sensors easier across large numbers of nodes.  Skummee
 (`http://sourceforge.net/projects/skummee') currently uses
 libipmimonitoring to monitoring sensors on LLNL clusters of up to 2000
 nodes in size.  FreeIPMI sensor monitoring plugins for Ganglia
 (`http://ganglia.info/') and Nagios (`http://www.nagios.org/') have
 also been developed and made available for download
 (`http://www.gnu.org/software/freeipmi/download.html').
+
+   Ipmi-sel and libipmimonitoring are capable of interpreting system
+event log (SEL) entries as well as just reporting them.  It can be used
+for host monitoring IPMI event severity on a cluster.  By mapping
+events into NOMINAL, WARNING, or CRITICAL states, it makes monitoring
+system events easier across large numbers of nodes.  Skummee
+(`http://sourceforge.net/projects/skummee') currently uses
+libipmimonitoring to monitoring the SEL on LLNL clusters of up to 2000
+nodes in size.
 
    The bmc-config, ipmi-chassis-config, ipmi-pef-config,
 ipmi-sensors-config, and configuration file and command-line interface
@@ -386,17 +399,17 @@ Makefile), if you have problems building from the port.
 
 
 Tag Table:
-Node: Top696
-Node: What is IPMI1307
-Node: What is FreeIPMI?2496
-Node: How did FreeIPMI start?2904
-Node: What operating systems does FreeIPMI run on?4221
-Node: FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil4898
-Node: What is special about FreeIPMI5769
-Node: Serial Over LAN (SOL) / Ipmiconsole Setup11452
-Node: SSIF Driver Configuration13180
-Node: x86-64 Compilation14730
-Node: libgcrypt requirement15406
-Node: Installing FreeIPMI on FreeBSD16052
+Node: Top693
+Node: What is IPMI1303
+Node: What is FreeIPMI?2492
+Node: How did FreeIPMI start?3028
+Node: What operating systems does FreeIPMI run on?4364
+Node: FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil5041
+Node: What is special about FreeIPMI5912
+Node: Serial Over LAN (SOL) / Ipmiconsole Setup12116
+Node: SSIF Driver Configuration13844
+Node: x86-64 Compilation15394
+Node: libgcrypt requirement16070
+Node: Installing FreeIPMI on FreeBSD16716
 
 End Tag Table

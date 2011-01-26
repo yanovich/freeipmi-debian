@@ -11,23 +11,19 @@ Update configuration information from a config file or key pairs.
 \fB\-d\fR, \fB\-\-diff\fR
 Show differences between stored information and a config file or key pairs.
 .TP
-\fB\-n\fR FILENAME, \fB\-\-filename\fR=\fIFILENAME\fR
+\fB\-n\fR \fIFILENAME\fR, \fB\-\-filename\fR=\fIFILENAME\fR
 Specify a config file for checkout/commit/diff.
 .TP
-\fB\-e\fR "KEY=VALUE", \fB\-\-key\-pair=\fR"KEY=VALUE"
+\fB\-e\fR \fI"KEY=VALUE"\fR, \fB\-\-key\-pair\fR=\fI"KEY=VALUE"\fR
 Specify KEY=VALUE pairs for checkout/commit/diff.  Specify KEY by
 SectionName:FieldName.  This option can be used multiple times.  On
 commit, any KEY=VALUE pairs will overwrite any pairs specified in a
 file with \fB\-\-filename\fR.
 .TP
-\fB\-S\fR "SECTION", \fB\-\-section=\fR"SECTION"
+\fB\-S\fR \fISECTION\fR, \fB\-\-section\fR=\fISECTION\fR
 Specify a SECTION for checkout.  This option can be used multiple times.
 .TP
 \fB\-L\fR, \fB\-\-listsections\fR
-List available sections for checkout.
-.TP
-\fB\-v\fR, \fB\-\-verbose\fR
-Output additional detailed information.  In general will output more
-detailed information about what fields can and cannot be checked out,
-committed, etc.  When used with \-\-checkout, additional uncommon,
-unconfigurable, and/or unused fields may be output.
+List available sections for checkout.  Some sections in the list may
+not be checked out by default and may require verbosity to be
+increased.

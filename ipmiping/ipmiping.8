@@ -1,7 +1,7 @@
 
 
 .\"#############################################################################
-.\"$Id: ipmiping.8.pre.in,v 1.15.20.1 2009-12-23 21:24:13 chu11 Exp $
+.\"$Id: ipmiping.8.pre.in,v 1.18 2010-06-30 21:56:36 chu11 Exp $
 .\"#############################################################################
 .\"  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
 .\"  Copyright (C) 2003-2007 The Regents of the University of California.
@@ -14,7 +14,7 @@
 .\"
 .\"  Ipmiping is free software; you can redistribute it and/or modify it under
 .\"  the terms of the GNU General Public License as published by the Free
-.\"  Software Foundation; either version 2 of the License, or (at your option)
+.\"  Software Foundation; either version 3 of the License, or (at your option)
 .\"  any later version.
 .\"  
 .\"  Ipmiping is distributed in the hope that it will be useful, but WITHOUT 
@@ -25,7 +25,7 @@
 .\"  You should have received a copy of the GNU General Public License along
 .\"  with Ipmiping.  If not, see <http://www.gnu.org/licenses/>.
 .\"############################################################################
-.TH IPMIPING 8 "2010-12-06" "ipmiping 0.8.12" "System Commands"
+.TH IPMIPING 8 "2011-01-20" "ipmiping 1.0.1" "System Commands"
 .SH "NAME"
 ipmiping \- send IPMI Get Authentication Capabilitiy request to network hosts
 .SH "SYNOPSIS"
@@ -45,41 +45,41 @@ from the remote host. Otherwise, it exists with a value of 1.
 .SH "OPTIONS"
 The following options are available
 .TP
-.I "-h"
+\fB\-h\fR
 Output help menu.
 .TP
-.I "-V"
+\fB\-V\fR
 Output version.
 .TP
-.I "-c count"
+\fB\-c\fR \fIcount\fR
 Stop after sending
 .I count
 packets.
 .TP
-.I "-i interval"
+\fB\-i\fR \fIinterval\fR
 Wait
 .I interval
 seconds between sending each packet. The default is to wait for one
 second between each packet.
 .TP
-.I "-I interface address"
+\fB\-I\fR \fIinterface address\fR
 Set source address to specified interface address. Argument may
 be numeric IP address or name of device.
 .TP
-.I "-t timeout"
+\fB\-t\fR \fItimeout\fR
 Time to wait for a response, in seconds. Default is five seconds.
 .TP
-.I "-v"
+\fB\-v\fR
 Verbose output.
 .TP
-.I "-s num"
+\fB\-s\fR \fInum\fR
 Specify an initial starting sequence number. The default is to use a
 random initial sequence number.
 .TP
-.I "-d"
+\fB\-d\fR
 Turn on debugging.
 .TP
-.I "-r version"
+\fB\-r\fR \fIversion\fR
 Specify IPMI version. Available options are "1.5" and "2.0". Default
 is to use "1.5". Note that packets will always be sent with the IPMI
 1.5 protocol, but IPMI 1.5 vs IPMI 2.0 relevant fields will be
@@ -103,7 +103,7 @@ Copyright (C) 2003-2007 The Regents of the University of California.
 .PP
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at
+the Free Software Foundation; either version 3 of the License, or (at
 your option) any later version.
 .SH "ORIGIN"
 Command and manpage based off

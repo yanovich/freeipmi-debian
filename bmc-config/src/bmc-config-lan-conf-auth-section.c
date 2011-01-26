@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2003-2010 FreeIPMI Core Team
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
-*/
+ * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -64,7 +64,8 @@ struct bmc_authentication_level {
 };
 
 static config_err_t
-_get_authentication_type_support (bmc_config_state_data_t *state_data)
+_get_authentication_type_support (bmc_config_state_data_t *state_data,
+				  const char *section_name)
 {
   fiid_obj_t obj_cmd_rs = NULL;
   uint64_t val;
@@ -73,6 +74,20 @@ _get_authentication_type_support (bmc_config_state_data_t *state_data)
   uint8_t channel_number;
 
   assert (state_data);
+  assert (section_name);
+
+  if ((ret = get_lan_channel_number (state_data, section_name, &channel_number)) != CONFIG_ERR_SUCCESS)
+    {
+      rv = ret;
+      goto cleanup;
+    }
+  
+  if (state_data->authentication_type_initialized
+      && state_data->authentication_type_channel_number == channel_number)
+    goto out;
+  
+  state_data->authentication_type_initialized = 0;
+  state_data->authentication_type_channel_number = 0;
 
   if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_get_lan_configuration_parameters_authentication_type_support_rs)))
     {
@@ -83,17 +98,11 @@ _get_authentication_type_support (bmc_config_state_data_t *state_data)
       goto cleanup;
     }
 
-  if ((ret = get_lan_channel_number (state_data, &channel_number)) != CONFIG_ERR_SUCCESS)
-    {
-      rv = ret;
-      goto cleanup;
-    }
-
   if (ipmi_cmd_get_lan_configuration_parameters_authentication_type_support (state_data->ipmi_ctx,
                                                                              channel_number,
                                                                              IPMI_GET_LAN_PARAMETER,
-                                                                             CONFIG_SET_SELECTOR,
-                                                                             CONFIG_BLOCK_SELECTOR,
+                                                                             IPMI_LAN_CONFIGURATION_PARAMETERS_NO_SET_SELECTOR,
+                                                                             IPMI_LAN_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                              obj_cmd_rs) < 0)
     {
       if (state_data->prog_data->args->config_args.common.debug)
@@ -161,6 +170,7 @@ _get_authentication_type_support (bmc_config_state_data_t *state_data)
   state_data->authentication_type_oem_proprietary = val;
 
   state_data->authentication_type_initialized++;
+ out:
   rv = CONFIG_ERR_SUCCESS;
  cleanup:
   fiid_obj_destroy (obj_cmd_rs);
@@ -169,6 +179,7 @@ _get_authentication_type_support (bmc_config_state_data_t *state_data)
 
 static config_err_t
 _get_authentication_type_enables (bmc_config_state_data_t *state_data,
+				  const char *section_name,
                                   struct bmc_authentication_level *al)
 {
   fiid_obj_t obj_cmd_rs = NULL;
@@ -178,6 +189,7 @@ _get_authentication_type_enables (bmc_config_state_data_t *state_data,
   uint8_t channel_number;
 
   assert (state_data);
+  assert (section_name);
   assert (al);
 
   if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_get_lan_configuration_parameters_authentication_type_enables_rs)))
@@ -189,7 +201,7 @@ _get_authentication_type_enables (bmc_config_state_data_t *state_data,
       goto cleanup;
     }
 
-  if ((ret = get_lan_channel_number (state_data, &channel_number)) != CONFIG_ERR_SUCCESS)
+  if ((ret = get_lan_channel_number (state_data, section_name, &channel_number)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
       goto cleanup;
@@ -198,8 +210,8 @@ _get_authentication_type_enables (bmc_config_state_data_t *state_data,
   if (ipmi_cmd_get_lan_configuration_parameters_authentication_type_enables (state_data->ipmi_ctx,
                                                                              channel_number,
                                                                              IPMI_GET_LAN_PARAMETER,
-                                                                             CONFIG_SET_SELECTOR,
-                                                                             CONFIG_BLOCK_SELECTOR,
+                                                                             IPMI_LAN_CONFIGURATION_PARAMETERS_NO_SET_SELECTOR,
+                                                                             IPMI_LAN_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                              obj_cmd_rs) < 0)
     {
       if (state_data->prog_data->args->config_args.common.debug)
@@ -474,6 +486,7 @@ _get_authentication_type_enables (bmc_config_state_data_t *state_data,
 
 static config_err_t
 _set_authentication_type_enables (bmc_config_state_data_t *state_data,
+				  const char *section_name,
                                   struct bmc_authentication_level *al)
 {
   fiid_obj_t obj_cmd_rs = NULL;
@@ -482,6 +495,7 @@ _set_authentication_type_enables (bmc_config_state_data_t *state_data,
   uint8_t channel_number;
 
   assert (state_data);
+  assert (section_name);
   assert (al);
 
   if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_lan_configuration_parameters_rs)))
@@ -493,7 +507,7 @@ _set_authentication_type_enables (bmc_config_state_data_t *state_data,
       goto cleanup;
     }
 
-  if ((ret = get_lan_channel_number (state_data, &channel_number)) != CONFIG_ERR_SUCCESS)
+  if ((ret = get_lan_channel_number (state_data, section_name, &channel_number)) != CONFIG_ERR_SUCCESS)
     {
       rv = ret;
       goto cleanup;
@@ -670,6 +684,7 @@ _authentication_level_ptr (bmc_config_state_data_t *state_data,
                            struct bmc_authentication_level *al)
 {
   assert (state_data);
+  assert (section_name);
   assert (key_name);
   assert (al);
 
@@ -744,21 +759,19 @@ _authentication_type_enable_available (bmc_config_state_data_t *state_data,
   config_err_t ret;
 
   assert (state_data);
+  assert (section_name);
   assert (key_name);
   assert (available);
 
   /* default to always allow checkout */
   *available = 1;
 
-  /* always output under verbose mode */
-  if (state_data->prog_data->args->config_args.verbose_count)
+  /* always output under very verbose mode */
+  if (state_data->prog_data->args->config_args.verbose_count > 1)
     return (CONFIG_ERR_SUCCESS);
 
-  if (!state_data->authentication_type_initialized)
-    {
-      if ((ret = _get_authentication_type_support (state_data)) != CONFIG_ERR_SUCCESS)
-        return (ret);
-    }
+  if ((ret = _get_authentication_type_support (state_data, section_name)) != CONFIG_ERR_SUCCESS)
+    return (ret);
 
   if (state_data->authentication_type_initialized)
     {
@@ -787,13 +800,20 @@ _authentication_level_checkout (const char *section_name,
                                 struct config_keyvalue *kv,
                                 void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct bmc_authentication_level al;
   config_err_t ret;
   unsigned int available_flag = 1; /* default is to always allow checkout */
   uint8_t *al_ptr;
 
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+
+  state_data = (bmc_config_state_data_t *)arg;
+
   if ((ret = _get_authentication_type_enables (state_data,
+					       section_name,
                                                &al)) != CONFIG_ERR_SUCCESS)
     return (ret);
 
@@ -829,12 +849,19 @@ _authentication_level_commit (const char *section_name,
                               const struct config_keyvalue *kv,
                               void *arg)
 {
-  bmc_config_state_data_t *state_data = (bmc_config_state_data_t *)arg;
+  bmc_config_state_data_t *state_data;
   struct bmc_authentication_level al;
   config_err_t ret;
   uint8_t *flag;
 
+  assert (section_name);
+  assert (kv);
+  assert (arg);
+
+  state_data = (bmc_config_state_data_t *)arg;
+
   if ((ret = _get_authentication_type_enables (state_data,
+					       section_name,
                                                &al)) != CONFIG_ERR_SUCCESS)
     return (ret);
 
@@ -847,6 +874,7 @@ _authentication_level_commit (const char *section_name,
   *flag = same (kv->value_input, "yes");
 
   if ((ret = _set_authentication_type_enables (state_data,
+					       section_name,
                                                &al)) != CONFIG_ERR_SUCCESS)
     return (ret);
 
@@ -854,7 +882,9 @@ _authentication_level_commit (const char *section_name,
 }
 
 struct config_section *
-bmc_config_lan_conf_auth_section_get (bmc_config_state_data_t *state_data)
+bmc_config_lan_conf_auth_section_get (bmc_config_state_data_t *state_data,
+				      unsigned int config_flags,
+				      int channel_index)
 {
   struct config_section *section = NULL;
   char *section_comment =
@@ -866,14 +896,19 @@ bmc_config_lan_conf_auth_section_get (bmc_config_state_data_t *state_data)
     "to allow \"None\" authentication to work.  Some motherboards do not "
     "allow you to enable OEM authentication, so you may wish to set all "
     "OEM related fields to \"No\".";
+  char *section_name_base_str = "Lan_Conf_Auth";
 
-  if (!(section = config_section_create (state_data->pstate,
-                                         "Lan_Conf_Auth",
-                                         "Lan_Conf_Auth",
-                                         section_comment,
-                                         0,
-                                         NULL,
-                                         NULL)))
+  assert (state_data);
+
+  if (!(section = config_section_multi_channel_create (state_data->pstate,
+						       section_name_base_str,
+						       section_comment,
+						       NULL,
+						       NULL,
+						       config_flags,
+						       channel_index,
+						       state_data->lan_channel_numbers,
+						       state_data->lan_channel_numbers_count)))
     goto cleanup;
 
   if (config_section_add_key (state_data->pstate,

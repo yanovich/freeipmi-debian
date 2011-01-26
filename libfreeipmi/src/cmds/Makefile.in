@@ -42,10 +42,15 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
+	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sdr_cache_dir.m4 \
 	$(top_srcdir)/config/ac_ipmi_monitoring_sensor_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -62,6 +67,7 @@ am_libcmds_la_OBJECTS = libcmds_la-ipmi-bmc-watchdog-timer-cmds.lo \
 	libcmds_la-ipmi-fru-inventory-device-cmds.lo \
 	libcmds_la-ipmi-lan-cmds.lo \
 	libcmds_la-ipmi-messaging-support-cmds.lo \
+	libcmds_la-ipmi-oem-intel-node-manager-cmds.lo \
 	libcmds_la-ipmi-pef-and-alerting-cmds.lo \
 	libcmds_la-ipmi-rmcpplus-support-and-payload-cmds.lo \
 	libcmds_la-ipmi-sdr-repository-cmds.lo \
@@ -117,6 +123,7 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 FREEIPMI_CONFIG_FILE_DEFAULT = @FREEIPMI_CONFIG_FILE_DEFAULT@
+FREEIPMI_SYSCONFDIR = @FREEIPMI_SYSCONFDIR@
 GCRYPT_LIBS = @GCRYPT_LIBS@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
@@ -126,14 +133,20 @@ INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTERPRET_SEL_CONFIG_FILE_DEFAULT = @INTERPRET_SEL_CONFIG_FILE_DEFAULT@
+INTERPRET_SENSOR_CONFIG_FILE_DEFAULT = @INTERPRET_SENSOR_CONFIG_FILE_DEFAULT@
+IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
+IPMIMONITORINGSBINDIR = @IPMIMONITORINGSBINDIR@
+IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
-IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT = @IPMI_MONITORING_SENSOR_CONFIG_FILE_DEFAULT@
+IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
 LDFLAGS = @LDFLAGS@
 LIBFREEIPMI_VERSION = @LIBFREEIPMI_VERSION@
 LIBFREEIPMI_VERSION_INFO = @LIBFREEIPMI_VERSION_INFO@
+LIBIPMICONSOLE_CONFIG_FILE_DEFAULT = @LIBIPMICONSOLE_CONFIG_FILE_DEFAULT@
 LIBIPMICONSOLE_VERSION_INFO = @LIBIPMICONSOLE_VERSION_INFO@
 LIBIPMIDETECT_VERSION_INFO = @LIBIPMIDETECT_VERSION_INFO@
 LIBIPMIMONITORING_VERSION_INFO = @LIBIPMIMONITORING_VERSION_INFO@
@@ -225,6 +238,7 @@ libcmds_la_SOURCES = \
 	ipmi-fru-inventory-device-cmds.c \
 	ipmi-lan-cmds.c \
 	ipmi-messaging-support-cmds.c \
+	ipmi-oem-intel-node-manager-cmds.c \
 	ipmi-pef-and-alerting-cmds.c \
 	ipmi-rmcpplus-support-and-payload-cmds.c \
 	ipmi-sdr-repository-cmds.c \
@@ -293,6 +307,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcmds_la-ipmi-fru-inventory-device-cmds.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcmds_la-ipmi-lan-cmds.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcmds_la-ipmi-messaging-support-cmds.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcmds_la-ipmi-oem-intel-node-manager-cmds.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcmds_la-ipmi-pef-and-alerting-cmds.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcmds_la-ipmi-rmcpplus-support-and-payload-cmds.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcmds_la-ipmi-sdr-repository-cmds.Plo@am__quote@
@@ -378,6 +393,13 @@ libcmds_la-ipmi-messaging-support-cmds.lo: ipmi-messaging-support-cmds.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-messaging-support-cmds.c' object='libcmds_la-ipmi-messaging-support-cmds.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcmds_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcmds_la-ipmi-messaging-support-cmds.lo `test -f 'ipmi-messaging-support-cmds.c' || echo '$(srcdir)/'`ipmi-messaging-support-cmds.c
+
+libcmds_la-ipmi-oem-intel-node-manager-cmds.lo: ipmi-oem-intel-node-manager-cmds.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcmds_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcmds_la-ipmi-oem-intel-node-manager-cmds.lo -MD -MP -MF "$(DEPDIR)/libcmds_la-ipmi-oem-intel-node-manager-cmds.Tpo" -c -o libcmds_la-ipmi-oem-intel-node-manager-cmds.lo `test -f 'ipmi-oem-intel-node-manager-cmds.c' || echo '$(srcdir)/'`ipmi-oem-intel-node-manager-cmds.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcmds_la-ipmi-oem-intel-node-manager-cmds.Tpo" "$(DEPDIR)/libcmds_la-ipmi-oem-intel-node-manager-cmds.Plo"; else rm -f "$(DEPDIR)/libcmds_la-ipmi-oem-intel-node-manager-cmds.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-oem-intel-node-manager-cmds.c' object='libcmds_la-ipmi-oem-intel-node-manager-cmds.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcmds_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libcmds_la-ipmi-oem-intel-node-manager-cmds.lo `test -f 'ipmi-oem-intel-node-manager-cmds.c' || echo '$(srcdir)/'`ipmi-oem-intel-node-manager-cmds.c
 
 libcmds_la-ipmi-pef-and-alerting-cmds.lo: ipmi-pef-and-alerting-cmds.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcmds_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libcmds_la-ipmi-pef-and-alerting-cmds.lo -MD -MP -MF "$(DEPDIR)/libcmds_la-ipmi-pef-and-alerting-cmds.Tpo" -c -o libcmds_la-ipmi-pef-and-alerting-cmds.lo `test -f 'ipmi-pef-and-alerting-cmds.c' || echo '$(srcdir)/'`ipmi-pef-and-alerting-cmds.c; \

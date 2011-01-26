@@ -1,13 +1,173 @@
-FreeIPMI 0.8.12 - 12/06/10
+FreeIPMI 1.0.1 - 01/20/11
+-------------------------
+
+Major Changes, Additions, and Features
+--------------------------------------
+o Remove ipmimonitoring tool.  Tool is now superseded by ipmi-sensors
+  and the new --output-sensor-state option.
+o Support --output-event-state option for ipmi-sel to support SEL event
+  interpretation.
+o All config-tools now support multi-channel configuration under
+  verbose mode.
+o Re-architect libipmimonitoring to support all defined IPMI sensor
+  types, OEM bitmasks, and OEM interpretations.
+o Add SEL monitoring support to libipmimonitoring.
+o Support new 'interpret' sub-library in libfreeipmi.
+o Support interpretation rules for sensors when no states/events occur.
+o Support interpretation rules for out of spec sensor states/events.
+o Support interpretation rules for OEM sensors and events.
+o Move all config files to /etc/freeipmi/.  Support legacy config
+  files for backwards compatibility.
+o Support serial keepalive in ipmiconsole to check if serial
+  connection has remained alive across system reboots.
+o Create symlinks and manpage pointers for 'ipmi-power', 'ipmi-ping',
+  'rmcp-ping', 'ipmi-console', and 'ipmi-detect' to give some
+  additional consistency to the tool naming.
+o Various documentation updates.
+o Update to support DCMI 1.1.
+o Update all licensing information to GPLv3.
+
+Tools - Detailed Enhancements/Changes/Fixes
+-------------------------------------------
+o ipmi-sensors
+  - Support --output-sensor-state option.
+  - Support --sensor-state-config-file option.
+  - Support --output-event-bitmask option.
+  - Support Intel Node Manager sensors.
+  - Some sensor states may now report 'N/A' if an invalid sensor event
+    occurred.
+  - Report 'N/A' instead of 'Unknown' is requested sensor does not exist
+    on motherboard.
+  - Support number input for --sensor-types and
+    --exclude-sensor-types.
+  - The "Unrecognized State" event string is now output as
+    "Unrecognized Event = X" or "OEM Event = X" where X is the event
+    bitmask.
+o ipmi-sel
+  - Support --output-event-state option.
+  - Support --event-state-config-file option.
+  - Support --sensor-types option.
+  - Support --exclude-sensor-types option.
+  - Support --output-manufacturer-id option.
+  - Support --date-range option.
+  - Support --exclude-date-range option.
+  - Alter OEM record output to align with columns by outputting "N/A"
+    in appropriate fields and putting manufacturer ID in event output.
+o ipmi-dcmi
+  - Support --set-asset-tag option.
+  - Support --get-management-controller-identifier-string option.
+  - Support --set-management-controller-identifier-string option.
+o ipmiconsole
+  - Support --serial-keepalive option.
+  - Rework 'intel20' workaround to not allow a non two-part authentication.
+o ipmipower
+  - Rework 'intel20' workaround to not allow a non two-part authentication.
+o bmc-config
+  - Support --lan-channel-number.
+  - Support --serial-channel-number.
+  - Support --sol-channel-number.
+  - Support 'solchannelassumelanchannel' workaround.
+  - Support IPv4 header parameter configuration under verbose mode.
+  - Support RMCP port configuration under verbose mode.
+  - Move Vlan configuration to output only on verbose.
+  - Show verbose-only sections in --list.
+  - Do not output section comments if key-pair specified on command line.
+  - Allow checkout of sections/key-pairs if specified on command line,
+    even if not available by default.
+  - Support very-verbose output by specifying -vv.  Move some output
+    from verbose output to very verbose output.
+o ipmi-pef-config
+  - Support --lan-channel-number.
+  - Do not output section comments if key-pair specified on command line.
+  - Allow checkout of sections/key-pairs if specified on command line,
+    even if not available by default.
+  - Support very-verbose output by specifying -vv.  Move some output
+    from verbose output to very verbose output.
+o ipmi-sensors-config
+  - Do not output section comments if key-pair specified on command line.
+  - Allow checkout of sections/key-pairs if specified on command line,
+    even if not available by default.
+  - Support very-verbose output by specifying -vv.  Move some output
+    from verbose output to very verbose output.
+o ipmi-chassis-config
+  - Do not output section comments if key-pair specified on command line.
+  - Allow checkout of sections/key-pairs if specified on command line,
+    even if not available by default.
+  - Support very-verbose output by specifying -vv.  Move some output
+    from verbose output to very verbose output.
+o ipmi-oem
+  - Support Intel get/set-smtp-config.
+  - Support basic Intel Node Manager OEM commands.
+o ipmimonitoring
+  - Removed tool.  Tool is now superseded by ipmi-sensors and the new
+    --output-sensor-state option.
+  - Legacy output support maintained via
+    --ipmimonitoring-legacy-output option.
+o ipmi-locate
+  - Do not output system defaults by default.
+  - Support --defaults option.
+  
+Libraries - Detailed Enhancements/Changes/Fixes
+-----------------------------------------------
+o libfreeipmi
+  - Support new 'interpret' sub-library.
+  - Support new 'payload' sub-library and templates.  Split off SOL
+    Payload templates, functions, etc. into this section.
+  - Support new 'oem' sub-library and templates.
+  - Support OEM Intel Node Manager extensions.
+  - 'sel-parse' library now does not require valid ipmi_ctx.
+    Functions performing ipmi communication will simply error.
+  - Rework 'intel20' workaround to not allow a non two-part authentication.
+  - Add DCMI 1.1 support.
+  - Split workaround flags for inband, IPMI 1.5, and IPMI 2.0 to save bits.
+  - Improve SDR caching speed for many modern motherboards.
+  - Support more IPMI templates.
+  - Fix some API differences from spec.
+  - Fix some template bugs/typos.
+  - Rename number of macros for consistency to IPMI spec.
+o libipmimonitoring
+  - Add SEL monitoring support to libipmimonitoring.
+  - Re-architect to support all defined IPMI sensor types.
+  - Re-architect to use 'interpret' sub-library.
+  - Rename a number of functions to differentiate sensor vs. SEL
+    functions.
+  - Support percent (i.e. '%') units.
+  - Support OEM bitmasks and bitmask strings.
+    - Add bitmask type IPMI_MONITORING_SENSOR_BITMASK_TYPE_OEM.
+    - Add ipmi_monitoring_read_sensor_bitmask_string().
+    - Remove ipmi_monitoring_sensor_bitmask_string().
+  - Through libfreeipmi 'interpret' sub-library, support OEM sensor
+    interpretations.  Initial OEM interpretations include:
+    - Dell Poweredge R610/R710
+    - Supermicro X8DTH
+  - Support IPMI_MONITORING_ERR_SENSOR_CONFIG_FILE_DOES_NOT_EXIST error code.
+  - Remove unused IPMI_MONITORING_ERR_CONFIG_FILE_PARSE error code.
+  - Split workaround flags for inband, IPMI 1.5, and IPMI 2.0 to save bits.
+o libipmiconsole
+  - Support serial keepalive to check for loss of serial connection.
+  - Support libipmiconsole.conf defaults file.
+  - Support default thread_count of 4 if zero input for thread_count.
+
+Contributions
+-------------
+o ganglia_ipmi_sensors.pl
+  - Updated for new output format and options.
+  - Support ability to monitor sensor state.
+  - Support -T and -t options to allow option to monitor only sensor
+    state or sensor readings.
+o ganglia_ipmimonitoring.pl
+  - Removed.  Superseded by ganglia_ipmi_sensors.pl.
+o nagios_ipmi_sensors.pl
+  - New tool to replace nagios_ipmimonitoring.pl.
+o nagios_ipmimonitoring.pl
+  - Removed.  Superseded by nagios_ipmi_sensors.pl.
+
+FreeIPMI 0.8.12 - 10/28/10
 --------------------------
-o In bmc-config, workaround RMCP+ Privilege Level configuration
-  compliance bugs on HP DL145 servers.
-o In ipmi-chassis-config, after configuring boot flags, set valid bits
-  appropriately.
+o In bmc-config, workaround RMCP+ Privilege Level configuration bugs
+  on HP DL145 servers.
 o Fix N/A output corner case in ipmi-sel.
 o Support Supermicro X8DTU-6+ motherboard OEM sensors.
-o Fix FRU date/time calculation bug that did not account for leap
-  years.
 
 FreeIPMI 0.8.11 - 10/28/10
 --------------------------
