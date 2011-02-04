@@ -1,0 +1,1 @@
+* Ship ./contrib/ganglia/*, e.g. ganglia_ipmimonitoring.pl (superseeded by ganglia_ipmi_sensors.pl)
