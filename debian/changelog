@@ -1,3 +1,10 @@
+freeipmi (0.8.12-2) unstable; urgency=low
+
+  * Upload to unstable: this upstream version is robust to 
+    --no-add-needed (Closes: #615716)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 27 Feb 2011 21:03:36 -0500
+
 freeipmi (0.8.12-1) experimental; urgency=low
 
   * [b3c7c12] Imported Upstream version 0.8.12
