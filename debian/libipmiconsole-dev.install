@@ -1,5 +1,4 @@
 usr/lib/libipmiconsole.a
-usr/lib/libipmiconsole.la
 usr/lib/libipmiconsole.so
 usr/include/ipmiconsole.h
 usr/share/doc/freeipmi/freeipmi-libraries.txt usr/share/doc/libipmiconsole-dev/

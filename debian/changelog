@@ -1,3 +1,11 @@
+freeipmi (0.8.12-2.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Stop shipping libtool la files in binary packages. Closes: #610134
+    http://wiki.debian.org/ReleaseGoals/LAFileRemoval
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 09 Apr 2011 14:38:42 +0200
+
 freeipmi (0.8.12-2) unstable; urgency=low
 
   * Upload to unstable: this upstream version is robust to 
