@@ -1,3 +1,11 @@
+freeipmi (0.8.12-3) unstable; urgency=low
+
+  * Drop build-depend on libreadline since it is not used any longer
+    (Closes: #634440). Thanks Lucas!
+  * Re-formated Build-Depends into mutliple lines
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 18 Jul 2011 19:29:26 -0400
+
 freeipmi (0.8.12-2.1) unstable; urgency=low
 
   * Non-maintainer upload.

@@ -2,8 +2,12 @@ Source: freeipmi
 Section: admin
 Priority: extra
 Maintainer: Yaroslav Halchenko <debian@onerussian.com>
-Build-Depends: debhelper (>= 7.0.50~), autotools-dev, libreadline5-dev, libgcrypt11-dev, chrpath,
- autoconf, automake, libtool, texinfo
+Build-Depends: debhelper (>= 7.0.50~),
+ autotools-dev, 
+ libgcrypt11-dev,
+ chrpath,
+ autoconf, automake, libtool,
+ texinfo
 Standards-Version: 3.9.1
 Homepage: http://www.gnu.org/software/freeipmi/
 Vcs-Browser: http://git.onerussian.com/?p=deb/freeipmi.git
