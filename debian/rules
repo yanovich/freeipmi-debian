@@ -18,24 +18,24 @@ override_dh_clean:
 
 override_dh_auto_install:
 	dh_auto_install
-	: # Fix badly installed upstream
-	mv $(CURDIR)/debian/tmpvar  $(CURDIR)/debian/tmp/var
-	chmod 644 $(CURDIR)/debian/tmp/etc/ipmi_monitoring_sensors.conf
+	### chmod 644 $(CURDIR)/debian/tmp/etc/ipmi_monitoring_sensors.conf
 	: # since it containts sensitive information
-	chmod 640 $(CURDIR)/debian/tmp/etc/freeipmi.conf
-	chown root.adm $(CURDIR)/debian/tmp/etc/freeipmi.conf
+	chmod 640 $(CURDIR)/debian/tmp/etc/freeipmi/freeipmi.conf
+	chown root.adm $(CURDIR)/debian/tmp/etc/freeipmi/freeipmi.conf
 	: # Clean up duplicate/unneeded copyright/installation files
-	rm $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/COPYING*
-	rm $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/DISCLAIMER*
-	rm $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/INSTALL*
-	rm $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/ChangeLog*
+	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/COPYING*
+	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/DISCLAIMER*
+	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/INSTALL*
+	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/ChangeLog*
 
 	: # chrpath -- operate only on files (not on still dangling symlinks)
-	find  $(CURDIR)/debian/*/usr/sbin/* -type f | xargs chrpath -d
+	/usr/bin/find  $(CURDIR)/debian/*/usr/sbin -type f \
+	| xargs grep -L '#!/bin/sh' \
+	| xargs chrpath -d
 	chrpath -d $(CURDIR)/debian/*/usr/lib/*.so.*
 
 	: # assure no dir.gz
-	-rm  $(CURDIR)/debian/tmp/usr/share/info/dir
+	rm -f $(CURDIR)/debian/tmp/usr/share/info/dir
 
 
 	: # Copy default file for bmc-watchdog
