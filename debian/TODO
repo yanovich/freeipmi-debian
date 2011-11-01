@@ -1,1 +1,35 @@
+-*- mode: org -*-
+
 * Ship ./contrib/ganglia/*, e.g. ganglia_ipmimonitoring.pl (superseeded by ganglia_ipmi_sensors.pl)
+
+* Changes 0.8.x -> 1.x:
+** removed ipmimonitoring (in favor of ipmi-sensors)
+** configs moved under /etc/freeipmi
+
+Was before (including init scripts):
+neurodebian@head2:~/deb/builds/freeipmi/0.8.12-3-noreadline$ for x in *deb; do echo $x; dpkg -c $x | grep etc ;done
+freeipmi-bmc-watchdog_0.8.12-3_amd64.deb
+drwxr-xr-x root/root         0 2011-07-18 22:35 ./etc/
+drwxr-xr-x root/root         0 2011-07-18 22:35 ./etc/init.d/
+-rwxr-xr-x root/root      6424 2011-07-18 22:28 ./etc/init.d/bmc-watchdog
+drwxr-xr-x root/root         0 2011-07-18 22:35 ./etc/logrotate.d/
+-rw-r--r-- root/root       254 2011-07-18 22:35 ./etc/logrotate.d/bmc-watchdog
+drwxr-xr-x root/root         0 2011-07-18 22:35 ./etc/default/
+-rw-r--r-- root/root      1502 2011-07-18 22:35 ./etc/default/bmc-watchdog
+
+freeipmi-common_0.8.12-3_all.deb
+drwxr-xr-x root/root         0 2011-07-18 22:35 ./etc/
+-rw-r--r-- root/root     13783 2010-10-20 17:07 ./etc/freeipmi.conf
+
+freeipmi-ipmidetect_0.8.12-3_amd64.deb
+drwxr-xr-x root/root         0 2011-07-18 22:35 ./etc/
+drwxr-xr-x root/root         0 2011-07-18 22:35 ./etc/default/
+-rw-r--r-- root/root       121 2011-07-18 22:28 ./etc/default/ipmidetectd
+drwxr-xr-x root/root         0 2011-07-18 22:35 ./etc/init.d/
+-rwxr-xr-x root/root      6440 2011-07-18 22:28 ./etc/init.d/ipmidetectd
+-rw-r--r-- root/root       589 2011-07-18 22:35 ./etc/ipmidetectd.conf
+
+libipmimonitoring4_0.8.12-3_amd64.deb
+drwxr-xr-x root/root         0 2011-07-18 22:35 ./etc/
+-rw-r--r-- root/root     23432 2011-07-18 22:35 ./etc/ipmi_monitoring_sensors.conf
+

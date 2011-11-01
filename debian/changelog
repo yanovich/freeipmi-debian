@@ -1,3 +1,10 @@
+freeipmi (1.0.8-1~pre1) UNRELEASED; urgency=low
+
+  * New upstream release (Closes: #635508)
+    - GPLv3 licensed now
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 01 Nov 2011 14:04:45 -0400
+
 freeipmi (0.8.12-3) unstable; urgency=low
 
   * Drop build-depend on libreadline since it is not used any longer
