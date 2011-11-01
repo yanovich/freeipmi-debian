@@ -35,6 +35,26 @@ extern "C" {
 #include <freeipmi/freeipmi.h>
 
 /*
+ * Libipmiconsole version
+ *
+ * MAJOR - Incremented when interfaces are changed or removed.
+ *         Interfaces may be binary incompatible.  When incremented, MINOR
+ *         and PATCH are zeroed.
+ *
+ * MINOR - Incremented when interfaces are added.  Interfaces are
+ *         binary compatible with older minor versions.  When incremented,
+ *         PATCH is zeroed.
+ *
+ * PATCH - Incremented when interfaces are not changed.  Typically
+ *         incremented due to bug fixes or minor features.  Interfaces are
+ *         forward and backward compatible to other PATCH versions.
+ */
+
+#define LIBIPMICONSOLE_VERSION_MAJOR 1
+#define LIBIPMICONSOLE_VERSION_MINOR 1
+#define LIBIPMICONSOLE_VERSION_PATCH 0
+
+/*
  * IPMI Console Error Codes
  */
 #define IPMICONSOLE_ERR_SUCCESS                               0
@@ -90,12 +110,15 @@ extern "C" {
  * SYSLOG       - Output debugging to the Syslog
  * FILE         - Output debugging to the default debug file
  * IPMI_PACKETS - Dump IPMI Packets too
+ * DEFAULT      - Informs library to use default, may it be standard
+ *                or configured via libipmiconsole.conf.
  */
 #define IPMICONSOLE_DEBUG_STDOUT           0x00000001
 #define IPMICONSOLE_DEBUG_STDERR           0x00000002
 #define IPMICONSOLE_DEBUG_SYSLOG           0x00000004
 #define IPMICONSOLE_DEBUG_FILE             0x00000008
 #define IPMICONSOLE_DEBUG_IPMI_PACKETS     0x00000010
+#define IPMICONSOLE_DEBUG_DEFAULT          0xFFFFFFFF
 
 /*
  * IPMI Privilege Constants
@@ -179,6 +202,11 @@ extern "C" {
  * of SOL during the protocol setup.  It works around remote systems
  * that do not properly support this command.
  *
+ * DEFAULT
+ *
+ * Informs library to use default, may it be the standard default or
+ * a default configured via libipmiconsole.conf.
+ *
  * Note: The non-logical bitmask order below is set for future
  * expansion and matching w/ libfreeipmi.
  */
@@ -191,6 +219,7 @@ extern "C" {
 #define IPMICONSOLE_WORKAROUND_IGNORE_SOL_PAYLOAD_SIZE         0x01000000
 #define IPMICONSOLE_WORKAROUND_IGNORE_SOL_PORT                 0x02000000
 #define IPMICONSOLE_WORKAROUND_SKIP_SOL_ACTIVATION_STATUS      0x04000000
+#define IPMICONSOLE_WORKAROUND_DEFAULT                         0xFFFFFFFF
 
 /*
  * Engine Flags
@@ -267,11 +296,16 @@ extern "C" {
  * NUL character byte may affect the remote system depending on what
  * input it may or may not be expecting.
  * 
+ * DEFAULT
+ *
+ * Informs library to use default, may it be the standard default or
+ * a default configured via libipmiconsole.conf.
  */
 #define IPMICONSOLE_ENGINE_CLOSE_FD                  0x00000001
 #define IPMICONSOLE_ENGINE_OUTPUT_ON_SOL_ESTABLISHED 0x00000002
 #define IPMICONSOLE_ENGINE_LOCK_MEMORY               0x00000004
 #define IPMICONSOLE_ENGINE_SERIAL_KEEPALIVE          0x00000008
+#define IPMICONSOLE_ENGINE_DEFAULT                   0xFFFFFFFF
 
 /*
  * Behavior Flags
@@ -295,9 +329,15 @@ extern "C" {
  *
  * Only attempt to deactivate the SOL session.  If an SOL session is
  * not active, do nothing.
+ *
+ * DEFAULT
+ *
+ * Informs library to use default, may it be the standard default or
+ * a default configured via libipmiconsole.conf.
  */
 #define IPMICONSOLE_BEHAVIOR_ERROR_ON_SOL_INUSE 0x00000001
 #define IPMICONSOLE_BEHAVIOR_DEACTIVATE_ONLY    0x00000002
+#define IPMICONSOLE_BEHAVIOR_DEFAULT            0xFFFFFFFF
 
 /*
  * Context Status
@@ -344,18 +384,22 @@ typedef enum ipmiconsole_ctx_status ipmiconsole_ctx_status_t;
  *
  * username
  *
- *   BMC username. Pass NULL ptr for NULL username.  Maximum length of
- *   16 bytes.
+ *   BMC username. Pass NULL ptr for default username.  Standard
+ *   default is the null (e.g. empty) username.  Maximum length of 16
+ *   bytes.
  *
  * password
  *
- *   BMC password. Pass NULL ptr for NULL password.  Maximum length of
- *   20 bytes.
+ *   BMC password. Pass NULL ptr for default password.  Standard
+ *   default is the null (e.g. empty) password.  Maximum length of 20
+ *   bytes.
  *
  * k_g
  *
- *   BMC Key for 2-key authentication.  Pass NULL ptr to use password
- *   as BMC key.  The k_g key need not be an ascii string.
+ *   BMC Key for 2-key authentication.  Pass NULL ptr to use the
+ *   default.  Standard default is the null (e.g. empty) k_g,
+ *   which will use the password as the BMC key.  The k_g key need not
+ *   be an ascii string.
  *
  * k_g_len
  *
@@ -372,7 +416,8 @@ typedef enum ipmiconsole_ctx_status ipmiconsole_ctx_status_t;
  *   IPMICONSOLE_PRIVILEGE_OPERATOR
  *   IPMICONSOLE_PRIVILEGE_ADMIN
  *
- *   Pass < 0 for default of IPMICONSOLE_PRIVILEGE_ADMIN.
+ *   Pass < 0 for default.  Standard default is
+ *   IPMICONSOLE_PRIVILEGE_ADMIN.
  *
  * cipher_suite_id
  *
@@ -393,15 +438,17 @@ typedef enum ipmiconsole_ctx_status ipmiconsole_ctx_status_t;
  *   8 - A = HMAC-MD5; I = HMAC-MD5-128; C = AES-CBC-128
  *   11 - A = HMAC-MD5; I = MD5-128; C = None
  *   12 - A = HMAC-MD5; I = MD5-128; C = AES-CBC-128
+ *   17 - A = HMC-SHA256; I = SHA256-128; C = AES-CBC-128
  *
- *   Pass < 0 for default of 3.
+ *   Pass < 0 for default.  Standard default is 3.
  *
  * workaround_flags
  *
  *   Bitwise OR of flags indicating IPMI implementation changes.  Some
  *   BMCs which are non-compliant and may require a workaround flag
- *   for correct operation. Pass 0 for default of no modifications to
- *   the IPMI protocol.
+ *   for correct operation. Pass IPMICONSOLE_WORKAROUND_DEFAULT for
+ *   default.  Standard default is 0, no modifications to the IPMI
+ *   protocol.
  */
 struct ipmiconsole_ipmi_config
 {
@@ -423,34 +470,38 @@ struct ipmiconsole_ipmi_config
  * session_timeout_len
  *
  *   Specifies the session timeout length in milliseconds.  Pass <= 0
- *   to default to 60000 (60 seconds).
+ *   for default.  Standard default is 60000 (60 seconds).
  *
  * retransmission_timeout_len
  *
  *   Specifies the packet retransmission timeout length in
- *   milliseconds.  Pass <= 0 to default to 500 (0.5 seconds).
+ *   milliseconds.  Pass <= 0 for default.  Standard default is
+ *   500 (0.5 seconds).
  *
  * retransmission_backoff_count
  *
  *   Specifies the packet retransmission count until retransmission
- *   timeout lengths will be backed off.  Pass <= 0 to default to 2.
+ *   timeout lengths will be backed off.  Pass <= 0 for default.
+ *   Standard default is 2.
  *
  * keepalive_timeout_len
  *
  *   Specifies the session timeout length in milliseconds until a
- *   keepalive packet is sent.  Pass <= 0 to default to 20000 (20
- *   seconds).
+ *   keepalive packet is sent.  Pass <= 0 for default.  Standard
+ *   default is 20000 (20 seconds).
  *
  * retransmission_keepalive_timeout_len
  *
  *   Specifies the keepalive packet retransmission timeout length in
- *   milliseconds.  Pass <= 0 to default to 5000 (5 seconds).
+ *   milliseconds.  Pass <= 0 for default.  Standard default is
+ *   5000 (5 seconds).
  *
  * acceptable_packet_errors_count
  *
  *   Specifies the maximum number of consecutive packet errors that
  *   can be received from a remote BMC before an error is returned and
- *   the session ended.  Pass <= 0 to use the default of 16.
+ *   the session ended.  Pass <= 0 for default.  Standard
+ *   default is 16.
  *
  *   Note: This has been added to the behavior of the IPMI engine due
  *   to issues where remote BMCs can become "un-synced" with sequence
@@ -461,9 +512,9 @@ struct ipmiconsole_ipmi_config
  *
  * maximum_retransmission_count
  *
- *   Specifies the maximum number of retransmissions that can be
- *   sent for any IPMI packet before an error is returned and the
- *   session ended.  Pass <= 0 to use the default of 16.
+ *   Specifies the maximum number of retransmissions that can be sent
+ *   for any IPMI packet before an error is returned and the session
+ *   ended.  Pass <= 0 for default.  Standard default is 16.
  *
  *   Note: This has been added to the behavior of the IPMI engine due
  *   to issues where remote BMCs can become "un-synced" with sequence
@@ -493,18 +544,20 @@ struct ipmiconsole_protocol_config
  * engine_flags
  *
  *   Bitwise OR of flags indicating how the ipmiconsole engine should
- *   behave for a particular context.  Pass 0 for default behavior.
+ *   behave for a particular context.  Pass IPMICONSOLE_ENGINE_DEFAULT
+ *   for default.  Standard default is 0.
  *
  * behavior_flags
  *
  *   Bitwise OR of flags indicating any protocol behavior that should
- *   be changed from the default.  Pass 0 for default of no
- *   modifications to behavior.
+ *   be changed from the default.  Pass IPMICONSOLE_BEHAVIOR_DEFAULT
+ *   for default.  Standard default is 0.
  *
  * debug_flags
  *
  *   Bitwise OR of flags indicating how debug output should (or should
- *   not) be output. Pass 0 for default of no debugging.
+ *   not) be output. Pass IPMICONSOLE_DEBUG_DEFAULT for default.
+ *   Standard default is 0.
  *
  */
 struct ipmiconsole_engine_config
@@ -532,7 +585,8 @@ typedef void (*Ipmiconsole_callback)(void *);
  * Initialize the ipmiconsole engine.  Engine threads will be created
  * which will manage SOL sessions for the user.  This function must be
  * called before ipmi console contexts can be submitted into the
- * engine.
+ * engine.  This call will also parse and load alternate defaults from
+ * the libipmiconsole.conf defaults file.
  *
  * Parameters:
  *
@@ -546,7 +600,8 @@ typedef void (*Ipmiconsole_callback)(void *);
  *   not) be output. Pass 0 for default of no debugging.
  *
  * Returns 0 on success, -1 on error.  On error errno will be set to
- * indicate error.
+ * indicate error.  Possible errnos are ENOMEM if memory cannot be
+ * allocated.
  */
 int ipmiconsole_engine_init (unsigned int thread_count,
                              unsigned int debug_flags);
@@ -581,9 +636,12 @@ int ipmiconsole_engine_init (unsigned int thread_count,
  *
  * C) Specify a callback function.  The callback function specified as
  * a parameter below will be called directly after a SOL session has
- * been established or an error has occurred.  Within those callback
- * functions, ipmiconsole_ctx_status() can be used to determine which
- * has occurred.
+ * been established or a session establishment error has occurred
+ * (e.g. SOL not supported, authentication error, etc.).  Within those
+ * callback functions, ipmiconsole_ctx_status() can be used to
+ * determine which has occurred.  This callback will be called by the
+ * engine thread, therefore users may need to protect their
+ * application's shared data.
  *
  * Due to the non-blocking semantics of this function, it is possible
  * that multiple errors could occur simultaneously and the errnum
@@ -686,7 +744,10 @@ void ipmiconsole_engine_teardown (int cleanup_sol_sessions);
  *   definition above.
  *
  * Returns ctx on success, NULL on error.  On error errno will be set to
- * indicate error.
+ * indicate error.  Possible errnos are EINVAL on invalid input,
+ * ENOMEM if memory cannot be allocated, EMFILE if process file
+ * descriptors limits have been reached, and EAGAIN if
+ * ipmiconsole_engine_init() has not yet been called.
  */
 ipmiconsole_ctx_t ipmiconsole_ctx_create (const char *hostname,
                                           struct ipmiconsole_ipmi_config *ipmi_config,
@@ -766,6 +827,73 @@ int ipmiconsole_ctx_generate_break (ipmiconsole_ctx_t c);
  * ipmiconsole_ctx_fd().
  */
 void ipmiconsole_ctx_destroy (ipmiconsole_ctx_t c);
+
+/*
+ * ipmiconsole_username_is_valid
+ *
+ * Convenience function to determine if a username is valid. Note that
+ * a NULL pointer, which would result in libipmiconsole using a
+ * default value, is considered an invalid input here.
+ *
+ * Returns 1 if username is valid, 0 if it is not.
+ */
+int ipmiconsole_username_is_valid (const char *username);
+
+/*
+ * ipmiconsole_password_is_valid
+ *
+ * Convenience function to determine if a password is valid.  Note
+ * that a NULL pointer, which would result in libipmiconsole using a
+ * default value, is considered an invalid input here.
+ *
+ * Returns 1 if password is valid, 0 if it is not.
+ */
+int ipmiconsole_password_is_valid (const char *password);
+
+/*
+ * ipmiconsole_k_g_is_valid
+ *
+ * Convenience function to determine if a k_g is valid.  Note that a
+ * NULL pointer, which would result in libipmiconsole using a default
+ * value, is considered an invalid input here.
+ *
+ * Returns 1 if k_g is valid, 0 if it is not.
+ */
+int ipmiconsole_k_g_is_valid (const unsigned char *k_g, unsigned int k_g_len);
+
+/*
+ * ipmiconsole_privilege_level_is_valid
+ *
+ * Convenience function to determine if a privilege level is valid.
+ * Note that a negative value, which would result in libipmiconsole
+ * using a default value, is considered an invalid input here.
+ *
+ * Returns 1 if privilege level is valid, 0 if it is not.
+ */
+int ipmiconsole_privilege_level_is_valid (int privilege_level);
+
+/*
+ * ipmiconsole_cipher_suite_id_is_valid
+ *
+ * Convenience function to determine if a cipher suite id is valid.
+ * Note that a negative value, which would result in libipmiconsole
+ * using a default value, is considered an invalid input here.
+ *
+ * Returns 1 if cipher suite id is valid, 0 if it is not.
+ */
+int ipmiconsole_cipher_suite_id_is_valid (int cipher_suite_id);
+
+/*
+ * ipmiconsole_workaround_flags_is_valid
+ *
+ * Convenience function to determine if workaround flags are valid.
+ * Note that a bitmask value of IPMICONSOLE_WORKAROUND_DEFAULT, which
+ * would result in libipmiconsole using a default value, is considered
+ * an invalid input here.
+ *
+ * Returns 1 if workaround flags are valid, 0 if they are not.
+ */
+int ipmiconsole_workaround_flags_is_valid (unsigned int workaround_flags);
 
 #ifdef __cplusplus
 }

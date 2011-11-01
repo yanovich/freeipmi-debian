@@ -1,3 +1,94 @@
+FreeIPMI 1.0.8 - 10/27/11
+-------------------------
+o Fix corner case in which invalid SDR entry could be loaded when
+  shared sensors exist on event only records.
+o Fix several event output corner cases.
+o Fix 'assumesystemevent' workaround for ipmi-sel.
+o Fix ipmi-raw and ipmi-oem allocation bug on newer systems, such as
+  RHEL6.
+o Support Intel Node Manager sensor/SEL events for Intel S2600JF/Appro
+  512X.
+o Document workarounds for Intel S2600JF/Appro 512X.
+o Per definition, output GUID w/ lower case characters in bmc-info.
+o Other minor bug fixes.
+
+FreeIPMI 1.0.7 - 09/28/11
+-------------------------
+o Support many new sensor state and sel event interpretations.
+o Fix parsing bugs for freeipmi_interpret_sel.conf.
+o Support 'assumebmcowner' workaround in ipmi-sensors.
+o Support dynamic linking in libfreeipmi.
+o Output pidfile in bmc-watchdog to support easier init script killing.
+o Do not poll stdin in ipmipower when operating in non-interactive mode.
+o Support IGNORE_SCANNING_DISABLED workaround in libipmimonitoring.
+o Support Supermicro OEM sensors on X7DB8, X8DTN, X7SBI-LN4, X8DTL,
+  X8DTN+-F, and X8SIE motherboards.
+o Fix handling error codes in optional parts of ipmi-dcmi.
+o Fix various debug dumping bugs.
+o Fix ipmimonitoring script install bug on some systems.
+o Fix symbol global vs. locals in libipmimonitoring.
+o Minor documentation and manpage updates.
+
+FreeIPMI 1.0.6 - 09/01/11
+-------------------------
+o Support 'ignorescanningdisabled' workaround in ipmi-sensors.
+o Support Supermicro X8SIL-F, X9SCL, and X9SCM motherboard OEM sensors.
+o Update bmc-watchdog logrotate script to reduce unnecessary output.
+o Fix ipmi-fru output typo.
+
+FreeIPMI 1.0.5 - 06/30/11
+-------------------------
+o Fix various issues in ipmi-dcmi, including command line parsing
+  bugs, asset tag/string identifier overwriting, and fix assumptions
+  based on new information in v1.5 errata.
+o Support pkg-config files for libraries.
+o Various documentation updates.
+
+FreeIPMI 1.0.4 - 04/21/11
+-------------------------
+o Support "discretereading" workaround in ipmi-sensors and associated
+  libraries.
+o Support "spinpoll" workaround/performance optimization in tools and
+  libraries.
+o Support additional sensor/SEL interpretations for Intel motherboards.
+o Add convenience input checking functions to libipmiconsole.
+o Fix bug in libipmimonitoring to allow additional OEM interpretations.
+
+FreeIPMI 1.0.3 - 03/29/11
+-------------------------
+o Support additional error handling in bmc-info.
+o Support ability to set "none" workaround flags on the command line
+  and in tools.
+o In libipmiconsole, force ipmiconsole_engine_init() to be called
+  before ipmiconsole_ctx_create().
+o Fix libipmiconsole callback semantics.
+o Fix libipmiconsole bugs in overriding standard defaults vs. config
+  file defaults.
+o Fix potential race in libipmiconsole during engine teardown.
+o Add package version macros to libfreeipmi.
+o Add library version macros to all libraries.
+o Fix Solaris build bug.
+o Fix config output bug in ipmipower.
+
+FreeIPMI 1.0.2 - 02/22/11
+-------------------------
+o Support --ignore-unrecognized-events in ipmi-sensors.
+o Clarify error messages in ipmi-locate.
+o Support Supermicro X7DBR-3, X8DTL-3F, X8DT3-LN4F motherboard OEM
+  sensors.
+o Support Dell Module/Board OEM sensor interpretation on Poweredge
+  R210 motherboards.
+o In bmc-info, support motherboards that don't implement Get Device
+  Guid.
+o In bmc-watchdog, fix error logging corner case.
+o Support new -r option in ganglia_ipmi_sensors.pl plugin to modify
+  ipmi hostname.
+o Add workaround for SDR caching compliance bug in HP Proliant
+  DL585G7.
+o In bmc-config, add workaround for motherboards that do not allow you
+  to configure identical usernames.
+o Various documentation updates.
+
 FreeIPMI 1.0.1 - 01/20/11
 -------------------------
 

@@ -31,6 +31,26 @@
 extern "C" {
 #endif
 
+/*
+ * Libipmimonitoring version
+ *
+ * MAJOR - Incremented when interfaces are changed or removed.
+ *         Interfaces may be binary incompatible.  When incremented, MINOR
+ *         and PATCH are zeroed.
+ *
+ * MINOR - Incremented when interfaces are added.  Interfaces are
+ *         binary compatible with older minor versions.  When incremented,
+ *         PATCH is zeroed.
+ *
+ * PATCH - Incremented when interfaces are not changed.  Typically
+ *         incremented due to bug fixes or minor features.  Interfaces are
+ *         forward and backward compatible to other PATCH versions.
+ */
+
+#define LIBIPMIMONITORING_VERSION_MAJOR 1
+#define LIBIPMIMONITORING_VERSION_MINOR 0
+#define LIBIPMIMONITORING_VERSION_PATCH 2
+
 enum ipmi_monitoring_error_codes
   {
     IPMI_MONITORING_ERR_SUCCESS                             = 0,
@@ -227,6 +247,7 @@ enum ipmi_monitoring_workaround_flags
 
     /* For use w/ an In-band driver */
     IPMI_MONITORING_WORKAROUND_FLAGS_INBAND_ASSUME_IO_BASE_ADDRESS                        = 0x00000001,
+    IPMI_MONITORING_WORKAROUND_FLAGS_INBAND_SPIN_POLL                                     = 0x00000002,	
   };
   
 /* REREAD_SDR_CACHE - Re-read the SDR cache
@@ -252,6 +273,20 @@ enum ipmi_monitoring_sel_flags
  * INTERPRET_OEM_DATA - Attempt to interpret OEM data if read.
  *
  * SHARED_SENSORS - Iterate through shared sensors if found
+ *
+ * DISCRETE_READING - Allow sensor readings to be read even if the event/reading type
+ *                    code for the sensor is not valid.  This option works around
+ *                    poorly defined (and arguably illegal) SDR records that list
+ *                    non-discrete sensor expectations along with discrete state
+ *                    conditions.
+ *
+ * IGNORE_SCANNING_DISABLED - Ignore the scanning bit and read sensors no matter
+ *                            what.  This option works around motherboards
+ *                            that incorrectly indicate sensors as disabled.
+ *
+ * ASSUME_BMC_OWNER - Assume the BMC is the sensor owner no matter what.  This option
+ *                    works around motherboards that incorrectly indicate a non-BMC
+ *                    sensor owner (e.g. usually bridging is required).
  */
 enum ipmi_monitoring_sensor_reading_flags
   {
@@ -260,6 +295,9 @@ enum ipmi_monitoring_sensor_reading_flags
     IPMI_MONITORING_SENSOR_READING_FLAGS_BRIDGE_SENSORS                   = 0x00000004,
     IPMI_MONITORING_SENSOR_READING_FLAGS_INTERPRET_OEM_DATA               = 0x00000008,
     IPMI_MONITORING_SENSOR_READING_FLAGS_SHARED_SENSORS                   = 0x00000010,
+    IPMI_MONITORING_SENSOR_READING_FLAGS_DISCRETE_READING                 = 0x00000020,
+    IPMI_MONITORING_SENSOR_READING_FLAGS_IGNORE_SCANNING_DISABLED         = 0x00000040,	
+    IPMI_MONITORING_SENSOR_READING_FLAGS_ASSUME_BMC_OWNER                 = 0x00000040,	
     IPMI_MONITORING_SENSOR_READING_FLAGS_IGNORE_UNREADABLE_SENSORS        = 0x00000002, /* legacy macro */
   };
 

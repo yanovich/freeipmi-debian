@@ -1,6 +1,15 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([freeipmi],[1.0.1],[freeipmi-devel@gnu.org])
+AC_INIT([freeipmi],[1.0.8],[freeipmi-devel@gnu.org])
 AC_REVISION([$Id: configure.ac,v 1.208 2010-08-06 21:02:29 chu11 Exp $])
+AC_CONFIG_MACRO_DIR([config])
+
+FREEIPMI_PACKAGE_VERSION_MAJOR=1
+FREEIPMI_PACKAGE_VERSION_MINOR=0
+FREEIPMI_PACKAGE_VERSION_PATCH=8
+
+AC_SUBST(FREEIPMI_PACKAGE_VERSION_MAJOR)
+AC_SUBST(FREEIPMI_PACKAGE_VERSION_MINOR)
+AC_SUBST(FREEIPMI_PACKAGE_VERSION_PATCH)
 
 dnl We require a modern autoconf and automake
 AC_PREREQ([2.57])
@@ -23,7 +32,7 @@ AC_CONFIG_FILES([
         man/Makefile
         man/freeipmi.conf.5.pre
         man/freeipmi.7.pre
-	common/Makefile 
+        common/Makefile 
         common/man/Makefile 
         common/src/Makefile
         common/src/configtool/Makefile
@@ -45,8 +54,10 @@ AC_CONFIG_FILES([
         libfreeipmi/libfreeipmi.3.pre
         libfreeipmi/freeipmi_interpret_sensor.conf.5.pre
         libfreeipmi/freeipmi_interpret_sel.conf.5.pre
+        libfreeipmi/libfreeipmi.pc
         libfreeipmi/include/Makefile 
-	libfreeipmi/src/Makefile 
+        libfreeipmi/include/freeipmi/freeipmi.h
+        libfreeipmi/src/Makefile 
         libfreeipmi/src/api/Makefile
         libfreeipmi/src/cmds/Makefile
         libfreeipmi/src/debug/Makefile
@@ -65,69 +76,74 @@ AC_CONFIG_FILES([
         libfreeipmi/src/sensor-read/Makefile
         libfreeipmi/src/spec/Makefile
         libfreeipmi/src/util/Makefile
-	libipmiconsole/Makefile
+        libipmiconsole/Makefile
         libipmiconsole/libipmiconsole.3.pre
         libipmiconsole/libipmiconsole.conf.5.pre
-	libipmiconsole/src/Makefile
-	libipmimonitoring/Makefile
+        libipmiconsole/libipmiconsole.pc
+        libipmiconsole/src/Makefile
+        libipmiconsole/src/ipmiconsole.h
+        libipmimonitoring/Makefile
         libipmimonitoring/src/Makefile
+        libipmimonitoring/src/ipmi_monitoring.h
         libipmimonitoring/ipmi_monitoring_sensors.conf.5.pre
         libipmimonitoring/ipmimonitoring_sensors.conf.5.pre
         libipmimonitoring/ipmimonitoring.conf.5.pre
         libipmimonitoring/libipmimonitoring.conf.5.pre
         libipmimonitoring/libipmimonitoring.3.pre
+        libipmimonitoring/libipmimonitoring.pc
         libipmidetect/Makefile
         libipmidetect/libipmidetect.3.pre
+        libipmidetect/libipmidetect.pc
         libipmidetect/src/Makefile
-	bmc-config/Makefile 
- 	bmc-config/bmc-config.8.pre 
+        libipmidetect/src/ipmidetect.h
+        bmc-config/Makefile
+        bmc-config/bmc-config.8.pre
         bmc-config/bmc-config.conf.5.pre
         bmc-config/src/Makefile
-        bmc-device/Makefile 
-	bmc-device/bmc-device.8.pre
+        bmc-device/Makefile
+        bmc-device/bmc-device.8.pre
         bmc-device/src/Makefile
-        bmc-info/Makefile 
-	bmc-info/bmc-info.8.pre
+        bmc-info/Makefile
+        bmc-info/bmc-info.8.pre
         bmc-info/src/Makefile
         bmc-watchdog/Makefile 
         bmc-watchdog/bmc-watchdog.8.pre
         bmc-watchdog/src/Makefile
-	ipmi-chassis/Makefile
-	ipmi-chassis/ipmi-chassis.8.pre
-	ipmi-chassis/src/Makefile
+        ipmi-chassis/Makefile
+        ipmi-chassis/ipmi-chassis.8.pre
+        ipmi-chassis/src/Makefile
         ipmi-chassis-config/Makefile 
-	ipmi-chassis-config/ipmi-chassis-config.8.pre
-        ipmi-chassis-config/src/Makefile 
-	ipmi-dcmi/Makefile
-	ipmi-dcmi/ipmi-dcmi.8.pre
-	ipmi-dcmi/src/Makefile
-        ipmi-fru/Makefile 
-	ipmi-fru/ipmi-fru.8.pre
+        ipmi-chassis-config/ipmi-chassis-config.8.pre
+        ipmi-chassis-config/src/Makefile
+        ipmi-dcmi/Makefile
+        ipmi-dcmi/ipmi-dcmi.8.pre
+        ipmi-dcmi/src/Makefile
+        ipmi-fru/Makefile
+        ipmi-fru/ipmi-fru.8.pre
         ipmi-fru/src/Makefile
-        ipmi-locate/Makefile 
+        ipmi-locate/Makefile
         ipmi-locate/ipmi-locate.8.pre
         ipmi-locate/src/Makefile
-        ipmi-oem/Makefile 
-	ipmi-oem/ipmi-oem.8.pre
-        ipmi-oem/src/Makefile 
+        ipmi-oem/Makefile
+        ipmi-oem/ipmi-oem.8.pre
+        ipmi-oem/src/Makefile
         ipmi-pef-config/Makefile
-	ipmi-pef-config/ipmi-pef-config.8.pre
-        ipmi-pef-config/src/Makefile 
-        ipmi-raw/Makefile 
-	ipmi-raw/ipmi-raw.8.pre
-        ipmi-raw/src/Makefile 
-        ipmi-sel/Makefile 
-	ipmi-sel/ipmi-sel.8.pre
-        ipmi-sel/src/Makefile 
-        ipmi-sensors/Makefile 
-	ipmi-sensors/ipmi-sensors.8.pre
-        ipmi-sensors/src/Makefile 
-        ipmi-sensors/src/ipmimonitoring
-        ipmi-sensors-config/Makefile 
-	ipmi-sensors-config/ipmi-sensors-config.8.pre
-        ipmi-sensors-config/src/Makefile 
-	ipmiconsole/Makefile 
-	ipmiconsole/ipmiconsole.8.pre
+        ipmi-pef-config/ipmi-pef-config.8.pre
+        ipmi-pef-config/src/Makefile
+        ipmi-raw/Makefile
+        ipmi-raw/ipmi-raw.8.pre
+        ipmi-raw/src/Makefile
+        ipmi-sel/Makefile
+        ipmi-sel/ipmi-sel.8.pre
+        ipmi-sel/src/Makefile
+        ipmi-sensors/Makefile
+        ipmi-sensors/ipmi-sensors.8.pre
+        ipmi-sensors/src/Makefile
+        ipmi-sensors-config/Makefile
+        ipmi-sensors-config/ipmi-sensors-config.8.pre
+        ipmi-sensors-config/src/Makefile
+        ipmiconsole/Makefile
+        ipmiconsole/ipmiconsole.8.pre
         ipmiconsole/ipmiconsole.conf.5.pre
         ipmiconsole/src/Makefile
         ipmidetect/Makefile
@@ -138,14 +154,14 @@ AC_CONFIG_FILES([
         ipmidetectd/ipmidetectd.8.pre
         ipmidetectd/ipmidetectd.conf.5.pre
         ipmidetectd/src/Makefile
-        ipmiping/Makefile 
+        ipmiping/Makefile
         ipmiping/ipmiping.8.pre
         ipmiping/src/Makefile
         ipmipower/Makefile 
         ipmipower/ipmipower.8.pre
         ipmipower/ipmipower.conf.5.pre
         ipmipower/src/Makefile
-        rmcpping/Makefile 
+        rmcpping/Makefile
         rmcpping/rmcpping.8.pre
         rmcpping/src/Makefile
         freeipmi.spec])
@@ -153,7 +169,7 @@ AC_CONFIG_FILES([
 ISODATE=`date +%Y-%m-%d`
 AC_SUBST([ISODATE])
 
-# libfreeipmi versioning
+# libfreeipmi libtool versioning
 #
 # If library source code has changed at all increment rev
 # (current:rev:age) = (current:rev+1:age)
@@ -166,7 +182,7 @@ AC_SUBST([ISODATE])
 # If any interfaces have been removed, set age = 0
 #
 LIBFREEIPMI_CURRENT=11
-LIBFREEIPMI_REVISION=0
+LIBFREEIPMI_REVISION=5
 LIBFREEIPMI_AGE=1
 
 LIBFREEIPMI_VERSION=$LIBFREEIPMI_CURRENT.$LIBFREEIPMI_REVISION.$LIBFREEIPMI_AGE
@@ -174,7 +190,27 @@ AC_SUBST([LIBFREEIPMI_VERSION])
 LIBFREEIPMI_VERSION_INFO=$LIBFREEIPMI_CURRENT:$LIBFREEIPMI_REVISION:$LIBFREEIPMI_AGE
 AC_SUBST([LIBFREEIPMI_VERSION_INFO])
 
-# libipmiconsole versioning
+# libfreeipmi versioning macros
+#
+# MAJOR - Incremented when interfaces are changed or removed.
+#         Interfaces may be binary incompatible.  When incremented, MINOR and
+#         PATCH are zeroed.
+# MINOR - Incremented when interfaces are added.  Interfaces are
+#         binary compatible with older minor versions.  When incremented,
+#         PATCH is zeroed.
+# PATCH - Incremented when interfaces are not changed.  Typically
+#         incremented due to bug fixes or minor features.  Interfaces are
+#         forward and backward compatible to other PATCH versions.
+
+LIBFREEIPMI_VERSION_MAJOR=1
+LIBFREEIPMI_VERSION_MINOR=0
+LIBFREEIPMI_VERSION_PATCH=5
+
+AC_SUBST(LIBFREEIPMI_VERSION_MAJOR)
+AC_SUBST(LIBFREEIPMI_VERSION_MINOR)
+AC_SUBST(LIBFREEIPMI_VERSION_PATCH)
+
+# libipmiconsole libtool versioning
 #
 # If library source code has changed at all increment rev
 # (current:rev:age) = (current:rev+1:age)
@@ -186,13 +222,34 @@ AC_SUBST([LIBFREEIPMI_VERSION_INFO])
 #
 # If any interfaces have been removed, set age = 0
 #
-LIBIPMICONSOLE_CURRENT=3
-LIBIPMICONSOLE_REVISION=1
-LIBIPMICONSOLE_AGE=1
+LIBIPMICONSOLE_CURRENT=4
+LIBIPMICONSOLE_REVISION=0
+LIBIPMICONSOLE_AGE=2
 LIBIPMICONSOLE_VERSION_INFO=$LIBIPMICONSOLE_CURRENT:$LIBIPMICONSOLE_REVISION:$LIBIPMICONSOLE_AGE
 AC_SUBST([LIBIPMICONSOLE_VERSION_INFO])
 
-# libipmimonitoring versioning
+# libipmiconsole versioning macros
+#
+# MAJOR - Incremented when interfaces are changed or removed.
+#         Interfaces may be binary incompatible.  When incremented, MINOR and
+#         PATCH are zeroed.
+# MINOR - Incremented when interfaces are added.  Interfaces are
+#         binary compatible with older minor versions.  When incremented,
+#         PATCH is zeroed.
+# PATCH - Incremented when interfaces are not changed.  Typically
+#         incremented due to bug fixes or minor features.  Interfaces are
+#         forward and backward compatible to other PATCH versions.
+#
+
+LIBIPMICONSOLE_VERSION_MAJOR=1
+LIBIPMICONSOLE_VERSION_MINOR=1
+LIBIPMICONSOLE_VERSION_PATCH=0
+
+AC_SUBST(LIBIPMICONSOLE_VERSION_MAJOR)
+AC_SUBST(LIBIPMICONSOLE_VERSION_MINOR)
+AC_SUBST(LIBIPMICONSOLE_VERSION_PATCH)
+
+# libipmimonitoring libtool versioning
 #
 # If library source code has changed at all increment rev
 # (current:rev:age) = (current:rev+1:age)
@@ -205,12 +262,33 @@ AC_SUBST([LIBIPMICONSOLE_VERSION_INFO])
 # If any interfaces have been removed, set age = 0
 #
 LIBIPMIMONITORING_CURRENT=5
-LIBIPMIMONITORING_REVISION=0
+LIBIPMIMONITORING_REVISION=2
 LIBIPMIMONITORING_AGE=0
 LIBIPMIMONITORING_VERSION_INFO=$LIBIPMIMONITORING_CURRENT:$LIBIPMIMONITORING_REVISION:$LIBIPMIMONITORING_AGE
 AC_SUBST([LIBIPMIMONITORING_VERSION_INFO])
 
-# libipmidetect versioning
+# libipmimonitoring versioning macros
+#
+# MAJOR - Incremented when interfaces are changed or removed.
+#         Interfaces may be binary incompatible.  When incremented, MINOR and
+#         PATCH are zeroed.
+# MINOR - Incremented when interfaces are added.  Interfaces are
+#         binary compatible with older minor versions.  When incremented,
+#         PATCH is zeroed.
+# PATCH - Incremented when interfaces are not changed.  Typically
+#         incremented due to bug fixes or minor features.  Interfaces are
+#         forward and backward compatible to other PATCH versions.
+#
+
+LIBIPMIMONITORING_VERSION_MAJOR=1
+LIBIPMIMONITORING_VERSION_MINOR=0
+LIBIPMIMONITORING_VERSION_PATCH=2
+
+AC_SUBST(LIBIPMIMONITORING_VERSION_MAJOR)
+AC_SUBST(LIBIPMIMONITORING_VERSION_MINOR)
+AC_SUBST(LIBIPMIMONITORING_VERSION_PATCH)
+
+# libipmidetect libtool versioning
 #
 # If library source code has changed at all increment rev
 # (current:rev:age) = (current:rev+1:age)
@@ -228,11 +306,34 @@ LIBIPMIDETECT_AGE=0
 LIBIPMIDETECT_VERSION_INFO=$LIBIPMIDETECT_CURRENT:$LIBIPMIDETECT_REVISION:$LIBIPMIDETECT_AGE
 AC_SUBST([LIBIPMIDETECT_VERSION_INFO])
 
+# libipmidetect versioning macros
+#
+# MAJOR - Incremented when interfaces are changed or removed.
+#         Interfaces may be binary incompatible.  When incremented, MINOR and
+#         PATCH are zeroed.
+# MINOR - Incremented when interfaces are added.  Interfaces are
+#         binary compatible with older minor versions.  When incremented,
+#         PATCH is zeroed.
+# PATCH - Incremented when interfaces are not changed.  Typically
+#         incremented due to bug fixes or minor features.  Interfaces are
+#         forward and backward compatible to other PATCH versions.
+#
+
+LIBIPMIDETECT_VERSION_MAJOR=1
+LIBIPMIDETECT_VERSION_MINOR=0
+LIBIPMIDETECT_VERSION_PATCH=0
+
+AC_SUBST(LIBIPMIDETECT_VERSION_MAJOR)
+AC_SUBST(LIBIPMIDETECT_VERSION_MINOR)
+AC_SUBST(LIBIPMIDETECT_VERSION_PATCH)
+
 AC_CANONICAL_HOST
 
 dnl Checks for programs.
 AC_PROG_INSTALL
 AC_PROG_CC
+dnl Needed for per-target flags
+AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 AC_PATH_PROG([CPP], [cpp])
 if test -z "${CPP}"; then
@@ -252,11 +353,19 @@ elif test "x${enable_trace}" = "x" ; then
      enable_trace=no
 fi
 
+AC_ARG_ENABLE([profiling],
+              AC_HELP_STRING([--enable-profiling], [turn on profiling]))
+if test "x${enable_profiling}" = "x" ; then
+     enable_profiling=no
+fi
+
 dnl Turn off all optimizations when debugging
 AC_ARG_ENABLE(debug,
               AC_HELP_STRING([--enable-debug], [turn on debugging]))
 if test "x${enable_debug}" = "xyes"; then
-   if test "$GCC" = "yes"; then 
+   if test "$GCC" = "yes" && test "x${enable_profiling}" = "xyes"; then 
+      CFLAGS="$CFLAGS -ggdb -Wall -pg"
+   elif test "$GCC" = "yes" && test "x${enable_profiling}" = "xno"; then 
       CFLAGS="$CFLAGS -ggdb -Wall"
    elif test "$ac_cv_prog_cc_g" = "yes"; then
       CFLAGS="$CFLAGS -g"
@@ -273,60 +382,60 @@ AC_SUBST(WITH_DEBUG)
 
 dnl Allow advanced developers to compile with raw dumping
 AC_ARG_ENABLE(rawdumps,
-	      AC_HELP_STRING([--enable-rawdumps], [output raw packet dumps when debugging]))
+   AC_HELP_STRING([--enable-rawdumps], [output raw packet dumps when debugging]))
 if test "x${enable_rawdumps}" = "xyes"; then
    AC_DEFINE([WITH_RAWDUMPS], [1], [Define if you want raw dumps])
 fi
 
 dnl Option to disable installing init.d scripts
 AC_ARG_ENABLE(init-scripts,
-	AC_HELP_STRING([--disable-init-scripts],
-		[don't install init.d startup scripts]))
+   AC_HELP_STRING([--disable-init-scripts],
+      [don\'t install init.d startup scripts]))
 INSTALL_INIT_SCRIPTS=install-init-scripts
 if test x"$enable_init_scripts" = xno; then
-	INSTALL_INIT_SCRIPTS=
+   INSTALL_INIT_SCRIPTS=
 fi
 AC_SUBST(INSTALL_INIT_SCRIPTS)
 
 dnl Option to disable installing logrotate config
 AC_ARG_ENABLE(logrotate-config,
-	AC_HELP_STRING([--disable-logrotate-config],
-		[don't install logrotate configuration files]))
+   AC_HELP_STRING([--disable-logrotate-config],
+      [don\'t install logrotate configuration files]))
 INSTALL_LOGROTATE_CONFIG=install-logrotate-config
 if test x"$enable_logrotate_config" = xno; then
-	INSTALL_LOGROTATE_CONFIG=
+   INSTALL_LOGROTATE_CONFIG=
 fi
 AC_SUBST(INSTALL_LOGROTATE_CONFIG)
 
 dnl Option to disable creating log directory
 AC_ARG_ENABLE([logdir],
-	AC_HELP_STRING([--disable-logdir], [don't create log directory]))
+   AC_HELP_STRING([--disable-logdir], [don\'t create log directory]))
 INSTALL_LOGDIR=install-logdir
 if test x"$enable_logdir" = xno; then
-	INSTALL_LOGDIR=
+   INSTALL_LOGDIR=
 fi
 AC_SUBST(INSTALL_LOGDIR)
 
 dnl Option to disable creating ipmi sdr cache directory
 AC_ARG_ENABLE([ipmisdrcachedir],
-	AC_HELP_STRING([--disable-ipmisdrcachedir], [don't create ipmi sdr cache directory]))
+   AC_HELP_STRING([--disable-ipmisdrcachedir], [don\'t create ipmi sdr cache directory]))
 INSTALL_IPMISDRCACHEDIR=install-ipmisdrcachedir
 if test x"$enable_ipmisdrcachedir" = xno; then
-	INSTALL_IPMISDRCACHEDIR=
+   INSTALL_IPMISDRCACHEDIR=
 fi
 AC_SUBST(INSTALL_IPMISDRCACHEDIR)
 
 dnl Option to disable encryption in FreeIPMI
 dnl
 dnl May be useful/needed for embedded systems w/ IPMI in band only and
-dnl don't want to link to additional encryption libraries not on the
+dnl don\'t want to link to additional encryption libraries not on the
 dnl system.  If turned off and users use encryption features (i.e. in IPMI 2.0),
 dnl errors will be returned from the underlying subsystems.
 dnl
 dnl Default to it being on
 AC_MSG_CHECKING([for encryption support])
 AC_ARG_WITH([encryption],
-           AC_HELP_STRING([--without-encryption], [don't support encryption]),
+           AC_HELP_STRING([--without-encryption], [don\'t support encryption]),
            [ case "$withval" in
              no)  ac_with_encryption=no ;;
              yes) ac_with_encryption=yes ;;
@@ -340,7 +449,7 @@ if test x"${ac_with_encryption}" = xyes; then
 fi
 
 dnl Checks for libraries.
-dnl don't include lib if LAN not desired
+dnl don\'t include lib if LAN not desired
 if test x"${ac_with_encryption}" = xyes; then
   AC_CHECK_LIB([gcrypt], [gcry_md_open], [have_gcrypt=yes], [have_gcrypt=no])
   if test "x${have_gcrypt}" = "xno"; then
@@ -364,8 +473,8 @@ AC_SUBST(GCRYPT_LIBS)
 
 dnl FreeBSD < 5 has getopt_long in a separate gnugetopt library
 AC_CHECK_FUNC([getopt_long], [have_getopt_long=yes],
-	AC_CHECK_LIB([gnugetopt], [getopt_long], [have_getopt_long=yes],
-		AC_MSG_ERROR([getopt_long not found.])))
+   AC_CHECK_LIB([gnugetopt], [getopt_long], [have_getopt_long=yes],
+      AC_MSG_ERROR([getopt_long not found.])))
 
 if test "x${have_getopt_long}" = "xyes"; then
    AC_DEFINE(HAVE_GETOPT_LONG, 1, [define if you found getopt_long])
@@ -461,34 +570,34 @@ if test "x${have_gethostbyname_r}" = "xyes"; then
    (void) gethostbyname_r(name, he, &data);
    ],
    [ac_cv_func_which_gethostbyname_r=three], [
-	AC_TRY_LINK(
-	[
-	#include <netdb.h>
-	],
-	[
-	char *name;
-	struct hostent *he, *res;
-	char buffer[2048];
-	int buflen = 2048;
-	int h_errnop;
-	(void) gethostbyname_r(name, he, buffer, buflen, &res, &h_errnop);
-	],
-	[ac_cv_func_which_gethostbyname_r=six], [
-	    AC_TRY_LINK(
-	    [
-	    #include <netdb.h>
-	    ],
-	    [
-	    char *name;
-	    struct hostent *he;
-	    char buffer[2048];
-	    int buflen = 2048;
-	    int h_errnop;
-	    (void) gethostbyname_r(name, he, buffer, buflen, &h_errnop);
-	    ],
-	    [ac_cv_func_which_gethostbyname_r=five],
-	    [ac_cv_func_which_gethostbyname_r=no])
-	])
+   AC_TRY_LINK(
+   [
+   #include <netdb.h>
+   ],
+   [
+   char *name;
+   struct hostent *he, *res;
+   char buffer[2048];
+   int buflen = 2048;
+   int h_errnop;
+   (void) gethostbyname_r(name, he, buffer, buflen, &res, &h_errnop);
+   ],
+   [ac_cv_func_which_gethostbyname_r=six], [
+       AC_TRY_LINK(
+       [
+       #include <netdb.h>
+       ],
+       [
+       char *name;
+       struct hostent *he;
+       char buffer[2048];
+       int buflen = 2048;
+       int h_errnop;
+       (void) gethostbyname_r(name, he, buffer, buflen, &h_errnop);
+       ],
+       [ac_cv_func_which_gethostbyname_r=five],
+       [ac_cv_func_which_gethostbyname_r=no])
+   ])
    ])
 
 dnl  define HAVE_FUNC_GETHOSTBYNAME_R_6 if gethostbyname_r needs 6 arguments (e.g linux)
@@ -509,20 +618,20 @@ AC_MSG_CHECKING([for thread-safe gethostbyname()])
 have_thread_safe_gethostbyname=no
 case "$host_os" in
 *freebsd*)
-	AC_TRY_CPP([
-			#include <sys/param.h>
-			#if __FreeBSD_version < 505000
-			#error "gethostbyname() is not thread-safe"
-			#endif
-		], [have_thread_safe_gethostbyname=yes])
-	;;
+   AC_TRY_CPP([
+               #include <sys/param.h>
+               #if __FreeBSD_version < 505000
+               #error "gethostbyname() is not thread-safe"
+               #endif
+              ], [have_thread_safe_gethostbyname=yes])
+   ;;
 esac
 if test "x$have_thread_safe_gethostbyname" = "xyes"; then
-	AC_DEFINE([HAVE_THREAD_SAFE_GETHOSTBYNAME], [1],
-		[Define if you have thread-safe gethostbyname() implementation])
-	AC_MSG_RESULT([yes])
+   AC_DEFINE([HAVE_THREAD_SAFE_GETHOSTBYNAME], [1],
+      [Define if you have thread-safe gethostbyname() implementation])
+   AC_MSG_RESULT([yes])
 else
-	AC_MSG_RESULT([no])
+   AC_MSG_RESULT([no])
 fi
 
 AC_CHECK_FUNC([hstrerror], 
@@ -553,19 +662,19 @@ if test "x${have_getpwuid_r}" = "xyes"; then
    (void) getpwuid_r (uid, &pwd, buffer, bufsize, &result);
    ],
    [ac_cv_func_which_getpwuid_r=five], [
-	AC_TRY_LINK(
-	[
-	#include <pwd.h>
-        #include <sys/types.h>
-	],
-	[
+   AC_TRY_LINK(
+   [
+     #include <pwd.h>
+     #include <sys/types.h>
+   ],
+   [
         uid_t uid;
         struct passwd pwd;
         char buffer[1];
         int bufsize;
         (void) getpwuid_r (uid, &pwd, buffer, bufsize);
-	],
-	[ac_cv_func_which_getpwuid_r=four], 
+   ],
+   [ac_cv_func_which_getpwuid_r=four], 
         [ac_cv_func_which_getpwuid_r=no])
    ])
 
@@ -591,15 +700,15 @@ dnl
 dnl Solaris has no argp library
 AC_CHECK_FUNC([argp_parse], 
               [have_argp=yes],
-	      AC_CHECK_LIB([argp], 
+              AC_CHECK_LIB([argp], 
                            [argp_parse], 
                            [have_argp=yes; LIBS="-largp $LIBS"],
                            [have_argp=no]))
 
 if test "x$have_argp" = "xyes"; then
    AC_CHECK_HEADER([argp.h], 
-		   AC_DEFINE([HAVE_ARGP_H], [1], [Define if you have argp.h]),
-	           AC_MSG_ERROR([argp header cannot be found]))
+         AC_DEFINE([HAVE_ARGP_H], [1], [Define if you have argp.h]),
+                   AC_MSG_ERROR([argp header cannot be found]))
 else
 dnl FreeBSD has the argp-standalone package.  If we're on FreeBSD
 dnl make them install the argp-standalone.  On non-FreeBSD, the code
@@ -651,13 +760,6 @@ dnl Check for variables
 
 dnl Macro definitions
 
-dnl Misc substitutions
-dnl Must expand nested unquoting
-IPMIMONITORINGSBINDIR_TMP1="`eval echo ${sbindir}`"
-IPMIMONITORINGSBINDIR_TMP2="`echo $IPMIMONITORINGSBINDIR_TMP1 | sed 's/^NONE/$ac_default_prefix/'`"
-IPMIMONITORINGSBINDIR="`eval echo $IPMIMONITORINGSBINDIR_TMP2`"
-AC_SUBST([IPMIMONITORINGSBINDIR])
-
 dnl Check for random number paths
 
 dnl Option to disable checking for /dev/urandom and /dev/random
@@ -680,5 +782,32 @@ if test x"${ac_with_random_device}" = xyes; then
    AC_CHECK_FILE([/dev/urandom], AC_DEFINE([HAVE_DEVURANDOM], [1], [Define that you found /dev/urandom]))
    AC_CHECK_FILE([/dev/random], AC_DEFINE([HAVE_DEVRANDOM], [1], [Define that you found /dev/urandom]))
 fi
+
+
+dnl Option to install pkg-config support files
+
+pkgconfigdir='${libdir}/pkgconfig'
+AC_MSG_CHECKING(whether to install pkg-config *.pc files)
+AC_ARG_WITH(pkgconfig-dir,
+	AS_HELP_STRING([--with-pkgconfig-dir=PATH], [where to install pkg-config *.pc files (EPREFIX/lib/pkgconfig)]),
+[
+	case "${withval}" in
+	yes|auto)
+		;;
+	no)
+		pkgconfigdir=""
+		;;
+	*)
+		pkgconfigdir="${withval}"
+		;;
+	esac
+], [])
+if test -n "${pkgconfigdir}"; then
+	AC_MSG_RESULT(using ${pkgconfigdir})
+else
+	AC_MSG_RESULT(no)
+fi
+AM_CONDITIONAL(WITH_PKG_CONFIG, test -n "${pkgconfigdir}")
+AC_SUBST(pkgconfigdir)
 
 AC_OUTPUT

@@ -57,7 +57,9 @@
 #include "freeipmi/spec/ipmi-event-reading-type-code-oem-spec.h"
 #include "freeipmi/spec/ipmi-iana-enterprise-numbers-spec.h"
 #include "freeipmi/spec/ipmi-product-id-spec.h"
+#include "freeipmi/spec/ipmi-sensor-types-spec.h"
 #include "freeipmi/spec/ipmi-sensor-types-oem-spec.h"
+#include "freeipmi/spec/ipmi-sensor-and-event-code-tables-spec.h"
 #include "freeipmi/spec/ipmi-sensor-and-event-code-tables-oem-spec.h"
 
 #include "ipmi-interpret-defs.h"
@@ -86,6 +88,37 @@ static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_threshold_confi
   };
 static unsigned int ipmi_interpret_sensor_threshold_config_len = 7;
 
+static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_temperature_state_config[] =
+  {
+    { "IPMI_Temperature_State_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Temperature_State_Deasserted", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Temperature_State_Asserted", IPMI_INTERPRET_STATE_WARNING},
+  };
+static unsigned int ipmi_interpret_sensor_temperature_state_config_len = 3;
+
+static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_temperature_limit_config[] =
+  {
+    { "IPMI_Temperature_Limit_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Temperature_Limit_Not_Exceeded", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Temperature_Limit_Exceeded", IPMI_INTERPRET_STATE_CRITICAL},
+  };
+static unsigned int ipmi_interpret_sensor_temperature_limit_config_len = 3;
+
+static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_temperature_transition_severity_config[] =
+  {
+    { "IPMI_Temperature_Transition_Severity_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Temperature_Transition_Severity_Transition_To_OK", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Temperature_Transition_Severity_Transition_To_Non_Critical_From_OK", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Temperature_Transition_Severity_Transition_To_Critical_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Temperature_Transition_Severity_Transition_To_Non_Recoverable_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Temperature_Transition_Severity_Transition_To_Non_Critical_From_More_Severe", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Temperature_Transition_Severity_Transition_To_Critical_From_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Temperature_Transition_Severity_Transition_To_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Temperature_Transition_Severity_Monitor", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Temperature_Transition_Severity_Informational", IPMI_INTERPRET_STATE_NOMINAL},
+  };
+static unsigned int ipmi_interpret_sensor_temperature_transition_severity_config_len = 10;
+
 static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_voltage_state_config[] =
   {
     { "IPMI_Voltage_State_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
@@ -101,6 +134,51 @@ static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_voltage_perform
     { "IPMI_Voltage_Performance_Lags", IPMI_INTERPRET_STATE_CRITICAL},
   };
 static unsigned int ipmi_interpret_sensor_voltage_performance_config_len = 3;
+
+static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_voltage_transition_severity_config[] =
+  {
+    { "IPMI_Voltage_Transition_Severity_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Voltage_Transition_Severity_Transition_To_OK", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Voltage_Transition_Severity_Transition_To_Non_Critical_From_OK", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Voltage_Transition_Severity_Transition_To_Critical_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Voltage_Transition_Severity_Transition_To_Non_Recoverable_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Voltage_Transition_Severity_Transition_To_Non_Critical_From_More_Severe", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Voltage_Transition_Severity_Transition_To_Critical_From_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Voltage_Transition_Severity_Transition_To_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Voltage_Transition_Severity_Monitor", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Voltage_Transition_Severity_Informational", IPMI_INTERPRET_STATE_NOMINAL},
+  };
+static unsigned int ipmi_interpret_sensor_voltage_transition_severity_config_len = 10;
+
+static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_current_transition_severity_config[] =
+  {
+    { "IPMI_Current_Transition_Severity_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Current_Transition_Severity_Transition_To_OK", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Current_Transition_Severity_Transition_To_Non_Critical_From_OK", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Current_Transition_Severity_Transition_To_Critical_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Current_Transition_Severity_Transition_To_Non_Recoverable_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Current_Transition_Severity_Transition_To_Non_Critical_From_More_Severe", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Current_Transition_Severity_Transition_To_Critical_From_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Current_Transition_Severity_Transition_To_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Current_Transition_Severity_Monitor", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Current_Transition_Severity_Informational", IPMI_INTERPRET_STATE_NOMINAL},
+  };
+static unsigned int ipmi_interpret_sensor_current_transition_severity_config_len = 10;
+
+static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_fan_transition_severity_config[] =
+  {
+    { "IPMI_Fan_Transition_Severity_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Fan_Transition_Severity_Transition_To_OK", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Fan_Transition_Severity_Transition_To_Non_Critical_From_OK", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Fan_Transition_Severity_Transition_To_Critical_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Fan_Transition_Severity_Transition_To_Non_Recoverable_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Fan_Transition_Severity_Transition_To_Non_Critical_From_More_Severe", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Fan_Transition_Severity_Transition_To_Critical_From_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Fan_Transition_Severity_Transition_To_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Fan_Transition_Severity_Monitor", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Fan_Transition_Severity_Informational", IPMI_INTERPRET_STATE_NOMINAL},
+  };
+static unsigned int ipmi_interpret_sensor_fan_transition_severity_config_len = 10;
 
 static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_fan_device_present_config[] =
   {
@@ -212,6 +290,21 @@ static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_power_supply_st
   };
 static unsigned int ipmi_interpret_sensor_power_supply_state_config_len = 3;
 
+static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_power_supply_transition_severity_config[] =
+  {
+    { "IPMI_Power_Supply_Transition_Severity_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Power_Supply_Transition_Severity_Transition_To_OK", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Power_Supply_Transition_Severity_Transition_To_Non_Critical_From_OK", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Power_Supply_Transition_Severity_Transition_To_Critical_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Power_Supply_Transition_Severity_Transition_To_Non_Recoverable_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Power_Supply_Transition_Severity_Transition_To_Non_Critical_From_More_Severe", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Power_Supply_Transition_Severity_Transition_To_Critical_From_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Power_Supply_Transition_Severity_Transition_To_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Power_Supply_Transition_Severity_Monitor", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Power_Supply_Transition_Severity_Informational", IPMI_INTERPRET_STATE_NOMINAL},
+  };
+static unsigned int ipmi_interpret_sensor_power_supply_transition_severity_config_len = 10;
+
 static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_power_supply_redundancy_config[] =
   {
     { "IPMI_Power_Supply_Redundancy_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
@@ -262,6 +355,20 @@ static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_power_unit_redu
   };
 static unsigned int ipmi_interpret_sensor_power_unit_redundancy_config_len = 9;
 
+static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_cooling_device_redundancy_config[] =
+  {
+    { "IPMI_Cooling_Device_Redundancy_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Cooling_Device_Redundancy_Fully_Redundant", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Cooling_Device_Redundancy_Redundancy_Lost", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Cooling_Device_Redundancy_Redundancy_Degraded", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Cooling_Device_Redundancy_Non_Redundant_Sufficient_Resources_From_Redundant", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Cooling_Device_Redundancy_Non_Redundant_Sufficient_Resources_From_Insufficient_Redundancy", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Cooling_Device_Redundancy_Non_Redundant_Insufficient_Resources", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Cooling_Device_Redundancy_Redundancy_Degraded_From_Fully_Redundant", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Cooling_Device_Redundancy_Redundancy_Degraded_From_Non_Redundant", IPMI_INTERPRET_STATE_WARNING},
+  };
+static unsigned int ipmi_interpret_sensor_cooling_device_redundancy_config_len = 9;
+
 static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_memory_config[] =
   {
     { "IPMI_Memory_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
@@ -278,6 +385,20 @@ static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_memory_config[]
     { "IPMI_Memory_Critical_Overtemperature", IPMI_INTERPRET_STATE_CRITICAL},
   };
 static unsigned int ipmi_interpret_sensor_memory_config_len = 12;
+
+static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_memory_redundancy_config[] =
+  {
+    { "IPMI_Memory_Redundancy_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Memory_Redundancy_Fully_Redundant", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Memory_Redundancy_Redundancy_Lost", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Memory_Redundancy_Redundancy_Degraded", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Memory_Redundancy_Non_Redundant_Sufficient_Resources_From_Redundant", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Memory_Redundancy_Non_Redundant_Sufficient_Resources_From_Insufficient_Redundancy", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Memory_Redundancy_Non_Redundant_Insufficient_Resources", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Memory_Redundancy_Redundancy_Degraded_From_Fully_Redundant", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Memory_Redundancy_Redundancy_Degraded_From_Non_Redundant", IPMI_INTERPRET_STATE_WARNING},
+  };
+static unsigned int ipmi_interpret_sensor_memory_redundancy_config_len = 9;
 
 static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_drive_slot_config[] =
   {
@@ -352,6 +473,14 @@ static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_system_event_co
   };
 static unsigned int ipmi_interpret_sensor_system_event_config_len = 7;
 
+static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_system_event_state_config[] =
+  {
+    { "IPMI_System_Event_State_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_System_Event_State_Deasserted", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_System_Event_State_Asserted", IPMI_INTERPRET_STATE_WARNING},
+  };
+static unsigned int ipmi_interpret_sensor_system_event_state_config_len = 3;
+
 static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_critical_interrupt_config[] =
   {
     { "IPMI_Critical_Interrupt_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
@@ -407,6 +536,21 @@ static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_module_board_de
     { "IPMI_Module_Board_Device_Present_Device_Inserted_Device_Present", IPMI_INTERPRET_STATE_NOMINAL},
   };
 static unsigned int ipmi_interpret_sensor_module_board_device_present_config_len = 3;
+
+static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_chip_set_transition_severity_config[] =
+  {
+    { "IPMI_Chip_Set_Transition_Severity_No_Event", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Chip_Set_Transition_Severity_Transition_To_OK", IPMI_INTERPRET_STATE_NOMINAL},
+    { "IPMI_Chip_Set_Transition_Severity_Transition_To_Non_Critical_From_OK", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Chip_Set_Transition_Severity_Transition_To_Critical_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Chip_Set_Transition_Severity_Transition_To_Non_Recoverable_From_Less_Severe", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Chip_Set_Transition_Severity_Transition_To_Non_Critical_From_More_Severe", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Chip_Set_Transition_Severity_Transition_To_Critical_From_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Chip_Set_Transition_Severity_Transition_To_Non_Recoverable", IPMI_INTERPRET_STATE_CRITICAL},
+    { "IPMI_Chip_Set_Transition_Severity_Monitor", IPMI_INTERPRET_STATE_WARNING},
+    { "IPMI_Chip_Set_Transition_Severity_Informational", IPMI_INTERPRET_STATE_NOMINAL},
+  };
+static unsigned int ipmi_interpret_sensor_chip_set_transition_severity_config_len = 10;
 
 static struct ipmi_interpret_sensor_config ipmi_interpret_sensor_cable_interconnect_config[] =
   {
@@ -710,6 +854,85 @@ _interpret_sensor_oem_dell_power_optimized (ipmi_interpret_ctx_t ctx)
 }
 
 static int
+_interpret_sensor_oem_dell_module_board_status (ipmi_interpret_ctx_t ctx)
+{
+  struct ipmi_interpret_sensor_oem_config *oem_conf;
+
+  assert (ctx);
+  assert (ctx->magic == IPMI_INTERPRET_CTX_MAGIC);
+  assert (ctx->interpret_sensor.sensor_oem_config);
+
+  /* Dell Poweredge R210 Module/Board OEM
+   *
+   * Manufacturer ID = 674 (Dell)
+   * Product ID = 256 (Poweredge)
+   * Event/Reading Type Code = 70h (OEM)
+   * Sensor Type = 15h (Module/Board)
+   * Bitmask 0x0001 = "Absent"
+   * Bitmask 0x0002 = "Standby"
+   * Bitmask 0x0004 = "IPMI Function ready"
+   * Bitmask 0x0008 = "Fully ready"
+   * Bitmask 0x0010 = "Offline"
+   * Bitmask 0x0020 = "Failed"
+   * Bitmask 0x0040 = "Active"
+   * Bitmask 0x0080 = "Booting"
+   * Bitmask 0x0100 = "Write protected"
+   */
+  
+  if (_interpret_sensor_oem_config_create (ctx,
+					   IPMI_IANA_ENTERPRISE_ID_DELL,
+					   IPMI_DELL_PRODUCT_ID_POWEREDGE_R610,
+					   IPMI_EVENT_READING_TYPE_CODE_OEM_DELL_STATUS,
+					   IPMI_SENSOR_TYPE_MODULE_BOARD,
+					   &oem_conf) < 0)
+    return (-1);
+
+  oem_conf->oem_state[0].sensor_event_bitmask = 0;
+  oem_conf->oem_state[0].sensor_state = IPMI_INTERPRET_STATE_NOMINAL;
+  oem_conf->oem_state[0].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state[1].sensor_event_bitmask = (0x1 << IPMI_GENERIC_EVENT_READING_TYPE_CODE_OEM_DELL_STATUS_ABSENT);
+  oem_conf->oem_state[1].sensor_state = IPMI_INTERPRET_STATE_CRITICAL;
+  oem_conf->oem_state[1].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state[2].sensor_event_bitmask = (0x1 << IPMI_GENERIC_EVENT_READING_TYPE_CODE_OEM_DELL_STATUS_STANDBY);
+  oem_conf->oem_state[2].sensor_state = IPMI_INTERPRET_STATE_NOMINAL;
+  oem_conf->oem_state[2].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state[3].sensor_event_bitmask = (0x1 << IPMI_GENERIC_EVENT_READING_TYPE_CODE_OEM_DELL_STATUS_IPMI_FUNCTION_READY);
+  oem_conf->oem_state[3].sensor_state = IPMI_INTERPRET_STATE_NOMINAL;
+  oem_conf->oem_state[3].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state[4].sensor_event_bitmask = (0x1 << IPMI_GENERIC_EVENT_READING_TYPE_CODE_OEM_DELL_STATUS_FULLY_READY);
+  oem_conf->oem_state[4].sensor_state = IPMI_INTERPRET_STATE_NOMINAL;
+  oem_conf->oem_state[4].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state[5].sensor_event_bitmask = (0x1 << IPMI_GENERIC_EVENT_READING_TYPE_CODE_OEM_DELL_STATUS_OFFLINE);
+  oem_conf->oem_state[5].sensor_state = IPMI_INTERPRET_STATE_WARNING;
+  oem_conf->oem_state[5].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state[6].sensor_event_bitmask = (0x1 << IPMI_GENERIC_EVENT_READING_TYPE_CODE_OEM_DELL_STATUS_FAILED);
+  oem_conf->oem_state[6].sensor_state = IPMI_INTERPRET_STATE_CRITICAL;
+  oem_conf->oem_state[6].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state[7].sensor_event_bitmask = (0x1 << IPMI_GENERIC_EVENT_READING_TYPE_CODE_OEM_DELL_STATUS_ACTIVE);
+  oem_conf->oem_state[7].sensor_state = IPMI_INTERPRET_STATE_NOMINAL;
+  oem_conf->oem_state[7].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state[8].sensor_event_bitmask = (0x1 << IPMI_GENERIC_EVENT_READING_TYPE_CODE_OEM_DELL_STATUS_BOOTING);
+  oem_conf->oem_state[8].sensor_state = IPMI_INTERPRET_STATE_NOMINAL;
+  oem_conf->oem_state[8].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state[9].sensor_event_bitmask = (0x1 << IPMI_GENERIC_EVENT_READING_TYPE_CODE_OEM_DELL_STATUS_WRITE_PROTECTED);
+  oem_conf->oem_state[9].sensor_state = IPMI_INTERPRET_STATE_WARNING;
+  oem_conf->oem_state[9].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state_count = 10;
+
+  return (0);
+}
+
+static int
 _interpret_sensor_oem_discrete_cpu_temp (ipmi_interpret_ctx_t ctx,
                                          uint32_t manufacturer_id,
                                          uint16_t product_id)
@@ -719,25 +942,6 @@ _interpret_sensor_oem_discrete_cpu_temp (ipmi_interpret_ctx_t ctx,
   assert (ctx);
   assert (ctx->magic == IPMI_INTERPRET_CTX_MAGIC);
   assert (ctx->interpret_sensor.sensor_oem_config);
-
-  /* Supermicro X8DTH/X8DTG/X8DTU/X8DTU-6+ CPU Temperature Sensor
-   *
-   * Manufacturer ID = 47488 (Supermicro, not IANA number, special case)
-   * Product ID = 43707 (X8DT*), 1549 (X8DTU-6+)
-   * Event/Reading Type Code = 70h (OEM)
-   * Sensor Type = C0h (OEM)
-   * Value 0x0000 = "Low"
-   * Value 0x0001 = "Medium"
-   * Value 0x0002 = "High"
-   * Value 0x0004 = "Overheat"
-   * Value 0x0007 = "Not Installed"
-   *
-   * IPMI_OEM_Value 47488 43707 0x70 0xC0 0x0000 Nominal
-   * IPMI_OEM_Value 47488 43707 0x70 0xC0 0x0001 Warning
-   * IPMI_OEM_Value 47488 43707 0x70 0xC0 0x0002 Warning
-   * IPMI_OEM_Value 47488 43707 0x70 0xC0 0x0004 Critical
-   * IPMI_OEM_Value 47488 43707 0x70 0xC0 0x0007 Warning
-   */
 
   if (_interpret_sensor_oem_config_create (ctx,
 					   manufacturer_id,
@@ -779,15 +983,122 @@ _interpret_sensor_oem_supermicro (ipmi_interpret_ctx_t ctx)
   assert (ctx->magic == IPMI_INTERPRET_CTX_MAGIC);
   assert (ctx->interpret_sensor.sensor_oem_config);
 
+  /* Supermicro CPU Temperature Sensor
+   * X7DBR-3/X7DB8/X8DTN/X7SBI-LN4/X8DTH/X8DTG/X8DTU/X8DT3-LN4F/X8DTU-6+/X8DTL/X8DTL-3F/X8SIL-F/X9SCL/X9SCM/X8DTN+-F/X8SIE
+   *
+   * Manufacturer ID = 10437 (Peppercon, IPMI card manufacturer), 47488 (Supermicro, not IANA number, special case)
+   *                   5593 (Magnum Technologies, rebranded Supermicro board)
+   * Product ID = 4 (X7DBR-3, X7DB8, X8DTN, X7SBI-LN4 / X7SBI_LN4), 43707 (X8DTH, X8DTG, X8DTU, X8DT3-LN4F / X8DT3_LN4F), 1549 (X8DTU-6+ / X8DTU_6PLUS),
+   *              6 (X8DTL, X8DTL-3F / X8DTL_3F), 1541 (X8SIL-F), 1572 (X9SCL, X9SCM), 1551 (X8DTN+-F / X8DTNPLUS_F), 1037 (X8SIE)
+   * Event/Reading Type Code = 70h (OEM)
+   * Sensor Type = C0h (OEM)
+   * Value 0x0000 = "Low"
+   * Value 0x0001 = "Medium"
+   * Value 0x0002 = "High"
+   * Value 0x0004 = "Overheat"
+   * Value 0x0007 = "Not Installed"
+   */
+
   if (_interpret_sensor_oem_discrete_cpu_temp (ctx,
-                                               IPMI_IANA_ENTERPRISE_ID_SUPERMICRO_WORKAROUND,
-                                               __IPMI_SUPERMICRO_PRODUCT_ID_X8DT) < 0)
+                                               IPMI_IANA_ENTERPRISE_ID_PEPPERCON,
+                                               __IPMI_SUPERMICRO_PRODUCT_ID_FOUR) < 0)
     return (-1);
 
   if (_interpret_sensor_oem_discrete_cpu_temp (ctx,
                                                IPMI_IANA_ENTERPRISE_ID_SUPERMICRO_WORKAROUND,
+                                               __IPMI_SUPERMICRO_PRODUCT_ID_X8DT) < 0)
+    return (-1);
+  
+  if (_interpret_sensor_oem_discrete_cpu_temp (ctx,
+                                               IPMI_IANA_ENTERPRISE_ID_SUPERMICRO_WORKAROUND,
                                                IPMI_SUPERMICRO_PRODUCT_ID_X8DTU_6PLUS) < 0)
     return (-1);
+  
+  if (_interpret_sensor_oem_discrete_cpu_temp (ctx,
+                                               IPMI_IANA_ENTERPRISE_ID_SUPERMICRO_WORKAROUND,
+                                               __IPMI_SUPERMICRO_PRODUCT_ID_X8DTL) < 0)
+    return (-1);
+  
+  if (_interpret_sensor_oem_discrete_cpu_temp (ctx,
+                                               IPMI_IANA_ENTERPRISE_ID_SUPERMICRO_WORKAROUND,
+                                               IPMI_SUPERMICRO_PRODUCT_ID_X8SIL_F) < 0)
+    return (-1);
+
+  if (_interpret_sensor_oem_discrete_cpu_temp (ctx,
+                                               IPMI_IANA_ENTERPRISE_ID_SUPERMICRO_WORKAROUND,
+                                               __IPMI_SUPERMICRO_PRODUCT_ID_X9SC) < 0)
+    return (-1);
+
+  if (_interpret_sensor_oem_discrete_cpu_temp (ctx,
+                                               IPMI_IANA_ENTERPRISE_ID_SUPERMICRO_WORKAROUND,
+                                               IPMI_SUPERMICRO_PRODUCT_ID_X8DTNPLUS_F) < 0)
+    return (-1);
+
+  if (_interpret_sensor_oem_discrete_cpu_temp (ctx,
+                                               IPMI_IANA_ENTERPRISE_ID_SUPERMICRO_WORKAROUND,
+                                               IPMI_SUPERMICRO_PRODUCT_ID_X8SIE) < 0)
+    return (-1);
+
+  if (_interpret_sensor_oem_discrete_cpu_temp (ctx,
+                                               IPMI_IANA_ENTERPRISE_ID_MAGNUM_TECHNOLOGIES,
+                                               __IPMI_SUPERMICRO_PRODUCT_ID_X8DTL) < 0)
+    return (-1);
+ 
+  return (0);
+}
+
+static int
+_interpret_sensor_oem_intel_smi_timeout (ipmi_interpret_ctx_t ctx)
+{
+  struct ipmi_interpret_sensor_oem_config *oem_conf;
+
+  assert (ctx);
+  assert (ctx->magic == IPMI_INTERPRET_CTX_MAGIC);
+  assert (ctx->interpret_sensor.sensor_oem_config);
+
+  /* Intel SR1625/S5500WB SMI Timeout
+   *
+   * Manufacturer ID = 343 (Intel)
+   * Product ID = 62 (Intel SR1625, S5500WB)
+   * Event/Reading Type Code = 3h (State Asserted/Deasserted)
+   * Sensor Type = F3h (OEM)
+   * Bitmask 0x0001 = "State Deasserted"
+   * Bitmask 0x0002 = "State Asserted"
+   */
+  
+  /* From Intel
+   *
+   * The BMC supports an SMI timeout sensor (sensor type OEM (F3h),
+   * event type Discrete (03h)) that asserts if the SMI signal has
+   * been asserted for more than 90 seconds. A continuously asserted
+   * SMI signal is an indication that the BIOS cannot service the
+   * condition that caused the SMI. This is usually because that
+   * condition prevents the BIOS from running. When an SMI timeout
+   * occurs, the BMC asserts the SMI timeout sensor and logs a SEL
+   * event for that sensor. The BMC will also reset the system.
+   */
+
+  if (_interpret_sensor_oem_config_create (ctx,
+					   IPMI_IANA_ENTERPRISE_ID_INTEL,
+					   IPMI_INTEL_PRODUCT_ID_SR1625,
+					   IPMI_EVENT_READING_TYPE_CODE_STATE,
+					   IPMI_SENSOR_TYPE_OEM_INTEL_SMI_TIMEOUT,
+					   &oem_conf) < 0)
+    return (-1);
+
+  oem_conf->oem_state[0].sensor_event_bitmask = 0;
+  oem_conf->oem_state[0].sensor_state = IPMI_INTERPRET_STATE_NOMINAL;
+  oem_conf->oem_state[0].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state[1].sensor_event_bitmask = (0x1 << IPMI_GENERIC_EVENT_READING_TYPE_CODE_STATE_DEASSERTED);
+  oem_conf->oem_state[1].sensor_state = IPMI_INTERPRET_STATE_NOMINAL;
+  oem_conf->oem_state[1].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state[2].sensor_event_bitmask = (0x1 << IPMI_GENERIC_EVENT_READING_TYPE_CODE_STATE_ASSERTED);
+  oem_conf->oem_state[2].sensor_state = IPMI_INTERPRET_STATE_CRITICAL;
+  oem_conf->oem_state[2].oem_state_type = IPMI_OEM_STATE_TYPE_BITMASK;
+
+  oem_conf->oem_state_count = 3;
 
   return (0);
 }
@@ -802,7 +1113,13 @@ _interpret_sensor_oem_config_init (ipmi_interpret_ctx_t ctx)
   if (_interpret_sensor_oem_dell_power_optimized (ctx) < 0)
     return (-1);
 
+  if (_interpret_sensor_oem_dell_module_board_status (ctx) < 0)
+    return (-1);
+
   if (_interpret_sensor_oem_supermicro (ctx) < 0)
+    return (-1);
+
+  if (_interpret_sensor_oem_intel_smi_timeout (ctx) < 0)
     return (-1);
 
   return (0);
@@ -823,6 +1140,24 @@ ipmi_interpret_sensor_init (ipmi_interpret_ctx_t ctx)
     goto cleanup;
 
   if (_interpret_config_sensor_init (ctx,
+                                     &ctx->interpret_sensor.ipmi_interpret_sensor_temperature_state_config,
+                                     ipmi_interpret_sensor_temperature_state_config,
+                                     ipmi_interpret_sensor_temperature_state_config_len) < 0)
+    goto cleanup;
+
+  if (_interpret_config_sensor_init (ctx,
+                                     &ctx->interpret_sensor.ipmi_interpret_sensor_temperature_limit_config,
+                                     ipmi_interpret_sensor_temperature_limit_config,
+                                     ipmi_interpret_sensor_temperature_limit_config_len) < 0)
+    goto cleanup;
+
+  if (_interpret_config_sensor_init (ctx,
+                                     &ctx->interpret_sensor.ipmi_interpret_sensor_temperature_transition_severity_config,
+                                     ipmi_interpret_sensor_temperature_transition_severity_config,
+                                     ipmi_interpret_sensor_temperature_transition_severity_config_len) < 0)
+    goto cleanup;
+
+  if (_interpret_config_sensor_init (ctx,
                                      &ctx->interpret_sensor.ipmi_interpret_sensor_voltage_state_config,
                                      ipmi_interpret_sensor_voltage_state_config,
                                      ipmi_interpret_sensor_voltage_state_config_len) < 0)
@@ -832,6 +1167,24 @@ ipmi_interpret_sensor_init (ipmi_interpret_ctx_t ctx)
                                      &ctx->interpret_sensor.ipmi_interpret_sensor_voltage_performance_config,
                                      ipmi_interpret_sensor_voltage_performance_config,
                                      ipmi_interpret_sensor_voltage_performance_config_len) < 0)
+    goto cleanup;
+
+  if (_interpret_config_sensor_init (ctx,
+                                     &ctx->interpret_sensor.ipmi_interpret_sensor_voltage_transition_severity_config,
+                                     ipmi_interpret_sensor_voltage_transition_severity_config,
+                                     ipmi_interpret_sensor_voltage_transition_severity_config_len) < 0)
+    goto cleanup;
+
+  if (_interpret_config_sensor_init (ctx,
+                                     &ctx->interpret_sensor.ipmi_interpret_sensor_current_transition_severity_config,
+                                     ipmi_interpret_sensor_current_transition_severity_config,
+                                     ipmi_interpret_sensor_current_transition_severity_config_len) < 0)
+    goto cleanup;
+
+  if (_interpret_config_sensor_init (ctx,
+                                     &ctx->interpret_sensor.ipmi_interpret_sensor_fan_transition_severity_config,
+                                     ipmi_interpret_sensor_fan_transition_severity_config,
+                                     ipmi_interpret_sensor_fan_transition_severity_config_len) < 0)
     goto cleanup;
 
   if (_interpret_config_sensor_init (ctx,
@@ -889,6 +1242,12 @@ ipmi_interpret_sensor_init (ipmi_interpret_ctx_t ctx)
     goto cleanup;
 
   if (_interpret_config_sensor_init (ctx,
+                                     &ctx->interpret_sensor.ipmi_interpret_sensor_power_supply_transition_severity_config,
+                                     ipmi_interpret_sensor_power_supply_transition_severity_config,
+                                     ipmi_interpret_sensor_power_supply_transition_severity_config_len) < 0)
+    goto cleanup;
+
+  if (_interpret_config_sensor_init (ctx,
                                      &ctx->interpret_sensor.ipmi_interpret_sensor_power_supply_redundancy_config,
                                      ipmi_interpret_sensor_power_supply_redundancy_config,
                                      ipmi_interpret_sensor_power_supply_redundancy_config_len) < 0)
@@ -913,9 +1272,21 @@ ipmi_interpret_sensor_init (ipmi_interpret_ctx_t ctx)
     goto cleanup;
 
   if (_interpret_config_sensor_init (ctx,
+                                     &ctx->interpret_sensor.ipmi_interpret_sensor_cooling_device_redundancy_config,
+                                     ipmi_interpret_sensor_cooling_device_redundancy_config,
+                                     ipmi_interpret_sensor_cooling_device_redundancy_config_len) < 0)
+    goto cleanup;
+
+  if (_interpret_config_sensor_init (ctx,
                                      &ctx->interpret_sensor.ipmi_interpret_sensor_memory_config,
                                      ipmi_interpret_sensor_memory_config,
                                      ipmi_interpret_sensor_memory_config_len) < 0)
+    goto cleanup;
+
+  if (_interpret_config_sensor_init (ctx,
+                                     &ctx->interpret_sensor.ipmi_interpret_sensor_memory_redundancy_config,
+                                     ipmi_interpret_sensor_memory_redundancy_config,
+                                     ipmi_interpret_sensor_memory_redundancy_config_len) < 0)
     goto cleanup;
 
   if (_interpret_config_sensor_init (ctx,
@@ -961,6 +1332,12 @@ ipmi_interpret_sensor_init (ipmi_interpret_ctx_t ctx)
     goto cleanup;
 
   if (_interpret_config_sensor_init (ctx,
+                                     &ctx->interpret_sensor.ipmi_interpret_sensor_system_event_state_config,
+                                     ipmi_interpret_sensor_system_event_state_config,
+                                     ipmi_interpret_sensor_system_event_state_config_len) < 0)
+    goto cleanup;
+
+  if (_interpret_config_sensor_init (ctx,
                                      &ctx->interpret_sensor.ipmi_interpret_sensor_critical_interrupt_config,
                                      ipmi_interpret_sensor_critical_interrupt_config,
                                      ipmi_interpret_sensor_critical_interrupt_config_len) < 0)
@@ -988,6 +1365,12 @@ ipmi_interpret_sensor_init (ipmi_interpret_ctx_t ctx)
                                      &ctx->interpret_sensor.ipmi_interpret_sensor_module_board_device_present_config,
                                      ipmi_interpret_sensor_module_board_device_present_config,
                                      ipmi_interpret_sensor_module_board_device_present_config_len) < 0)
+    goto cleanup;
+
+  if (_interpret_config_sensor_init (ctx,
+                                     &ctx->interpret_sensor.ipmi_interpret_sensor_chip_set_transition_severity_config,
+                                     ipmi_interpret_sensor_chip_set_transition_severity_config,
+                                     ipmi_interpret_sensor_chip_set_transition_severity_config_len) < 0)
     goto cleanup;
 
   if (_interpret_config_sensor_init (ctx,
@@ -1097,10 +1480,28 @@ ipmi_interpret_sensor_destroy (ipmi_interpret_ctx_t ctx)
                                     ctx->interpret_sensor.ipmi_interpret_sensor_threshold_config);
 
   _interpret_config_sensor_destroy (ctx,
+                                    ctx->interpret_sensor.ipmi_interpret_sensor_temperature_state_config);
+
+  _interpret_config_sensor_destroy (ctx,
+                                    ctx->interpret_sensor.ipmi_interpret_sensor_temperature_limit_config);
+
+  _interpret_config_sensor_destroy (ctx,
+                                    ctx->interpret_sensor.ipmi_interpret_sensor_temperature_transition_severity_config);
+
+  _interpret_config_sensor_destroy (ctx,
                                     ctx->interpret_sensor.ipmi_interpret_sensor_voltage_state_config);
 
   _interpret_config_sensor_destroy (ctx,
                                     ctx->interpret_sensor.ipmi_interpret_sensor_voltage_performance_config);
+
+  _interpret_config_sensor_destroy (ctx,
+                                    ctx->interpret_sensor.ipmi_interpret_sensor_voltage_transition_severity_config);
+
+  _interpret_config_sensor_destroy (ctx,
+                                    ctx->interpret_sensor.ipmi_interpret_sensor_current_transition_severity_config);
+
+  _interpret_config_sensor_destroy (ctx,
+                                    ctx->interpret_sensor.ipmi_interpret_sensor_fan_transition_severity_config);
 
   _interpret_config_sensor_destroy (ctx,
                                     ctx->interpret_sensor.ipmi_interpret_sensor_fan_device_present_config);
@@ -1130,6 +1531,9 @@ ipmi_interpret_sensor_destroy (ipmi_interpret_ctx_t ctx)
                                     ctx->interpret_sensor.ipmi_interpret_sensor_power_supply_state_config);
 
   _interpret_config_sensor_destroy (ctx,
+                                    ctx->interpret_sensor.ipmi_interpret_sensor_power_supply_transition_severity_config);
+
+  _interpret_config_sensor_destroy (ctx,
                                     ctx->interpret_sensor.ipmi_interpret_sensor_power_supply_redundancy_config);
 
   _interpret_config_sensor_destroy (ctx,
@@ -1142,7 +1546,13 @@ ipmi_interpret_sensor_destroy (ipmi_interpret_ctx_t ctx)
                                     ctx->interpret_sensor.ipmi_interpret_sensor_power_unit_redundancy_config);
 
   _interpret_config_sensor_destroy (ctx,
+                                    ctx->interpret_sensor.ipmi_interpret_sensor_cooling_device_redundancy_config);
+
+  _interpret_config_sensor_destroy (ctx,
                                     ctx->interpret_sensor.ipmi_interpret_sensor_memory_config);
+
+  _interpret_config_sensor_destroy (ctx,
+                                    ctx->interpret_sensor.ipmi_interpret_sensor_memory_redundancy_config);
 
   _interpret_config_sensor_destroy (ctx,
                                     ctx->interpret_sensor.ipmi_interpret_sensor_drive_slot_config);
@@ -1166,6 +1576,9 @@ ipmi_interpret_sensor_destroy (ipmi_interpret_ctx_t ctx)
                                     ctx->interpret_sensor.ipmi_interpret_sensor_system_event_config);
 
   _interpret_config_sensor_destroy (ctx,
+                                    ctx->interpret_sensor.ipmi_interpret_sensor_system_event_state_config);
+
+  _interpret_config_sensor_destroy (ctx,
                                     ctx->interpret_sensor.ipmi_interpret_sensor_critical_interrupt_config);
 
   _interpret_config_sensor_destroy (ctx,
@@ -1179,6 +1592,9 @@ ipmi_interpret_sensor_destroy (ipmi_interpret_ctx_t ctx)
 
   _interpret_config_sensor_destroy (ctx,
                                     ctx->interpret_sensor.ipmi_interpret_sensor_module_board_device_present_config);
+
+  _interpret_config_sensor_destroy (ctx,
+                                    ctx->interpret_sensor.ipmi_interpret_sensor_chip_set_transition_severity_config);
 
   _interpret_config_sensor_destroy (ctx,
                                     ctx->interpret_sensor.ipmi_interpret_sensor_cable_interconnect_config);
@@ -1448,8 +1864,14 @@ ipmi_interpret_sensor_config_parse (ipmi_interpret_ctx_t ctx,
                                     const char *sensor_config_file)
 {
   int ipmi_interpret_sensor_threshold_flags[ipmi_interpret_sensor_threshold_config_len];
+  int ipmi_interpret_sensor_temperature_state_flags[ipmi_interpret_sensor_temperature_state_config_len];
+  int ipmi_interpret_sensor_temperature_limit_flags[ipmi_interpret_sensor_temperature_limit_config_len];
+  int ipmi_interpret_sensor_temperature_transition_severity_flags[ipmi_interpret_sensor_temperature_transition_severity_config_len];
   int ipmi_interpret_sensor_voltage_state_flags[ipmi_interpret_sensor_voltage_state_config_len];
   int ipmi_interpret_sensor_voltage_performance_flags[ipmi_interpret_sensor_voltage_performance_config_len];
+  int ipmi_interpret_sensor_voltage_transition_severity_flags[ipmi_interpret_sensor_voltage_transition_severity_config_len];
+  int ipmi_interpret_sensor_current_transition_severity_flags[ipmi_interpret_sensor_current_transition_severity_config_len];
+  int ipmi_interpret_sensor_fan_transition_severity_flags[ipmi_interpret_sensor_fan_transition_severity_config_len];
   int ipmi_interpret_sensor_fan_device_present_flags[ipmi_interpret_sensor_fan_device_present_config_len];
   int ipmi_interpret_sensor_fan_transition_availability_flags[ipmi_interpret_sensor_fan_transition_availability_config_len];
   int ipmi_interpret_sensor_fan_redundancy_flags[ipmi_interpret_sensor_fan_redundancy_config_len];
@@ -1459,11 +1881,14 @@ ipmi_interpret_sensor_config_parse (ipmi_interpret_ctx_t ctx,
   int ipmi_interpret_sensor_processor_state_flags[ipmi_interpret_sensor_processor_state_config_len];
   int ipmi_interpret_sensor_power_supply_flags[ipmi_interpret_sensor_power_supply_config_len];
   int ipmi_interpret_sensor_power_supply_state_flags[ipmi_interpret_sensor_power_supply_state_config_len];
+  int ipmi_interpret_sensor_power_supply_transition_severity_flags[ipmi_interpret_sensor_power_supply_transition_severity_config_len];
   int ipmi_interpret_sensor_power_supply_redundancy_flags[ipmi_interpret_sensor_power_supply_redundancy_config_len];
   int ipmi_interpret_sensor_power_unit_flags[ipmi_interpret_sensor_power_unit_config_len];
   int ipmi_interpret_sensor_power_unit_device_present_flags[ipmi_interpret_sensor_power_unit_device_present_config_len];
   int ipmi_interpret_sensor_power_unit_redundancy_flags[ipmi_interpret_sensor_power_unit_redundancy_config_len];
+  int ipmi_interpret_sensor_cooling_device_redundancy_flags[ipmi_interpret_sensor_cooling_device_redundancy_config_len];
   int ipmi_interpret_sensor_memory_flags[ipmi_interpret_sensor_memory_config_len];
+  int ipmi_interpret_sensor_memory_redundancy_flags[ipmi_interpret_sensor_memory_redundancy_config_len];
   int ipmi_interpret_sensor_drive_slot_flags[ipmi_interpret_sensor_drive_slot_config_len];
   int ipmi_interpret_sensor_drive_slot_state_flags[ipmi_interpret_sensor_drive_slot_state_config_len];
   int ipmi_interpret_sensor_drive_slot_predictive_failure_flags[ipmi_interpret_sensor_drive_slot_predictive_failure_config_len];
@@ -1471,11 +1896,13 @@ ipmi_interpret_sensor_config_parse (ipmi_interpret_ctx_t ctx,
   int ipmi_interpret_sensor_system_firmware_progress_flags[ipmi_interpret_sensor_system_firmware_progress_config_len];
   int ipmi_interpret_sensor_event_logging_disabled_flags[ipmi_interpret_sensor_event_logging_disabled_config_len];
   int ipmi_interpret_sensor_system_event_flags[ipmi_interpret_sensor_system_event_config_len];
+  int ipmi_interpret_sensor_system_event_state_flags[ipmi_interpret_sensor_system_event_state_config_len];
   int ipmi_interpret_sensor_critical_interrupt_flags[ipmi_interpret_sensor_critical_interrupt_config_len];
   int ipmi_interpret_sensor_button_switch_flags[ipmi_interpret_sensor_button_switch_config_len];
   int ipmi_interpret_sensor_button_switch_state_flags[ipmi_interpret_sensor_button_switch_state_config_len];
   int ipmi_interpret_sensor_module_board_state_flags[ipmi_interpret_sensor_module_board_state_config_len];
   int ipmi_interpret_sensor_module_board_device_present_flags[ipmi_interpret_sensor_module_board_device_present_config_len];
+  int ipmi_interpret_sensor_chip_set_transition_severity_flags[ipmi_interpret_sensor_chip_set_transition_severity_config_len];
   int ipmi_interpret_sensor_cable_interconnect_flags[ipmi_interpret_sensor_cable_interconnect_config_len];
   int ipmi_interpret_sensor_boot_error_flags[ipmi_interpret_sensor_boot_error_config_len];
   int ipmi_interpret_sensor_slot_connector_flags[ipmi_interpret_sensor_slot_connector_config_len];
@@ -1510,6 +1937,24 @@ ipmi_interpret_sensor_config_parse (ipmi_interpret_ctx_t ctx,
 
   _fill_sensor_config_options (config_file_options,
                                &config_file_options_len,
+                               ctx->interpret_sensor.ipmi_interpret_sensor_temperature_state_config,
+                               ipmi_interpret_sensor_temperature_state_flags,
+                               ipmi_interpret_sensor_temperature_state_config_len);
+
+  _fill_sensor_config_options (config_file_options,
+                               &config_file_options_len,
+                               ctx->interpret_sensor.ipmi_interpret_sensor_temperature_limit_config,
+                               ipmi_interpret_sensor_temperature_limit_flags,
+                               ipmi_interpret_sensor_temperature_limit_config_len);
+
+  _fill_sensor_config_options (config_file_options,
+                               &config_file_options_len,
+                               ctx->interpret_sensor.ipmi_interpret_sensor_temperature_transition_severity_config,
+                               ipmi_interpret_sensor_temperature_transition_severity_flags,
+                               ipmi_interpret_sensor_temperature_transition_severity_config_len);
+
+  _fill_sensor_config_options (config_file_options,
+                               &config_file_options_len,
                                ctx->interpret_sensor.ipmi_interpret_sensor_voltage_state_config,
                                ipmi_interpret_sensor_voltage_state_flags,
                                ipmi_interpret_sensor_voltage_state_config_len);
@@ -1519,6 +1964,24 @@ ipmi_interpret_sensor_config_parse (ipmi_interpret_ctx_t ctx,
                                ctx->interpret_sensor.ipmi_interpret_sensor_voltage_performance_config,
                                ipmi_interpret_sensor_voltage_performance_flags,
                                ipmi_interpret_sensor_voltage_performance_config_len);
+
+  _fill_sensor_config_options (config_file_options,
+                               &config_file_options_len,
+                               ctx->interpret_sensor.ipmi_interpret_sensor_voltage_transition_severity_config,
+                               ipmi_interpret_sensor_voltage_transition_severity_flags,
+                               ipmi_interpret_sensor_voltage_transition_severity_config_len);
+
+  _fill_sensor_config_options (config_file_options,
+                               &config_file_options_len,
+                               ctx->interpret_sensor.ipmi_interpret_sensor_current_transition_severity_config,
+                               ipmi_interpret_sensor_current_transition_severity_flags,
+                               ipmi_interpret_sensor_current_transition_severity_config_len);
+
+  _fill_sensor_config_options (config_file_options,
+                               &config_file_options_len,
+                               ctx->interpret_sensor.ipmi_interpret_sensor_fan_transition_severity_config,
+                               ipmi_interpret_sensor_fan_transition_severity_flags,
+                               ipmi_interpret_sensor_fan_transition_severity_config_len);
 
   _fill_sensor_config_options (config_file_options,
                                &config_file_options_len,
@@ -1576,6 +2039,12 @@ ipmi_interpret_sensor_config_parse (ipmi_interpret_ctx_t ctx,
 
   _fill_sensor_config_options (config_file_options,
                                &config_file_options_len,
+                               ctx->interpret_sensor.ipmi_interpret_sensor_power_supply_transition_severity_config,
+                               ipmi_interpret_sensor_power_supply_transition_severity_flags,
+                               ipmi_interpret_sensor_power_supply_transition_severity_config_len);
+
+  _fill_sensor_config_options (config_file_options,
+                               &config_file_options_len,
                                ctx->interpret_sensor.ipmi_interpret_sensor_power_supply_redundancy_config,
                                ipmi_interpret_sensor_power_supply_redundancy_flags,
                                ipmi_interpret_sensor_power_supply_redundancy_config_len);
@@ -1600,9 +2069,21 @@ ipmi_interpret_sensor_config_parse (ipmi_interpret_ctx_t ctx,
 
   _fill_sensor_config_options (config_file_options,
                                &config_file_options_len,
+                               ctx->interpret_sensor.ipmi_interpret_sensor_cooling_device_redundancy_config,
+                               ipmi_interpret_sensor_cooling_device_redundancy_flags,
+                               ipmi_interpret_sensor_cooling_device_redundancy_config_len);
+
+  _fill_sensor_config_options (config_file_options,
+                               &config_file_options_len,
                                ctx->interpret_sensor.ipmi_interpret_sensor_memory_config,
                                ipmi_interpret_sensor_memory_flags,
                                ipmi_interpret_sensor_memory_config_len);
+
+  _fill_sensor_config_options (config_file_options,
+                               &config_file_options_len,
+                               ctx->interpret_sensor.ipmi_interpret_sensor_memory_redundancy_config,
+                               ipmi_interpret_sensor_memory_redundancy_flags,
+                               ipmi_interpret_sensor_memory_redundancy_config_len);
 
   _fill_sensor_config_options (config_file_options,
                                &config_file_options_len,
@@ -1648,6 +2129,12 @@ ipmi_interpret_sensor_config_parse (ipmi_interpret_ctx_t ctx,
 
   _fill_sensor_config_options (config_file_options,
                                &config_file_options_len,
+                               ctx->interpret_sensor.ipmi_interpret_sensor_system_event_state_config,
+                               ipmi_interpret_sensor_system_event_state_flags,
+                               ipmi_interpret_sensor_system_event_state_config_len);
+
+  _fill_sensor_config_options (config_file_options,
+                               &config_file_options_len,
                                ctx->interpret_sensor.ipmi_interpret_sensor_critical_interrupt_config,
                                ipmi_interpret_sensor_critical_interrupt_flags,
                                ipmi_interpret_sensor_critical_interrupt_config_len);
@@ -1675,6 +2162,12 @@ ipmi_interpret_sensor_config_parse (ipmi_interpret_ctx_t ctx,
                                ctx->interpret_sensor.ipmi_interpret_sensor_module_board_device_present_config,
                                ipmi_interpret_sensor_module_board_device_present_flags,
                                ipmi_interpret_sensor_module_board_device_present_config_len);
+
+  _fill_sensor_config_options (config_file_options,
+                               &config_file_options_len,
+                               ctx->interpret_sensor.ipmi_interpret_sensor_chip_set_transition_severity_config,
+                               ipmi_interpret_sensor_chip_set_transition_severity_flags,
+                               ipmi_interpret_sensor_chip_set_transition_severity_config_len);
 
   _fill_sensor_config_options (config_file_options,
                                &config_file_options_len,

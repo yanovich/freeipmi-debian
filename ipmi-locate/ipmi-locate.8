@@ -1,6 +1,4 @@
-
-
-.TH IPMI-LOCATE 8 "2011-01-20" "IPMI Locate version 1.0.1" "System Commands"
+.TH IPMI-LOCATE 8 "2011-10-26" "IPMI Locate version 1.0.8" "System Commands"
 .SH "NAME"
 IPMI \- IPMI probing utility
 .SH "SYNOPSIS"
@@ -8,8 +6,16 @@ IPMI \- IPMI probing utility
 [\fIOPTION\fR...]
 .SH "DESCRIPTION"
 .B Ipmi-locate
-probes and displays information about the location of a BMC device,
-such as device addresses.
+probes and displays information about a BMC device, such as device
+addresses or IPMI version support.
+.B Ipmi-locate
+is sometimes used to determine if IPMI can be found on your system.
+Users are cautioned though, the failure to discover IPMI via
+.B Ipmi-locate
+is not sufficient to disprove that IPMI exists on your
+system. Your system may not publish such information or may expect
+clients to communicate at default locations.
+
 .SH "OPTIONS"
 .TP
 \fB\-?\fR, \fB\-\-help\fR

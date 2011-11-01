@@ -3,7 +3,7 @@
 #
 
 %define name freeipmi
-%define version 1.0.1
+%define version 1.0.8
 %if %{?_with_debug:1}%{!?_with_debug:0}
 %define release 1.debug%{?dist}
 %else
@@ -224,6 +224,7 @@ fi
 %{_libdir}/libfreeipmi*so.*
 %{_libdir}/libipmidetect*so.*
 %{_libdir}/libipmimonitoring.so.*
+%{_libdir}/pkgconfig/*
 %{_localstatedir}/lib/*
 %{_sbindir}/bmc-config
 %{_sbindir}/bmc-info
@@ -362,6 +363,9 @@ fi
 %{_mandir}/man8/ipmidetectd.8*
 
 %changelog
+* Wed Jun 29 2011 Albert Chu <chu11@llnl.gov> 1.0.4
+- Add pkgconfig files.
+
 * Fri Nov 5 2010 Albert Chu <chu11@llnl.gov> 0.9.0
 - Add interpret sub-library.
 - Support new config files.
@@ -412,7 +416,7 @@ fi
 - Obsolete old subpackage freeipmi-ipmimonitoring.
 
 * Tue Dec 18 2007 Albert Chu <chu11@llnl.gov> 0.6.0
-- Use %{version} instead of 1.0.1 for substitution in paths.
+- Use %{version} instead of 1.0.8 for substitution in paths.
 
 * Fri Dec 14 2007 Albert Chu <chu11@llnl.gov> 0.6.0
 - Update packaging for libfreeipmi reorganization

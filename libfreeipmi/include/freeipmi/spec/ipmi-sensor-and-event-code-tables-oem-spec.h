@@ -574,6 +574,7 @@ extern unsigned int ipmi_oem_intel_specific_pci_correctable_sensor_max_index;
  * For Intel Chips, not just Intel Motherboards.  Confirmed for:
  *
  * Intel S5500WB/Penguin Computing Relion 700
+ * Intel S2600JF/Appro 512X
  * Inventec 5441/Dell Xanadu II
  * Inventec 5442/Dell Xanadu III
  * Quanta S99Q/Dell FS12-TY
@@ -836,7 +837,22 @@ extern unsigned int ipmi_oem_intel_specific_pci_correctable_sensor_max_index;
  *******************************************/
 
 /*
- * Supermicro X8DTH, X8DTG, X8DTU
+ * Supermicro X7DBR-3 (X7DBR_3)
+ * Supermicro X7DB8
+ * Supermicro X8DTN
+ * Supermicro X7SBI-LN4 (X7SBI_LN4)
+ * Supermicro X8DTH
+ * Supermicro X8DTG
+ * Supermicro X8DTU
+ * Supermicro X8DT3-LN4F (X8DT3_LN4F)
+ * Supermicro X8DTU-6+ (X8DTU_6PLUS)
+ * Supermicro X8DTL
+ * Supermicro X8DTL-3F (X8DTL_3F)
+ * Supermicro X8SIL-F  (X8SIL_F)
+ * Supermicro X9SCL
+ * Supermicro X9SCM
+ * Supermicro X8DTN+-F (X8DTNPLUS_F)
+ * Supermicro X8SIE
  */
 /* achu: not official names, named based on use context */
 #define IPMI_SENSOR_TYPE_OEM_SUPERMICRO_CPU_TEMP_LOW           0x00

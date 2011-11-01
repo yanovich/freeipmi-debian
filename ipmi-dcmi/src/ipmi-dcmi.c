@@ -608,10 +608,23 @@ _optional_platform_attributes (ipmi_dcmi_state_data_t *state_data)
   if (ipmi_cmd_dcmi_get_dcmi_capability_info_optional_platform_attributes (state_data->ipmi_ctx,
                                                                            obj_cmd_rs) < 0)
     {
-      /* this optional parameter is not supported */
+      /* IPMI Workaround?
+       *
+       * Technically, I believe this should be mandatory, as this is
+       * not listed as optional in the DCMI spec (enhanced system
+       * power statistics attributes is the only one that is
+       * optional).  However, this parameter specifically lists
+       * attributes for optional parts of DCMI.
+       *
+       * This has been seen as non-implemented on atleast two
+       * motherboards (one undocumented motherboard and also the Intel
+       * S2600JF/Appro 512X).
+       */
       if (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
-          && ipmi_check_completion_code (obj_cmd_rs,
-                                         IPMI_COMP_CODE_REQUEST_PARAMETER_NOT_SUPPORTED) == 1)
+          && ((ipmi_check_completion_code (obj_cmd_rs,
+					   IPMI_COMP_CODE_REQUEST_PARAMETER_NOT_SUPPORTED) == 1)
+	      || (ipmi_check_completion_code (obj_cmd_rs,
+					      IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)))
         {
           rv = 0;
           goto cleanup;
@@ -701,7 +714,7 @@ _manageability_access_attributes (ipmi_dcmi_state_data_t *state_data)
 
   if (ipmi_cmd_dcmi_get_dcmi_capability_info_manageability_access_attributes (state_data->ipmi_ctx,
                                                                               obj_cmd_rs) < 0)
-    {
+    {     
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_dcmi_get_dcmi_capability_info_manageability_access_attributes: %s\n",
@@ -804,6 +817,17 @@ _get_enhanced_system_power_statistics_attributes (ipmi_dcmi_state_data_t *state_
   if (ipmi_cmd_dcmi_get_dcmi_capability_info_enhanced_system_power_statistics_attributes (state_data->ipmi_ctx,
                                                                                           obj_cmd_rs) < 0)
     {
+      /* this optional parameter is not supported */
+      if (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
+          && ((ipmi_check_completion_code (obj_cmd_rs,
+					   IPMI_COMP_CODE_REQUEST_PARAMETER_NOT_SUPPORTED) == 1)
+	      || (ipmi_check_completion_code (obj_cmd_rs,
+					      IPMI_COMP_CODE_REQUESTED_SENSOR_DATA_OR_RECORD_NOT_PRESENT) == 1)))
+        {
+          rv = 0;
+          goto cleanup;
+        }
+
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_dcmi_get_dcmi_capability_info_enhanced_system_power_statistics_attributes: %s\n",
@@ -1135,7 +1159,7 @@ set_asset_tag (ipmi_dcmi_state_data_t *state_data)
   fiid_obj_t obj_cmd_rs = NULL;
   unsigned int offset = 0;
   char data_buf[IPMI_DCMI_MAX_ASSET_TAG_LENGTH + 1];
-  unsigned int data_len = IPMI_DCMI_MAX_ASSET_TAG_LENGTH;
+  unsigned int data_len;
   uint8_t bytes_to_write = IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_WRITE_MAX;
   int rv = -1;
 
@@ -1143,13 +1167,21 @@ set_asset_tag (ipmi_dcmi_state_data_t *state_data)
 
   /* achu:
    *
-   * DCMI 1.1 spec is unclear, I am assuming the
-   * "total_asset_tag_length_written" is the number of bytes just
-   * written.
+   * DCMI v1.1 spec is unclear if the entire buffer needs to be
+   * written or just the amount you desire.
    *
-   * I am assuming we need to clear the entire buffer, so we write the
-   * full buffer, NUL byte extended.
+   * DCMI v1.5 spec strongly suggests you don't write the entire
+   * buffer due to the results of the "total_asset_tag_length_written"
+   * field.
+   *
+   * "Total Asset Tag Length. This is the length in bytes of the stored
+   * Asset Tag after the Set operation has completed. The Asset Tag
+   * length shall be set to the sum of the offset to write plus bytes
+   * to write. For example, if offset to write is 32 and bytes to
+   * write is 4, the Total Asset Tag Length returned will be 36."
    */
+
+  data_len = strlen (state_data->prog_data->args->set_asset_tag_arg);
 
   memset (data_buf, '\0', IPMI_DCMI_MAX_ASSET_TAG_LENGTH + 1);
 
@@ -1170,8 +1202,7 @@ set_asset_tag (ipmi_dcmi_state_data_t *state_data)
     {
       uint64_t val;
 
-      if (!offset
-          || ((data_len - offset) >= IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_WRITE_MAX))
+      if ((data_len - offset) >= IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_WRITE_MAX)
         bytes_to_write = IPMI_DCMI_ASSET_TAG_NUMBER_OF_BYTES_TO_WRITE_MAX;
       else 
         bytes_to_write = data_len - offset;
@@ -1179,7 +1210,7 @@ set_asset_tag (ipmi_dcmi_state_data_t *state_data)
       if (ipmi_cmd_dcmi_set_asset_tag (state_data->ipmi_ctx,
                                        offset,
                                        bytes_to_write,
-                                       data_buf,
+                                       data_buf + offset,
                                        data_len,
                                        obj_cmd_rs) < 0)
         {
@@ -1201,10 +1232,12 @@ set_asset_tag (ipmi_dcmi_state_data_t *state_data)
           goto cleanup;
         }
 
-      /* make sure response is reasonable, some vendors may return the
-       * max length of the internal buffer.  If we get an unreasonable
-       * number, just assume bytes_to_write is what is added to the
-       * offset.
+      /* DCMI 1.1 spec is unclear on "total_length_written", is it the
+       * number of bytes just written or total bytes written so far?
+       * 
+       * DCMI 1.5 spec makes it clear that this is the number of bytes
+       * written in total.  To defend against vendor mistakes, we
+       * handle both situations.
        */
       if (val > bytes_to_write)
         offset += bytes_to_write;
@@ -1316,7 +1349,7 @@ set_management_controller_identifier_string (ipmi_dcmi_state_data_t *state_data)
   fiid_obj_t obj_cmd_rs = NULL;
   unsigned int offset = 0;
   char data_buf[IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH];
-  unsigned int data_len = IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH;
+  unsigned int data_len;
   uint8_t bytes_to_write = IPMI_DCMI_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_NUMBER_OF_BYTES_TO_WRITE_MAX;
   int rv = -1;
 
@@ -1324,16 +1357,18 @@ set_management_controller_identifier_string (ipmi_dcmi_state_data_t *state_data)
 
   /* achu:
    *
-   * DCMI 1.1 spec is unclear, I am assuming the
-   * "total_length_written" is the number of bytes just written.
+   * According to DCMI v1.5 draft
+   * 
+   * "The presence of the null terminator among bytes to shall be
+   * considered as indicating the last transfer of the Management
+   * Controller Identifier string"
    *
-   * I am assuming we need to clear the entire buffer, so we write the
-   * full buffer, NUL byte extended.
-   *
-   * Note that IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH
-   * length includes the NUL byte, so max string length is really
-   * (IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH - 1)
+   * So I am assuming we don't need to write the entire buffer.  But
+   * we must include the NUL byte at the end.
    */
+
+  /* +1 for NUL char */
+  data_len = strlen (state_data->prog_data->args->set_management_controller_identifier_string_arg) + 1;
 
   memset (data_buf, '\0', IPMI_DCMI_MAX_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_LENGTH);
 
@@ -1354,8 +1389,7 @@ set_management_controller_identifier_string (ipmi_dcmi_state_data_t *state_data)
     {
       uint64_t val;
 
-      if (!offset
-          || ((data_len - offset) >= IPMI_DCMI_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_NUMBER_OF_BYTES_TO_WRITE_MAX))
+      if ((data_len - offset) >= IPMI_DCMI_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_NUMBER_OF_BYTES_TO_WRITE_MAX)
         bytes_to_write = IPMI_DCMI_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING_NUMBER_OF_BYTES_TO_WRITE_MAX;
       else 
         bytes_to_write = data_len - offset;
@@ -1363,7 +1397,7 @@ set_management_controller_identifier_string (ipmi_dcmi_state_data_t *state_data)
       if (ipmi_cmd_dcmi_set_management_controller_identifier_string (state_data->ipmi_ctx,
                                                                      offset,
                                                                      bytes_to_write,
-                                                                     data_buf,
+                                                                     data_buf + offset,
                                                                      data_len,
                                                                      obj_cmd_rs) < 0)
         {
@@ -1385,10 +1419,13 @@ set_management_controller_identifier_string (ipmi_dcmi_state_data_t *state_data)
           goto cleanup;
         }
 
-      /* make sure response is reasonable, some vendors may return the
-       * max length of the internal buffer.  If we get an unreasonable
-       * number, just assume bytes_to_write is what is added to the
-       * offset.
+
+      /* DCMI 1.1 spec is unclear on "total_length_written", is it the
+       * number of bytes just written or total bytes written so far?
+       * 
+       * DCMI 1.5 spec makes it clear that this is the number of bytes
+       * written in total.  To defend against vendor mistakes, we
+       * handle both situations.
        */
       if (val > bytes_to_write)
         offset += bytes_to_write;
