@@ -1,3 +1,26 @@
+freeipmi (0.8.12-3) unstable; urgency=low
+
+  * Drop build-depend on libreadline since it is not used any longer
+    (Closes: #634440). Thanks Lucas!
+  * Re-formated Build-Depends into mutliple lines
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 18 Jul 2011 19:29:26 -0400
+
+freeipmi (0.8.12-2.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Stop shipping libtool la files in binary packages. Closes: #610134
+    http://wiki.debian.org/ReleaseGoals/LAFileRemoval
+
+ -- Andreas Metzler <ametzler@debian.org>  Sat, 09 Apr 2011 14:38:42 +0200
+
+freeipmi (0.8.12-2) unstable; urgency=low
+
+  * Upload to unstable: this upstream version is robust to 
+    --no-add-needed (Closes: #615716)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 27 Feb 2011 21:03:36 -0500
+
 freeipmi (0.8.12-1) experimental; urgency=low
 
   * [b3c7c12] Imported Upstream version 0.8.12

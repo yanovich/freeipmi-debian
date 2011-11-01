@@ -1,5 +1,4 @@
 usr/lib/libipmimonitoring.a
-usr/lib/libipmimonitoring.la
 usr/lib/libipmimonitoring.so
 usr/include/ipmi_monitoring.h
 usr/share/doc/freeipmi/freeipmi-libraries.txt usr/share/doc/libipmimonitoring-dev/

@@ -1,5 +1,4 @@
 usr/lib/libfreeipmi.a
-usr/lib/libfreeipmi.la
 usr/lib/libfreeipmi.so
 usr/include/freeipmi
 usr/share/doc/freeipmi/freeipmi-libraries.txt usr/share/doc/libfreeipmi-dev/
