@@ -1,6 +1,4 @@
-
-
-.TH BMC-DEVICE 8 "2011-01-20" "bmc-device 1.0.1" "System Commands"
+.TH BMC-DEVICE 8 "2011-10-26" "bmc-device 1.0.8" "System Commands"
 .SH "NAME"
 bmc-device \- perform advanced BMC commands
 .SH "SYNOPSIS"
@@ -154,8 +152,10 @@ Specify an alternate configuration file.
 .TP
 \fB\-W\fR \fIWORKAROUNDS\fR, \fB\-\-workaround\-flags\fR=\fIWORKAROUNDS\fR
 Specify workarounds to vendor compliance issues. Multiple workarounds
-can be specified separated by commas. See WORKAROUNDS below for a
-list of available workarounds.
+can be specified separated by commas. A special command line flag of
+"none", will indicate no workarounds (may be useful for overriding
+configured defaults). See WORKAROUNDS below for a list of available
+workarounds.
 .TP
 \fB\-\-debug\fR
 Turn on debugging.
@@ -436,6 +436,10 @@ wait and try again.
 Please check configuration or specify specific device or driver on the
 command line.
 .LP
+"driver timeout" - The inband driver has timed out communicating to
+the local BMC or service processor. The BMC or service processor may
+be busy or (worst case) possibly non-functioning.
+.LP
 Please see WORKAROUNDS below to also if there are any vendor specific
 bugs that have been discovered and worked around.
 .SH "WORKAROUNDS"
@@ -461,6 +465,15 @@ communicate with system I/O rather than being memory-mapped. This
 will work around systems that report invalid base addresses. Those
 hitting this issue may see "device not supported" or "could not find
 inband device" errors.  Issue observed on HP ProLiant DL145 G1.
+.LP
+"spinpoll" - This workaround option will inform some inband drivers
+(most notably the KCS driver) to spin while polling rather than
+putting the process to sleep. This may significantly improve the wall
+clock running time of tools because an operating system scheduler's
+granularity is much larger than the time it takes to perform a single
+message transaction. However, by spinning, your system will be
+performing less useful work by not contexting out the tool for a more
+useful task.
 .LP
 "authcap" - This workaround option will skip early checks for username
 capabilities, authentication capabilities, and K_g support and allow
@@ -529,9 +542,9 @@ keys instead of the privilege level sent during the RAKP1 connection
 stage. Those hitting this issue may see "password invalid", "k_g
 invalid", or "bad rmcpplus status code" errors.  Issue observed on Sun
 Fire 4100/4200/4500 with ILOM, Inventec 5441/Dell Xanadu II,
-Supermicro X8DTH, Supermicro X8DTG, and Intel S5500WBV/Penguin Relion
-700. This workaround is automatically triggered with the "sun20"
-workaround.
+Supermicro X8DTH, Supermicro X8DTG, Intel S5500WBV/Penguin Relion 700,
+and Intel S2600JF/Appro 512X. This workaround is automatically
+triggered with the "sun20" workaround.
 .LP
 "integritycheckvalue" - This workaround option will work around an
 invalid integrity check value during an IPMI 2.0 session establishment
@@ -545,11 +558,11 @@ S5500WBV/Penguin Relion 700.
 .PP
 Perform a cold reset.
 .PP
-.B # ipmi-dcmi -h ahost -u myusername -p mypassword --cold-reset
+.B # bmc-device -h ahost -u myusername -p mypassword --cold-reset
 .PP
 Perform a cold reset of a remote machine using IPMI over LAN.
 .PP
-.B # ipmi-dcmi -h mycluster[0-127] -u myusername -p mypassword --cold-reset
+.B # bmc-device -h mycluster[0-127] -u myusername -p mypassword --cold-reset
 .PP
 Perform a cold reset across a cluster using IPMI over LAN.
 .PP

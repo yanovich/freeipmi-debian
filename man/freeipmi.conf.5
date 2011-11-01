@@ -1,6 +1,4 @@
-
-
-.TH FREEIPMI 5 "2011-01-20" "FreeIPMI 1.0.1" "Configuration"
+.TH FREEIPMI 5 "2011-10-26" "FreeIPMI 1.0.8" "Configuration"
 .SH "NAME"
 freeipmi.conf \- specify default values to FreeIPMI
 .SH "DESCRIPTION"
@@ -114,10 +112,11 @@ levels are supported: USER, OPERATOR, ADMIN.
 Specify default workaround flags to use. Multiple workarounds can be
 specified separated by whitespace. Please see tool manpages for
 details about available workarounds for each tool. The following
-workarounds are supported: assumeio, idzero, forcepermsg,
+workarounds are supported: assumeio, spinpoll, idzero, forcepermsg,
 unexpectedauth, endianseq, authcap, intel20, supermicro20, sun20,
 opensesspriv, integritycheckvalue, solpayloadsize, solport, solstatus,
-skipchecks, assumesystemevent, slowcommit, veryslowcommit,
+skipchecks, assumesystemevent, discretereading,
+ignorescanningdisabled, assumebmcowner, slowcommit, veryslowcommit,
 solchannelassumelanchannel, ignorestateflag.
 
 .SH "SDR OPTIONS"
@@ -1030,6 +1029,12 @@ should attempt to interpret OEM data by default or not.
 Specify if
 .B ipmi-sensors
 should ignore not-available (i.e. N/A) sensors by default.
+.TP
+\fBipmi\-sensors\-ignore\-unrecognized\-events\fR \fIENABLE|DISABLE\fR
+Specify if
+.B ipmi-sensors
+should ignore unrecognized events (i.e. 'Unrecognized Event') in
+sensors output by default.
 .TP
 \fBipmi\-sensors\-output\-event\-bitmask\fR \fIENABLE|DISABLE\fR
 Specify if

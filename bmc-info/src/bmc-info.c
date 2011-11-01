@@ -547,6 +547,15 @@ display_get_device_guid (bmc_info_state_data_t *state_data)
 
   if (ipmi_cmd_get_device_guid (state_data->ipmi_ctx, obj_cmd_rs) < 0)
     {
+      if (!state_data->prog_data->args->get_device_guid
+          && ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
+          && ipmi_check_completion_code (obj_cmd_rs,
+                                         IPMI_COMP_CODE_INVALID_COMMAND) == 1)
+        {
+          rv = 0;
+          goto cleanup;
+        }
+
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_cmd_get_device_guid: %s\n",
@@ -581,13 +590,14 @@ display_get_device_guid (bmc_info_state_data_t *state_data)
    *
    * For output format details see Appendix 1 "String Representation
    * of UUIDs" in the above document.  Note that the output is
-   * supposed to be output in most significant byte order.
+   * supposed to be output in most significant byte order and hex
+   * characters are to be output lower case.
    */
   if (!state_data->prog_data->args->get_device_guid)
     pstdout_printf (state_data->pstate, "GUID : ");
 
   pstdout_printf (state_data->pstate,
-                  "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X\n",
+                  "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x\n",
                   guidbuf[15],  /* time low */
                   guidbuf[14],
                   guidbuf[13],
@@ -675,8 +685,10 @@ display_system_info_common (bmc_info_state_data_t *state_data,
     {
       if (!state_data->prog_data->args->get_system_info
           && ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
-          && ipmi_check_completion_code (obj_cmd_first_set_rs,
-                                         IPMI_COMP_CODE_INVALID_COMMAND) == 1)
+          && (ipmi_check_completion_code (obj_cmd_first_set_rs,
+					  IPMI_COMP_CODE_INVALID_COMMAND) == 1
+	      || ipmi_check_completion_code (obj_cmd_first_set_rs,
+					     IPMI_COMP_CODE_GET_SYSTEM_INFO_PARAMETERS_PARAMETER_NOT_SUPPORTED) == 1))
         {
           rv = 0;
           goto cleanup;
@@ -756,8 +768,11 @@ display_system_info_common (bmc_info_state_data_t *state_data,
         {
           if (!state_data->prog_data->args->get_system_info
               && ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
-              && ipmi_check_completion_code (obj_cmd_first_set_rs,
-                                             IPMI_COMP_CODE_INVALID_COMMAND) == 1)
+              && (ipmi_check_completion_code (obj_cmd_first_set_rs,
+					      IPMI_COMP_CODE_INVALID_COMMAND) == 1
+		  || ipmi_check_completion_code (obj_cmd_first_set_rs,
+						 IPMI_COMP_CODE_GET_SYSTEM_INFO_PARAMETERS_PARAMETER_NOT_SUPPORTED) == 1))
+
             {
               rv = 0;
               goto cleanup;

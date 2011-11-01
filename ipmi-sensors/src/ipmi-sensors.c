@@ -906,6 +906,9 @@ _get_event_message (ipmi_sensors_state_data_t *state_data,
       flags |= IPMI_GET_EVENT_MESSAGES_FLAGS_INTERPRET_OEM_DATA;
     }
 
+  if (state_data->prog_data->args->ignore_unrecognized_events)
+    flags |= IPMI_GET_EVENT_MESSAGES_FLAGS_IGNORE_UNRECOGNIZED_EVENTS;
+
   if (ipmi_get_event_messages (event_reading_type_code,
                                sensor_type,
                                sensor_event_bitmask,
@@ -1038,7 +1041,8 @@ _output_sensor (ipmi_sensors_state_data_t *state_data,
        */
       if (state_data->prog_data->args->interpret_oem_data
           && ((state_data->oem_data.manufacturer_id == IPMI_IANA_ENTERPRISE_ID_INTEL
-               && state_data->oem_data.product_id == IPMI_INTEL_PRODUCT_ID_S5500WB)
+               && (state_data->oem_data.product_id == IPMI_INTEL_PRODUCT_ID_S5500WB
+		   || state_data->oem_data.product_id == IPMI_INTEL_PRODUCT_ID_S2600JF))
               || (state_data->oem_data.manufacturer_id == IPMI_IANA_ENTERPRISE_ID_INVENTEC
                   && (state_data->oem_data.product_id == IPMI_INVENTEC_PRODUCT_ID_5441
                       || state_data->oem_data.product_id == IPMI_INVENTEC_PRODUCT_ID_5442))
@@ -1140,6 +1144,7 @@ _display_sensors (ipmi_sensors_state_data_t *state_data)
        * For Intel Chips, not just Intel Motherboards.  Confirmed for:
        *
        * Intel S5500WB/Penguin Computing Relion 700
+       * Intel S2600JF/Appro 512X
        * Inventec 5441/Dell Xanadu II
        * Inventec 5442/Dell Xanadu III
        * Quanta S99Q/Dell FS12-TY
@@ -1149,7 +1154,8 @@ _display_sensors (ipmi_sensors_state_data_t *state_data)
        * sensor it is via the sensor number.
        */
       if ((state_data->oem_data.manufacturer_id == IPMI_IANA_ENTERPRISE_ID_INTEL
-           && state_data->oem_data.product_id == IPMI_INTEL_PRODUCT_ID_S5500WB)
+           && (state_data->oem_data.product_id == IPMI_INTEL_PRODUCT_ID_S5500WB
+	       || state_data->oem_data.product_id == IPMI_INTEL_PRODUCT_ID_S2600JF))
           || (state_data->oem_data.manufacturer_id == IPMI_IANA_ENTERPRISE_ID_INVENTEC
               && (state_data->oem_data.product_id == IPMI_INVENTEC_PRODUCT_ID_5441
                   || state_data->oem_data.product_id == IPMI_INVENTEC_PRODUCT_ID_5442))
@@ -1512,6 +1518,39 @@ _ipmi_sensors (pstdout_state_t pstate,
                              "ipmi_sensor_read_ctx_set_flags: %s\n",
                              ipmi_sensor_read_ctx_strerror (ipmi_sensor_read_ctx_errnum (state_data.sensor_read_ctx)));
         }
+
+      if (state_data.prog_data->args->common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_DISCRETE_READING)
+	{
+          /* Don't error out, if this fails we can still continue */
+          if (ipmi_sensor_read_ctx_set_flags (state_data.sensor_read_ctx,
+                                              IPMI_SENSOR_READ_FLAGS_DISCRETE_READING) < 0)
+            pstdout_fprintf (pstate,
+                             stderr,
+                             "ipmi_sensor_read_ctx_set_flags: %s\n",
+                             ipmi_sensor_read_ctx_strerror (ipmi_sensor_read_ctx_errnum (state_data.sensor_read_ctx)));
+	}
+
+      if (state_data.prog_data->args->common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_IGNORE_SCANNING_DISABLED)
+	{
+          /* Don't error out, if this fails we can still continue */
+          if (ipmi_sensor_read_ctx_set_flags (state_data.sensor_read_ctx,
+                                              IPMI_SENSOR_READ_FLAGS_IGNORE_SCANNING_DISABLED) < 0)
+            pstdout_fprintf (pstate,
+                             stderr,
+                             "ipmi_sensor_read_ctx_set_flags: %s\n",
+                             ipmi_sensor_read_ctx_strerror (ipmi_sensor_read_ctx_errnum (state_data.sensor_read_ctx)));
+	}
+
+      if (state_data.prog_data->args->common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_ASSUME_BMC_OWNER)
+	{
+          /* Don't error out, if this fails we can still continue */
+          if (ipmi_sensor_read_ctx_set_flags (state_data.sensor_read_ctx,
+                                              IPMI_SENSOR_READ_FLAGS_ASSUME_BMC_OWNER) < 0)
+            pstdout_fprintf (pstate,
+                             stderr,
+                             "ipmi_sensor_read_ctx_set_flags: %s\n",
+                             ipmi_sensor_read_ctx_strerror (ipmi_sensor_read_ctx_errnum (state_data.sensor_read_ctx)));
+	}
     }
 
   if (prog_data->args->output_sensor_state)
@@ -1565,9 +1604,18 @@ _ipmi_sensors (pstdout_state_t pstate,
             }
         }
 
-      if (prog_data->args->interpret_oem_data)
+      if (prog_data->args->interpret_oem_data 
+	  || prog_data->args->ignore_unrecognized_events)
 	{
-	  if (ipmi_interpret_ctx_set_flags (state_data.interpret_ctx, IPMI_INTERPRET_FLAGS_INTERPRET_OEM_DATA) < 0)
+	  unsigned int flags = 0;
+
+	  if (prog_data->args->interpret_oem_data)
+	    flags |= IPMI_INTERPRET_FLAGS_INTERPRET_OEM_DATA;
+
+	  if (prog_data->args->ignore_unrecognized_events)
+	    flags |= IPMI_INTERPRET_FLAGS_IGNORE_UNRECOGNIZED_EVENTS;
+
+	  if (ipmi_interpret_ctx_set_flags (state_data.interpret_ctx, flags) < 0)
 	    {
 	      pstdout_fprintf (pstate,
 			       stderr,

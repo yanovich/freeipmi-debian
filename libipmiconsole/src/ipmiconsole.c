@@ -707,7 +707,8 @@ ipmiconsole_engine_init (unsigned int thread_count, unsigned int debug_flags)
   unsigned int i;
 
   if (thread_count > IPMICONSOLE_THREAD_COUNT_MAX
-      || (debug_flags & ~IPMICONSOLE_DEBUG_MASK))
+      || (debug_flags != IPMICONSOLE_DEBUG_DEFAULT
+	  && debug_flags & ~IPMICONSOLE_DEBUG_MASK))
     {
       errno = EINVAL;
       return (-1);
@@ -812,6 +813,9 @@ ipmiconsole_engine_submit (ipmiconsole_ctx_t c,
     {
       IPMICONSOLE_DEBUG (("pthread_mutex_unlock: %s", strerror (perr)));
       ipmiconsole_ctx_set_errnum (c, IPMICONSOLE_ERR_INTERNAL_ERROR);
+      /* don't go to cleanup, b/c the engine will call
+       * ipmiconsole_ctx_connection_cleanup_session_not_submitted().
+       */
       goto cleanup_ctx_fds_only;
     }
 
@@ -1027,6 +1031,9 @@ ipmiconsole_engine_submit_block (ipmiconsole_ctx_t c)
     {
       IPMICONSOLE_DEBUG (("pthread_mutex_lock: %s", strerror (perr)));
       ipmiconsole_ctx_set_errnum (c, IPMICONSOLE_ERR_INTERNAL_ERROR);
+      /* don't go to cleanup, b/c the engine will call
+       * ipmiconsole_ctx_connection_cleanup_session_not_submitted().
+       */
       goto cleanup_ctx_fds_only;
     }
 
@@ -1040,6 +1047,9 @@ ipmiconsole_engine_submit_block (ipmiconsole_ctx_t c)
     {
       IPMICONSOLE_DEBUG (("pthread_mutex_unlock: %s", strerror (perr)));
       ipmiconsole_ctx_set_errnum (c, IPMICONSOLE_ERR_INTERNAL_ERROR);
+      /* don't go to cleanup, b/c the engine will call
+       * ipmiconsole_ctx_connection_cleanup_session_not_submitted().
+       */
       goto cleanup_ctx_fds_only;
     }
 
@@ -1088,17 +1098,31 @@ ipmiconsole_ctx_create (const char *hostname,
               && ipmi_config->privilege_level != IPMICONSOLE_PRIVILEGE_ADMIN))
       || (ipmi_config->cipher_suite_id >= IPMI_CIPHER_SUITE_ID_MIN
           && !IPMI_CIPHER_SUITE_ID_SUPPORTED (ipmi_config->cipher_suite_id))
-      || (ipmi_config->workaround_flags & ~IPMICONSOLE_WORKAROUND_MASK)
-      || (engine_config->engine_flags & ~IPMICONSOLE_ENGINE_MASK)
-      || (engine_config->behavior_flags & ~IPMICONSOLE_BEHAVIOR_MASK)
-      || (engine_config->debug_flags & ~IPMICONSOLE_DEBUG_MASK))
+      || (ipmi_config->workaround_flags != IPMICONSOLE_WORKAROUND_DEFAULT
+	  && ipmi_config->workaround_flags & ~IPMICONSOLE_WORKAROUND_MASK)
+      || (engine_config->engine_flags != IPMICONSOLE_ENGINE_DEFAULT
+	  && engine_config->engine_flags & ~IPMICONSOLE_ENGINE_MASK)
+      || (engine_config->behavior_flags != IPMICONSOLE_BEHAVIOR_DEFAULT
+	  && engine_config->behavior_flags & ~IPMICONSOLE_BEHAVIOR_MASK)
+      || (engine_config->debug_flags != IPMICONSOLE_DEBUG_DEFAULT
+	  && engine_config->debug_flags & ~IPMICONSOLE_DEBUG_MASK))
     {
       IPMICONSOLE_DEBUG (("invalid input parameters"));
       errno = EINVAL;
       return (NULL);
     }
 
-  if (engine_config->engine_flags & IPMICONSOLE_ENGINE_LOCK_MEMORY)
+  /* If engine is not setup, the default_config is not yet known */
+  if (!ipmiconsole_engine_is_setup ())
+    {
+      IPMICONSOLE_DEBUG (("engine not initialized"));
+      errno = EAGAIN;
+      return (NULL);
+    }
+
+  if ((engine_config->engine_flags != IPMICONSOLE_ENGINE_DEFAULT
+       && engine_config->engine_flags & IPMICONSOLE_ENGINE_LOCK_MEMORY)
+      || default_config.engine_flags & IPMICONSOLE_ENGINE_LOCK_MEMORY)
     {
       if (!(c = (ipmiconsole_ctx_t)secure_malloc (sizeof (struct ipmiconsole_ctx))))
         {
@@ -1114,6 +1138,10 @@ ipmiconsole_ctx_create (const char *hostname,
           return (NULL);
         }
     }
+
+  /* XXX: Should move much of this to engine_submit, to make context
+   * creation faster for console concentrators
+   */
 
   if (ipmiconsole_ctx_setup (c) < 0)
     goto cleanup;
@@ -1156,7 +1184,9 @@ ipmiconsole_ctx_create (const char *hostname,
   /* Note: use engine_config->engine_flags not c->config.engine_flags,
    * b/c we don't know where we failed earlier.
    */
-  if (engine_config->engine_flags & IPMICONSOLE_ENGINE_LOCK_MEMORY)
+  if ((engine_config->engine_flags != IPMICONSOLE_ENGINE_DEFAULT
+       && engine_config->engine_flags & IPMICONSOLE_ENGINE_LOCK_MEMORY)
+      || default_config.engine_flags & IPMICONSOLE_ENGINE_LOCK_MEMORY)
     secure_free (c, sizeof (struct ipmiconsole_ctx));
   else
     free (c);
@@ -1283,6 +1313,10 @@ ipmiconsole_ctx_destroy (ipmiconsole_ctx_t c)
     {
       int perr;
 
+      /* achu: fds cleanup will not race with engine polling, b/c the
+       * garbage collection will not complete until the flags set
+       * below are set.
+       */
       ipmiconsole_ctx_fds_cleanup (c);
 
       if ((perr = pthread_mutex_lock (&(c->signal.destroyed_mutex))) != 0)
@@ -1309,4 +1343,69 @@ ipmiconsole_ctx_destroy (ipmiconsole_ctx_t c)
   ipmiconsole_ctx_signal_cleanup (c);
   ipmiconsole_ctx_blocking_cleanup (c);
   ipmiconsole_ctx_cleanup (c);
+}
+
+int
+ipmiconsole_username_is_valid (const char *username)
+{
+  if (!username)
+    return (0);
+
+  if (strlen (username) > IPMI_MAX_USER_NAME_LENGTH)
+    return (0);
+
+  return (1);
+}
+
+int
+ipmiconsole_password_is_valid (const char *password)
+{
+  if (!password)
+    return (0);
+
+  if (strlen (password) > IPMI_2_0_MAX_PASSWORD_LENGTH)
+    return (0);
+
+  return (1);
+}
+
+int
+ipmiconsole_k_g_is_valid (const unsigned char *k_g, unsigned int k_g_len)
+{
+  if (!k_g)
+    return (0);
+
+  if (k_g_len > IPMI_MAX_K_G_LENGTH)
+    return (0);
+
+  return (1);
+}
+
+int
+ipmiconsole_privilege_level_is_valid (int privilege_level)
+{
+  if (privilege_level != IPMICONSOLE_PRIVILEGE_USER
+      && privilege_level != IPMICONSOLE_PRIVILEGE_OPERATOR
+      && privilege_level != IPMICONSOLE_PRIVILEGE_ADMIN)
+    return (0);
+
+  return (1);
+}
+
+int
+ipmiconsole_cipher_suite_id_is_valid (int cipher_suite_id)
+{
+  if (!IPMI_CIPHER_SUITE_ID_SUPPORTED (cipher_suite_id))
+    return (0);
+
+  return (1);
+}
+
+int
+ipmiconsole_workaround_flags_is_valid (unsigned int workaround_flags)
+{
+  if (workaround_flags & ~IPMICONSOLE_WORKAROUND_MASK)
+    return (0);
+
+  return (1);
 }

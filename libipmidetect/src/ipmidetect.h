@@ -30,6 +30,26 @@
 #include <stdio.h>
 
 /*
+ * Libipmidetect version
+ *
+ * MAJOR - Incremented when interfaces are changed or removed.
+ *         Interfaces may be binary incompatible.  When incremented, MINOR
+ *         and PATCH are zeroed.
+ *
+ * MINOR - Incremented when interfaces are added.  Interfaces are
+ *         binary compatible with older minor versions.  When incremented,
+ *         PATCH is zeroed.
+ *
+ * PATCH - Incremented when interfaces are not changed.  Typically
+ *         incremented due to bug fixes or minor features.  Interfaces are
+ *         forward and backward compatible to other PATCH versions.
+ */
+
+#define LIBIPMIDETECT_VERSION_MAJOR 1
+#define LIBIPMIDETECT_VERSION_MINOR 0
+#define LIBIPMIDETECT_VERSION_PATCH 0
+
+/*
  * Ipmidetect Error Codes
  */
 

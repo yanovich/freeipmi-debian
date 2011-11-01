@@ -1,3 +1,519 @@
+2011-10-26  Albert Chu <chu11@llnl.gov>
+
+	* NEWS, configure.ac: Update for release.
+
+	* Tagged Release-1_0_8.
+
+2011-10-24  Albert Chu <chu11@llnl.gov>
+
+	* Update documentation with OEM support information.
+	
+2011-10-21  Albert Chu <chu11@llnl.gov>
+
+	* bmc-info/: Output GUID w/ lower case hex characters, as defined
+	in Wired for Management spec.
+	
+2011-10-19  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-raw/src/ipmi-raw.c: Check for valid netfn request input.
+
+	* libfreeipmi/src/api/: Check for valid netfn request input on raw functions.
+	
+2011-10-19  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-raw/src/ipmi-raw-argp.c: Fix error message.  Check raw byte
+	inputs for correctness.
+
+	* ipmi-raw/src/ipmi-raw.c (string2bytes): Check for input errors
+	on input streams.
+		
+2011-10-19  Albert Chu <chu11@llnl.gov>
+
+	* Document Intel S2600JF/Appro 512X IPMI bugs.
+	
+2011-10-18  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-raw/, ipmi-oem/: Fix allocation bug due to much larger
+	_SC_ARG_MAX on RHEL6.  Assume max args appropriately for each
+	tool.
+
+	* ipmi-raw/, ipmi-oem/: Output error when excess arguments
+	specified.
+	
+2011-10-17  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sel/, libfreeipmi/src/sel-parse/: Fix the assumesystemevent
+	workaround.
+	
+2011-10-17  Albert Chu <chu11@llnl.gov>
+
+	* Support Intel Node Manager sensor/SEL events for Intel
+	S2600JF/Appro 512X.
+	
+2011-10-17  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/src/util/ipmi-sensor-and-event-code-tables-util.c (get_management_subsystem_health_event_data2_message):
+	Fix corner case output bug.
+	
+2011-10-17  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/src/sdr-cache/ipmi-sdr-cache-read.c (ipmi_sdr_cache_search_sensor),
+	libfreeipmi/src/sdr-cache/ipmi-sdr-cache-defs.h: Fix corner case
+	where invalid SDR record could be loaded if shared sensors are
+	utilized on event only records.
+
+	* configure.ac: Update library revision numbers appropriately.
+
+2011-10-14  Albert Chu <chu11@llnl.gov>
+
+	* NEWS, configure.ac: Update for release.
+
+	* Tagged Release-1_0_7.
+
+2011-09-23  Albert Chu <chu11@llnl.gov>
+
+	* libipmiconsole/src/Makefile.am: Fix logdir creation bug, should
+	not hardcode /var for localstatedir.
+
+	* libipmimonitoring/src/Makefile.am: Properly hide local library
+	symbols.
+
+2011-09-26  Diego Elio Pettenò <flameeyes@flameeyes.eu>
+
+	* configure.ac, ipmi-sensors/src/Makefile.am: ipmimonitoring is
+	generated referring to /usr/local even if configured with
+	--prefix=/usr . This was caused by the broken expansion of the
+	sbin path in configure.ac.
+
+	To resolve the issue, this change no longer consider
+	ipmimonitoring to be expanded by configure itself, but is rather
+	processed at build time with sed so that make takes care of the
+	expansion.
+
+	The file is also not distributed (since it needs to be regenerated
+	depending on configure options), but its sources are.
+		
+2011-09-22  Dave Love <fx@gnu.org>
+
+	* bmc-device/bmc-device.8.pre.in: Fix typos.
+	
+2011-09-21  Albert Chu <chu11@llnl.gov>
+
+	* Remove Magnum X7SBI-LN4 sensor interpretation, not needed.
+
+	* Support Supermicro X8SIE OEM sensors.
+
+2011-09-20  Albert Chu <chu11@llnl.gov>
+
+	* Fix use of new interpret library interpretation rules.
+
+	* libfreeipmi/src/interpret/: Support chip set transition
+	severity, current severity, memory redundancy, and system event
+	state interpretations.
+
+	* libfreeipmi/src/interpret/ipmi-interpret-config-sel.c
+	(_cb_sel_parse): Fix parse corner case.
+	
+2011-09-20  Albert Chu <chu11@llnl.gov>
+
+	* Support Supermicro X7DB8, X8DTN, X7SBI-LN4, X8DTL OEM sensors.
+	
+2011-09-19  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-dcmi/: Handle additional error codes for optional portions.
+	
+2011-09-19  Albert Chu <chu11@llnl.gov>
+
+	* Support Supermicro X8DTN+-F OEM sensors.
+	
+2011-09-15  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sensors/, libfreeipmi/src/sensor-read/,
+	libfreeipmi/include/freeipmi/sensor-read/,
+	common/src/parsecommon/: Support new "assumebmcowner" workaround.
+	
+2011-09-15  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sensors/ipmi-sensors.8.pre.in: Fix some text.  Remove
+	experimental tag from --bridge-sensors option.
+
+	* libfreeipmi/src/sensor-read/ipmi-sensor-read.c: Add comments on
+	workaround needs.
+	
+2011-09-15  Albert Chu <chu11@llnl.gov>
+
+	* libipmimonitoring/: Support IGNORE_SCANNING_DISABLED workaround.
+	
+2011-09-15  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sensors/ipmi-sensors.8.pre.in: Update motherboards
+	workaround may work on.
+	
+2011-09-14  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/src/debug/ipmi-debug.c (ipmi_dump_hex): Output
+	correct byte length of hex array.
+
+	* libfreeipmi/src/api/ipmi-api.c (ipmi_cmd_raw): Fix debug dump
+	output corner case.
+
+	* libfreeipmi/src/api/ipmi-api.c (ipmi_cmd_raw_ipmb): Add debug
+	dump support for special case drivers.
+	
+2011-09-13  Albert Chu <chu11@llnl.gov>
+
+	* ipmipower/: Do not poll stdin when operating in non-interactive
+	mode.
+	
+2011-09-13  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/src/interpret/: Support cooling device redundancy
+	interpretation.
+
+	* man/: Update manpages for new interpret configuration options.
+	
+2011-09-12  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/src/interpret/: Support transition severity
+	sensor/sel interpretations for temperature, voltage, fan, and
+	power supply sensor types.
+
+2011-09-07  Diego Elio Pettenò <flameeyes@flameeyes.eu>
+
+	* bmc-watchdog/src/bmc-watchdog.c: By writing a pidfile, init
+	scripts can rely on that to kill or signal the running daemon
+	instance. This is important because relying on the process name
+	can be troublesome when using Linux Containers, for instance.
+
+2011-09-06  Diego Elio Pettenò <flameeyes@flameeyes.eu>
+
+	* libfreeipmi/src/Makefile.am: The -module option is used to tell
+	libtool that the library is not to be used to link against, but
+	only loaded at runtime, which is not the case for this library.
+
+2011-09-01  Albert Chu <chu11@llnl.gov>
+
+	* NEWS, configure.ac: Update for release.
+
+	* Tagged Release-1_0_6.
+
+2011-08-29  Albert Chu <chu11@llnl.gov>
+
+	* Support Supermicro X9SCL and X9SCM OEM sensors.
+	
+2011-08-25  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/: Support
+	IPMI_SENSOR_READ_FLAGS_IGNORE_SCANNING_DISABLED sensor-read
+	workaround flag.
+
+	* ipmi-sensors/: Support 'ignorescanningdisabled' workaround
+	option.
+	
+2011-08-09  Albert Chu <chu11@llnl.gov>
+
+	* bmc-watchdog/bmc-watchdog.logrotate: Reduce logrotate output spam.
+	
+2011-07-20  Arnaud Quette <arnaud.quette@free.fr>
+
+	* ipmi-fru/src/ipmi-fru-output.c: Fix typo.
+	
+2011-07-11  Albert Chu <chu11@llnl.gov>
+
+	* Support Supermicro X8SIL-F OEM Sensors.
+	
+2011-06-30  Albert Chu <chu11@llnl.gov>
+
+	* NEWS, configure.ac: Update for release.
+
+	* Tagged Release-1_0_5.
+
+2011-06-29  Arnaud Quette <arnaud.quette@free.fr>
+
+	* configure.ac, Makefile.am: fix m4 macro reference for libtoolize.
+	This allows to call the system provided 'autoreconf' instead of autogen.sh
+
+2011-06-29  Arnaud Quette <arnaud.quette@free.fr>
+
+	* configure.ac: fix indentation inconsistencies, remove extraneous spaces
+	and escape single quotes that break some color highlighting systems.
+
+2011-06-30  Arnaud Quette <arnaud.quette@free.fr>
+
+	* configure.ac: add AM_PROG_CC_C_O, needed for per-target flags
+	  (ipmipower/src/Makefile.am and ipmipower/src/argv.c)
+
+2011-06-29  Albert Chu <chu11@llnl.gov>
+
+	* freeipmi.spec.in: Add pkg-config files.
+
+2011-06-28  Arnaud Quette <arnaud.quette@free.fr>
+
+	* Add pkg-config support for all FreeIPMI libraries.
+
+2011-05-24  Holger Liebig <holger.liebig@ts.fujitsu.com>
+
+	* ipmi-dcmi/src/ipmi-dcmi.c: Fix asset tag/string identifier
+	overwriting bug.  Update to handle setting asset tag and
+	management identifier string according to DCMI v1.5 spec.
+
+2011-05-18  Albert Chu <chu11@llnl.gov>
+
+	* bmc-config/bmc-config.8.pre.in: Add additional troubleshooting
+	information.
+	
+2011-05-12  Holger Liebig <holger.liebig@ts.fujitsu.com>
+
+	* ipmi-dcmi/src/ipmi-dcmi-argp.c: Fix command line parsing bug.
+
+2011-05-04 Albert Chu <chu11@llnl.gov>
+
+	* Update documents and comments with additional motherboard
+	workaround information.
+	
+2011-04-27 Albert Chu <chu11@llnl.gov>
+
+	* common/src/miscutil/: Remove unnecessary locking calls.
+
+2011-04-21 Albert Chu <chu11@llnl.gov>
+
+	* NEWS, configure.ac: Update for release.
+
+	* Tagged Release-1_0_4.
+	
+2011-04-18 Albert Chu <chu11@llnl.gov>
+
+	* libipmiconsole/: Support convenience functions for determining
+	whether user inputs are valid or not.
+	
+2011-04-18 Albert Chu <chu11@llnl.gov>
+
+	* libipmiconsole/src/ipmiconsole.h: Update comments to show
+	support for cipher suite id 17.
+	
+2011-04-07 Albert Chu <chu11@llnl.gov>
+
+	* Add Intel SR1625/S5500WB OEM SEL interpration.
+
+	* libfreeipmi/src/interpret/ipmi-interpret.c: Support
+	interpretations of OEM sensor types w/ generic event/reading type
+	codes.
+	
+2011-04-06 Albert Chu <chu11@llnl.gov>
+
+	* Add Intel SR1625 OEM sensor interpretation.
+	
+2011-04-05 Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/src/drivers/: Support SPIN_POLL option for faster
+	inband IPMI under certain circumstances.  Timeout after a
+	consistent time rather than a poll-attempted guess.
+
+	* libfreeipmi/src/api/ipmi-api.c: Adjust default polling interval
+	for KCS.
+
+	* Support "spinpoll" workaround for all tools and libipmimonitoring.
+	
+2011-04-01 Albert Chu <chu11@llnl.gov>
+
+	* Support additional sensor and sel interpretations.
+	
+2011-03-31 Albert Chu <chu11@llnl.gov>
+
+	* Support "discretereading" in libipmimonitoring.
+	
+2011-03-29 Albert Chu <chu11@llnl.gov>
+
+	* common/src/parsecommon/, ipmi-sensors/,
+	libfreeipmi/src/sensor-read/: Support new "discretereading"
+	workaround in ipmi-sensors.
+	
+2011-03-29 Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-hostrange.txt: Fix some English.
+	
+2011-03-22 Albert Chu <chu11@llnl.gov>
+
+	* Support package version string in libfreeipmi.
+	
+2011-03-16 Albert Chu <chu11@llnl.gov>
+
+	* Support package version number macros in libfreeipmi.
+	
+2011-03-16 Albert Chu <chu11@llnl.gov>
+
+	* libipmiconsole/: Slightly alter mechanism for selecting standard
+	defaults vs. config file defaults.
+
+	* libipmiconsole/: Fix bug where an empty string k_g key (e.g. "")
+	would not overwrite the default k_g key specified in a config
+	file.
+
+	* libipmiconsole/src/ipmiconsole.c (ipmiconsole_ctx_create): Force
+	ipmiconsole_engine_init() to be called prior to creating a
+	context.
+
+	* common/src/parsecommon/: Fix assert corner case.
+	
+2011-03-14 Albert Chu <chu11@llnl.gov>
+
+	* Support library version numbers in libfreeipmi, libipmiconsole,
+	libipmidetect, and libipmimonitoring.
+	
+2011-03-11 Albert Chu <chu11@llnl.gov>
+
+	* common/src/parsecommon/parse-common.h,
+	common/src/parsecommon/parse-common.c,
+	common/src/toolcommon/tool-cmdline-common.c: Support ability to
+	configure "none" workaround flags.  May be useful for overriding
+	workaround flags configured in freeipmi.conf.
+
+	* common/src/toolcommon/tool-cmdline-common.c (common_parse_opt):
+	Fix bug in which workaround flags on the command line may not
+	overwrite config file workaround flags.
+
+	* ipmipower/src/ipmipower_prompt.c (_cmd_workaround_flags):
+	Support ability to reconfigure workaround flags to 'none' via
+	ipmipower prompt.
+	
+	* ipmipower/src/ipmipower_prompt.c (_cmd_config): Fix
+	workaround-flags config output bug.
+
+2011-03-10 Albert Chu <chu11@llnl.gov>
+
+	* bmc-info/: Handle additional error conditions within Get System
+	Info Parameter calls.
+	
+2011-03-09 Albert Chu <chu11@llnl.gov>
+
+	* libipmiconsole/src/ipmiconsole_ctx.c
+	(__ipmiconsole_ctx_connection_cleanup): Only call the callback if
+	an error occurred during a session submission, not if an error
+	occurred in API land.
+	
+2011-03-08 Albert Chu <chu11@llnl.gov>
+
+	* libipmiconsole/src/ipmiconsole_engine.c,
+	libipmiconsole/src/ipmiconsole_garbage_collector.c: Add
+	mutex/conditional to protect against theoretical race between
+	engine and garbage collector on teardown.
+
+	* configure.ac: Increment library revision.
+	
+2011-02-24 Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/src/ipmi-oem-intel.c: Fix portability bug to Solaris 10.
+
+2011-02-23 Albert Chu <chu11@llnl.gov>
+
+	* Tagged Release-1_0_2.
+	
+2011-02-21 Albert Chu <chu11@llnl.gov>
+
+	* Documentation Dell Poweredge R210 OEM sensor.
+
+	* libfreeipmi/src/interpret/ipmi-interpret-config-sensor.c: Fix
+	Dell OEM default bug.
+	
+2011-02-18 Albert Chu <chu11@llnl.gov>
+	
+	* common/man/manpage-common-entity-sensor-names.man: Fix
+	formatting error.
+	
+2011-02-18 Albert Chu <chu11@llnl.gov>
+
+	* Overwrite symlinks during make install.
+	
+2011-02-17 Albert Chu <chu11@llnl.gov>
+
+	* bmc-config/src/bmc-config-user-sections.c (username_commit):
+	Handle corner case in which motherboard does not allow
+	configuration of identical username.
+	
+2011-02-17 Albert Chu <chu11@llnl.gov>
+
+	* Support Supermicro X7DBR-3 OEM Sensors.
+	
+2011-02-17 Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/src/interpret/: Support Dell Module/Board OEM sensor
+	interpretation.
+	
+2011-02-17 Albert Chu <chu11@llnl.gov>
+
+	* contrib/ganglia/ganglia_ipmi_sensors.pl,
+	contrib/nagios/nagios_ipmi_sensors.pl: Do not exit out if an error
+	occurs, an error could have occurred if one node out of a
+	hostrange fails.
+	
+2011-02-17 Albert Chu <chu11@llnl.gov>
+
+	* Support Supermicro X8DT3-LN4F motherboard.
+	
+2011-02-14 Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/src/sdr-cache/ipmi-sdr-cache-create.c
+	(_sdr_cache_record_write): Fix compliance bug on HP Proliant
+	DL585G7.
+	
+2011-02-04 Christopher Maestas <cdmaestas@gmail.com> and Albert Chu <chu11@llnl.gov>
+
+	* contrib/ganglia/ganglia_ipmi_sensors.pl: Support new -r option.
+	
+2011-02-01 Albert Chu <chu11@llnl.gov>
+
+	* bmc-watchdog/src/bmc-watchdog.c (_deamon_cmd_error_exit): Fix
+	typo, rename to 'deamon' to 'daemon'.  Fix elsewhere
+	appropriately.
+
+	* bmc-watchdog/src/bmc-watchdog.c (_daemon_setup, _daemon_cmd):
+	Call _bmclog() and exit(1) instead instead of _err_exit().
+	
+2011-01-28 Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-comp-code-spec.h: Fix
+	spelling typo.
+	
+2011-01-28 Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-faq.texi: Add additional info on determining if
+	your system has IPMI support.
+	
+2011-01-27 Albert Chu <chu11@llnl.gov>
+
+	* bmc-info/: Support motherboards that don't implement Get Device
+	Guid.
+	
+2011-01-27 Albert Chu <chu11@llnl.gov>
+
+	* Support Supermicro X8DTL-3F.
+	
+2011-01-27 Albert Chu <chu11@llnl.gov>
+
+	Various ipmi-locate fixes based on user comments
+
+	* common/man/manpage-common-troubleshooting.man: Add "driver
+	timeout" error description.
+
+	* ipmi-locate/ipmi-locate.8.pre.in: Add text on how ipmi-locate
+	can be used.
+
+	* doc/freeipmi-faq.texi: Add info on determining if your system
+	has IPMI.
+	
+	* ipmi-locate/src/ipmi-locate.c: Fix error message output for
+	clarity.
+
+2011-01-24 Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sensors/, libfreeipmi/: Support ignore unrecognized events
+	capability.
+
+2011-01-24 Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/ipmi-oem.8.pre.in: Document what is wrtten to eeprom to
+	clear them.
+	
 2011-01-20 Albert Chu <chu11@llnl.gov>
 
 	* configure.ac, NEWS: Update for 1.0.1 release.

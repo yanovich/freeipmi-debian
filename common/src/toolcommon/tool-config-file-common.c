@@ -434,10 +434,10 @@ _config_file_workaround_flags (conffile_t cf,
       unsigned int outofband_flags, outofband_2_0_flags, inband_flags, section_flags;
 
       if (parse_workaround_flags (data->stringlist[i],
-                                  &outofband_flags,
-                                  &outofband_2_0_flags,
-                                  &inband_flags,
-                                  &section_flags) < 0)
+				  &outofband_flags,
+				  &outofband_2_0_flags,
+				  &inband_flags,
+				  &section_flags) < 0)
         {
           fprintf (stderr, "Config File Error: invalid value for %s\n", optionname);
           exit (1);
@@ -3051,6 +3051,17 @@ config_file_parse (const char *filename,
         0,
         &(ipmi_sensors_data.ignore_not_available_sensors_count),
         &(ipmi_sensors_data.ignore_not_available_sensors),
+        0,
+      },
+      {
+        "ipmi-sensors-ignore-unrecognized-events",
+        CONFFILE_OPTION_BOOL,
+        -1,
+        _config_file_bool,
+        1,
+        0,
+        &(ipmi_sensors_data.ignore_unrecognized_events_count),
+        &(ipmi_sensors_data.ignore_unrecognized_events),
         0,
       },
       {

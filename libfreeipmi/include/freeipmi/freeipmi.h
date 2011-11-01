@@ -141,6 +141,31 @@ extern "C" {
 #include <freeipmi/util/ipmi-dcmi-util.h>
 #include <freeipmi/util/rmcp-util.h>
 
+#define FREEIPMI_PACKAGE_VERSION       1.0.8
+#define FREEIPMI_PACKAGE_VERSION_MAJOR 1
+#define FREEIPMI_PACKAGE_VERSION_MINOR 0
+#define FREEIPMI_PACKAGE_VERSION_PATCH 8
+
+/*
+ * Libfreeipmi version
+ *
+ * MAJOR - Incremented when interfaces are changed or removed.
+ *         Interfaces may be binary incompatible.  When incremented, MINOR
+ *         and PATCH are zeroed.
+ *
+ * MINOR - Incremented when interfaces are added.  Interfaces are
+ *         binary compatible with older minor versions.  When incremented,
+ *         PATCH is zeroed.
+ *
+ * PATCH - Incremented when interfaces are not changed.  Typically
+ *         incremented due to bug fixes or minor features.  Interfaces are
+ *         forward and backward compatible to other PATCH versions.
+ */
+
+#define LIBFREEIPMI_VERSION_MAJOR 1
+#define LIBFREEIPMI_VERSION_MINOR 0
+#define LIBFREEIPMI_VERSION_PATCH 5
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,5 +1,3 @@
-
-
 .\"#############################################################################
 .\"$Id: bmc-watchdog.8.pre.in,v 1.30 2010-06-30 21:56:36 chu11 Exp $
 .\"#############################################################################
@@ -25,7 +23,7 @@
 .\"  You should have received a copy of the GNU General Public License along
 .\"  with Bmc-Watchdog.  If not, see <http://www.gnu.org/licenses/>.
 .\"############################################################################
-.TH bmc-watchdog 8 "2011-01-20" "bmc-watchdog 1.0.1" "System Commands"
+.TH bmc-watchdog 8 "2011-10-26" "bmc-watchdog 1.0.8" "System Commands"
 .SH "NAME"
 bmc-watchdog \- BMC watchdog timer daemon and control utility
 .SH "SYNOPSIS"
@@ -155,8 +153,10 @@ Specify an alternate configuration file.
 .TP
 \fB\-W\fR \fIWORKAROUNDS\fR, \fB\-\-workaround\-flags\fR=\fIWORKAROUNDS\fR
 Specify workarounds to vendor compliance issues. Multiple workarounds
-can be specified separated by commas. See WORKAROUNDS below for a
-list of available workarounds.
+can be specified separated by commas. A special command line flag of
+"none", will indicate no workarounds (may be useful for overriding
+configured defaults). See WORKAROUNDS below for a list of available
+workarounds.
 .TP
 \fB\-\-debug\fR
 Turn on debugging.
@@ -334,6 +334,15 @@ communicate with system I/O rather than being memory-mapped. This
 will work around systems that report invalid base addresses. Those
 hitting this issue may see "device not supported" or "could not find
 inband device" errors.  Issue observed on HP ProLiant DL145 G1.
+.LP
+"spinpoll" - This workaround option will inform some inband drivers
+(most notably the KCS driver) to spin while polling rather than
+putting the process to sleep. This may significantly improve the wall
+clock running time of tools because an operating system scheduler's
+granularity is much larger than the time it takes to perform a single
+message transaction. However, by spinning, your system will be
+performing less useful work by not contexting out the tool for a more
+useful task.
 .LP
 "ignorestateflag" - This workaround option will ignore the BMC timer
 state flag (indicating if the timer is running or stopped) when

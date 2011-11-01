@@ -1,5 +1,3 @@
-
-
 .\"#############################################################################
 .\"$Id: ipmi-fru.8.pre.in,v 1.47 2010-08-06 23:55:21 chu11 Exp $
 .\"#############################################################################
@@ -26,7 +24,7 @@
 .\"  You should have received a copy of the GNU General Public License along
 .\"  with Ipmi-fru.  If not, see <http://www.gnu.org/licenses/>.
 .\"#############################################################################
-.TH IPMI-FRU 8 "2011-01-20" "ipmi-fru 1.0.1" "System Commands"
+.TH IPMI-FRU 8 "2011-10-26" "ipmi-fru 1.0.8" "System Commands"
 .SH "NAME"
 ipmi-fru \- display FRU information
 .SH "SYNOPSIS"
@@ -176,8 +174,10 @@ Specify an alternate configuration file.
 .TP
 \fB\-W\fR \fIWORKAROUNDS\fR, \fB\-\-workaround\-flags\fR=\fIWORKAROUNDS\fR
 Specify workarounds to vendor compliance issues. Multiple workarounds
-can be specified separated by commas. See WORKAROUNDS below for a
-list of available workarounds.
+can be specified separated by commas. A special command line flag of
+"none", will indicate no workarounds (may be useful for overriding
+configured defaults). See WORKAROUNDS below for a list of available
+workarounds.
 .TP
 \fB\-\-debug\fR
 Turn on debugging.
@@ -414,6 +414,10 @@ wait and try again.
 Please check configuration or specify specific device or driver on the
 command line.
 .LP
+"driver timeout" - The inband driver has timed out communicating to
+the local BMC or service processor. The BMC or service processor may
+be busy or (worst case) possibly non-functioning.
+.LP
 Please see WORKAROUNDS below to also if there are any vendor specific
 bugs that have been discovered and worked around.
 .SH "WORKAROUNDS"
@@ -439,6 +443,15 @@ communicate with system I/O rather than being memory-mapped. This
 will work around systems that report invalid base addresses. Those
 hitting this issue may see "device not supported" or "could not find
 inband device" errors.  Issue observed on HP ProLiant DL145 G1.
+.LP
+"spinpoll" - This workaround option will inform some inband drivers
+(most notably the KCS driver) to spin while polling rather than
+putting the process to sleep. This may significantly improve the wall
+clock running time of tools because an operating system scheduler's
+granularity is much larger than the time it takes to perform a single
+message transaction. However, by spinning, your system will be
+performing less useful work by not contexting out the tool for a more
+useful task.
 .LP
 "authcap" - This workaround option will skip early checks for username
 capabilities, authentication capabilities, and K_g support and allow
@@ -507,9 +520,9 @@ keys instead of the privilege level sent during the RAKP1 connection
 stage. Those hitting this issue may see "password invalid", "k_g
 invalid", or "bad rmcpplus status code" errors.  Issue observed on Sun
 Fire 4100/4200/4500 with ILOM, Inventec 5441/Dell Xanadu II,
-Supermicro X8DTH, Supermicro X8DTG, and Intel S5500WBV/Penguin Relion
-700. This workaround is automatically triggered with the "sun20"
-workaround.
+Supermicro X8DTH, Supermicro X8DTG, Intel S5500WBV/Penguin Relion 700,
+and Intel S2600JF/Appro 512X. This workaround is automatically
+triggered with the "sun20" workaround.
 .LP
 "integritycheckvalue" - This workaround option will work around an
 invalid integrity check value during an IPMI 2.0 session establishment
@@ -529,7 +542,8 @@ identical to using the \fB\-\-skip\-checks\fR option above.
 The following motherboards are confirmed to have atleast some support
 by the \fB\-\-interpret-oem-data\fR option. While highly probable the
 OEM data interpretations would work across other motherboards by the
-same manufacturer, there are no guarantees.
+same manufacturer, there are no guarantees. Some of the motherboards
+below may be rebranded by vendors/distributors.
 .LP
 Currently None
 .SH "EXAMPLES"
