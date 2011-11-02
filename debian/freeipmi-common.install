@@ -1,2 +1,3 @@
-etc/freeipmi.conf
+etc/freeipmi/freeipmi.conf
+etc/freeipmi/freeipmi_interpret*.conf
 usr/share/info
