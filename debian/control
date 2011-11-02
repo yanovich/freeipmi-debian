@@ -8,7 +8,7 @@ Build-Depends: debhelper (>= 7.0.50~),
  chrpath,
  autoconf, automake, libtool,
  texinfo
-Standards-Version: 3.9.1
+Standards-Version: 3.9.2
 Homepage: http://www.gnu.org/software/freeipmi/
 Vcs-Browser: http://git.onerussian.com/?p=deb/freeipmi.git
 Vcs-git: git://git.onerussian.com/deb/freeipmi.git
