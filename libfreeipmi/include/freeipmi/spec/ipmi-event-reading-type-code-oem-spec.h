@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,8 @@ extern "C" {
 
 /*
  * Intel S5500WB/Penguin Computing Relion 700
+ * Quanta QSSC-S4R/Appro GB812X-CN
+ * (Quanta motherboard maintains Intel manufacturer ID)
  */
 
 #define IPMI_EVENT_READING_TYPE_CODE_OEM_INTEL_PCIE_FATAL_SENSOR       0x70
@@ -56,17 +58,24 @@ extern "C" {
 #define IPMI_EVENT_READING_TYPE_CODE_OEM_INTEL_QPI_NON_FATAL_SENSOR    0x73
 #define IPMI_EVENT_READING_TYPE_CODE_OEM_INTEL_QPI_FATAL_SENSOR        0x74
 
+/* 
+ * Quanta QSSC-S4R/Appro GB812X-CN
+ * (Quanta motherboard maintains Intel manufacturer ID)
+ */
+/* achu: not official names, named based on use context */
+#define IPMI_EVENT_READING_TYPE_CODE_OEM_INTEL_QUANTA_QSSC_S4R_CORRECTABLE_ERROR   0x76
+#define IPMI_EVENT_READING_TYPE_CODE_OEM_INTEL_QUANTA_QSSC_S4R_UNCORRECTABLE_ERROR 0x77
+
 /*
  * Intel Node Manager
  *
- * http://download.intel.com/support/motherboards/server/s5500wb/sb/s5500wb_tps_1_0.pdf
- * 
  * For Intel Chips, not just Intel Motherboards.  Confirmed for:
  *
  * Intel S5500WB/Penguin Computing Relion 700
  * Inventec 5441/Dell Xanadu II
  * Inventec 5442/Dell Xanadu III
  * Quanta S99Q/Dell FS12-TY
+ * Quanta QSSC-S4R/Appro GB812X-CN
  */
 
 #define IPMI_EVENT_READING_TYPE_CODE_OEM_INTEL_NODE_MANAGER_EXCEPTION_EVENT                       0x72
@@ -107,6 +116,7 @@ extern "C" {
  * Supermicro X9SCM
  * Supermicro X8DTN+-F (X8DTNPLUS_F)
  * Supermicro X8SIE
+ * Supermicro X9SCA-F-O (X9SCA_F_O)
  */
 
 /* achu: not official names, named based on use context */

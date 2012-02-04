@@ -1,0 +1,104 @@
+.\"#############################################################################
+.\"$Id: rmcpping.8.pre.in,v 1.15 2010-02-08 22:02:31 chu11 Exp $
+.\"#############################################################################
+.\"  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+.\"  Copyright (C) 2003-2007 The Regents of the University of California.
+.\"  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
+.\"  Written by Albert Chu <chu11@llnl.gov>
+.\"  UCRL-CODE-155448
+.\"
+.\"  This file is part of Ipmiping, tools for pinging IPMI and RMCP compliant
+.\"  remote systems. For details, see http://www.llnl.gov/linux/.
+.\"
+.\"  Ipmiping is free software; you can redistribute it and/or modify it under
+.\"  the terms of the GNU General Public License as published by the Free
+.\"  Software Foundation; either version 3 of the License, or (at your option)
+.\"  any later version.
+.\"
+.\"  Ipmiping is distributed in the hope that it will be useful, but WITHOUT
+.\"  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+.\"  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+.\"  for more details.
+.\"
+.\"  You should have received a copy of the GNU General Public License along
+.\"  with Ipmiping.  If not, see <http://www.gnu.org/licenses/>.
+.\"############################################################################
+.TH RMCPING 8 "2012-01-02" "rmcpping 1.1.1" "System Manager Commands"
+.SH "NAME"
+rmcpping \- send RMCP Ping to network hosts
+.SH "SYNOPSIS"
+.B rmcpping
+[\fIOPTION\fR...] destination
+.SH "DESCRIPTION"
+.B rmcpping
+uses the RMCP Ping request datagram to elicit an RMCP Pong response
+from a remote host. The utility can be used to verify if a remote
+host supports RMCP or IPMI. The initial starting sequence number will
+be randomized.
+
+.B rmcpping
+will return 0 to the environment if it receives atleast 1 response
+from the remote host. Otherwise, it exits with a value of 1.
+.SH "OPTIONS"
+The following options are available
+.TP
+\fB\-h\fR
+Output help menu.
+.TP
+\fB\-V\fR
+Output version.
+.TP
+\fB\-c\fR \fIcount\fR
+Stop after sending
+.I count
+packets.
+.TP
+\fB\-i\fR \fIinterval\fR
+Wait
+.I interval
+seconds between sending each packet. The default is to wait for one
+second between each packet.
+.TP
+\fB\-I\fR \fIinterface address\fR
+Set source address to specified interface address. Argument may
+be numeric IP address or name of device.
+.TP
+\fB\-t\fR \fItimeout\fR
+Time to wait for a response, in seconds. Default is five seconds.
+.TP
+\fB\-v\fR
+Verbose output.
+.TP
+\fB\-s\fR \fInum\fR
+Specify an initial starting sequence number. The default is to use a
+random initial sequence number.
+.TP
+\fB\-d\fR
+Turn on debugging.
+.SH "KNOWN ISSUES"
+It has been observed that some remote BMCs can get "confused" and
+delay packet responses if duplicate packets (with duplicate sequence
+numbers) are sent in succession very quickly. There is no known way
+to cleanly deal with a "confused" BMC other than the wait awhile.
+.PP
+Unlike
+.B ping(8),
+local network devicess (e.g. 127.0.0.1) cannot be "pinged".
+.SH "REPORTING BUGS"
+Report bugs to <freeipmi\-users@gnu.org> or <freeipmi\-devel@gnu.org>.
+.SH COPYRIGHT
+Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+.br
+Copyright (C) 2003-2007 The Regents of the University of California.
+.PP
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or (at
+your option) any later version.
+.SH "ORIGIN"
+Command and manpage based off
+.B ping(8).
+.SH "SEE ALSO"
+freeipmi(7), ping(8), ipmiping(8)
+.PP
+http://www.gnu.org/software/freeipmi/

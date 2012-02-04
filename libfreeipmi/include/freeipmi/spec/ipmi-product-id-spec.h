@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,6 +124,9 @@ extern "C" {
 #define IPMI_INTEL_PRODUCT_ID_S5500WB  62
 #define IPMI_INTEL_PRODUCT_ID_SR1625   62
 
+/* Quanta motherboard, but listed under a Intel manufacturer ID, why?? */
+#define IPMI_INTEL_PRODUCT_ID_QUANTA_QSSC_S4R 64
+
 #define IPMI_INTEL_PRODUCT_ID_S2600JF  77
 
 /* 
@@ -135,6 +138,8 @@ extern "C" {
 #define IPMI_PENGUIN_COMPUTING_PRODUCT_ID_RELION_700 IPMI_INTEL_PRODUCT_ID_S5500WB
 
 #define IPMI_APPRO_PRODUCT_ID_512X IPMI_INTEL_PRODUCT_ID_S2600JF
+
+#define IPMI_APPRO_PRODUCT_ID_QG812X_CN IPMI_INTEL_PRODUCT_ID_QUANTA_QSSC_S4R
 
 /*******************************************
  * IBM                                     *
@@ -206,6 +211,10 @@ extern "C" {
 #define IPMI_SUPERMICRO_PRODUCT_ID_X9SCM       __IPMI_SUPERMICRO_PRODUCT_ID_X9SC
 #define IPMI_SUPERMICRO_PRODUCT_ID_X8DTNPLUS_F 1551
 #define IPMI_SUPERMICRO_PRODUCT_ID_X8SIE       1037
+#define IPMI_SUPERMICRO_PRODUCT_ID_X9SCA_F_O   1585
+
+/* Seen in the wild w/ proper IANA number 10876 */
+/* defined above: IPMI_SUPERMICRO_PRODUCT_ID_X9SCM */
 
 /* Seen in the wild w/ Magnum Technologies IANA number 5593 */
 /* defined above: IPMI_SUPERMICRO_PRODUCT_ID_X8DTL */

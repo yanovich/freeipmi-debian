@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,10 +50,11 @@ extern "C" {
 #define IPMI_FRU_PARSE_ERR_FRU_SENTINEL_VALUE_NOT_FOUND           21
 #define IPMI_FRU_PARSE_ERR_OVERFLOW                               22
 #define IPMI_FRU_PARSE_ERR_OUT_OF_MEMORY                          23
-#define IPMI_FRU_PARSE_ERR_IPMI_ERROR                             24
-#define IPMI_FRU_PARSE_ERR_SYSTEM_ERROR                           25
-#define IPMI_FRU_PARSE_ERR_INTERNAL_ERROR                         26
-#define IPMI_FRU_PARSE_ERR_ERRNUMRANGE                            27
+#define IPMI_FRU_PARSE_ERR_DEVICE_BUSY                            24 
+#define IPMI_FRU_PARSE_ERR_IPMI_ERROR                             25
+#define IPMI_FRU_PARSE_ERR_SYSTEM_ERROR                           26
+#define IPMI_FRU_PARSE_ERR_INTERNAL_ERROR                         27
+#define IPMI_FRU_PARSE_ERR_ERRNUMRANGE                            28
 
 #define IPMI_FRU_PARSE_FLAGS_DEFAULT                              0x0000
 #define IPMI_FRU_PARSE_FLAGS_DEBUG_DUMP                           0x0001
@@ -99,7 +100,10 @@ typedef struct ipmi_fru_parse_field ipmi_fru_parse_field_t;
 
 typedef struct ipmi_fru_parse_ctx *ipmi_fru_parse_ctx_t;
 
-/* FRU Parse Context Functions */
+/* FRU Parse Context Functions
+ * - ipmi_ctx assumes ipmi opened and ready to go
+ * - ipmi_ctx is optional, if NULL ctx cannot be for FRU reading, only parsing records
+ */
 ipmi_fru_parse_ctx_t ipmi_fru_parse_ctx_create (ipmi_ctx_t ipmi_ctx);
 void ipmi_fru_parse_ctx_destroy (ipmi_fru_parse_ctx_t ctx);
 int ipmi_fru_parse_ctx_errnum (ipmi_fru_parse_ctx_t ctx);

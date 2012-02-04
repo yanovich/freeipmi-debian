@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -289,7 +289,8 @@ int assemble_ipmi_rmcpplus_pkt (uint8_t authentication_algorithm,
                                 fiid_obj_t obj_cmd,
                                 fiid_obj_t obj_rmcpplus_session_trlr,
                                 void *pkt,
-                                unsigned int pkt_len);
+                                unsigned int pkt_len,
+				unsigned int flags);
 
 /* returns 1 if fully unparsed, 0 if not, -1 on error */
 int unassemble_ipmi_rmcpplus_pkt (uint8_t authentication_algorithm,
@@ -307,7 +308,8 @@ int unassemble_ipmi_rmcpplus_pkt (uint8_t authentication_algorithm,
                                   fiid_obj_t obj_lan_msg_hdr,
                                   fiid_obj_t obj_cmd,
                                   fiid_obj_t obj_lan_msg_trlr,
-                                  fiid_obj_t obj_rmcpplus_session_trlr);
+                                  fiid_obj_t obj_rmcpplus_session_trlr,
+				  unsigned int flags);
 
 #ifdef __cplusplus
 }

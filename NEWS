@@ -1,3 +1,57 @@
+FreeIPMI 1.1.1 - 01/03/11
+-------------------------
+
+Tools
+-----
+o Support new tool ipmi-pet, tool to parse/interpret platform event traps.
+o Support new --sdr-cache-file option specify specific SDR cache file
+  in all SDR related tools (ipmi-sensors, ipmi-sel, ipmi-fru, etc.).
+o In ipmi-fru, do not consider a busy device a fatal error. 
+o In ipmi-sensors, support 'ignoreauthcode' workaround option.
+o In ipmi-sensors, support Quanta QSSC-S4R/Appro GB812X-CN OEM SDRs
+  and sensors.
+o In ipmi-sel, support Quanta QSSC-S4R/Appro GB812X-CN OEM SEL events.
+o In ipmi-sel, fix several OEM specific event output bugs.
+o In ipmi-pef-config, fix configuration bug for Enable_PEF_Event_Messages.
+o In ipmi-raw, for file/stdin input, output line number when there is
+  an error.
+  
+Libraries
+---------
+o Update libfreeipmi for DCMI 1.5 additions.
+o Update libfreeipmi fru-parse sub-library to support FRU parsing
+  without an IPMI connection.
+o In libfreeipmi, support IPMI_FLAGS_NOSESSION flag to open a context
+  for IPMI communication w/o establishing a session.
+o In libfreeipmi, support IPMI_FLAGS_NO_LEGAL_CHECK flag, to
+  workaround motherboards to may return illegal IPMI packets.
+o In libfreeipmi, support IPMI_FLAGS_IGNORE_AUTHENTICATION_CODE flag,
+  to workaround specific situations where motherboards return
+  incorrectly generated authentication codes.
+o In libfreeipmi fru-parse sub-library, support
+  IPMI_FRU_PARSE_ERR_DEVICE_BUSY error code.
+o In libfreeipmi, add support for IPMI firmware firewall and command
+  discovery payloads.
+o In libfreeipmi, support Quanta QSSC-S4R/Appro GB812X-CN OEM SEL
+  events.
+o Fix various macro names (typos, invalid naming, etc.)
+
+Contributions
+-------------
+o petalert.pl
+  - snmptrapd handler script to alert when Platform Event Traps (PET) occur.
+
+FreeIPMI 1.0.10 - 12/13/11
+--------------------------
+o Clarify bmc-watchdog error messages.
+o Various documentation updates.
+
+FreeIPMI 1.0.9 - 11/21/11
+-------------------------
+o Support Supermicro OEM sensors on X9SCA-F-O motherboards.
+o Support Supermicro OEM sensors on X9SCM-F motherboards with
+  newer firmware.
+
 FreeIPMI 1.0.8 - 10/27/11
 -------------------------
 o Fix corner case in which invalid SDR entry could be loaded when

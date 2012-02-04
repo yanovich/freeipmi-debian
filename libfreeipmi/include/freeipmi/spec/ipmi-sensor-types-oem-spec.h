@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,14 +71,20 @@ extern "C" {
 /*
  * Intel S5500WB
  * Intel SR1625
+ * Quanta QSSC-S4R/Appro GB812X-CN
+ * (Quanta motherboard maintains Intel manufacturer ID)
  */
 
 #define IPMI_SENSOR_TYPE_OEM_INTEL_SMI_TIMEOUT                  0xF3
 
 /*
+ * Quanta QSSC-S4R/Appro GB812X-CN
+ * (Quanta motherboard maintains Intel manufacturer ID)
+ */
+#define IPMI_SENSOR_TYPE_OEM_INTEL_POWER_THROTTLED              0xF3
+
+/*
  * Intel Node Manager
- *
- * http://download.intel.com/support/motherboards/server/s5500wb/sb/s5500wb_tps_1_0.pdf
  *
  * For Intel Chips, not just Intel Motherboards.  Confirmed for:
  *
@@ -87,6 +93,7 @@ extern "C" {
  * Inventec 5441/Dell Xanadu II
  * Inventec 5442/Dell Xanadu III
  * Quanta S99Q/Dell FS12-TY
+ * Quanta QSSC-S4R/Appro GB812X-CN
  */
 
 #define IPMI_SENSOR_TYPE_OEM_INTEL_NODE_MANAGER 0xDC
@@ -123,6 +130,7 @@ extern "C" {
  * Supermicro X9SCM
  * Supermicro X8DTN+-F (X8DTNPLUS_F)
  * Supermicro X8SIE
+ * Supermicro X9SCA-F-O (X9SCA-F-O)
  */
 /* achu: not official names, named based on use context */
 #define IPMI_SENSOR_TYPE_OEM_SUPERMICRO_CPU_TEMP 0xC0 

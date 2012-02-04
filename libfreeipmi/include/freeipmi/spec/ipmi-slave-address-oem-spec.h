@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@ extern "C" {
  * Intel S5500WB/Penguin Computing Relion 700
  */
 
-#define IPMI_GENERATOR_ID_OEM_INTEL_BIOS_POST          0x01
 #define IPMI_GENERATOR_ID_OEM_INTEL_BIOS_SMI_HANDLER   0x33
 #define IPMI_GENERATOR_ID_OEM_INTEL_ME_FIRMWARE        0x2C
 #define IPMI_GENERATOR_ID_OEM_INTEL_HSC_FIRMWARE       0xC0

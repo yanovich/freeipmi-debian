@@ -14,6 +14,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -33,10 +34,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+sbin_PROGRAMS = ipmipower$(EXEEXT)
 subdir = ipmipower
-DIST_COMMON = $(dist_man_MANS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/ipmipower.8.pre.in \
-	$(srcdir)/ipmipower.conf.5.pre.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
@@ -56,77 +56,50 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config/config.h
-CONFIG_CLEAN_FILES = ipmipower.8.pre ipmipower.conf.5.pre
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-SOURCES =
-DIST_SOURCES =
-RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
-	html-recursive info-recursive install-data-recursive \
-	install-dvi-recursive install-exec-recursive \
-	install-html-recursive install-info-recursive \
-	install-pdf-recursive install-ps-recursive install-recursive \
-	installcheck-recursive installdirs-recursive pdf-recursive \
-	ps-recursive uninstall-recursive
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-man5dir = $(mandir)/man5
-am__installdirs = "$(DESTDIR)$(man5dir)" "$(DESTDIR)$(man8dir)"
-man8dir = $(mandir)/man8
-NROFF = nroff
-MANS = $(dist_man_MANS)
-RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
-  distclean-recursive maintainer-clean-recursive
-AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
-	$(RECURSIVE_CLEAN_TARGETS:-recursive=) tags TAGS ctags CTAGS \
-	distdir
+am__installdirs = "$(DESTDIR)$(sbindir)"
+PROGRAMS = $(sbin_PROGRAMS)
+am_ipmipower_OBJECTS = ipmipower-argv.$(OBJEXT) \
+	ipmipower-ipmipower.$(OBJEXT) \
+	ipmipower-ipmipower_argp.$(OBJEXT) \
+	ipmipower-ipmipower_check.$(OBJEXT) \
+	ipmipower-ipmipower_connection.$(OBJEXT) \
+	ipmipower-ipmipower_error.$(OBJEXT) \
+	ipmipower-ipmipower_output.$(OBJEXT) \
+	ipmipower-ipmipower_packet.$(OBJEXT) \
+	ipmipower-ipmipower_ping.$(OBJEXT) \
+	ipmipower-ipmipower_powercmd.$(OBJEXT) \
+	ipmipower-ipmipower_prompt.$(OBJEXT) \
+	ipmipower-ipmipower_util.$(OBJEXT)
+ipmipower_OBJECTS = $(am_ipmipower_OBJECTS)
+ipmipower_DEPENDENCIES =  \
+	$(top_builddir)/common/toolcommon/libtoolcommon.la \
+	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
+	$(top_builddir)/common/debugutil/libdebugutil.la \
+	$(top_builddir)/common/miscutil/libmiscutil.la \
+	$(top_builddir)/common/parsecommon/libparsecommon.la \
+	$(top_builddir)/common/portability/libportability.la \
+	$(top_builddir)/libipmidetect/libipmidetect.la \
+	$(top_builddir)/libfreeipmi/libfreeipmi.la
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/config
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+am__depfiles_maybe = depfiles
+am__mv = mv -f
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+SOURCES = $(ipmipower_SOURCES)
+DIST_SOURCES = $(ipmipower_SOURCES)
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-am__relativize = \
-  dir0=`pwd`; \
-  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
-  sed_rest='s,^[^/]*/*,,'; \
-  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
-  sed_butlast='s,/*[^/]*$$,,'; \
-  while test -n "$$dir1"; do \
-    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
-    if test "$$first" != "."; then \
-      if test "$$first" = ".."; then \
-        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
-        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
-      else \
-        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
-        if test "$$first2" = "$$first"; then \
-          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
-        else \
-          dir2="../$$dir2"; \
-        fi; \
-        dir0="$$dir0"/"$$first"; \
-      fi; \
-    fi; \
-    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
-  done; \
-  reldir="$$dir2"
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
@@ -281,18 +254,60 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = src
-MANS_CPP = \
-	ipmipower.8 \
-	ipmipower.conf.5
+ipmipower_CPPFLAGS = \
+	-I$(top_srcdir)/common/toolcommon \
+	-I$(top_srcdir)/common/toolhostrange \
+	-I$(top_srcdir)/common/debugutil \
+	-I$(top_srcdir)/common/miscutil \
+	-I$(top_srcdir)/common/parsecommon \
+	-I$(top_srcdir)/common/portability \
+	-I$(top_srcdir)/libipmidetect \
+	-I$(top_srcdir)/libfreeipmi/include \
+	-DWITH_LSD_FATAL_ERROR_FUNC=1 \
+	-DWITH_LSD_NOMEM_ERROR_FUNC=1 \
+	-D_GNU_SOURCE \
+	-D_REENTRANT
 
-dist_man_MANS = $(MANS_CPP) ipmi-power.8
-CLEANFILES = $(MANS_CPP) *~
-DISTCLEANFILES = $(MANS_CPP) $(MANS_CPP:%=%.pre) .deps/*.P
-EXTRA_DIST = ipmi-power.8
-all: all-recursive
+ipmipower_LDADD = \
+	$(top_builddir)/common/toolcommon/libtoolcommon.la \
+	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
+	$(top_builddir)/common/debugutil/libdebugutil.la \
+	$(top_builddir)/common/miscutil/libmiscutil.la \
+	$(top_builddir)/common/parsecommon/libparsecommon.la \
+	$(top_builddir)/common/portability/libportability.la \
+	$(top_builddir)/libipmidetect/libipmidetect.la \
+	$(top_builddir)/libfreeipmi/libfreeipmi.la
+
+ipmipower_SOURCES = \
+	argv.c \
+	argv.h \
+	ipmipower.c \
+	ipmipower.h \
+	ipmipower_argp.c \
+	ipmipower_argp.h \
+	ipmipower_check.c \
+	ipmipower_check.h \
+	ipmipower_connection.c \
+	ipmipower_connection.h \
+	ipmipower_error.c \
+	ipmipower_error.h \
+	ipmipower_output.c \
+	ipmipower_output.h \
+	ipmipower_packet.c \
+	ipmipower_packet.h \
+	ipmipower_ping.c \
+	ipmipower_ping.h \
+	ipmipower_powercmd.c \
+	ipmipower_powercmd.h \
+	ipmipower_prompt.c \
+	ipmipower_prompt.h \
+	ipmipower_util.c \
+	ipmipower_util.h
+
+all: all-am
 
 .SUFFIXES:
+.SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -323,162 +338,269 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-ipmipower.8.pre: $(top_builddir)/config.status $(srcdir)/ipmipower.8.pre.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-ipmipower.conf.5.pre: $(top_builddir)/config.status $(srcdir)/ipmipower.conf.5.pre.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+install-sbinPROGRAMS: $(sbin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	test -z "$(sbindir)" || $(MKDIR_P) "$(DESTDIR)$(sbindir)"
+	@list='$(sbin_PROGRAMS)'; test -n "$(sbindir)" || list=; \
+	for p in $$list; do echo "$$p $$p"; done | \
+	sed 's/$(EXEEXT)$$//' | \
+	while read p p1; do if test -f $$p || test -f $$p1; \
+	  then echo "$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n;h' -e 's|.*|.|' \
+	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
+	sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
+	    else { print "f", $$3 "/" $$4, $$1; } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	    test -z "$$files" || { \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(sbindir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(sbindir)$$dir" || exit $$?; \
+	    } \
+	; done
+
+uninstall-sbinPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(sbin_PROGRAMS)'; test -n "$(sbindir)" || list=; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
+	      -e 's/$$/$(EXEEXT)/' `; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(sbindir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(sbindir)" && rm -f $$files
+
+clean-sbinPROGRAMS:
+	@list='$(sbin_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+ipmipower$(EXEEXT): $(ipmipower_OBJECTS) $(ipmipower_DEPENDENCIES) 
+	@rm -f ipmipower$(EXEEXT)
+	$(LINK) $(ipmipower_OBJECTS) $(ipmipower_LDADD) $(LIBS)
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT)
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-argv.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_argp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_check.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_connection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_error.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_output.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_packet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_ping.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_powercmd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_prompt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_util.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c -o $@ $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+ipmipower-argv.o: argv.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-argv.o -MD -MP -MF $(DEPDIR)/ipmipower-argv.Tpo -c -o ipmipower-argv.o `test -f 'argv.c' || echo '$(srcdir)/'`argv.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-argv.Tpo $(DEPDIR)/ipmipower-argv.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='argv.c' object='ipmipower-argv.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-argv.o `test -f 'argv.c' || echo '$(srcdir)/'`argv.c
+
+ipmipower-argv.obj: argv.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-argv.obj -MD -MP -MF $(DEPDIR)/ipmipower-argv.Tpo -c -o ipmipower-argv.obj `if test -f 'argv.c'; then $(CYGPATH_W) 'argv.c'; else $(CYGPATH_W) '$(srcdir)/argv.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-argv.Tpo $(DEPDIR)/ipmipower-argv.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='argv.c' object='ipmipower-argv.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-argv.obj `if test -f 'argv.c'; then $(CYGPATH_W) 'argv.c'; else $(CYGPATH_W) '$(srcdir)/argv.c'; fi`
+
+ipmipower-ipmipower.o: ipmipower.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower.Tpo -c -o ipmipower-ipmipower.o `test -f 'ipmipower.c' || echo '$(srcdir)/'`ipmipower.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower.Tpo $(DEPDIR)/ipmipower-ipmipower.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower.c' object='ipmipower-ipmipower.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower.o `test -f 'ipmipower.c' || echo '$(srcdir)/'`ipmipower.c
+
+ipmipower-ipmipower.obj: ipmipower.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower.Tpo -c -o ipmipower-ipmipower.obj `if test -f 'ipmipower.c'; then $(CYGPATH_W) 'ipmipower.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower.Tpo $(DEPDIR)/ipmipower-ipmipower.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower.c' object='ipmipower-ipmipower.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower.obj `if test -f 'ipmipower.c'; then $(CYGPATH_W) 'ipmipower.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower.c'; fi`
+
+ipmipower-ipmipower_argp.o: ipmipower_argp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_argp.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_argp.Tpo -c -o ipmipower-ipmipower_argp.o `test -f 'ipmipower_argp.c' || echo '$(srcdir)/'`ipmipower_argp.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_argp.Tpo $(DEPDIR)/ipmipower-ipmipower_argp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_argp.c' object='ipmipower-ipmipower_argp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_argp.o `test -f 'ipmipower_argp.c' || echo '$(srcdir)/'`ipmipower_argp.c
+
+ipmipower-ipmipower_argp.obj: ipmipower_argp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_argp.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_argp.Tpo -c -o ipmipower-ipmipower_argp.obj `if test -f 'ipmipower_argp.c'; then $(CYGPATH_W) 'ipmipower_argp.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_argp.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_argp.Tpo $(DEPDIR)/ipmipower-ipmipower_argp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_argp.c' object='ipmipower-ipmipower_argp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_argp.obj `if test -f 'ipmipower_argp.c'; then $(CYGPATH_W) 'ipmipower_argp.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_argp.c'; fi`
+
+ipmipower-ipmipower_check.o: ipmipower_check.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_check.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_check.Tpo -c -o ipmipower-ipmipower_check.o `test -f 'ipmipower_check.c' || echo '$(srcdir)/'`ipmipower_check.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_check.Tpo $(DEPDIR)/ipmipower-ipmipower_check.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_check.c' object='ipmipower-ipmipower_check.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_check.o `test -f 'ipmipower_check.c' || echo '$(srcdir)/'`ipmipower_check.c
+
+ipmipower-ipmipower_check.obj: ipmipower_check.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_check.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_check.Tpo -c -o ipmipower-ipmipower_check.obj `if test -f 'ipmipower_check.c'; then $(CYGPATH_W) 'ipmipower_check.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_check.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_check.Tpo $(DEPDIR)/ipmipower-ipmipower_check.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_check.c' object='ipmipower-ipmipower_check.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_check.obj `if test -f 'ipmipower_check.c'; then $(CYGPATH_W) 'ipmipower_check.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_check.c'; fi`
+
+ipmipower-ipmipower_connection.o: ipmipower_connection.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_connection.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_connection.Tpo -c -o ipmipower-ipmipower_connection.o `test -f 'ipmipower_connection.c' || echo '$(srcdir)/'`ipmipower_connection.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_connection.Tpo $(DEPDIR)/ipmipower-ipmipower_connection.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_connection.c' object='ipmipower-ipmipower_connection.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_connection.o `test -f 'ipmipower_connection.c' || echo '$(srcdir)/'`ipmipower_connection.c
+
+ipmipower-ipmipower_connection.obj: ipmipower_connection.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_connection.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_connection.Tpo -c -o ipmipower-ipmipower_connection.obj `if test -f 'ipmipower_connection.c'; then $(CYGPATH_W) 'ipmipower_connection.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_connection.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_connection.Tpo $(DEPDIR)/ipmipower-ipmipower_connection.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_connection.c' object='ipmipower-ipmipower_connection.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_connection.obj `if test -f 'ipmipower_connection.c'; then $(CYGPATH_W) 'ipmipower_connection.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_connection.c'; fi`
+
+ipmipower-ipmipower_error.o: ipmipower_error.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_error.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_error.Tpo -c -o ipmipower-ipmipower_error.o `test -f 'ipmipower_error.c' || echo '$(srcdir)/'`ipmipower_error.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_error.Tpo $(DEPDIR)/ipmipower-ipmipower_error.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_error.c' object='ipmipower-ipmipower_error.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_error.o `test -f 'ipmipower_error.c' || echo '$(srcdir)/'`ipmipower_error.c
+
+ipmipower-ipmipower_error.obj: ipmipower_error.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_error.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_error.Tpo -c -o ipmipower-ipmipower_error.obj `if test -f 'ipmipower_error.c'; then $(CYGPATH_W) 'ipmipower_error.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_error.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_error.Tpo $(DEPDIR)/ipmipower-ipmipower_error.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_error.c' object='ipmipower-ipmipower_error.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_error.obj `if test -f 'ipmipower_error.c'; then $(CYGPATH_W) 'ipmipower_error.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_error.c'; fi`
+
+ipmipower-ipmipower_output.o: ipmipower_output.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_output.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_output.Tpo -c -o ipmipower-ipmipower_output.o `test -f 'ipmipower_output.c' || echo '$(srcdir)/'`ipmipower_output.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_output.Tpo $(DEPDIR)/ipmipower-ipmipower_output.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_output.c' object='ipmipower-ipmipower_output.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_output.o `test -f 'ipmipower_output.c' || echo '$(srcdir)/'`ipmipower_output.c
+
+ipmipower-ipmipower_output.obj: ipmipower_output.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_output.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_output.Tpo -c -o ipmipower-ipmipower_output.obj `if test -f 'ipmipower_output.c'; then $(CYGPATH_W) 'ipmipower_output.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_output.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_output.Tpo $(DEPDIR)/ipmipower-ipmipower_output.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_output.c' object='ipmipower-ipmipower_output.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_output.obj `if test -f 'ipmipower_output.c'; then $(CYGPATH_W) 'ipmipower_output.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_output.c'; fi`
+
+ipmipower-ipmipower_packet.o: ipmipower_packet.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_packet.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_packet.Tpo -c -o ipmipower-ipmipower_packet.o `test -f 'ipmipower_packet.c' || echo '$(srcdir)/'`ipmipower_packet.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_packet.Tpo $(DEPDIR)/ipmipower-ipmipower_packet.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_packet.c' object='ipmipower-ipmipower_packet.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_packet.o `test -f 'ipmipower_packet.c' || echo '$(srcdir)/'`ipmipower_packet.c
+
+ipmipower-ipmipower_packet.obj: ipmipower_packet.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_packet.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_packet.Tpo -c -o ipmipower-ipmipower_packet.obj `if test -f 'ipmipower_packet.c'; then $(CYGPATH_W) 'ipmipower_packet.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_packet.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_packet.Tpo $(DEPDIR)/ipmipower-ipmipower_packet.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_packet.c' object='ipmipower-ipmipower_packet.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_packet.obj `if test -f 'ipmipower_packet.c'; then $(CYGPATH_W) 'ipmipower_packet.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_packet.c'; fi`
+
+ipmipower-ipmipower_ping.o: ipmipower_ping.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_ping.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_ping.Tpo -c -o ipmipower-ipmipower_ping.o `test -f 'ipmipower_ping.c' || echo '$(srcdir)/'`ipmipower_ping.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_ping.Tpo $(DEPDIR)/ipmipower-ipmipower_ping.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_ping.c' object='ipmipower-ipmipower_ping.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_ping.o `test -f 'ipmipower_ping.c' || echo '$(srcdir)/'`ipmipower_ping.c
+
+ipmipower-ipmipower_ping.obj: ipmipower_ping.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_ping.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_ping.Tpo -c -o ipmipower-ipmipower_ping.obj `if test -f 'ipmipower_ping.c'; then $(CYGPATH_W) 'ipmipower_ping.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_ping.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_ping.Tpo $(DEPDIR)/ipmipower-ipmipower_ping.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_ping.c' object='ipmipower-ipmipower_ping.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_ping.obj `if test -f 'ipmipower_ping.c'; then $(CYGPATH_W) 'ipmipower_ping.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_ping.c'; fi`
+
+ipmipower-ipmipower_powercmd.o: ipmipower_powercmd.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_powercmd.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_powercmd.Tpo -c -o ipmipower-ipmipower_powercmd.o `test -f 'ipmipower_powercmd.c' || echo '$(srcdir)/'`ipmipower_powercmd.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_powercmd.Tpo $(DEPDIR)/ipmipower-ipmipower_powercmd.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_powercmd.c' object='ipmipower-ipmipower_powercmd.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_powercmd.o `test -f 'ipmipower_powercmd.c' || echo '$(srcdir)/'`ipmipower_powercmd.c
+
+ipmipower-ipmipower_powercmd.obj: ipmipower_powercmd.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_powercmd.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_powercmd.Tpo -c -o ipmipower-ipmipower_powercmd.obj `if test -f 'ipmipower_powercmd.c'; then $(CYGPATH_W) 'ipmipower_powercmd.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_powercmd.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_powercmd.Tpo $(DEPDIR)/ipmipower-ipmipower_powercmd.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_powercmd.c' object='ipmipower-ipmipower_powercmd.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_powercmd.obj `if test -f 'ipmipower_powercmd.c'; then $(CYGPATH_W) 'ipmipower_powercmd.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_powercmd.c'; fi`
+
+ipmipower-ipmipower_prompt.o: ipmipower_prompt.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_prompt.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_prompt.Tpo -c -o ipmipower-ipmipower_prompt.o `test -f 'ipmipower_prompt.c' || echo '$(srcdir)/'`ipmipower_prompt.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_prompt.Tpo $(DEPDIR)/ipmipower-ipmipower_prompt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_prompt.c' object='ipmipower-ipmipower_prompt.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_prompt.o `test -f 'ipmipower_prompt.c' || echo '$(srcdir)/'`ipmipower_prompt.c
+
+ipmipower-ipmipower_prompt.obj: ipmipower_prompt.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_prompt.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_prompt.Tpo -c -o ipmipower-ipmipower_prompt.obj `if test -f 'ipmipower_prompt.c'; then $(CYGPATH_W) 'ipmipower_prompt.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_prompt.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_prompt.Tpo $(DEPDIR)/ipmipower-ipmipower_prompt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_prompt.c' object='ipmipower-ipmipower_prompt.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_prompt.obj `if test -f 'ipmipower_prompt.c'; then $(CYGPATH_W) 'ipmipower_prompt.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_prompt.c'; fi`
+
+ipmipower-ipmipower_util.o: ipmipower_util.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_util.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_util.Tpo -c -o ipmipower-ipmipower_util.o `test -f 'ipmipower_util.c' || echo '$(srcdir)/'`ipmipower_util.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_util.Tpo $(DEPDIR)/ipmipower-ipmipower_util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_util.c' object='ipmipower-ipmipower_util.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_util.o `test -f 'ipmipower_util.c' || echo '$(srcdir)/'`ipmipower_util.c
+
+ipmipower-ipmipower_util.obj: ipmipower_util.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_util.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_util.Tpo -c -o ipmipower-ipmipower_util.obj `if test -f 'ipmipower_util.c'; then $(CYGPATH_W) 'ipmipower_util.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_util.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_util.Tpo $(DEPDIR)/ipmipower-ipmipower_util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_util.c' object='ipmipower-ipmipower_util.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_util.obj `if test -f 'ipmipower_util.c'; then $(CYGPATH_W) 'ipmipower_util.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_util.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-man5: $(dist_man_MANS)
-	@$(NORMAL_INSTALL)
-	test -z "$(man5dir)" || $(MKDIR_P) "$(DESTDIR)$(man5dir)"
-	@list=''; test -n "$(man5dir)" || exit 0; \
-	{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.5[a-z]*$$/p'; \
-	} | while read p; do \
-	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; echo "$$p"; \
-	done | \
-	sed -e 'n;s,.*/,,;p;h;s,.*\.,,;s,^[^5][0-9a-z]*$$,5,;x' \
-	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,' | \
-	sed 'N;N;s,\n, ,g' | { \
-	list=; while read file base inst; do \
-	  if test "$$base" = "$$inst"; then list="$$list $$file"; else \
-	    echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man5dir)/$$inst'"; \
-	    $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man5dir)/$$inst" || exit $$?; \
-	  fi; \
-	done; \
-	for i in $$list; do echo "$$i"; done | $(am__base_list) | \
-	while read files; do \
-	  test -z "$$files" || { \
-	    echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(man5dir)'"; \
-	    $(INSTALL_DATA) $$files "$(DESTDIR)$(man5dir)" || exit $$?; }; \
-	done; }
-
-uninstall-man5:
-	@$(NORMAL_UNINSTALL)
-	@list=''; test -n "$(man5dir)" || exit 0; \
-	files=`{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.5[a-z]*$$/p'; \
-	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^5][0-9a-z]*$$,5,;x' \
-	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
-	test -z "$$files" || { \
-	  echo " ( cd '$(DESTDIR)$(man5dir)' && rm -f" $$files ")"; \
-	  cd "$(DESTDIR)$(man5dir)" && rm -f $$files; }
-install-man8: $(dist_man_MANS)
-	@$(NORMAL_INSTALL)
-	test -z "$(man8dir)" || $(MKDIR_P) "$(DESTDIR)$(man8dir)"
-	@list=''; test -n "$(man8dir)" || exit 0; \
-	{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.8[a-z]*$$/p'; \
-	} | while read p; do \
-	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; echo "$$p"; \
-	done | \
-	sed -e 'n;s,.*/,,;p;h;s,.*\.,,;s,^[^8][0-9a-z]*$$,8,;x' \
-	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,' | \
-	sed 'N;N;s,\n, ,g' | { \
-	list=; while read file base inst; do \
-	  if test "$$base" = "$$inst"; then list="$$list $$file"; else \
-	    echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man8dir)/$$inst'"; \
-	    $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man8dir)/$$inst" || exit $$?; \
-	  fi; \
-	done; \
-	for i in $$list; do echo "$$i"; done | $(am__base_list) | \
-	while read files; do \
-	  test -z "$$files" || { \
-	    echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(man8dir)'"; \
-	    $(INSTALL_DATA) $$files "$(DESTDIR)$(man8dir)" || exit $$?; }; \
-	done; }
-
-uninstall-man8:
-	@$(NORMAL_UNINSTALL)
-	@list=''; test -n "$(man8dir)" || exit 0; \
-	files=`{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.8[a-z]*$$/p'; \
-	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^8][0-9a-z]*$$,8,;x' \
-	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
-	test -z "$$files" || { \
-	  echo " ( cd '$(DESTDIR)$(man8dir)' && rm -f" $$files ")"; \
-	  cd "$(DESTDIR)$(man8dir)" && rm -f $$files; }
-
-# This directory's subdirectories are mostly independent; you can cd
-# into them and run `make' without going through this Makefile.
-# To change the values of `make' variables: instead of editing Makefiles,
-# (1) if the variable is set in `config.status', edit `config.status'
-#     (which will cause the Makefiles to be regenerated when you run `make');
-# (2) otherwise, pass the desired values on the `make' command line.
-$(RECURSIVE_TARGETS):
-	@fail= failcom='exit 1'; \
-	for f in x $$MAKEFLAGS; do \
-	  case $$f in \
-	    *=* | --[!k]*);; \
-	    *k*) failcom='fail=yes';; \
-	  esac; \
-	done; \
-	dot_seen=no; \
-	target=`echo $@ | sed s/-recursive//`; \
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  echo "Making $$target in $$subdir"; \
-	  if test "$$subdir" = "."; then \
-	    dot_seen=yes; \
-	    local_target="$$target-am"; \
-	  else \
-	    local_target="$$target"; \
-	  fi; \
-	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
-	  || eval $$failcom; \
-	done; \
-	if test "$$dot_seen" = "no"; then \
-	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
-	fi; test -z "$$fail"
-
-$(RECURSIVE_CLEAN_TARGETS):
-	@fail= failcom='exit 1'; \
-	for f in x $$MAKEFLAGS; do \
-	  case $$f in \
-	    *=* | --[!k]*);; \
-	    *k*) failcom='fail=yes';; \
-	  esac; \
-	done; \
-	dot_seen=no; \
-	case "$@" in \
-	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
-	  *) list='$(SUBDIRS)' ;; \
-	esac; \
-	rev=''; for subdir in $$list; do \
-	  if test "$$subdir" = "."; then :; else \
-	    rev="$$subdir $$rev"; \
-	  fi; \
-	done; \
-	rev="$$rev ."; \
-	target=`echo $@ | sed s/-recursive//`; \
-	for subdir in $$rev; do \
-	  echo "Making $$target in $$subdir"; \
-	  if test "$$subdir" = "."; then \
-	    local_target="$$target-am"; \
-	  else \
-	    local_target="$$target"; \
-	  fi; \
-	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
-	  || eval $$failcom; \
-	done && test -z "$$fail"
-tags-recursive:
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
-	done
-ctags-recursive:
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) ctags); \
-	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -490,23 +612,10 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	mkid -fID $$unique
 tags: TAGS
 
-TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	set x; \
 	here=`pwd`; \
-	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
-	  include_option=--etags-include; \
-	  empty_fix=.; \
-	else \
-	  include_option=--include; \
-	  empty_fix=; \
-	fi; \
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    test ! -f $$subdir/TAGS || \
-	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
-	  fi; \
-	done; \
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
@@ -525,7 +634,7 @@ TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 	  fi; \
 	fi
 ctags: CTAGS
-CTAGS: ctags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
@@ -546,19 +655,6 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	@list='$(MANS)'; if test -n "$$list"; then \
-	  list=`for p in $$list; do \
-	    if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
-	    if test -f "$$d$$p"; then echo "$$d$$p"; else :; fi; done`; \
-	  if test -n "$$list" && \
-	    grep 'ab help2man is required to generate this page' $$list >/dev/null; then \
-	    echo "error: found man pages containing the \`missing help2man' replacement text:" >&2; \
-	    grep -l 'ab help2man is required to generate this page' $$list | sed 's/^/         /' >&2; \
-	    echo "       to fix them, install help2man, remove and regenerate the man pages;" >&2; \
-	    echo "       typically \`make maintainer-clean' will remove them" >&2; \
-	    exit 1; \
-	  else :; fi; \
-	else :; fi
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	list='$(DISTFILES)'; \
@@ -588,51 +684,22 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    test -d "$(distdir)/$$subdir" \
-	    || $(MKDIR_P) "$(distdir)/$$subdir" \
-	    || exit 1; \
-	  fi; \
-	done
-	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
-	    $(am__relativize); \
-	    new_distdir=$$reldir; \
-	    dir1=$$subdir; dir2="$(top_distdir)"; \
-	    $(am__relativize); \
-	    new_top_distdir=$$reldir; \
-	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
-	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
-	    ($(am__cd) $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$new_top_distdir" \
-	        distdir="$$new_distdir" \
-		am__remove_distdir=: \
-		am__skip_length_check=: \
-		am__skip_mode_fix=: \
-	        distdir) \
-	      || exit 1; \
-	  fi; \
-	done
 check-am: all-am
-check: check-recursive
-all-am: Makefile $(MANS)
-installdirs: installdirs-recursive
-installdirs-am:
-	for dir in "$(DESTDIR)$(man5dir)" "$(DESTDIR)$(man8dir)"; do \
+check: check-am
+all-am: Makefile $(PROGRAMS)
+installdirs:
+	for dir in "$(DESTDIR)$(sbindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-recursive
-install-exec: install-exec-recursive
-install-data: install-data-recursive
-uninstall: uninstall-recursive
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-recursive
+installcheck: installcheck-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
 	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
@@ -641,105 +708,137 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-recursive
+clean: clean-am
 
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libtool clean-sbinPROGRAMS \
+	mostlyclean-am
 
-distclean: distclean-recursive
+distclean: distclean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
-distclean-am: clean-am distclean-generic distclean-tags
+distclean-am: clean-am distclean-compile distclean-generic \
+	distclean-tags
 
-dvi: dvi-recursive
+dvi: dvi-am
 
 dvi-am:
 
-html: html-recursive
+html: html-am
 
 html-am:
 
-info: info-recursive
+info: info-am
 
 info-am:
 
-install-data-am: install-man
+install-data-am:
 
-install-dvi: install-dvi-recursive
+install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
-
-install-html: install-html-recursive
+install-exec-am: install-sbinPROGRAMS
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
+install-html: install-html-am
 
 install-html-am:
 
-install-info: install-info-recursive
+install-info: install-info-am
 
 install-info-am:
 
-install-man: install-man5 install-man8
+install-man:
 
-install-pdf: install-pdf-recursive
+install-pdf: install-pdf-am
 
 install-pdf-am:
 
-install-ps: install-ps-recursive
+install-ps: install-ps-am
 
 install-ps-am:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-recursive
+maintainer-clean: maintainer-clean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-recursive
+mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-generic mostlyclean-libtool
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
-pdf: pdf-recursive
+pdf: pdf-am
 
 pdf-am:
 
-ps: ps-recursive
+ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-man
+uninstall-am: uninstall-sbinPROGRAMS
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
+.MAKE: install-am install-exec-am install-strip uninstall-am
 
-uninstall-man: uninstall-man5 uninstall-man8
-
-.MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) ctags-recursive \
-	install-am install-strip tags-recursive
-
-.PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
-	all all-am check check-am clean clean-generic clean-libtool \
-	ctags ctags-recursive distclean distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-man5 install-man8 \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am tags tags-recursive uninstall uninstall-am \
-	uninstall-man uninstall-man5 uninstall-man8
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+	clean-libtool clean-sbinPROGRAMS ctags distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-exec-hook \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-sbinPROGRAMS install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-hook \
+	uninstall-sbinPROGRAMS
 
 
-$(MANS_CPP): $(MANS_CPP:%=%.pre)
-	$(CPP) -C -P -I. $@.pre  $@
+$(top_builddir)/common/toolcommon/libtoolcommon.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/toolhostrange/libtoolhostrange.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/debugutil/libdebugutil.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/miscutil/libmiscutil.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/parsecommon/libparsecommon.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/portability/libportability.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/libipmidetect/libipmidetect.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/libfreeipmi/libfreeipmi.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+force-dependency-check:
+
+install-exec-hook:
+	$(install_sh) -d -m 755 $(DESTDIR)$(sbindir)
+	$(LN_S) -f $(sbindir)/ipmipower $(DESTDIR)$(sbindir)/ipmi-power
+
+uninstall-hook:
+	$(RM) $(DESTDIR)$(sbindir)/ipmi-power
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

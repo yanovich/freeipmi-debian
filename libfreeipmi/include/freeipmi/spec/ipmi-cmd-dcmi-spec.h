@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * 
  */
 /*****************************************************************************\
- *  Copyright (C) 2009-2010 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2009-2012 Lawrence Livermore National Security, LLC.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
  *  LLNL-CODE-413270
@@ -46,7 +46,7 @@
 extern "C" {
 #endif
 
-#define IPMI_CMD_DCMI_GET_DCMI_CAPABILITIY_INFO                   0x01
+#define IPMI_CMD_DCMI_GET_DCMI_CAPABILITY_INFO                    0x01
 #define IPMI_CMD_DCMI_GET_POWER_READING                           0x02
 #define IPMI_CMD_DCMI_GET_POWER_LIMIT                             0x03
 #define IPMI_CMD_DCMI_SET_POWER_LIMIT                             0x04
@@ -56,6 +56,11 @@ extern "C" {
 #define IPMI_CMD_DCMI_SET_ASSET_TAG                               0x08
 #define IPMI_CMD_DCMI_GET_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING 0x09
 #define IPMI_CMD_DCMI_SET_MANAGEMENT_CONTROLLER_IDENTIFIER_STRING 0x0A
+#define IPMI_CMD_DCMI_SET_THERMAL_LIMIT                           0x0B
+#define IPMI_CMD_DCMI_GET_THERMAL_LIMIT                           0x0C
+#define IPMI_CMD_DCMI_GET_TEMPERATURE_READING                     0x10
+#define IPMI_CMD_DCMI_SET_DCMI_CONFIGURATION_PARAMETERS           0x12
+#define IPMI_CMD_DCMI_GET_DCMI_CONFIGURATION_PARAMETERS           0x13
 
 #ifdef __cplusplus
 }

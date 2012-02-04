@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,8 +78,19 @@ extern "C" {
 #define IPMI_ENTITY_ID_PROCESSOR_FRONT_SIDE_BUS                  0x34
 #define IPMI_ENTITY_ID_REAL_TIME_CLOCK                           0x35
 /* 0x36 - reserved */
-/* 0x37 - listed as air inlet, but not markup not consistent to errata, assume errata correct and markup has typo */
+/* achu:
+ *
+ * Ugh .. 0x37 is listed as air inlet in markup 4 spec, but not in
+ * errata 4.  Initial assumption was that it was a typo.  Later, DCMI
+ * v1.5 spec lits 0x37 is inlet temperature.
+ *
+ * So the assumption is it's not a typo now, we'll list 0x37 as
+ * AIR_INLET "B"
+ */
+#define IPMI_ENTITY_ID_AIR_INLET_B                               0x37
+/* 0x38 - 0x3F - reserved */
 #define IPMI_ENTITY_ID_AIR_INLET                                 0x40
+#define IPMI_ENTITY_ID_AIR_INLET_A                               IPMI_ENTITY_ID_AIR_INLET
 #define IPMI_ENTITY_ID_PROCESSOR_CPU                             0x41 /* considered same as 0x03, to match DCMI */
 #define IPMI_ENTITY_ID_BASEBOARD_MAIN_SYSTEM_BOARD               0x42 /* considered same as 0x07, to match DCMI */
 #define IPMI_ENTITY_ID_CHASSIS_SPECIFIC_MIN                      0x90
@@ -110,6 +121,9 @@ extern "C" {
     && ((__entity_id - 1) <= (IPMI_ENTITY_ID_OEM_SYSTEM_INTEGRATOR_DEFINED_MAX - 1))) ? 1 : 0)
 
 extern const char *const ipmi_entity_ids[];
+extern const char *const ipmi_entity_id_chassis_specific;
+extern const char *const ipmi_entity_id_board_set_specific;
+extern const char *const ipmi_entity_id_oem_system_integrator;
 
 /* properly capitalize, for some entries if entity has an "or" or "/" remove it and pick one element, etc. */
 extern const char *const ipmi_entity_ids_pretty[];

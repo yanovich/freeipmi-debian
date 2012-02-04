@@ -3,7 +3,7 @@
 #
 
 %define name freeipmi
-%define version 1.0.8
+%define version 1.1.1
 %if %{?_with_debug:1}%{!?_with_debug:0}
 %define release 1.debug%{?dist}
 %else
@@ -175,6 +175,8 @@ fi
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/freeipmi/freeipmi_interpret_sensor.conf
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/freeipmi/ipmidetect.conf
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/freeipmi/libipmiconsole.conf
+%doc %{_infodir}/*
+%dir %{_datadir}/doc/%{name}
 %doc %{_datadir}/doc/%{name}/AUTHORS
 %doc %{_datadir}/doc/%{name}/COPYING
 %doc %{_datadir}/doc/%{name}/ChangeLog
@@ -186,7 +188,6 @@ fi
 %doc %{_datadir}/doc/%{name}/README.build
 %doc %{_datadir}/doc/%{name}/README.openipmi
 %doc %{_datadir}/doc/%{name}/TODO
-%doc %{_infodir}/*
 %doc %{_datadir}/doc/%{name}/COPYING.ipmiping
 %doc %{_datadir}/doc/%{name}/COPYING.ipmipower
 %doc %{_datadir}/doc/%{name}/COPYING.ipmiconsole
@@ -219,7 +220,13 @@ fi
 %doc %{_datadir}/doc/%{name}/freeipmi-bugs-issues-and-workarounds.txt
 %doc %{_datadir}/doc/%{name}/freeipmi-testing.txt
 %doc %{_datadir}/doc/%{name}/freeipmi-oem-documentation-requirements.txt
-%dir %{_datadir}/doc/%{name}
+%dir %{_datadir}/doc/%{name}/contrib
+%dir %{_datadir}/doc/%{name}/contrib/ganglia
+%doc %{_datadir}/doc/%{name}/contrib/ganglia/*
+%dir %{_datadir}/doc/%{name}/contrib/nagios
+%doc %{_datadir}/doc/%{name}/contrib/nagios/*
+%dir %{_datadir}/doc/%{name}/contrib/pet
+%doc %{_datadir}/doc/%{name}/contrib/pet/*
 %{_libdir}/libipmiconsole*so.*
 %{_libdir}/libfreeipmi*so.*
 %{_libdir}/libipmidetect*so.*
@@ -250,6 +257,7 @@ fi
 %{_sbindir}/ipmi-chassis
 %{_sbindir}/ipmi-chassis-config
 %{_sbindir}/ipmi-dcmi
+%{_sbindir}/ipmi-pet
 %{_sbindir}/ipmidetect
 %{_sbindir}/ipmi-detect
 %{_mandir}/man8/bmc-config.8*
@@ -285,6 +293,7 @@ fi
 %{_mandir}/man8/ipmi-chassis.8*
 %{_mandir}/man8/ipmi-chassis-config.8*
 %{_mandir}/man8/ipmi-dcmi.8*
+%{_mandir}/man8/ipmi-pet.8*
 %{_mandir}/man8/ipmidetect.8*
 %{_mandir}/man8/ipmi-detect.8*
 %{_mandir}/man5/freeipmi.conf.5*
@@ -292,9 +301,12 @@ fi
 %{_mandir}/man7/freeipmi.7*
 %{_mandir}/man5/libipmiconsole.conf.5*
 %dir %{_localstatedir}/cache/ipmimonitoringsdrcache
+%dir %{_localstatedir}/log/freeipmi
 
 %files devel
 %defattr(-,root,root)
+%dir %{_datadir}/doc/%{name}/contrib/libipmimonitoring
+%doc %{_datadir}/doc/%{name}/contrib/libipmimonitoring/*
 %{_libdir}/libipmiconsole.so
 %{_libdir}/libfreeipmi.so
 %{_libdir}/libipmidetect.so
@@ -352,7 +364,6 @@ fi
 %config(noreplace) %{_sysconfdir}/logrotate.d/bmc-watchdog
 %{_sbindir}/bmc-watchdog
 %{_mandir}/man8/bmc-watchdog.8*
-%dir %{_localstatedir}/log/freeipmi
 
 %files ipmidetectd
 %defattr(-,root,root)
@@ -363,6 +374,10 @@ fi
 %{_mandir}/man8/ipmidetectd.8*
 
 %changelog
+* Mon Dec 12 2011 Albert Chu <chu11@llnl.gov> 1.1.1
+- Add contrib and ipmi-pet files.
+- Make main package own logdir.
+
 * Wed Jun 29 2011 Albert Chu <chu11@llnl.gov> 1.0.4
 - Add pkgconfig files.
 
@@ -416,7 +431,7 @@ fi
 - Obsolete old subpackage freeipmi-ipmimonitoring.
 
 * Tue Dec 18 2007 Albert Chu <chu11@llnl.gov> 0.6.0
-- Use %{version} instead of 1.0.8 for substitution in paths.
+- Use %{version} instead of 1.1.1 for substitution in paths.
 
 * Fri Dec 14 2007 Albert Chu <chu11@llnl.gov> 0.6.0
 - Update packaging for libfreeipmi reorganization
