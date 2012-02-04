@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,19 +111,48 @@ typedef enum ipmi_driver_type ipmi_driver_type_t;
 #define IPMI_WORKAROUND_FLAGS_INBAND_ASSUME_IO_BASE_ADDRESS                 0x00000001
 #define IPMI_WORKAROUND_FLAGS_INBAND_SPIN_POLL                              0x00000002
 
-/* NONBLOCKING - for inband only
+/* NONBLOCKING - for inband only, do no block if device busy.
  *
+ * NOSESSION - for outofband only, do not create an IPMI session.
+ * Useful for the few IPMI payloads that do not require a session for
+ * an IPMI command to be sent (e.g. Get Channel Authentication
+ * Capabilities, Get System GUID, PET Acknowledge).  Can only be set
+ * during opening, not later using ipmi_ctx_set_flags().  If set, you
+ * cannot call most IPMI payload functions, only those few that send
+ * data without a session.
+ * 
  * DEBUG_DUMP - for all interfaces
-
- * NO_VALID_CHECK - do not check if IPMI response packets are valid
+ *
+ * NO_VALID_CHECK - do not check if IPMI response payloads are valid
  * (i.e. all required fields set).  Useful to workaround non-compliant
- * motherboards.
+ * motherboards.  For example, if an IPMI payload did not return a
+ * required flag in the payload, an error would be returned.  The
+ * error might possibly be a session timeout, as no valid response
+ * packet was ever received.  This flag would skip the checks for
+ * valid fields and return the packet to the user.
+ *
+ * NO_LEGAL_CHECK - do no check if IPMI response payloads have
+ * sufficient data (i.e. completion code fields) to be legal.  Useful
+ * to work around non-compliant motherboards.  This flag is ignores
+ * the legality of IPMI payloads greater than the NO_VALID_CHECK
+ * option.  For example, NO_VALID_CHECK would still return an error if
+ * an IPMI payload did not return a completion code in an IPMI
+ * response.  The NO_LEGAL_CHECK would return such a packet to the
+ * user without an error.  If the payload did not return a completion
+ * code, the completion code will not be checked for.
+ *
+ * IGNORE_AUTHENTICATION_CODE - for IPMI 1.5 packets, do not check the
+ * authentication code on response packets.  Useful to workaround
+ * around non-compliant motherboards implementing invalid code/hashes.
  */
 
-#define IPMI_FLAGS_DEFAULT        0x00000000
-#define IPMI_FLAGS_NONBLOCKING    0x00000001
-#define IPMI_FLAGS_DEBUG_DUMP     0x00000010
-#define IPMI_FLAGS_NO_VALID_CHECK 0x00000100
+#define IPMI_FLAGS_DEFAULT                    0x00000000
+#define IPMI_FLAGS_NONBLOCKING                0x00000001
+#define IPMI_FLAGS_NOSESSION                  0x00000002
+#define IPMI_FLAGS_DEBUG_DUMP                 0x00000010
+#define IPMI_FLAGS_NO_VALID_CHECK             0x00000100
+#define IPMI_FLAGS_NO_LEGAL_CHECK             0x00000200
+#define IPMI_FLAGS_IGNORE_AUTHENTICATION_CODE 0x00000400
 
 typedef struct ipmi_ctx *ipmi_ctx_t;
 
@@ -141,6 +170,7 @@ int ipmi_ctx_get_flags (ipmi_ctx_t ctx, unsigned int *flags);
 int ipmi_ctx_set_flags (ipmi_ctx_t ctx, unsigned int flags);
 
 /* For IPMI 1.5 sessions */
+/* For session_timeout and retransmission_timeout, specify 0 for default */
 int ipmi_ctx_open_outofband (ipmi_ctx_t ctx,
                              const char *hostname,
                              const char *username,
@@ -153,6 +183,7 @@ int ipmi_ctx_open_outofband (ipmi_ctx_t ctx,
                              unsigned int flags);
 
 /* For IPMI 2.0 sessions */
+/* For session_timeout and retransmission_timeout, specify 0 for default */
 int ipmi_ctx_open_outofband_2_0 (ipmi_ctx_t ctx,
                                  const char *hostname,
                                  const char *username,

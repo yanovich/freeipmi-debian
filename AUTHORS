@@ -21,6 +21,7 @@ Holger Liebig <holger.liebig@ts.fujitsu.com>
 Dan Lukes <dan+freeipmi@obluda.cz>
 Arnaud Quette <arnaud.quette@free.fr>
 Diego Elio Pettenò <flameeyes@flameeyes.eu>
+Kaiwang Chen <kaiwang.chen@gmail.com>
 And others ...
 
 Package Maintainers:
@@ -28,6 +29,9 @@ Dmitry Frolov <frol@nov.net> - FreeBSD
 Phil Knirsch <pknirsch@redhat.com> - Redhat & Fedora
 Jan Safranek <jsafrane@redhat.com> - Redhat & Fedora
 Yaroslav Halchenko <debian@onerussian.com> - Debian
+
+Contrib Contributions:
+Kaiwang Chen <kaiwang.chen@gmail.com>
 
 Web Site:
 Anand Babu <ab@zresearch.com>

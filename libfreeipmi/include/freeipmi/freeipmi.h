@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ extern "C" {
 #include <freeipmi/api/ipmi-dcmi-cmds-api.h>
 #include <freeipmi/api/ipmi-device-global-cmds-api.h>
 #include <freeipmi/api/ipmi-event-cmds-api.h>
+#include <freeipmi/api/ipmi-firmware-firewall-command-discovery-cmds-api.h>
 #include <freeipmi/api/ipmi-fru-inventory-device-cmds-api.h>
 #include <freeipmi/api/ipmi-lan-cmds-api.h>
 #include <freeipmi/api/ipmi-messaging-support-cmds-api.h>
@@ -45,6 +46,7 @@ extern "C" {
 #include <freeipmi/cmds/ipmi-dcmi-oem-cmds.h>
 #include <freeipmi/cmds/ipmi-device-global-cmds.h>
 #include <freeipmi/cmds/ipmi-event-cmds.h>
+#include <freeipmi/cmds/ipmi-firmware-firewall-command-discovery-cmds.h>
 #include <freeipmi/cmds/ipmi-fru-inventory-device-cmds.h>
 #include <freeipmi/cmds/ipmi-lan-cmds.h>
 #include <freeipmi/cmds/ipmi-messaging-support-cmds.h>
@@ -64,6 +66,7 @@ extern "C" {
 #include <freeipmi/driver/ipmi-sunbmc-driver.h>
 #include <freeipmi/fiid/fiid.h>
 #include <freeipmi/fru-parse/ipmi-fru-parse.h>
+#include <freeipmi/interface/ipmi-interface.h>
 #include <freeipmi/interface/ipmi-ipmb-interface.h>
 #include <freeipmi/interface/ipmi-kcs-interface.h>
 #include <freeipmi/interface/ipmi-lan-interface.h>
@@ -74,6 +77,7 @@ extern "C" {
 #include <freeipmi/payload/ipmi-sol-payload.h>
 #include <freeipmi/record-format/ipmi-cipher-suite-record-format.h>
 #include <freeipmi/record-format/ipmi-fru-information-record-format.h>
+#include <freeipmi/record-format/ipmi-platform-event-trap-record-format.h>
 #include <freeipmi/record-format/ipmi-sdr-record-format.h>
 #include <freeipmi/record-format/ipmi-sdr-oem-record-format.h>
 #include <freeipmi/record-format/ipmi-sel-record-format.h>
@@ -127,6 +131,7 @@ extern "C" {
 #include <freeipmi/util/ipmi-channel-util.h>
 #include <freeipmi/util/ipmi-cipher-suite-util.h>
 #include <freeipmi/util/ipmi-device-types-util.h>
+#include <freeipmi/util/ipmi-entity-ids-util.h>
 #include <freeipmi/util/ipmi-error-util.h>
 #include <freeipmi/util/ipmi-error-dcmi-util.h>
 #include <freeipmi/util/ipmi-iana-enterprise-numbers-util.h>
@@ -141,10 +146,10 @@ extern "C" {
 #include <freeipmi/util/ipmi-dcmi-util.h>
 #include <freeipmi/util/rmcp-util.h>
 
-#define FREEIPMI_PACKAGE_VERSION       1.0.8
+#define FREEIPMI_PACKAGE_VERSION       1.1.1
 #define FREEIPMI_PACKAGE_VERSION_MAJOR 1
-#define FREEIPMI_PACKAGE_VERSION_MINOR 0
-#define FREEIPMI_PACKAGE_VERSION_PATCH 8
+#define FREEIPMI_PACKAGE_VERSION_MINOR 1
+#define FREEIPMI_PACKAGE_VERSION_PATCH 1
 
 /*
  * Libfreeipmi version
@@ -162,9 +167,9 @@ extern "C" {
  *         forward and backward compatible to other PATCH versions.
  */
 
-#define LIBFREEIPMI_VERSION_MAJOR 1
+#define LIBFREEIPMI_VERSION_MAJOR 2
 #define LIBFREEIPMI_VERSION_MINOR 0
-#define LIBFREEIPMI_VERSION_PATCH 5
+#define LIBFREEIPMI_VERSION_PATCH 0
 
 #ifdef __cplusplus
 }

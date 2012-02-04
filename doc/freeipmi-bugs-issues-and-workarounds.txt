@@ -56,6 +56,7 @@ MSI MS-91D2
 Dell Poweredge 2900
 Dell Poweredge 2950
 Intel S2600JF/Appro 512X
+Quanta QSSC-S4R/Appro GB812X-CN
 
 The remaining motherboards (and subsequent bugs/issues/workarounds)
 listed below are from interaction with users in the community and I
@@ -232,6 +233,13 @@ the privilege used during the RAKP1 stage.  This can be problematic if
 you specify IPMI_PRIVILEGE_LEVEL_HIGHEST_LEVEL during that stage
 instead of a real privilege level.  Resolved with a workaround to
 handle this specific situation.
+
+Quanta QSSC-S4R//Appro GB812X-CN: The remote BMC incorrectly
+calculates keys using the privilege specified in the open session
+stage rather than the privilege used during the RAKP1 stage.  This can
+be problematic if you specify IPMI_PRIVILEGE_LEVEL_HIGHEST_LEVEL
+during that stage instead of a real privilege level.  Resolved with a
+workaround to handle this specific situation.
 
 Session Issues
 --------------
@@ -451,6 +459,15 @@ flag in a BMC to Remote Console packet.  Not a severe issue, since the
 SOL session will eventually time out, but it isn't clean.  This bug is
 confirmed to be fixed on newer firmware.
 
+Quanta QSSC-S4R//Appro GB812X-CN: When a SOL session is closed by
+another session, the initial SOL session is not given a "SOL is
+deactivating" flag in a BMC to Remote Console packet.  Not a severe
+issue, since the SOL session will eventually time out, but it isn't
+clean.  This bug is confirmed to be fixed on newer firmware.
+
+Quanta QSSC-S4R/Appro GB812X-CN: SOL payload sizes are reported
+incorrectly.  Resolved with a workaround to skip payload size checks.
+
 bmc-config
 ----------
 
@@ -631,6 +648,9 @@ specified by a RMCP+ Messaging Cipher Suite Entry Support Count
 request.  Resolved with a workaround to not output a privilege if one
 is not available.
 
+Intel S2600JF/Appro 512X: Cipher suite privilege levels are not
+configurable.  The cipher suite entry count is 0.
+
 ipmi-pef-config
 ---------------
 
@@ -758,7 +778,7 @@ Resolved with special case handling.
 
 HP Proliant DL380 G7, HP ProLiant ML310 G5: SDR records for some
 sensors give conflicting information.  A threshold based sensor lists
-an event/reading type code for a discrete sensor.  The the analog data
+an event/reading type code for a discrete sensor.  The analog data
 format indicates an analog/threshold based sensor, however no
 threshold limits for the sensor are listed in the SDR.  Ipmi-sensors
 subsequently reports discrete states without an actual sensor reading
@@ -779,9 +799,9 @@ are provided, this field should be written as 00h."  Some vendors
 subsequently set this field to 00b or 11b for non-analog sensors.
 
 Dell Poweredge 2900, Dell Poweredge 2950, Dell Poweredge R410, Dell
-Poweredge R610: Some sensors report that their sensor scanning is
-disabled, even though the sensor is actually not.  Resolved with
-workaround to ignore the sensor scanning bit.
+Poweredge R610, HP Integrity rx3600: Some sensors report that their sensor
+scanning is disabled, even though the sensor is actually not.
+Resolved with workaround to ignore the sensor scanning bit.
 
 Fujitsu RX300, Fujitsu RX300S2: Some sensors report a non-BMC sensor
 owner and thus require bridging.  However, the sensor owner is
@@ -886,6 +906,13 @@ identifier string is stated to be NUL terminated, but the asset tag is
 not stated with this requirement.  At present, the assumption is that
 all 64 bytes of the buffer must be overwritten everytime the string is
 modified.  This seems to be the safest approach.
+
+ipmi-pet
+--------
+
+Dell Poweredge R610: Responses from a PET Acknowledge are invalid and
+malformed.  The payload is short by one byte (i.e. does not contain a
+completion code).
 
 Appendix
 --------

@@ -14,6 +14,8 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -33,9 +35,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+sbin_PROGRAMS = ipmi-sensors$(EXEEXT)
 subdir = ipmi-sensors
-DIST_COMMON = $(dist_man_MANS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/ipmi-sensors.8.pre.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
@@ -55,17 +57,31 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config/config.h
-CONFIG_CLEAN_FILES = ipmi-sensors.8.pre
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-SOURCES =
-DIST_SOURCES =
-RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
-	html-recursive info-recursive install-data-recursive \
-	install-dvi-recursive install-exec-recursive \
-	install-html-recursive install-info-recursive \
-	install-pdf-recursive install-ps-recursive install-recursive \
-	installcheck-recursive installdirs-recursive pdf-recursive \
-	ps-recursive uninstall-recursive
+am__installdirs = "$(DESTDIR)$(sbindir)" "$(DESTDIR)$(sbindir)"
+PROGRAMS = $(sbin_PROGRAMS)
+am_ipmi_sensors_OBJECTS = ipmi_sensors-ipmi-sensors.$(OBJEXT) \
+	ipmi_sensors-ipmi-sensors-argp.$(OBJEXT) \
+	ipmi_sensors-ipmi-sensors-detailed-output.$(OBJEXT) \
+	ipmi_sensors-ipmi-sensors-oem-intel.$(OBJEXT) \
+	ipmi_sensors-ipmi-sensors-oem-intel-node-manager.$(OBJEXT) \
+	ipmi_sensors-ipmi-sensors-oem-inventec.$(OBJEXT) \
+	ipmi_sensors-ipmi-sensors-oem-quanta.$(OBJEXT) \
+	ipmi_sensors-ipmi-sensors-output-common.$(OBJEXT) \
+	ipmi_sensors-ipmi-sensors-simple-output.$(OBJEXT)
+ipmi_sensors_OBJECTS = $(am_ipmi_sensors_OBJECTS)
+ipmi_sensors_DEPENDENCIES =  \
+	$(top_builddir)/common/toolcommon/libtoolcommon.la \
+	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
+	$(top_builddir)/common/tooloem/libtooloem.la \
+	$(top_builddir)/common/toolsdr/libtoolsdr.la \
+	$(top_builddir)/common/toolsensor/libtoolsensor.la \
+	$(top_builddir)/common/miscutil/libmiscutil.la \
+	$(top_builddir)/common/parsecommon/libparsecommon.la \
+	$(top_builddir)/common/portability/libportability.la \
+	$(top_builddir)/libipmidetect/libipmidetect.la \
+	$(top_builddir)/libfreeipmi/libfreeipmi.la
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -87,44 +103,25 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-man8dir = $(mandir)/man8
-am__installdirs = "$(DESTDIR)$(man8dir)"
-NROFF = nroff
-MANS = $(dist_man_MANS)
-RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
-  distclean-recursive maintainer-clean-recursive
-AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
-	$(RECURSIVE_CLEAN_TARGETS:-recursive=) tags TAGS ctags CTAGS \
-	distdir
+SCRIPTS = $(sbin_SCRIPTS)
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/config
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+am__depfiles_maybe = depfiles
+am__mv = mv -f
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+SOURCES = $(ipmi_sensors_SOURCES)
+DIST_SOURCES = $(ipmi_sensors_SOURCES)
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-am__relativize = \
-  dir0=`pwd`; \
-  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
-  sed_rest='s,^[^/]*/*,,'; \
-  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
-  sed_butlast='s,/*[^/]*$$,,'; \
-  while test -n "$$dir1"; do \
-    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
-    if test "$$first" != "."; then \
-      if test "$$first" = ".."; then \
-        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
-        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
-      else \
-        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
-        if test "$$first2" = "$$first"; then \
-          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
-        else \
-          dir2="../$$dir2"; \
-        fi; \
-        dir0="$$dir0"/"$$first"; \
-      fi; \
-    fi; \
-    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
-  done; \
-  reldir="$$dir2"
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
@@ -279,15 +276,58 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = src
-MANS_CPP = ipmi-sensors.8
-dist_man_MANS = $(MANS_CPP) ipmimonitoring.8
-CLEANFILES = $(MANS_CPP) *~
-DISTCLEANFILES = $(MANS_CPP) $(MANS_CPP:%=%.pre) .deps/*.P
-EXTRA_DIST = ipmimonitoring.8
-all: all-recursive
+sbin_SCRIPTS = ipmimonitoring
+ipmi_sensors_CPPFLAGS = \
+	-I$(top_srcdir)/common/toolcommon \
+	-I$(top_srcdir)/common/toolhostrange \
+	-I$(top_srcdir)/common/tooloem \
+	-I$(top_srcdir)/common/toolsdr \
+	-I$(top_srcdir)/common/toolsensor \
+	-I$(top_srcdir)/common/miscutil \
+	-I$(top_srcdir)/common/parsecommon \
+	-I$(top_srcdir)/common/portability \
+	-I$(top_srcdir)/libfreeipmi/include \
+	-D_GNU_SOURCE \
+	-D_REENTRANT
+
+ipmi_sensors_LDADD = \
+	$(top_builddir)/common/toolcommon/libtoolcommon.la \
+	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
+	$(top_builddir)/common/tooloem/libtooloem.la \
+	$(top_builddir)/common/toolsdr/libtoolsdr.la \
+	$(top_builddir)/common/toolsensor/libtoolsensor.la \
+	$(top_builddir)/common/miscutil/libmiscutil.la \
+	$(top_builddir)/common/parsecommon/libparsecommon.la \
+	$(top_builddir)/common/portability/libportability.la \
+	$(top_builddir)/libipmidetect/libipmidetect.la \
+	$(top_builddir)/libfreeipmi/libfreeipmi.la
+
+ipmi_sensors_SOURCES = \
+	ipmi-sensors.c \
+	ipmi-sensors.h \
+	ipmi-sensors-argp.c \
+	ipmi-sensors-argp.h \
+	ipmi-sensors-detailed-output.c \
+	ipmi-sensors-detailed-output.h \
+	ipmi-sensors-oem-intel.c \
+	ipmi-sensors-oem-intel.h \
+	ipmi-sensors-oem-intel-node-manager.c \
+	ipmi-sensors-oem-intel-node-manager.h \
+	ipmi-sensors-oem-inventec.c \
+	ipmi-sensors-oem-inventec.h \
+	ipmi-sensors-oem-quanta.c \
+	ipmi-sensors-oem-quanta.h \
+	ipmi-sensors-output-common.c \
+	ipmi-sensors-output-common.h \
+	ipmi-sensors-simple-output.c \
+	ipmi-sensors-simple-output.h
+
+CLEANFILES = ipmimonitoring
+EXTRA_DIST = ipmimonitoring.in
+all: all-am
 
 .SUFFIXES:
+.SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -318,122 +358,258 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-ipmi-sensors.8.pre: $(top_builddir)/config.status $(srcdir)/ipmi-sensors.8.pre.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+install-sbinPROGRAMS: $(sbin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	test -z "$(sbindir)" || $(MKDIR_P) "$(DESTDIR)$(sbindir)"
+	@list='$(sbin_PROGRAMS)'; test -n "$(sbindir)" || list=; \
+	for p in $$list; do echo "$$p $$p"; done | \
+	sed 's/$(EXEEXT)$$//' | \
+	while read p p1; do if test -f $$p || test -f $$p1; \
+	  then echo "$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n;h' -e 's|.*|.|' \
+	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
+	sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
+	    else { print "f", $$3 "/" $$4, $$1; } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	    test -z "$$files" || { \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(sbindir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(sbindir)$$dir" || exit $$?; \
+	    } \
+	; done
+
+uninstall-sbinPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(sbin_PROGRAMS)'; test -n "$(sbindir)" || list=; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
+	      -e 's/$$/$(EXEEXT)/' `; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(sbindir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(sbindir)" && rm -f $$files
+
+clean-sbinPROGRAMS:
+	@list='$(sbin_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+ipmi-sensors$(EXEEXT): $(ipmi_sensors_OBJECTS) $(ipmi_sensors_DEPENDENCIES) 
+	@rm -f ipmi-sensors$(EXEEXT)
+	$(LINK) $(ipmi_sensors_OBJECTS) $(ipmi_sensors_LDADD) $(LIBS)
+install-sbinSCRIPTS: $(sbin_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	test -z "$(sbindir)" || $(MKDIR_P) "$(DESTDIR)$(sbindir)"
+	@list='$(sbin_SCRIPTS)'; test -n "$(sbindir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n' \
+	    -e 'h;s|.*|.|' \
+	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
+	      if (++n[d] == $(am__install_max)) { \
+		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
+	    else { print "f", d "/" $$4, $$1 } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	     test -z "$$files" || { \
+	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(sbindir)$$dir'"; \
+	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(sbindir)$$dir" || exit $$?; \
+	     } \
+	; done
+
+uninstall-sbinSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(sbin_SCRIPTS)'; test -n "$(sbindir)" || exit 0; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	       sed -e 's,.*/,,;$(transform)'`; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(sbindir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(sbindir)" && rm -f $$files
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT)
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-argp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-detailed-output.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel-node-manager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-inventec.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-quanta.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-output-common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-simple-output.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c -o $@ $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+ipmi_sensors-ipmi-sensors.o: ipmi-sensors.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors.o -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors.Tpo -c -o ipmi_sensors-ipmi-sensors.o `test -f 'ipmi-sensors.c' || echo '$(srcdir)/'`ipmi-sensors.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors.c' object='ipmi_sensors-ipmi-sensors.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors.o `test -f 'ipmi-sensors.c' || echo '$(srcdir)/'`ipmi-sensors.c
+
+ipmi_sensors-ipmi-sensors.obj: ipmi-sensors.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors.obj -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors.Tpo -c -o ipmi_sensors-ipmi-sensors.obj `if test -f 'ipmi-sensors.c'; then $(CYGPATH_W) 'ipmi-sensors.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors.c' object='ipmi_sensors-ipmi-sensors.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors.obj `if test -f 'ipmi-sensors.c'; then $(CYGPATH_W) 'ipmi-sensors.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors.c'; fi`
+
+ipmi_sensors-ipmi-sensors-argp.o: ipmi-sensors-argp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-argp.o -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-argp.Tpo -c -o ipmi_sensors-ipmi-sensors-argp.o `test -f 'ipmi-sensors-argp.c' || echo '$(srcdir)/'`ipmi-sensors-argp.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-argp.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-argp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-argp.c' object='ipmi_sensors-ipmi-sensors-argp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-argp.o `test -f 'ipmi-sensors-argp.c' || echo '$(srcdir)/'`ipmi-sensors-argp.c
+
+ipmi_sensors-ipmi-sensors-argp.obj: ipmi-sensors-argp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-argp.obj -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-argp.Tpo -c -o ipmi_sensors-ipmi-sensors-argp.obj `if test -f 'ipmi-sensors-argp.c'; then $(CYGPATH_W) 'ipmi-sensors-argp.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-argp.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-argp.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-argp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-argp.c' object='ipmi_sensors-ipmi-sensors-argp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-argp.obj `if test -f 'ipmi-sensors-argp.c'; then $(CYGPATH_W) 'ipmi-sensors-argp.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-argp.c'; fi`
+
+ipmi_sensors-ipmi-sensors-detailed-output.o: ipmi-sensors-detailed-output.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-detailed-output.o -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-detailed-output.Tpo -c -o ipmi_sensors-ipmi-sensors-detailed-output.o `test -f 'ipmi-sensors-detailed-output.c' || echo '$(srcdir)/'`ipmi-sensors-detailed-output.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-detailed-output.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-detailed-output.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-detailed-output.c' object='ipmi_sensors-ipmi-sensors-detailed-output.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-detailed-output.o `test -f 'ipmi-sensors-detailed-output.c' || echo '$(srcdir)/'`ipmi-sensors-detailed-output.c
+
+ipmi_sensors-ipmi-sensors-detailed-output.obj: ipmi-sensors-detailed-output.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-detailed-output.obj -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-detailed-output.Tpo -c -o ipmi_sensors-ipmi-sensors-detailed-output.obj `if test -f 'ipmi-sensors-detailed-output.c'; then $(CYGPATH_W) 'ipmi-sensors-detailed-output.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-detailed-output.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-detailed-output.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-detailed-output.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-detailed-output.c' object='ipmi_sensors-ipmi-sensors-detailed-output.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-detailed-output.obj `if test -f 'ipmi-sensors-detailed-output.c'; then $(CYGPATH_W) 'ipmi-sensors-detailed-output.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-detailed-output.c'; fi`
+
+ipmi_sensors-ipmi-sensors-oem-intel.o: ipmi-sensors-oem-intel.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-oem-intel.o -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel.Tpo -c -o ipmi_sensors-ipmi-sensors-oem-intel.o `test -f 'ipmi-sensors-oem-intel.c' || echo '$(srcdir)/'`ipmi-sensors-oem-intel.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-oem-intel.c' object='ipmi_sensors-ipmi-sensors-oem-intel.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-oem-intel.o `test -f 'ipmi-sensors-oem-intel.c' || echo '$(srcdir)/'`ipmi-sensors-oem-intel.c
+
+ipmi_sensors-ipmi-sensors-oem-intel.obj: ipmi-sensors-oem-intel.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-oem-intel.obj -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel.Tpo -c -o ipmi_sensors-ipmi-sensors-oem-intel.obj `if test -f 'ipmi-sensors-oem-intel.c'; then $(CYGPATH_W) 'ipmi-sensors-oem-intel.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-oem-intel.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-oem-intel.c' object='ipmi_sensors-ipmi-sensors-oem-intel.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-oem-intel.obj `if test -f 'ipmi-sensors-oem-intel.c'; then $(CYGPATH_W) 'ipmi-sensors-oem-intel.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-oem-intel.c'; fi`
+
+ipmi_sensors-ipmi-sensors-oem-intel-node-manager.o: ipmi-sensors-oem-intel-node-manager.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-oem-intel-node-manager.o -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel-node-manager.Tpo -c -o ipmi_sensors-ipmi-sensors-oem-intel-node-manager.o `test -f 'ipmi-sensors-oem-intel-node-manager.c' || echo '$(srcdir)/'`ipmi-sensors-oem-intel-node-manager.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel-node-manager.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel-node-manager.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-oem-intel-node-manager.c' object='ipmi_sensors-ipmi-sensors-oem-intel-node-manager.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-oem-intel-node-manager.o `test -f 'ipmi-sensors-oem-intel-node-manager.c' || echo '$(srcdir)/'`ipmi-sensors-oem-intel-node-manager.c
+
+ipmi_sensors-ipmi-sensors-oem-intel-node-manager.obj: ipmi-sensors-oem-intel-node-manager.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-oem-intel-node-manager.obj -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel-node-manager.Tpo -c -o ipmi_sensors-ipmi-sensors-oem-intel-node-manager.obj `if test -f 'ipmi-sensors-oem-intel-node-manager.c'; then $(CYGPATH_W) 'ipmi-sensors-oem-intel-node-manager.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-oem-intel-node-manager.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel-node-manager.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel-node-manager.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-oem-intel-node-manager.c' object='ipmi_sensors-ipmi-sensors-oem-intel-node-manager.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-oem-intel-node-manager.obj `if test -f 'ipmi-sensors-oem-intel-node-manager.c'; then $(CYGPATH_W) 'ipmi-sensors-oem-intel-node-manager.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-oem-intel-node-manager.c'; fi`
+
+ipmi_sensors-ipmi-sensors-oem-inventec.o: ipmi-sensors-oem-inventec.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-oem-inventec.o -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-inventec.Tpo -c -o ipmi_sensors-ipmi-sensors-oem-inventec.o `test -f 'ipmi-sensors-oem-inventec.c' || echo '$(srcdir)/'`ipmi-sensors-oem-inventec.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-inventec.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-inventec.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-oem-inventec.c' object='ipmi_sensors-ipmi-sensors-oem-inventec.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-oem-inventec.o `test -f 'ipmi-sensors-oem-inventec.c' || echo '$(srcdir)/'`ipmi-sensors-oem-inventec.c
+
+ipmi_sensors-ipmi-sensors-oem-inventec.obj: ipmi-sensors-oem-inventec.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-oem-inventec.obj -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-inventec.Tpo -c -o ipmi_sensors-ipmi-sensors-oem-inventec.obj `if test -f 'ipmi-sensors-oem-inventec.c'; then $(CYGPATH_W) 'ipmi-sensors-oem-inventec.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-oem-inventec.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-inventec.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-inventec.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-oem-inventec.c' object='ipmi_sensors-ipmi-sensors-oem-inventec.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-oem-inventec.obj `if test -f 'ipmi-sensors-oem-inventec.c'; then $(CYGPATH_W) 'ipmi-sensors-oem-inventec.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-oem-inventec.c'; fi`
+
+ipmi_sensors-ipmi-sensors-oem-quanta.o: ipmi-sensors-oem-quanta.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-oem-quanta.o -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-quanta.Tpo -c -o ipmi_sensors-ipmi-sensors-oem-quanta.o `test -f 'ipmi-sensors-oem-quanta.c' || echo '$(srcdir)/'`ipmi-sensors-oem-quanta.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-quanta.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-quanta.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-oem-quanta.c' object='ipmi_sensors-ipmi-sensors-oem-quanta.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-oem-quanta.o `test -f 'ipmi-sensors-oem-quanta.c' || echo '$(srcdir)/'`ipmi-sensors-oem-quanta.c
+
+ipmi_sensors-ipmi-sensors-oem-quanta.obj: ipmi-sensors-oem-quanta.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-oem-quanta.obj -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-quanta.Tpo -c -o ipmi_sensors-ipmi-sensors-oem-quanta.obj `if test -f 'ipmi-sensors-oem-quanta.c'; then $(CYGPATH_W) 'ipmi-sensors-oem-quanta.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-oem-quanta.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-quanta.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-quanta.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-oem-quanta.c' object='ipmi_sensors-ipmi-sensors-oem-quanta.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-oem-quanta.obj `if test -f 'ipmi-sensors-oem-quanta.c'; then $(CYGPATH_W) 'ipmi-sensors-oem-quanta.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-oem-quanta.c'; fi`
+
+ipmi_sensors-ipmi-sensors-output-common.o: ipmi-sensors-output-common.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-output-common.o -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-output-common.Tpo -c -o ipmi_sensors-ipmi-sensors-output-common.o `test -f 'ipmi-sensors-output-common.c' || echo '$(srcdir)/'`ipmi-sensors-output-common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-output-common.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-output-common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-output-common.c' object='ipmi_sensors-ipmi-sensors-output-common.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-output-common.o `test -f 'ipmi-sensors-output-common.c' || echo '$(srcdir)/'`ipmi-sensors-output-common.c
+
+ipmi_sensors-ipmi-sensors-output-common.obj: ipmi-sensors-output-common.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-output-common.obj -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-output-common.Tpo -c -o ipmi_sensors-ipmi-sensors-output-common.obj `if test -f 'ipmi-sensors-output-common.c'; then $(CYGPATH_W) 'ipmi-sensors-output-common.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-output-common.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-output-common.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-output-common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-output-common.c' object='ipmi_sensors-ipmi-sensors-output-common.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-output-common.obj `if test -f 'ipmi-sensors-output-common.c'; then $(CYGPATH_W) 'ipmi-sensors-output-common.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-output-common.c'; fi`
+
+ipmi_sensors-ipmi-sensors-simple-output.o: ipmi-sensors-simple-output.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-simple-output.o -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-simple-output.Tpo -c -o ipmi_sensors-ipmi-sensors-simple-output.o `test -f 'ipmi-sensors-simple-output.c' || echo '$(srcdir)/'`ipmi-sensors-simple-output.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-simple-output.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-simple-output.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-simple-output.c' object='ipmi_sensors-ipmi-sensors-simple-output.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-simple-output.o `test -f 'ipmi-sensors-simple-output.c' || echo '$(srcdir)/'`ipmi-sensors-simple-output.c
+
+ipmi_sensors-ipmi-sensors-simple-output.obj: ipmi-sensors-simple-output.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-simple-output.obj -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-simple-output.Tpo -c -o ipmi_sensors-ipmi-sensors-simple-output.obj `if test -f 'ipmi-sensors-simple-output.c'; then $(CYGPATH_W) 'ipmi-sensors-simple-output.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-simple-output.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-simple-output.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-simple-output.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-simple-output.c' object='ipmi_sensors-ipmi-sensors-simple-output.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-simple-output.obj `if test -f 'ipmi-sensors-simple-output.c'; then $(CYGPATH_W) 'ipmi-sensors-simple-output.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-simple-output.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-man8: $(dist_man_MANS)
-	@$(NORMAL_INSTALL)
-	test -z "$(man8dir)" || $(MKDIR_P) "$(DESTDIR)$(man8dir)"
-	@list=''; test -n "$(man8dir)" || exit 0; \
-	{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.8[a-z]*$$/p'; \
-	} | while read p; do \
-	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; echo "$$p"; \
-	done | \
-	sed -e 'n;s,.*/,,;p;h;s,.*\.,,;s,^[^8][0-9a-z]*$$,8,;x' \
-	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,' | \
-	sed 'N;N;s,\n, ,g' | { \
-	list=; while read file base inst; do \
-	  if test "$$base" = "$$inst"; then list="$$list $$file"; else \
-	    echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man8dir)/$$inst'"; \
-	    $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man8dir)/$$inst" || exit $$?; \
-	  fi; \
-	done; \
-	for i in $$list; do echo "$$i"; done | $(am__base_list) | \
-	while read files; do \
-	  test -z "$$files" || { \
-	    echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(man8dir)'"; \
-	    $(INSTALL_DATA) $$files "$(DESTDIR)$(man8dir)" || exit $$?; }; \
-	done; }
-
-uninstall-man8:
-	@$(NORMAL_UNINSTALL)
-	@list=''; test -n "$(man8dir)" || exit 0; \
-	files=`{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.8[a-z]*$$/p'; \
-	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^8][0-9a-z]*$$,8,;x' \
-	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
-	test -z "$$files" || { \
-	  echo " ( cd '$(DESTDIR)$(man8dir)' && rm -f" $$files ")"; \
-	  cd "$(DESTDIR)$(man8dir)" && rm -f $$files; }
-
-# This directory's subdirectories are mostly independent; you can cd
-# into them and run `make' without going through this Makefile.
-# To change the values of `make' variables: instead of editing Makefiles,
-# (1) if the variable is set in `config.status', edit `config.status'
-#     (which will cause the Makefiles to be regenerated when you run `make');
-# (2) otherwise, pass the desired values on the `make' command line.
-$(RECURSIVE_TARGETS):
-	@fail= failcom='exit 1'; \
-	for f in x $$MAKEFLAGS; do \
-	  case $$f in \
-	    *=* | --[!k]*);; \
-	    *k*) failcom='fail=yes';; \
-	  esac; \
-	done; \
-	dot_seen=no; \
-	target=`echo $@ | sed s/-recursive//`; \
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  echo "Making $$target in $$subdir"; \
-	  if test "$$subdir" = "."; then \
-	    dot_seen=yes; \
-	    local_target="$$target-am"; \
-	  else \
-	    local_target="$$target"; \
-	  fi; \
-	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
-	  || eval $$failcom; \
-	done; \
-	if test "$$dot_seen" = "no"; then \
-	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
-	fi; test -z "$$fail"
-
-$(RECURSIVE_CLEAN_TARGETS):
-	@fail= failcom='exit 1'; \
-	for f in x $$MAKEFLAGS; do \
-	  case $$f in \
-	    *=* | --[!k]*);; \
-	    *k*) failcom='fail=yes';; \
-	  esac; \
-	done; \
-	dot_seen=no; \
-	case "$@" in \
-	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
-	  *) list='$(SUBDIRS)' ;; \
-	esac; \
-	rev=''; for subdir in $$list; do \
-	  if test "$$subdir" = "."; then :; else \
-	    rev="$$subdir $$rev"; \
-	  fi; \
-	done; \
-	rev="$$rev ."; \
-	target=`echo $@ | sed s/-recursive//`; \
-	for subdir in $$rev; do \
-	  echo "Making $$target in $$subdir"; \
-	  if test "$$subdir" = "."; then \
-	    local_target="$$target-am"; \
-	  else \
-	    local_target="$$target"; \
-	  fi; \
-	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
-	  || eval $$failcom; \
-	done && test -z "$$fail"
-tags-recursive:
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
-	done
-ctags-recursive:
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  test "$$subdir" = . || ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) ctags); \
-	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -445,23 +621,10 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	mkid -fID $$unique
 tags: TAGS
 
-TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	set x; \
 	here=`pwd`; \
-	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
-	  include_option=--etags-include; \
-	  empty_fix=.; \
-	else \
-	  include_option=--include; \
-	  empty_fix=; \
-	fi; \
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    test ! -f $$subdir/TAGS || \
-	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
-	  fi; \
-	done; \
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
@@ -480,7 +643,7 @@ TAGS: tags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 	  fi; \
 	fi
 ctags: CTAGS
-CTAGS: ctags-recursive $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
@@ -501,19 +664,6 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	@list='$(MANS)'; if test -n "$$list"; then \
-	  list=`for p in $$list; do \
-	    if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
-	    if test -f "$$d$$p"; then echo "$$d$$p"; else :; fi; done`; \
-	  if test -n "$$list" && \
-	    grep 'ab help2man is required to generate this page' $$list >/dev/null; then \
-	    echo "error: found man pages containing the \`missing help2man' replacement text:" >&2; \
-	    grep -l 'ab help2man is required to generate this page' $$list | sed 's/^/         /' >&2; \
-	    echo "       to fix them, install help2man, remove and regenerate the man pages;" >&2; \
-	    echo "       typically \`make maintainer-clean' will remove them" >&2; \
-	    exit 1; \
-	  else :; fi; \
-	else :; fi
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	list='$(DISTFILES)'; \
@@ -543,51 +693,22 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    test -d "$(distdir)/$$subdir" \
-	    || $(MKDIR_P) "$(distdir)/$$subdir" \
-	    || exit 1; \
-	  fi; \
-	done
-	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
-	    $(am__relativize); \
-	    new_distdir=$$reldir; \
-	    dir1=$$subdir; dir2="$(top_distdir)"; \
-	    $(am__relativize); \
-	    new_top_distdir=$$reldir; \
-	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
-	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
-	    ($(am__cd) $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$new_top_distdir" \
-	        distdir="$$new_distdir" \
-		am__remove_distdir=: \
-		am__skip_length_check=: \
-		am__skip_mode_fix=: \
-	        distdir) \
-	      || exit 1; \
-	  fi; \
-	done
 check-am: all-am
-check: check-recursive
-all-am: Makefile $(MANS)
-installdirs: installdirs-recursive
-installdirs-am:
-	for dir in "$(DESTDIR)$(man8dir)"; do \
+check: check-am
+all-am: Makefile $(PROGRAMS) $(SCRIPTS)
+installdirs:
+	for dir in "$(DESTDIR)$(sbindir)" "$(DESTDIR)$(sbindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-recursive
-install-exec: install-exec-recursive
-install-data: install-data-recursive
-uninstall: uninstall-recursive
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-recursive
+installcheck: installcheck-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
 	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
@@ -601,100 +722,134 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-recursive
+clean: clean-am
 
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libtool clean-sbinPROGRAMS \
+	mostlyclean-am
 
-distclean: distclean-recursive
+distclean: distclean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
-distclean-am: clean-am distclean-generic distclean-tags
+distclean-am: clean-am distclean-compile distclean-generic \
+	distclean-tags
 
-dvi: dvi-recursive
+dvi: dvi-am
 
 dvi-am:
 
-html: html-recursive
+html: html-am
 
 html-am:
 
-info: info-recursive
+info: info-am
 
 info-am:
 
-install-data-am: install-man
+install-data-am:
 
-install-dvi: install-dvi-recursive
+install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
+install-exec-am: install-sbinPROGRAMS install-sbinSCRIPTS
 
-install-html: install-html-recursive
+install-html: install-html-am
 
 install-html-am:
 
-install-info: install-info-recursive
+install-info: install-info-am
 
 install-info-am:
 
-install-man: install-man8
+install-man:
 
-install-pdf: install-pdf-recursive
+install-pdf: install-pdf-am
 
 install-pdf-am:
 
-install-ps: install-ps-recursive
+install-ps: install-ps-am
 
 install-ps-am:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-recursive
+maintainer-clean: maintainer-clean-am
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-recursive
+mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-generic mostlyclean-libtool
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
-pdf: pdf-recursive
+pdf: pdf-am
 
 pdf-am:
 
-ps: ps-recursive
+ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-man
+uninstall-am: uninstall-sbinPROGRAMS uninstall-sbinSCRIPTS
 
-uninstall-man: uninstall-man8
+.MAKE: install-am install-strip
 
-.MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) ctags-recursive \
-	install-am install-strip tags-recursive
-
-.PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
-	all all-am check check-am clean clean-generic clean-libtool \
-	ctags ctags-recursive distclean distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-man8 install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic mostlyclean \
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+	clean-libtool clean-sbinPROGRAMS ctags distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-sbinPROGRAMS install-sbinSCRIPTS install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-recursive uninstall uninstall-am uninstall-man \
-	uninstall-man8
+	tags uninstall uninstall-am uninstall-sbinPROGRAMS \
+	uninstall-sbinSCRIPTS
 
 
-$(MANS_CPP): $(MANS_CPP:%=%.pre)
-	$(CPP) -C -P -I. $@.pre  $@
+ipmimonitoring: ipmimonitoring.in
+	sed -e 's:@IPMIMONITORINGSBINDIR@:$(sbindir):' $< > $@
+	chmod +x ipmimonitoring
+
+$(top_builddir)/common/toolcommon/libtoolcommon.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/toolhostrange/libtoolhostrange.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/tooloem/libtooloem.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/toolsdr/libtoolsdr.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/toolsensor/libtoolsensor.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/miscutil/libmiscutil.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/parsecommon/libparsecommon.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/common/portability/libportability.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/libipmidetect/libipmidetect.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+$(top_builddir)/libfreeipmi/libfreeipmi.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
+
+force-dependency-check:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

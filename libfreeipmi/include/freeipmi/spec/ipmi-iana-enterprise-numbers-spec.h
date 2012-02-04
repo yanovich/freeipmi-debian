@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,11 @@ extern "C" {
 /* To avoid gcc warnings, add +1 in comparison */
 #define IPMI_IANA_ENTERPRISE_ID_VALID(__iana_enterprise_id) \
   (((__iana_enterprise_id + 1) >= (0 + 1)                   \
-    && (__iana_enterprise_id) <= 34214) ? 1 : 0)
+    && (__iana_enterprise_id) <= 38967) ? 1 : 0)
+
+#define IPMI_IANA_ENTERPRISE_ID_RECOGNIZED(__iana_enterprise_id) \
+  (IPMI_IANA_ENTERPRISE_ID_VALID((__iana_enterprise_id)) \
+   || (__iana_enterprise_id) == IPMI_IANA_ENTERPRISE_ID_SUPERMICRO_WORKAROUND)
 
 /* Some fields can be NULL if they were not assigned/removed by IANA */
 /* consider using ipmi_iana_enerprise_numbers_string() function to

@@ -1,11 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([freeipmi],[1.0.8],[freeipmi-devel@gnu.org])
+AC_INIT([freeipmi],[1.1.1],[freeipmi-devel@gnu.org])
 AC_REVISION([$Id: configure.ac,v 1.208 2010-08-06 21:02:29 chu11 Exp $])
 AC_CONFIG_MACRO_DIR([config])
 
 FREEIPMI_PACKAGE_VERSION_MAJOR=1
-FREEIPMI_PACKAGE_VERSION_MINOR=0
-FREEIPMI_PACKAGE_VERSION_PATCH=8
+FREEIPMI_PACKAGE_VERSION_MINOR=1
+FREEIPMI_PACKAGE_VERSION_PATCH=1
 
 AC_SUBST(FREEIPMI_PACKAGE_VERSION_MAJOR)
 AC_SUBST(FREEIPMI_PACKAGE_VERSION_MINOR)
@@ -19,171 +19,122 @@ AC_CONFIG_AUX_DIR([config])
 dnl Locate the sources.
 AC_CONFIG_SRCDIR([ChangeLog.0])
 
-AM_INIT_AUTOMAKE([tar-ustar 1.9])
+AM_INIT_AUTOMAKE([tar-ustar subdir-objects 1.9])
 
 dnl create a config.h file
 AM_CONFIG_HEADER([config/config.h])
 
 dnl define output files
 AC_CONFIG_FILES([
+	freeipmi.spec
         Makefile 
+        bmc-config/Makefile
+        bmc-device/Makefile
+        bmc-info/Makefile
+        bmc-watchdog/Makefile 
+        common/Makefile 
+        common/configtool/Makefile
+        common/debugutil/Makefile
+        common/miscutil/Makefile
+        common/parsecommon/Makefile
+        common/pingtool/Makefile
+        common/portability/Makefile
+        common/toolcommon/Makefile
+        common/toolevent/Makefile
+        common/toolhostrange/Makefile
+        common/tooloem/Makefile
+        common/toolsdr/Makefile
+        common/toolsensor/Makefile
+        contrib/Makefile
         doc/Makefile 
         etc/Makefile
-        man/Makefile
-        man/freeipmi.conf.5.pre
-        man/freeipmi.7.pre
-        common/Makefile 
-        common/man/Makefile 
-        common/src/Makefile
-        common/src/configtool/Makefile
-        common/src/debugutil/Makefile
-        common/src/miscutil/Makefile
-        common/src/parsecommon/Makefile
-        common/src/pingtool/Makefile
-        common/src/portability/Makefile
-        common/src/toolcommon/Makefile
-        common/src/toolhostrange/Makefile
-        common/src/tooloem/Makefile
-        common/src/toolsdr/Makefile
-        common/src/toolsensor/Makefile
-        contrib/Makefile
-        contrib/ganglia/Makefile
-        contrib/nagios/Makefile
-        examples/Makefile
+        ipmi-chassis/Makefile
+        ipmi-chassis-config/Makefile 
+        ipmi-dcmi/Makefile
+        ipmi-fru/Makefile
+        ipmi-locate/Makefile
+        ipmi-oem/Makefile
+        ipmi-pef-config/Makefile
+        ipmi-pet/Makefile
+        ipmi-raw/Makefile
+        ipmi-sel/Makefile
+        ipmi-sensors/Makefile
+        ipmi-sensors-config/Makefile
+        ipmiconsole/Makefile
+        ipmidetect/Makefile
+        ipmidetectd/Makefile
+        ipmiping/Makefile
+        ipmipower/Makefile 
         libfreeipmi/Makefile 
-        libfreeipmi/libfreeipmi.3.pre
-        libfreeipmi/freeipmi_interpret_sensor.conf.5.pre
-        libfreeipmi/freeipmi_interpret_sel.conf.5.pre
         libfreeipmi/libfreeipmi.pc
         libfreeipmi/include/Makefile 
         libfreeipmi/include/freeipmi/freeipmi.h
-        libfreeipmi/src/Makefile 
-        libfreeipmi/src/api/Makefile
-        libfreeipmi/src/cmds/Makefile
-        libfreeipmi/src/debug/Makefile
-        libfreeipmi/src/driver/Makefile
-        libfreeipmi/src/fiid/Makefile
-        libfreeipmi/src/fru-parse/Makefile
-        libfreeipmi/src/interface/Makefile
-        libfreeipmi/src/interpret/Makefile
-        libfreeipmi/src/libcommon/Makefile
-        libfreeipmi/src/locate/Makefile
-        libfreeipmi/src/payload/Makefile
-        libfreeipmi/src/record-format/Makefile
-        libfreeipmi/src/sdr-cache/Makefile
-        libfreeipmi/src/sdr-parse/Makefile
-        libfreeipmi/src/sel-parse/Makefile
-        libfreeipmi/src/sensor-read/Makefile
-        libfreeipmi/src/spec/Makefile
-        libfreeipmi/src/util/Makefile
         libipmiconsole/Makefile
-        libipmiconsole/libipmiconsole.3.pre
-        libipmiconsole/libipmiconsole.conf.5.pre
+        libipmiconsole/ipmiconsole.h
         libipmiconsole/libipmiconsole.pc
-        libipmiconsole/src/Makefile
-        libipmiconsole/src/ipmiconsole.h
-        libipmimonitoring/Makefile
-        libipmimonitoring/src/Makefile
-        libipmimonitoring/src/ipmi_monitoring.h
-        libipmimonitoring/ipmi_monitoring_sensors.conf.5.pre
-        libipmimonitoring/ipmimonitoring_sensors.conf.5.pre
-        libipmimonitoring/ipmimonitoring.conf.5.pre
-        libipmimonitoring/libipmimonitoring.conf.5.pre
-        libipmimonitoring/libipmimonitoring.3.pre
-        libipmimonitoring/libipmimonitoring.pc
         libipmidetect/Makefile
-        libipmidetect/libipmidetect.3.pre
+        libipmidetect/ipmidetect.h
         libipmidetect/libipmidetect.pc
-        libipmidetect/src/Makefile
-        libipmidetect/src/ipmidetect.h
-        bmc-config/Makefile
-        bmc-config/bmc-config.8.pre
-        bmc-config/bmc-config.conf.5.pre
-        bmc-config/src/Makefile
-        bmc-device/Makefile
-        bmc-device/bmc-device.8.pre
-        bmc-device/src/Makefile
-        bmc-info/Makefile
-        bmc-info/bmc-info.8.pre
-        bmc-info/src/Makefile
-        bmc-watchdog/Makefile 
-        bmc-watchdog/bmc-watchdog.8.pre
-        bmc-watchdog/src/Makefile
-        ipmi-chassis/Makefile
-        ipmi-chassis/ipmi-chassis.8.pre
-        ipmi-chassis/src/Makefile
-        ipmi-chassis-config/Makefile 
-        ipmi-chassis-config/ipmi-chassis-config.8.pre
-        ipmi-chassis-config/src/Makefile
-        ipmi-dcmi/Makefile
-        ipmi-dcmi/ipmi-dcmi.8.pre
-        ipmi-dcmi/src/Makefile
-        ipmi-fru/Makefile
-        ipmi-fru/ipmi-fru.8.pre
-        ipmi-fru/src/Makefile
-        ipmi-locate/Makefile
-        ipmi-locate/ipmi-locate.8.pre
-        ipmi-locate/src/Makefile
-        ipmi-oem/Makefile
-        ipmi-oem/ipmi-oem.8.pre
-        ipmi-oem/src/Makefile
-        ipmi-pef-config/Makefile
-        ipmi-pef-config/ipmi-pef-config.8.pre
-        ipmi-pef-config/src/Makefile
-        ipmi-raw/Makefile
-        ipmi-raw/ipmi-raw.8.pre
-        ipmi-raw/src/Makefile
-        ipmi-sel/Makefile
-        ipmi-sel/ipmi-sel.8.pre
-        ipmi-sel/src/Makefile
-        ipmi-sensors/Makefile
-        ipmi-sensors/ipmi-sensors.8.pre
-        ipmi-sensors/src/Makefile
-        ipmi-sensors-config/Makefile
-        ipmi-sensors-config/ipmi-sensors-config.8.pre
-        ipmi-sensors-config/src/Makefile
-        ipmiconsole/Makefile
-        ipmiconsole/ipmiconsole.8.pre
-        ipmiconsole/ipmiconsole.conf.5.pre
-        ipmiconsole/src/Makefile
-        ipmidetect/Makefile
-        ipmidetect/ipmidetect.8.pre
-        ipmidetect/ipmidetect.conf.5.pre
-        ipmidetect/src/Makefile
-        ipmidetectd/Makefile
-        ipmidetectd/ipmidetectd.8.pre
-        ipmidetectd/ipmidetectd.conf.5.pre
-        ipmidetectd/src/Makefile
-        ipmiping/Makefile
-        ipmiping/ipmiping.8.pre
-        ipmiping/src/Makefile
-        ipmipower/Makefile 
-        ipmipower/ipmipower.8.pre
-        ipmipower/ipmipower.conf.5.pre
-        ipmipower/src/Makefile
-        rmcpping/Makefile
-        rmcpping/rmcpping.8.pre
-        rmcpping/src/Makefile
-        freeipmi.spec])
+        libipmimonitoring/Makefile
+        libipmimonitoring/ipmi_monitoring.h
+        libipmimonitoring/libipmimonitoring.pc
+        man/Makefile
+        man/bmc-config.8.pre
+        man/bmc-config.conf.5.pre
+        man/bmc-device.8.pre
+        man/bmc-info.8.pre
+        man/bmc-watchdog.8.pre
+        man/freeipmi.conf.5.pre
+        man/freeipmi.7.pre
+        man/ipmi-chassis.8.pre
+        man/ipmi-chassis-config.8.pre
+	man/ipmi-dcmi.8.pre
+	man/ipmi-fru.8.pre
+	man/ipmi-locate.8.pre
+	man/ipmi-oem.8.pre
+	man/ipmi-pef-config.8.pre
+	man/ipmi-pet.8.pre
+	man/ipmi-raw.8.pre
+	man/ipmi-sel.8.pre
+	man/ipmi-sensors.8.pre
+	man/ipmi-sensors-config.8.pre
+	man/ipmiconsole.8.pre
+	man/ipmidetect.8.pre
+	man/ipmidetect.conf.5.pre
+	man/ipmidetectd.8.pre
+	man/ipmidetectd.conf.5.pre
+	man/ipmiping.8.pre
+	man/ipmipower.8.pre
+        man/libfreeipmi.3.pre
+        man/freeipmi_interpret_sensor.conf.5.pre
+        man/freeipmi_interpret_sel.conf.5.pre
+        man/libipmiconsole.3.pre
+        man/libipmiconsole.conf.5.pre
+        man/libipmidetect.3.pre
+        man/libipmimonitoring.3.pre
+	man/rmcpping.8.pre
+        rmcpping/Makefile])
 
 ISODATE=`date +%Y-%m-%d`
 AC_SUBST([ISODATE])
 
 # libfreeipmi libtool versioning
 #
-# If library source code has changed at all increment rev
-# (current:rev:age) = (current:rev+1:age)
+# If the library source code has changed at all since the last update,
+# then increment c:r: c:r+1:).
 #
-# If any interfaces have been added,removed, or changed increment current
-#  and set rev = 0;
+# If any interfaces have been added, removed, or changed since the
+# last update, increment current, and set revision to 0.
 #
-# If any interfaces have been added increment age
+# If any interfaces have been added since the last public release,
+# then increment age.
 #
-# If any interfaces have been removed, set age = 0
+# If any interfaces have been removed or changed since the last public
+# release, then set age to 0.
 #
-LIBFREEIPMI_CURRENT=11
-LIBFREEIPMI_REVISION=5
-LIBFREEIPMI_AGE=1
+LIBFREEIPMI_CURRENT=12
+LIBFREEIPMI_REVISION=0
+LIBFREEIPMI_AGE=0
 
 LIBFREEIPMI_VERSION=$LIBFREEIPMI_CURRENT.$LIBFREEIPMI_REVISION.$LIBFREEIPMI_AGE
 AC_SUBST([LIBFREEIPMI_VERSION])
@@ -202,9 +153,9 @@ AC_SUBST([LIBFREEIPMI_VERSION_INFO])
 #         incremented due to bug fixes or minor features.  Interfaces are
 #         forward and backward compatible to other PATCH versions.
 
-LIBFREEIPMI_VERSION_MAJOR=1
+LIBFREEIPMI_VERSION_MAJOR=2
 LIBFREEIPMI_VERSION_MINOR=0
-LIBFREEIPMI_VERSION_PATCH=5
+LIBFREEIPMI_VERSION_PATCH=0
 
 AC_SUBST(LIBFREEIPMI_VERSION_MAJOR)
 AC_SUBST(LIBFREEIPMI_VERSION_MINOR)
@@ -212,15 +163,17 @@ AC_SUBST(LIBFREEIPMI_VERSION_PATCH)
 
 # libipmiconsole libtool versioning
 #
-# If library source code has changed at all increment rev
-# (current:rev:age) = (current:rev+1:age)
+# If the library source code has changed at all since the last update,
+# then increment c:r: c:r+1:).
 #
-# If any interfaces have been added,removed, or changed increment current
-#  and set rev = 0;
+# If any interfaces have been added, removed, or changed since the
+# last update, increment current, and set revision to 0.
 #
-# If any interfaces have been added increment age
+# If any interfaces have been added since the last public release,
+# then increment age.
 #
-# If any interfaces have been removed, set age = 0
+# If any interfaces have been removed or changed since the last public
+# release, then set age to 0.
 #
 LIBIPMICONSOLE_CURRENT=4
 LIBIPMICONSOLE_REVISION=0
@@ -251,18 +204,20 @@ AC_SUBST(LIBIPMICONSOLE_VERSION_PATCH)
 
 # libipmimonitoring libtool versioning
 #
-# If library source code has changed at all increment rev
-# (current:rev:age) = (current:rev+1:age)
+# If the library source code has changed at all since the last update,
+# then increment c:r: c:r+1:).
 #
-# If any interfaces have been added,removed, or changed increment current
-#  and set rev = 0;
+# If any interfaces have been added, removed, or changed since the
+# last update, increment current, and set revision to 0.
 #
-# If any interfaces have been added increment age
+# If any interfaces have been added since the last public release,
+# then increment age.
 #
-# If any interfaces have been removed, set age = 0
+# If any interfaces have been removed or changed since the last public
+# release, then set age to 0.
 #
 LIBIPMIMONITORING_CURRENT=5
-LIBIPMIMONITORING_REVISION=2
+LIBIPMIMONITORING_REVISION=1
 LIBIPMIMONITORING_AGE=0
 LIBIPMIMONITORING_VERSION_INFO=$LIBIPMIMONITORING_CURRENT:$LIBIPMIMONITORING_REVISION:$LIBIPMIMONITORING_AGE
 AC_SUBST([LIBIPMIMONITORING_VERSION_INFO])
@@ -282,7 +237,7 @@ AC_SUBST([LIBIPMIMONITORING_VERSION_INFO])
 
 LIBIPMIMONITORING_VERSION_MAJOR=1
 LIBIPMIMONITORING_VERSION_MINOR=0
-LIBIPMIMONITORING_VERSION_PATCH=2
+LIBIPMIMONITORING_VERSION_PATCH=1
 
 AC_SUBST(LIBIPMIMONITORING_VERSION_MAJOR)
 AC_SUBST(LIBIPMIMONITORING_VERSION_MINOR)
@@ -290,15 +245,17 @@ AC_SUBST(LIBIPMIMONITORING_VERSION_PATCH)
 
 # libipmidetect libtool versioning
 #
-# If library source code has changed at all increment rev
-# (current:rev:age) = (current:rev+1:age)
+# If the library source code has changed at all since the last update,
+# then increment c:r: c:r+1:).
 #
-# If any interfaces have been added,removed, or changed increment current
-#  and set rev = 0;
+# If any interfaces have been added, removed, or changed since the
+# last update, increment current, and set revision to 0.
 #
-# If any interfaces have been added increment age
+# If any interfaces have been added since the last public release,
+# then increment age.
 #
-# If any interfaces have been removed, set age = 0
+# If any interfaces have been removed or changed since the last public
+# release, then set age to 0.
 #
 LIBIPMIDETECT_CURRENT=0
 LIBIPMIDETECT_REVISION=0

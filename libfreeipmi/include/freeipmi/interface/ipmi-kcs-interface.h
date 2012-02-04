@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,13 +48,15 @@ int fill_hdr_ipmi_kcs (uint8_t lun,
 int assemble_ipmi_kcs_pkt (fiid_obj_t obj_kcs_hdr,
                            fiid_obj_t obj_cmd,
                            void *pkt,
-                           unsigned int pkt_len);
+                           unsigned int pkt_len,
+			   unsigned int flags);
 
 /* returns 1 if fully unparsed, 0 if not, -1 on error */
 int unassemble_ipmi_kcs_pkt (const void *pkt,
                              unsigned int pkt_len,
                              fiid_obj_t obj_kcs_hdr,
-                             fiid_obj_t obj_cmd);
+                             fiid_obj_t obj_cmd,
+			     unsigned int flags);
 
 #ifdef __cplusplus
 }

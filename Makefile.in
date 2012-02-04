@@ -64,8 +64,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config/config.h
-CONFIG_CLEAN_FILES = libfreeipmi/include/freeipmi/freeipmi.h \
-	freeipmi.spec
+CONFIG_CLEAN_FILES = freeipmi.spec \
+	libfreeipmi/include/freeipmi/freeipmi.h
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -319,6 +319,7 @@ SUBDIRS = \
 	ipmi-fru \
 	ipmi-oem \
 	ipmi-pef-config \
+	ipmi-pet \
 	ipmi-raw \
 	ipmi-sel \
 	ipmi-sensors \
@@ -330,7 +331,6 @@ SUBDIRS = \
 	ipmiping \
 	ipmipower \
 	rmcpping \
-	examples \
 	contrib
 
 EXTRA = \
@@ -432,9 +432,9 @@ $(top_srcdir)/config/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config/config.h config/stamp-h1
-libfreeipmi/include/freeipmi/freeipmi.h: $(top_builddir)/config.status $(top_srcdir)/libfreeipmi/include/freeipmi/freeipmi.h.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 freeipmi.spec: $(top_builddir)/config.status $(srcdir)/freeipmi.spec.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+libfreeipmi/include/freeipmi/freeipmi.h: $(top_builddir)/config.status $(top_srcdir)/libfreeipmi/include/freeipmi/freeipmi.h.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
@@ -833,7 +833,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-docDATA
+install-data-am: install-data-local install-docDATA
 
 install-dvi: install-dvi-recursive
 
@@ -892,15 +892,20 @@ uninstall-am: uninstall-docDATA
 	distclean-libtool distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am \
-	install-docDATA install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-docDATA
+	install-data-local install-docDATA install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am uninstall-docDATA
 
+
+install-data-local: $(INSTALL_LOGDIR)
+
+install-logdir:
+	$(INSTALL) -m 755 -d $(DESTDIR)$(localstatedir)/log/$(PACKAGE)
 
 uninstall-extra:
 	$(docdir)

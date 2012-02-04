@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,8 +69,6 @@ extern "C" {
 /*
  * Intel Node Manager
  *
- * http://download.intel.com/support/motherboards/server/s5500wb/sb/s5500wb_tps_1_0.pdf
- * 
  * For Intel Chips, not just Intel Motherboards.  Confirmed for:
  *
  * Intel S5500WB/Penguin Computing Relion 700
@@ -78,6 +76,7 @@ extern "C" {
  * Inventec 5441/Dell Xanadu II
  * Inventec 5442/Dell Xanadu III
  * Quanta S99Q/Dell FS12-TY
+ * Quanta QSSC-S4R/Appro GB812X-CN
  */
 
 /* IPMI_CMD_OEM_INTEL_ENABLE_DISABLE_NODE_MANAGER_POLICY_CONTROL */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * 
  */
 /*****************************************************************************\
- *  Copyright (C) 2007-2010 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -124,7 +124,10 @@ int ipmi_sdr_cache_create (ipmi_sdr_cache_ctx_t ctx,
                            Sdr_Create_Callback create_callback,
                            void *create_callback_data);
 
-/* SDR Cache Reading Functions */
+/* SDR Cache Reading Functions
+ * - ipmi_ctx is optional
+ * - if ipmi_ctx is specified, timestamps/version of the SDR will be checked for out-of-dateness
+ */
 int ipmi_sdr_cache_open (ipmi_sdr_cache_ctx_t ctx,
                          ipmi_ctx_t ipmi_ctx,
                          const char *filename);

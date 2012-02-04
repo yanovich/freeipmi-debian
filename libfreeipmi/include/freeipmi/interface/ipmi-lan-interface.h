@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 FreeIPMI Core Team
+ * Copyright (C) 2003-2012 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,8 @@ int assemble_ipmi_lan_pkt (fiid_obj_t obj_rmcp_hdr,
                            const void *authentication_code_data,
                            unsigned int authentication_code_data_len,
                            void *pkt,
-                           unsigned int pkt_len);
+                           unsigned int pkt_len,
+			   unsigned int flags);
 
 /* returns 1 if fully unparsed, 0 if not, -1 on error */
 int unassemble_ipmi_lan_pkt (const void *pkt,
@@ -76,9 +77,13 @@ int unassemble_ipmi_lan_pkt (const void *pkt,
                              fiid_obj_t obj_lan_session_hdr,
                              fiid_obj_t obj_lan_msg_hdr,
                              fiid_obj_t obj_cmd,
-                             fiid_obj_t obj_lan_msg_trlr);
+                             fiid_obj_t obj_lan_msg_trlr,
+			     unsigned int flags);
 
 /* returns length sent on success, -1 on error */
+/* Compared to system sendto(), handles several IPMI padding issues,
+ * should be used in favor for system sendto().
+ */
 ssize_t ipmi_lan_sendto (int s,
                          const void *buf,
                          size_t len,
@@ -87,6 +92,7 @@ ssize_t ipmi_lan_sendto (int s,
                          socklen_t tolen);
 
 /* returns length received on success, 0 on orderly shutdown, -1 on error */
+/* A few extra error checks, but nearly identical to system recvfrom() */
 ssize_t ipmi_lan_recvfrom (int s,
                            void *buf,
                            size_t len,

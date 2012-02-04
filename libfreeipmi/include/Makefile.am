@@ -9,6 +9,7 @@ nobase_include_HEADERS = \
 	freeipmi/api/ipmi-dcmi-cmds-api.h \
 	freeipmi/api/ipmi-device-global-cmds-api.h \
 	freeipmi/api/ipmi-event-cmds-api.h \
+	freeipmi/api/ipmi-firmware-firewall-command-discovery-cmds-api.h \
 	freeipmi/api/ipmi-fru-inventory-device-cmds-api.h \
 	freeipmi/api/ipmi-lan-cmds-api.h \
 	freeipmi/api/ipmi-messaging-support-cmds-api.h \
@@ -26,6 +27,7 @@ nobase_include_HEADERS = \
 	freeipmi/cmds/ipmi-dcmi-oem-cmds.h \
 	freeipmi/cmds/ipmi-device-global-cmds.h \
 	freeipmi/cmds/ipmi-event-cmds.h \
+	freeipmi/cmds/ipmi-firmware-firewall-command-discovery-cmds.h \
 	freeipmi/cmds/ipmi-fru-inventory-device-cmds.h \
 	freeipmi/cmds/ipmi-lan-cmds.h \
 	freeipmi/cmds/ipmi-messaging-support-cmds.h \
@@ -45,6 +47,7 @@ nobase_include_HEADERS = \
 	freeipmi/driver/ipmi-ssif-driver.h \
 	freeipmi/fiid/fiid.h \
 	freeipmi/fru-parse/ipmi-fru-parse.h \
+	freeipmi/interface/ipmi-interface.h \
 	freeipmi/interface/rmcp-interface.h \
 	freeipmi/interface/ipmi-ipmb-interface.h \
 	freeipmi/interface/ipmi-kcs-interface.h \
@@ -55,6 +58,7 @@ nobase_include_HEADERS = \
 	freeipmi/payload/ipmi-sol-payload.h \
 	freeipmi/record-format/ipmi-cipher-suite-record-format.h \
 	freeipmi/record-format/ipmi-fru-information-record-format.h \
+	freeipmi/record-format/ipmi-platform-event-trap-record-format.h \
 	freeipmi/record-format/ipmi-sdr-record-format.h \
 	freeipmi/record-format/ipmi-sdr-oem-record-format.h \
 	freeipmi/record-format/ipmi-sel-record-format.h \
@@ -110,6 +114,7 @@ nobase_include_HEADERS = \
 	freeipmi/templates/ipmi-dcmi-cmds-templates.h \
 	freeipmi/templates/ipmi-device-global-cmds-templates.h \
 	freeipmi/templates/ipmi-event-cmds-templates.h \
+	freeipmi/templates/ipmi-firmware-firewall-command-discovery-cmds-templates.h \
 	freeipmi/templates/ipmi-fru-inventory-device-cmds-templates.h \
 	freeipmi/templates/ipmi-lan-cmds-templates.h \
 	freeipmi/templates/ipmi-messaging-support-cmds-templates.h \
@@ -136,6 +141,7 @@ nobase_include_HEADERS = \
 	freeipmi/util/ipmi-channel-util.h \
 	freeipmi/util/ipmi-cipher-suite-util.h \
 	freeipmi/util/ipmi-device-types-util.h \
+	freeipmi/util/ipmi-entity-ids-util.h \
 	freeipmi/util/ipmi-error-util.h \
 	freeipmi/util/ipmi-error-dcmi-util.h \
 	freeipmi/util/ipmi-iana-enterprise-numbers-util.h \
