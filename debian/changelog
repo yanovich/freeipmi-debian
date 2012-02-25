@@ -5,6 +5,7 @@ freeipmi (1.0.8-1~pre1) UNRELEASED; urgency=low
   * Version build-dependency on autotools-dev, version 20100122.1 deduced
     from autotools-dev's changelog (Closes: #619248)
   * Boost policy compliance to 3.9.2 -- no changes
+  * debian/watch: adjusted url
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 01 Nov 2011 14:04:45 -0400
 

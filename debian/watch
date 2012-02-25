@@ -1,2 +1,2 @@
 version=3
-http://ftp.gluster.com/pub/freeipmi/([\d\.]+)/freeipmi-([\d\.]+)\.tar\.gz
+http://ftp.gnu.org/gnu/freeipmi/freeipmi-([\d\.]+)\.tar\.gz
