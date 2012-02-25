@@ -1,4 +1,4 @@
-.TH BMC-DEVICE 8 "2012-01-02" "bmc-device 1.1.1" "System Commands"
+.TH BMC-DEVICE 8 "2012-02-06" "bmc-device 1.1.2" "System Commands"
 .SH "NAME"
 bmc-device \- perform advanced BMC commands
 .SH "SYNOPSIS"
@@ -41,8 +41,8 @@ Specify the in-band driver device path to be used instead of the
 probed path.
 .TP
 \fB\-\-register\-spacing\fR=\fIREGISTER-SPACING\fR
-Specify the in-band driver register spacing instead of the
-probed value.
+Specify the in-band driver register spacing instead of the probed
+value. Argument is in bytes (i.e. 32bit register spacing = 4)
 .TP
 \fB\-h\fR \fIIPMIHOST1,IPMIHOST2,...\fR, \fB\-\-hostname\fR=\fIIPMIHOST1,IPMIHOST2,...\fR
 Specify the remote host(s) to communicate with. Multiple hostnames
@@ -208,6 +208,17 @@ Get IP, UDP, and RMCP statistics.
 \fB\-\-clear\-lan\-statistics\fR
 Clear IP, UDP, and RMCP statistics.
 .TP
+\fB\-\-rearm\-sensor\fR=\fI"<record_id> [<assertion_bitmask> <deassertion_bitmask>]"\fR
+Re-arm a sensor. Re-arming a sensor informs the internal device to
+reset and re-evaluate a sensor reading and events. Most sensors are
+automatically re-armed, however a rare few do require manual
+re-arming. This option may also be useful to reset a sensor reading
+or event that may be stuck due to an internal hardware or firmware
+error. If the \fIassertion_bitmask\fR and \fIdeassertion_bitmask\fR
+are specified, only the specific events will be re-armed. If not
+specified, all possible events will be re-armed. This command
+requires the loading of the SDR.
+.TP
 \fB\-\-get\-sdr\-repository\-time\fR
 Get SDR repository time.
 .TP
@@ -266,6 +277,35 @@ Set Operating System Name.
 .TP
 \fB\-\-verbose\fR
 Increase verbosity in output.
+.SH "SDR CACHE OPTIONS"
+This tool requires access to the sensor data repository (SDR) cache
+for general operation. By default, SDR data will be downloaded and
+cached on the local machine. The following options apply to the SDR
+cache.
+.TP
+\fB\-f\fR, \fB\-\-flush\-cache\fR
+Flush a cached version of the sensor data repository (SDR) cache. The
+SDR is typically cached for faster subsequent access. However, it may
+need to be flushed and re-generated if the SDR has been updated on a
+system.
+.TP
+\fB\-Q\fR, \fB\-\-\quiet\-cache\fR
+Do not output information about cache creation/deletion. May be
+useful in scripting.
+.TP
+\fB\-\-sdr\-cache\-directory\fR=\fIDIRECTORY\fR
+Specify an alternate directory for sensor data repository (SDR) caches
+to be stored or read from. Defaults to the home directory if not
+specified.
+.TP
+\fB\-\-sdr\-cache\-file\fR=\fIFILE\fR
+Specify a specific sensor data repository (SDR) cache file to be
+stored or read from.
+.TP
+\fB\-\-sdr-cache-recreate\fR
+If the SDR cache is out of date or invalid, automatically recreate the
+sensor data repository (SDR) cache. This option may be useful for
+scripting purposes.
 .SH "HOSTRANGED OPTIONS"
 The following options manipulate hostranged output. See HOSTRANGED
 SUPPORT below for additional information on hostranges.

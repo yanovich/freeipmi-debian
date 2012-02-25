@@ -268,11 +268,14 @@ extern "C" {
  * On some motherboards, it's been observed that IPMI connections
  * between the IPMI client and remote BMC/server can stay alive while
  * the remote server's internal connection between the BMC and serial
- * chip can be lost.  The affect is that this loss of the serial
- * connection will not be noticed by the IPMI client until serial data
- * is transfered from the client to the BMC and a timeout (or similar
- * error) is received.  The IPMI client must then reconnect to
- * restablish the session.
+ * chip can be lost.  This has been observed under several situations, 
+ * such as when the remote system is rebooted or a IPMI SOL session is
+ * stolen.   
+ *
+ * The affect is that this loss of the serial connection will not be
+ * noticed by the IPMI client until serial data is transfered from the
+ * client to the BMC and a timeout (or similar error) eventually occurs.
+ * The IPMI client must then reconnect to restablish the session.
  *
  * This is a severe problem for IPMI clients that predominantly log
  * serial data or display serial output without user interactivity.
@@ -296,6 +299,15 @@ extern "C" {
  * NUL character byte may affect the remote system depending on what
  * input it may or may not be expecting.
  * 
+ * SERIAL_KEEPALIVE_EMPTY
+ *
+ * This option is identical to SERIAL_KEEPALIVE, except that the
+ * serial keepalive packets are empty and without character data.  On
+ * some motherboards, this may be sufficient to deal with the "serial
+ * keepalive" issue and character data need not be sent with each
+ * packet.  On some systems though, a SOL packet without character
+ * data may not be ACKed, and therefore the keepalive fails.
+ *
  * DEFAULT
  *
  * Informs library to use default, may it be the standard default or
@@ -305,6 +317,7 @@ extern "C" {
 #define IPMICONSOLE_ENGINE_OUTPUT_ON_SOL_ESTABLISHED 0x00000002
 #define IPMICONSOLE_ENGINE_LOCK_MEMORY               0x00000004
 #define IPMICONSOLE_ENGINE_SERIAL_KEEPALIVE          0x00000008
+#define IPMICONSOLE_ENGINE_SERIAL_KEEPALIVE_EMPTY    0x00000010
 #define IPMICONSOLE_ENGINE_DEFAULT                   0xFFFFFFFF
 
 /*

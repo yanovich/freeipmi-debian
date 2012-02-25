@@ -1,3 +1,180 @@
+2012-02-06  Albert Chu <chu11@llnl.gov>
+
+	* NEWS, configure.ac: Update for release.
+
+	* Tagged Release-1_1_2.
+
+2012-02-06  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-sel.8.pre.in: Fix option typo.
+	
+2012-01-31  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-oem.8.pre.in: Update supported motherboard information
+	based on tests from Ryan Cox.
+
+2012-01-30  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-oem.8.pre.in: Update supported motherboard information
+	based on tests from Ryan Cox.
+
+2012-01-27  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-oem.8.pre.in: Update information based on tests from
+	Ryan Cox.
+	
+2012-01-18  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-sel.8.pre.in: Clarify usefulness of event direction.
+	
+2012-01-16  Albert Chu <chu11@llnl.gov>
+
+	* man/manpage-common-inband.man: Clarify argument input.
+
+2012-01-15  Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-faq.texi: Add some OpenIPMI linux kerneld driver
+	notes.
+	
+2012-01-15  Albert Chu <chu11@llnl.gov>
+
+	Merge branch dellsolinstancecapacity
+
+	* libipmiconsole/ipmiconsole_processing.c (_check_sol_activated):
+	Workaround bug in Dell Poweredge M605, Dell Poweredge M610, and
+	Dell Poweredge M915 where instance count of SOL is returned as 0.
+
+2012-01-13  Albert Chu <chu11@llnl.gov>
+
+	* doc/solstatediagram.dot: SOL State Diagram documentation.
+	
+2012-01-13  Albert Chu <chu11@llnl.gov>
+
+	* libipmiconsole/ipmiconsole_processing.c
+	(_process_protocol_state_deactivate_payload_sent): Fix deactivate
+	only corner case in which session not closed cleanly.
+	
+2012-01-12  Albert Chu <chu11@llnl.gov>
+
+	Merge branch redotemplatedocs
+
+	* libfreeipmi/include/freeipmi/templates/: Redo format.  Update
+	OEM motherboard lists.
+
+	*
+	libfreeipmi/include/record-format/ipmi-oem-intel-node-manager-cmds.h:
+	Update motherboard list.
+
+	* libfreeipmi/: Clean up some comments in various files.
+	
+2012-01-12  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/sensor-read/ipmi-sensor-read.c
+	(_sensor_reading_corner_case_checks): Handle corner case in Sun
+	Blade 6000M2.
+	
+2012-01-11  Albert Chu <chu11@llnl.gov>
+
+	Merge sunbladex6250sensor branch
+
+	* libfreeipmi/sensor-read/ipmi-sensor-read.c
+	(_sensor_reading_corner_case_checks): Handle corner case in Sun
+	Blade x6250.
+
+	* libfreeipmi/sensor-read/ipmi-sensor-read.c
+	(_sensor_reading_corner_case_checks): Slightly alter error code
+	return interpretations.
+	
+2012-01-10  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/tool-config-file-common.c: Fix several config
+	file option parsing bugs.
+	
+2012-01-10  Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-faq.texi: Add conman configuration FAQ example.
+	Add terminology, ganglia, nagios info.
+
+2012-01-09  Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-faq.texi: Add powerman configuration FAQ example.
+	
+2012-01-09  Albert Chu <chu11@llnl.gov>
+
+	* Merge 8250:8352 ipmioemdellgetsysteminfo.
+
+	* ipmi-oem/ipmi-oem-dell.c: Add Dell get-system-info
+	'slot-number', 'system-revision', 'embedded-video-status',
+	'idrac-info', 'idrac-ipv4-url', 'idrac-gui-webserver-control',
+	'cmc-ipv4-url', 'cmc-ipv6-info', 'cmc-ipv6-url' k eys.  Support
+	12G mac addresses.  Support better error messages.
+	
+2012-01-09  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/: Add re-arm sensor events functions.
+
+	* bmc-device/: Support --rearm-sensor.
+
+	* README, man/freeipmi.7.pre.in: Update description of bmc-device.
+
+2012-01-09  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-oem.8.pre.in: Add SDR caching information to specific
+	OEM commands.
+	
+2012-01-08  Albert Chu <chu11@llnl.gov>
+
+	* Update/fix various documentation and comments.
+	
+2012-01-08  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/cmds/ipmi-sensor-cmds.c,
+	libfreeipmi/include/freeipmi/templates/ipmi-sensor-cmds-templates.h:
+	Re-arm Sensor Events fields are optional not required.
+	
+2012-01-08  Albert Chu <chu11@llnl.gov>
+
+	* libipmiconsole/: Don't deactivate the SOL payload when it
+	appears the SOL session has been stolen.
+	
+2012-01-07  Albert Chu <chu11@llnl.gov>
+
+	Merge serialkeepalive branch
+
+	* libipmiconsole/: Add SERIAL_KEEPALIVE_EMPTY flag support.
+
+	* libipmiconsole/ipmiconsole_processing.c
+	(_serial_keepalive_timeout): Fix keepalive calculation to avoid
+	spinning.
+
+	* ipmiconsole/: Add --serial-keepalive-empty support.
+
+	* configure.ac: Update versioning for libipmiconsole.
+	
+2012-01-07  Albert Chu <chu11@llnl.gov>
+
+	* Update/fix various documentation and comments.
+
+2012-01-06  Albert Chu <chu11@llnl.gov>
+
+	* bmc-watchdog/: Fix usage output typo.
+
+2012-01-06  Jan Safranek <jsafrane@redhat.com>
+
+	* ipmidetectd/, bmc-watchdog/: Fix race in daemon setup code to
+	function with new systemd.
+
+2012-01-06  Albert Chu <chu11@llnl.gov>
+
+	* Update/fix various documentation and comments.
+	
+2012-01-05  Albert Chu <chu11@llnl.gov>
+
+	Merge 8269:8289 from c410x branch. 
+
+	* ipmi-oem/: Support Dell C410x OEM extension slot-power-toggle,
+	slot-power-control, get-port-map, and set-port-map.
+	
 2012-01-03  Albert Chu <chu11@llnl.gov>
 
 	* NEWS, configure.ac: Update for release.
@@ -1645,7 +1822,7 @@
 
 	* ipmidetect/src/ipmidetectd/ipmidetectd_config.c: Fix parsing of
 	unknown arguments.
-	
+<	
 2010-06-28  Albert Chu <chu11@llnl.gov>
 
 	* bmc-watchdog/: Fix "ignorestateflag" workaround for more corner

@@ -418,8 +418,8 @@ fiid_template_t tmpl_cmd_re_arm_sensor_events_rq =
     { 8, "sensor_number", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
     { 7, "reserved", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
     { 1, "re_arm_all_event_status_from_this_sensor", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 16, "re_arm_assertion_event", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 16, "re_arm_deassertion_event", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
+    { 16, "re_arm_assertion_event", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 16, "re_arm_deassertion_event", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
     { 0, "", 0}
   };
 
@@ -429,32 +429,32 @@ fiid_template_t tmpl_cmd_re_arm_sensor_events_threshold_rq =
     { 8, "sensor_number", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
     { 7, "reserved1", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
     { 1, "re_arm_all_event_status_from_this_sensor", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_lower_non_critical_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_lower_non_critical_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_lower_critical_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_lower_critical_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_lower_non_recoverable_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_lower_non_recoverable_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_upper_non_critical_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_upper_non_critical_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_upper_critical_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_upper_critical_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_upper_non_recoverable_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_upper_non_recoverable_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 4, "reserved2", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_lower_non_critical_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_lower_non_critical_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_lower_critical_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_lower_critical_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_lower_non_recoverable_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_lower_non_recoverable_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_upper_non_critical_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_upper_non_critical_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_upper_critical_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_upper_critical_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_upper_non_recoverable_going_low", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_upper_non_recoverable_going_high", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 4, "reserved3", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_lower_non_critical_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_lower_non_critical_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_lower_critical_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_lower_critical_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_lower_non_recoverable_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_lower_non_recoverable_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_upper_non_critical_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_upper_non_critical_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_upper_critical_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_upper_critical_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_upper_non_recoverable_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_upper_non_recoverable_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 4, "reserved2", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_lower_non_critical_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_lower_non_critical_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_lower_critical_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_lower_critical_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_lower_non_recoverable_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_lower_non_recoverable_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_upper_non_critical_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_upper_non_critical_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_upper_critical_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_upper_critical_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_upper_non_recoverable_going_low", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_upper_non_recoverable_going_high", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 4, "reserved3", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
     { 0, "", 0}
   };
 
@@ -464,38 +464,38 @@ fiid_template_t tmpl_cmd_re_arm_sensor_events_discrete_rq =
     { 8, "sensor_number", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
     { 7, "reserved1", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
     { 1, "re_arm_all_event_status_from_this_sensor", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_0", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_1", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_2", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_3", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_4", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_5", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_6", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_7", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_8", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_9", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_10", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_11", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_12", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_13", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_assertion_event_for_state_bit_14", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "reserved2", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_0", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_1", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_2", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_3", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_4", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_5", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_6", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_7", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_8", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_9", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_10", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_11", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_12", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_13", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "re_arm_deassertion_event_for_state_bit_14", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
-    { 1, "reserved3", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_0", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_1", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_2", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_3", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_4", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_5", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_6", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_7", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_8", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_9", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_10", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_11", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_12", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_13", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_assertion_event_for_state_bit_14", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "reserved2", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_0", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_1", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_2", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_3", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_4", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_5", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_6", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_7", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_8", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_9", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_10", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_11", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_12", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_13", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "re_arm_deassertion_event_for_state_bit_14", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
+    { 1, "reserved3", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
     { 0, "", 0}
   };
 
@@ -1188,6 +1188,40 @@ fill_cmd_get_sensor_event_enable (uint8_t sensor_number, fiid_obj_t obj_cmd_rq)
   FILL_FIID_OBJ_SET (obj_cmd_rq, "cmd", IPMI_CMD_GET_SENSOR_EVENT_ENABLE);
   FILL_FIID_OBJ_SET (obj_cmd_rq, "sensor_number", sensor_number);
 
+  return (0);
+}
+
+int
+fill_cmd_re_arm_sensor_events (uint8_t sensor_number,
+			       uint8_t re_arm_all_event_status_from_this_sensor,
+			       uint16_t *re_arm_assertion_event,
+			       uint16_t *re_arm_deassertion_event,
+			       fiid_obj_t obj_cmd_rq)
+{
+  if (!IPMI_SENSOR_RE_ARM_ALL_EVENT_STATUS_VALID (re_arm_all_event_status_from_this_sensor)
+      || !fiid_obj_valid (obj_cmd_rq))
+    {
+      SET_ERRNO (EINVAL);
+      return (-1);
+    }
+  
+  if (FIID_OBJ_TEMPLATE_COMPARE (obj_cmd_rq, tmpl_cmd_re_arm_sensor_events_rq) < 0)
+    {
+      ERRNO_TRACE (errno);
+      return (-1);
+    }
+  
+  FILL_FIID_OBJ_CLEAR (obj_cmd_rq);
+  FILL_FIID_OBJ_SET (obj_cmd_rq, "cmd", IPMI_CMD_RE_ARM_SENSOR_EVENTS);
+  FILL_FIID_OBJ_SET (obj_cmd_rq, "sensor_number", sensor_number);
+  
+  FILL_FIID_OBJ_SET (obj_cmd_rq, "reserved", 0);
+  FILL_FIID_OBJ_SET (obj_cmd_rq, "re_arm_all_event_status_from_this_sensor", re_arm_all_event_status_from_this_sensor);
+  if (re_arm_assertion_event)
+    FILL_FIID_OBJ_SET (obj_cmd_rq, "re_arm_assertion_event", *re_arm_assertion_event);
+  if (re_arm_deassertion_event)
+    FILL_FIID_OBJ_SET (obj_cmd_rq, "re_arm_deassertion_event", *re_arm_deassertion_event);
+  
   return (0);
 }
 

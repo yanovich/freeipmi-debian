@@ -23,7 +23,7 @@
 .\"  You should have received a copy of the GNU General Public License along
 .\"  with Bmc-Watchdog.  If not, see <http://www.gnu.org/licenses/>.
 .\"############################################################################
-.TH bmc-watchdog 8 "2012-01-02" "bmc-watchdog 1.1.1" "System Commands"
+.TH bmc-watchdog 8 "2012-02-06" "bmc-watchdog 1.1.2" "System Commands"
 .SH "NAME"
 bmc-watchdog \- BMC watchdog timer daemon and control utility
 .SH "SYNOPSIS"
@@ -137,8 +137,8 @@ Specify the in-band driver device path to be used instead of the
 probed path.
 .TP
 \fB\-\-register\-spacing\fR=\fIREGISTER-SPACING\fR
-Specify the in-band driver register spacing instead of the
-probed value.
+Specify the in-band driver register spacing instead of the probed
+value. Argument is in bytes (i.e. 32bit register spacing = 4)
 .TP
 \fB\-f\fR \fIFILE\fR, \fB\-\-logfile\fR=\fIFILE\fR
 Specify an alternate logfile from the default of
