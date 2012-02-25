@@ -6,6 +6,7 @@ freeipmi (1.1.2-1~pre1) UNRELEASED; urgency=low
     from autotools-dev's changelog (Closes: #619248)
   * Boost policy compliance to 3.9.2 -- no changes
   * debian/watch: adjusted url
+  * debian/patches: adjusted for config files move
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 24 Feb 2012 21:58:45 -0500
 

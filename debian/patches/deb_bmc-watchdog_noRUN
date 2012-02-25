@@ -2,8 +2,8 @@ From: Yaroslav Halchenko <debian@onerussian.com>
 Subject: to be able to condition use of watchdog in the configuration
 Vendor: Debian
 
---- a/bmc-watchdog/bmc-watchdog.sysconfig
-+++ b/bmc-watchdog/bmc-watchdog.sysconfig
+--- a/etc/bmc-watchdog.sysconfig
++++ b/etc/bmc-watchdog.sysconfig
 @@ -41,4 +41,5 @@
  #
  # For the remaining options, consult man bmc-watchdog
