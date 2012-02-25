@@ -1,4 +1,4 @@
-freeipmi (1.0.8-1~pre1) UNRELEASED; urgency=low
+freeipmi (1.1.2-1~pre1) UNRELEASED; urgency=low
 
   * New upstream release (Closes: #635508)
     - GPLv3 licensed now
@@ -7,7 +7,7 @@ freeipmi (1.0.8-1~pre1) UNRELEASED; urgency=low
   * Boost policy compliance to 3.9.2 -- no changes
   * debian/watch: adjusted url
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 01 Nov 2011 14:04:45 -0400
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 24 Feb 2012 21:58:45 -0500
 
 freeipmi (0.8.12-3) unstable; urgency=low
 
