@@ -1,8 +1,8 @@
 This is freeipmi-faq.info, produced by makeinfo version 4.13 from
 freeipmi-faq.texi.
 
-This manual is for FreeIPMI (version 1.1.1, 2 January 2012).  Copyright
-(C) 2006-2012 FreeIPMI Core Team
+This manual is for FreeIPMI (version 1.1.2, 6 February 2012).
+Copyright (C) 2006-2012 FreeIPMI Core Team
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -22,8 +22,8 @@ File: freeipmi-faq.info,  Node: Top,  Next: What is IPMI,  Prev: (dir),  Up: (di
 
    Frequently Asked Questions on *FreeIPMI*
 
-   This edition of the documentation was last updated on 2 January 2012
-for release 1.1.1 of the FreeIPMI.
+   This edition of the documentation was last updated on 6 February
+2012 for release 1.1.2 of the FreeIPMI.
 
 * Menu:
 
@@ -38,10 +38,14 @@ for release 1.1.1 of the FreeIPMI.
 * libgcrypt requirement::
 * x86-64 Compilation::
 * Installing FreeIPMI on FreeBSD::
+* What are some IPMI terminology or acronyms I should be aware of?::
 * What setup is needed for FreeIPMI to communicate over LAN?::
 * What setup is needed for Serial over LAN (SOL) or Ipmiconsole?::
 * Do I need to install or configure a driver to perform IPMI inband?::
 * SSIF Driver Configuration::
+* How do you setup Powerman with ipmipower?::
+* How do you setup Conman with ipmiconsole or libipmiconsole?::
+* How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?::
 * Why is the IPMI kernel driver faster than the KCS driver?::
 * Why are there so many IPMI compliance bugs?::
 * How do I get around an IPMI compliance bug on my motherboard?::
@@ -213,12 +217,11 @@ can be found in the document freeipmi-hostrange.txt
 (`http://www.gnu.org/software/freeipmi/freeipmi-hostrange.txt').
 
    Ipmipower is capable of scaling to large nodes for cluster support
-and is supported by Powerman
-(`http://sourceforge.net/projects/powerman') for scalable power
-management.  At LLNL, in conjunction with Powerman, ipmipower is used
-for power control on clusters ranging from sizes of 4 to 2000.  It has
-been used to determine power status or power control LLNL's largest
-clusters in under a second.
+and is supported by Powerman (`http://code.google.com/p/powerman/') for
+scalable power management.  At LLNL, in conjunction with Powerman,
+ipmipower is used for power control on clusters ranging from sizes of 4
+to 2000.  It has been used to determine power status or power control
+LLNL's largest clusters in under a second.
 
    Ipmiconsole is currently supported by Conman
 (`http://conman.googlecode.com/') for scalable console management.
@@ -374,7 +377,7 @@ appropriately to the configure script to workaround this problem. (e.g.
        # ./configure  --prefix=/usr --libdir=/usr/lib64
 
 
-File: freeipmi-faq.info,  Node: Installing FreeIPMI on FreeBSD,  Next: What setup is needed for FreeIPMI to communicate over LAN?,  Prev: x86-64 Compilation,  Up: Top
+File: freeipmi-faq.info,  Node: Installing FreeIPMI on FreeBSD,  Next: What are some IPMI terminology or acronyms I should be aware of?,  Prev: x86-64 Compilation,  Up: Top
 
 0.11 Installing FreeIPMI on FreeBSD
 ===================================
@@ -389,9 +392,71 @@ in The FreeBSD Handbook.
 Makefile), if you have problems building from the port.
 
 
-File: freeipmi-faq.info,  Node: What setup is needed for FreeIPMI to communicate over LAN?,  Next: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?,  Prev: Installing FreeIPMI on FreeBSD,  Up: Top
+File: freeipmi-faq.info,  Node: What are some IPMI terminology or acronyms I should be aware of?,  Next: What setup is needed for FreeIPMI to communicate over LAN?,  Prev: Installing FreeIPMI on FreeBSD,  Up: Top
 
-0.12 What setup is needed for FreeIPMI to communicate over LAN?
+0.12 What are some IPMI terminology or acronyms I should be aware of?
+=====================================================================
+
+Good question, here are some terms and acronyms with general definition
+you might want to know.
+
+   *BMC* stands for *Baseboard Management Controller*.  The BMC is the
+management chip on the system that is responsible for IPMI.  It is
+common to refer to configuring the "BMC" as synonymous for configuring
+IPMI.
+
+   *inband* IPMI communication refers to communication on a system
+locally (i.e. not over a network).
+
+   *outofband* and *IPMI over LAN* refer to IPMI communication over a
+network, typically ethernet.
+
+   *SDR* stands for *Sensor Data Repository*.  The SDR is a database of
+system information that is needed by many other IPMI functions.  It is
+commonly read before some IPMI action can be taken.  For example, it
+contains a list of all sensors on a system, so it must be downloaded
+before sensors on a system can be read.  In FreeIPMI, the SDR is cached
+in a common location and can be used by a number of tools, such as
+ipmi-sensors, ipmi-sel, and ipmi-fru.
+
+   *SEL* stands for *System Event Log*.  The SEL is a log of events
+stored on the system for later diagnostics.  In FreeIPMI, ipmi-sel can
+be used to read the SEL.
+
+   *FRU* stands for *Field Replaceable Unit*.  While FRU is a general
+computing term refering to a replaceable unit of electronics, in IPMI
+is is common to refer to the "FRU" as the database of all FRU
+components on a system.  In FreeIPMI, ipmi-fru can be used to read the
+FRU components on a system.
+
+   *PEF* stands for *Platform Event Filtering*.  PEF refers to the
+rules that determine when PETs are generated and where they are sent.
+In FreeIPMI, PEF can be configured via ipmi-pef-config.
+
+   *PET* stands for *Platform Event Trap*.  PET refers to a trap that
+can be sent by a system to an SNMP agent to indicate an event has
+occurred on the system.  In FreeIPMI, a PET trap can be interpreted via
+ipmi-pet.
+
+   *DCMI* stands for *Data Center Management Interface*.  DCMI is a
+management interface defined by a group of vendors that use IPMI as the
+backend for their system management definition.  In FreeIPMI, ipmi-dcmi
+can be used to read/configuring DCMI.
+
+   *SOL* stands for *Serial over LAN*.  SOL refers to the forwarding of
+serial system traffic over a network, typically an ethernet network.
+It is typically used to access a remote system console.  In FreeIPMI,
+ipmiconsole is used to access a remote console via SOL.
+
+   *RMCP* stands for *Remote Management Control Protocol*.  The RMCP
+protocol is another remote management protocol which IPMI is defined
+within for outofband communication.  For most IPMI users, you will
+never need to know about RMCP.
+
+
+File: freeipmi-faq.info,  Node: What setup is needed for FreeIPMI to communicate over LAN?,  Next: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?,  Prev: What are some IPMI terminology or acronyms I should be aware of?,  Up: Top
+
+0.13 What setup is needed for FreeIPMI to communicate over LAN?
 ===============================================================
 
 Please see the bmc-config.conf(5) manpage provided with FreeIPMI for
@@ -401,11 +466,11 @@ details, or you can read it on the FreeIPMI website's documentation
 
 File: freeipmi-faq.info,  Node: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?,  Next: Do I need to install or configure a driver to perform IPMI inband?,  Prev: What setup is needed for FreeIPMI to communicate over LAN?,  Up: Top
 
-0.13 What setup is needed for Serial over LAN (SOL) or Ipmiconsole?
+0.14 What setup is needed for Serial over LAN (SOL) or Ipmiconsole?
 ===================================================================
 
 The setup of Serial-over-LAN (SOL) and/or Ipmiconsole is highly
-dependent on your motherboard.  However, most motherboards require the
+dependent on your system.  However, most motherboardss require the
 following:
 
    1) Adjust the BIOS COM port for serial redirection over SOL instead
@@ -434,7 +499,7 @@ the ttySX terminal may need to be changed.
 
 File: freeipmi-faq.info,  Node: Do I need to install or configure a driver to perform IPMI inband?,  Next: SSIF Driver Configuration,  Prev: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?,  Up: Top
 
-0.14 Do I need to install or configure a driver to perform IPMI inband?
+0.15 Do I need to install or configure a driver to perform IPMI inband?
 =======================================================================
 
 For most people the answer is no.
@@ -455,12 +520,15 @@ for addresses, paths, etc. on your own and pass them as command line
 options to the tools.
 
    Every system is different and your situation may differ.  Please see
-your manufacturer instructions.
+your manufacturer and operating system instructions.
+
+   There are some additional Linux OpenIPMI kernel driver notes here:
+`http://www.gnu.org/software/freeipmi/README.openipmi'.
 
 
-File: freeipmi-faq.info,  Node: SSIF Driver Configuration,  Next: Why is the IPMI kernel driver faster than the KCS driver?,  Prev: Do I need to install or configure a driver to perform IPMI inband?,  Up: Top
+File: freeipmi-faq.info,  Node: SSIF Driver Configuration,  Next: How do you setup Powerman with ipmipower?,  Prev: Do I need to install or configure a driver to perform IPMI inband?,  Up: Top
 
-0.15 SSIF Driver Configuration
+0.16 SSIF Driver Configuration
 ==============================
 
 FreeIPMI's SSIF driver works on top of kernel'2 i2c device interface.
@@ -496,9 +564,95 @@ i2c-core before using FreeIPMI.
          Usual values for record 08h -> 0x400
 
 
-File: freeipmi-faq.info,  Node: Why is the IPMI kernel driver faster than the KCS driver?,  Next: Why are there so many IPMI compliance bugs?,  Prev: SSIF Driver Configuration,  Up: Top
+File: freeipmi-faq.info,  Node: How do you setup Powerman with ipmipower?,  Next: How do you setup Conman with ipmiconsole or libipmiconsole?,  Prev: SSIF Driver Configuration,  Up: Top
 
-0.16 Why is the IPMI kernel driver faster than the KCS driver?
+0.17 How do you setup Powerman with ipmipower?
+==============================================
+
+There are additional details in the Powerman
+(`http://code.google.com/p/powerman/') documentation, however here are
+the basics.  In the powerman.conf file, you want to include the
+ipmipower.dev device file, setup an ipmipower device in co-process
+mode, then configure hosts to use that device.
+
+     include "/etc/powerman/ipmipower.dev"
+
+     device "ipmi0" "ipmipower" "/usr/sbin/ipmipower -h mynodes[0-10] |&"
+
+     node "mynodes[0-10]"  "ipmi0" "mynodes[0-10]"
+
+   You may wish to add some additional ipmipower configuration on the
+device line:
+
+     device "ipmi0" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h mynodes[0-10] -u username -p password |&"
+
+   although you will probably want to do some of this configuration
+(especially the username and password) in freeipmi.conf.
+
+   If you use an alternate set of hostnames for IPMI from the primary
+hostname, that can configured like this:
+
+     device "ipmi0" "ipmipower" "/usr/sbin/ipmipower -h altname[0-10] |&"
+
+     node "primaryname[0-10]"  "ipmi0" "altname[0-10]"
+
+
+File: freeipmi-faq.info,  Node: How do you setup Conman with ipmiconsole or libipmiconsole?,  Next: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?,  Prev: How do you setup Powerman with ipmipower?,  Up: Top
+
+0.18 How do you setup Conman with ipmiconsole or libipmiconsole?
+================================================================
+
+There are additional details in the Conman
+(`http://conman.googlecode.com/') documentation and manpages, however
+here are some basics.
+
+   To configure Conman to connect via the ipmiconsole tool, Conman comes
+with an expect script named ipmiconsole.exp, typically installed into
+/usr/lib/conman/exec/ipmiconsole.exp.  Consoles can be setup by adding
+lines to conman.conf like:
+
+     CONSOLE name="myserver"   dev="/usr/lib/conman/exec/ipmiconsole.exp myserver myusername mypassword"
+
+   One of the useful aspects of using the ipmiconsole.exp script is that
+the same configuration options you may have already configured into
+freeipmi.conf, may be loaded automatically when ipmiconsole is executed
+via this expect script.
+
+   However, as can be expected, scalability may be a problem as you must
+launch a process for every node in your cluster.
+
+   Conman is also capable of connecting to servers natively through the
+libipmiconsole library, so that no additional processes are launched.
+They can be configured as follows:
+
+     CONSOLE name="myserver" IPMIOPTS="U:myusername,P:mypassword" dev="ipmi:myserver"
+
+   on some older versions of Conman, you would instead use
+
+     CONSOLE name="myserver" IPMIOPTS="myusername,mypassword" dev="ipmi:myserver"
+
+   Please see the Conman documentation for current version options and
+additional configuration options available.
+
+   One of the additional advantages of configuring Conman to use the
+libipmiconsole library natively is that Conman is able to detect and
+manage additional IPMI error cases.
+
+
+File: freeipmi-faq.info,  Node: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?,  Next: Why is the IPMI kernel driver faster than the KCS driver?,  Prev: How do you setup Conman with ipmiconsole or libipmiconsole?,  Up: Top
+
+0.19 How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?,
+==============================================================================
+
+Scripts to monitor IPMI via FreeIPMI in Ganglia and Nagios have been
+developed and are downloadable on the FreeIPMI homepage
+(`http://www.gnu.org/software/freeipmi/download.html').  Instructions
+for setup can be found at the top of the scripts.
+
+
+File: freeipmi-faq.info,  Node: Why is the IPMI kernel driver faster than the KCS driver?,  Next: Why are there so many IPMI compliance bugs?,  Prev: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?,  Up: Top
+
+0.20 Why is the IPMI kernel driver faster than the KCS driver?
 ==============================================================
 
 Internally the IPMI kernel driver chooses to spin while polling for a
@@ -515,7 +669,7 @@ response time to the IPMI kernel driver, users can specify the
 
 File: freeipmi-faq.info,  Node: Why are there so many IPMI compliance bugs?,  Next: How do I get around an IPMI compliance bug on my motherboard?,  Prev: Why is the IPMI kernel driver faster than the KCS driver?,  Up: Top
 
-0.17 Why are there so many IPMI compliance bugs?
+0.21 Why are there so many IPMI compliance bugs?
 ================================================
 
 The IPMI specification is very large.  At last check, the IPMI
@@ -535,7 +689,7 @@ it on the website here:
 
 File: freeipmi-faq.info,  Node: How do I get around an IPMI compliance bug on my motherboard?,  Next: How do I program with the FreeIPMI libraries?,  Prev: Why are there so many IPMI compliance bugs?,  Up: Top
 
-0.18 How do I get around an IPMI compliance bug on my motherboard?
+0.22 How do I get around an IPMI compliance bug on my motherboard?
 ==================================================================
 
 Most of the FreeIPMI tools and libraries have flags to workaround a
@@ -550,7 +704,7 @@ has not yet been implemented, please contact the maintainers on the
 
 File: freeipmi-faq.info,  Node: How do I program with the FreeIPMI libraries?,  Next: Where can I get additional help or support?,  Prev: How do I get around an IPMI compliance bug on my motherboard?,  Up: Top
 
-0.19 How do I program with the FreeIPMI libraries?
+0.23 How do I program with the FreeIPMI libraries?
 ==================================================
 
 If you are looking for a high level library to do Serial-over-LAN (SOL)
@@ -576,7 +730,7 @@ website here:
 
 File: freeipmi-faq.info,  Node: Where can I get additional help or support?,  Prev: How do I program with the FreeIPMI libraries?,  Up: Top
 
-0.20 Where can I get additional help or support?
+0.24 Where can I get additional help or support?
 ================================================
 
 For help, please email the <freeipmi-users@gnu.org> mailing list.
@@ -585,25 +739,29 @@ For help, please email the <freeipmi-users@gnu.org> mailing list.
 
 Tag Table:
 Node: Top691
-Node: What is IPMI1794
-Node: What is FreeIPMI?2983
-Node: How did FreeIPMI start?3519
-Node: What operating systems does FreeIPMI run on?4855
-Node: FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil5611
-Node: What is special about FreeIPMI?6419
-Node: Does my system support IPMI?12825
-Node: How do I compile FreeIPMI?14376
-Node: libgcrypt requirement14741
-Node: x86-64 Compilation15381
-Node: Installing FreeIPMI on FreeBSD16064
-Node: What setup is needed for FreeIPMI to communicate over LAN?16701
-Node: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?17261
-Node: Do I need to install or configure a driver to perform IPMI inband?19083
-Node: SSIF Driver Configuration20403
-Node: Why is the IPMI kernel driver faster than the KCS driver?22019
-Node: Why are there so many IPMI compliance bugs?22980
-Node: How do I get around an IPMI compliance bug on my motherboard?24075
-Node: How do I program with the FreeIPMI libraries?24865
-Node: Where can I get additional help or support?26199
+Node: What is IPMI2051
+Node: What is FreeIPMI?3240
+Node: How did FreeIPMI start?3776
+Node: What operating systems does FreeIPMI run on?5112
+Node: FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil5868
+Node: What is special about FreeIPMI?6676
+Node: Does my system support IPMI?13076
+Node: How do I compile FreeIPMI?14627
+Node: libgcrypt requirement14992
+Node: x86-64 Compilation15632
+Node: Installing FreeIPMI on FreeBSD16315
+Node: What are some IPMI terminology or acronyms I should be aware of?16958
+Node: What setup is needed for FreeIPMI to communicate over LAN?19926
+Node: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?20520
+Node: Do I need to install or configure a driver to perform IPMI inband?22338
+Node: SSIF Driver Configuration23806
+Node: How do you setup Powerman with ipmipower?25406
+Node: How do you setup Conman with ipmiconsole or libipmiconsole?26741
+Node: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?28652
+Node: Why is the IPMI kernel driver faster than the KCS driver?29309
+Node: Why are there so many IPMI compliance bugs?30317
+Node: How do I get around an IPMI compliance bug on my motherboard?31412
+Node: How do I program with the FreeIPMI libraries?32202
+Node: Where can I get additional help or support?33536
 
 End Tag Table

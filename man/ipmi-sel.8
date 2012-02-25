@@ -1,4 +1,4 @@
-.TH IPMI-SEL 8 "2012-01-02" "ipmi-sel 1.1.1" "System Commands"
+.TH IPMI-SEL 8 "2012-02-06" "ipmi-sel 1.1.2" "System Commands"
 .SH "NAME"
 ipmi-sel \- display SEL entries
 .SH "SYNOPSIS"
@@ -44,8 +44,8 @@ Specify the in-band driver device path to be used instead of the
 probed path.
 .TP
 \fB\-\-register\-spacing\fR=\fIREGISTER-SPACING\fR
-Specify the in-band driver register spacing instead of the
-probed value.
+Specify the in-band driver register spacing instead of the probed
+value. Argument is in bytes (i.e. 32bit register spacing = 4)
 .TP
 \fB\-h\fR \fIIPMIHOST1,IPMIHOST2,...\fR, \fB\-\-hostname\fR=\fIIPMIHOST1,IPMIHOST2,...\fR
 Specify the remote host(s) to communicate with. Multiple hostnames
@@ -177,6 +177,9 @@ The following options are specific to
 .TP
 \fB\-v\fR
 Output verbose output. This option will output event direction.
+Event direction may be useful to differentiate severity between some
+events. For example, some motherboards may issue an event both when a
+temperature exceeds a threshold and when it goes back down below it.
 .TP
 \fB\-vv\fR
 Output very verbose output. This option will output additional
@@ -255,7 +258,7 @@ Delete record ids from START to END in the SEL.
 \fB\-\-system\-event\-only\fR
 Output only system event records (i.e. don't output OEM records).
 .TP
-\fB\-\-oem\-only\fR
+\fB\-\-oem\-event\-only\fR
 Output only OEM event records.
 .TP
 \fB\-\-output\-manufacturer\-id\fR

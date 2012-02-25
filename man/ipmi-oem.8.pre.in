@@ -77,11 +77,14 @@ may be passed to any OEM ID to list commands supported by that OEM ID.
 This OEM command can retrieve the motherboard system information.
 Valid keys are \fIguid\fR, \fIasset\-tag\fR, \fIservice\-tag\fR,
 \fIchassis\-service\-tag\fR, \fIchassis\-related\-service\-tag\fR,
-\fIboard\-revision\fR, \fIplatform\-model\-name\fR, or
+\fIboard\-revision\fR, \fIplatform\-model\-name\fR,
+\fIslot\-number\fR, \fIsystem\-revision\fR, \fIidrac\-info\fR,
+\fIidrac\-ipv4\-url\fR, \fIidrac\-gui\-webserver\-control\fR,
+\fIcmc\-ipv4\-url\fR, \fIcmc\-ipv6\-info\fR, \fIcmc\-ipv6\-url\fR,
 \fImac\-addresses\fR.  Command confirmed to work on Dell Poweredge
-2900, 2950, R610, and R710 (Dell 10G and 11G Poweredge systems).
-However, specific system information may not be readable or available
-on all systems.
+2900, 2950, R610, R710, M600, M610, M610X, M910, and R905.  However,
+individual system information options may not be readable or available
+on every system.
 .TP
 .B get-nic-selection
 This OEM command will determine the current NIC selection for IPMI as
@@ -92,7 +95,7 @@ to NIC2 indicates IPMI is available on NIC1 w/ failover to NIC2 on
 NIC1's failure, and shared w/ failover to all indicates IPMI is
 available on NIC1 w/ failover to all other NICs in the event of NIC
 failure.  Command confirmed to work on Dell Poweredge 2900, 2950,
-R610, and R710 (Dell 10G and 11G Poweredge systems).
+R610, R710, and R905.
 .TP
 .B set-nic-section \fIdedicated|shared|shared_failover_nic2|shared_failover_all\fR
 This OEM command will set the current NIC selection to dedicated,
@@ -100,7 +103,7 @@ shared, shared_failover_nic2, or shared_failover_all.  (See
 \fIget\-nic\-selection\fR above for description on inputs.)  On older
 Poweredge systems, \fIshared_failover_nic2\fR may have been documented
 as just \fIfailover\fR.  Command confirmed to work on Dell Poweredge
-2900, 2950, R610, and R710 (Dell 10G and 11G Poweredge systems).
+2900, 2950, R610, R710, and R905.
 .TP
 .B get-active-lom-status
 This OEM command will get the current NIC being used for out of band
@@ -192,27 +195,26 @@ complete.  Command confirmed to work on Dell Poweredge R610 and R710
 .TP
 .B get-power-consumption-data
 This OEM command can retrieve power consumption data.  Command
-confirmed to work on Dell Poweredge R610 and R710 (Dell 11G Poweredge
-systems).
+confirmed to work on Dell Poweredge R610, R710, R905, M610, M610x, and
+M910.
 .TP
 .B reset-power-consumption-data \fIcumulative|peak\fI
 This OEM command can reset the cumulative or peak power consumption
 data (viewed via \fBget\-power\-consumption\-data\fR).  Command
-confirmed to work on Dell Poweredge R610 and R710 (Dell 11G Poweredge
-systems).
+confirmed to work on Dell Poweredge R610, R710, R905, M610, M610x, and
+M910.
 .TP
 .B power-supply-info
 This OEM command can read and output power supply ratings and other
 information.  This OEM command requires access to the SDR.  Command
-confirmed to work on Dell Poweredge R610 and R710 (Dell 11G Poweredge
-systems).
+confirmed to work on Dell Poweredge R610, R710, and M610.
 .TP
 .B get-instantaneous-power-consumption-data \fIpower_supply_instance\fR
 This OEM command can read instantaneous power consumption data.  If a
 power supply instance number is specified, only data for that instance
 will be gathered.  Otherwise, collective power consumption will be
-gathered.  Command confirmed to work on Dell Poweredge R610 and R710
-(Dell 11G Poweredge systems).
+gathered.  Command confirmed to work on Dell Poweredge R610, R710,
+M610, M610x, and M910.
 .TP
 .B get-power-head-room
 This OEM command can read power head room.  Command confirmed to work
@@ -220,13 +222,13 @@ on Dell Poweredge R610 and R710 (Dell 11G Poweredge systems).
 .TP
 .B get-power-consumption-statistics \fIaverage|max|min\fR
 This OEM command can read average, max, or min power consumption
-history.  Command confirmed to work on Dell Poweredge R610 and R710
-(Dell 11G Poweredge systems).
+history.  Command confirmed to work on Dell Poweredge R610, R710,
+M610, M610x, and M910.
 .TP
 .B get-power-capacity
 This OEM command can read the current power capacity.  Command
-confirmed to work on Dell Poweredge R610 and R710 (Dell 11G Poweredge
-systems).
+confirmed to work on Dell Poweredge R610, R710,
+M610, M610x, and M910.
 .TP
 .B set-power-capacity \fIpower-capacity\fR
 This OEM command can write the current power capacity (specified in
@@ -235,8 +237,8 @@ Watts).  Command confirmed to work on Dell Poweredge R610 and R710
 .TP
 .B get-power-capacity-status
 This OEM command can determine if the current power capacity is
-enabled or disabled.  Command confirmed to work on Dell Poweredge R610
-and R710 (Dell 11G Poweredge systems).
+enabled or disabled.  Command confirmed to work on Dell Poweredge
+R610, R710, M610, M610x, and M910.
 .TP
 .B set-power-capacity-status \fIenable|disable\fR
 This OEM command can configure the current power capacity to be
@@ -246,7 +248,54 @@ and R710 (Dell 11G Poweredge systems).
 .B get-chassis-identify-status
 This OEM command will retrieve the current chassis identify (i.e. LED)
 status.  Command confirmed to work on Dell Poweredge 2900, 2950, R610,
-and R710 (Dell 10G and 11G Poweredge systems).
+R710, R905, M600, M610, M610x, and M910.
+.TP
+.B slot-power-toggle \fIslot-number\fR
+This OEM command will perform a power toggle on a PCIe slot.  The PCIe
+slot number can range from 1 to 16.  Command confirmed to work on Dell
+Poweredge C410x.
+.TP
+.B slot-power-control \fIplatform\-model\fR \fIon|off|status\fR \fIslot-number\fR
+This OEM command will perform a power control action on a PCIe slot.
+This OEM extension is tied very closely to a platform, so a supported
+platform must be specified.  The currently supported
+\fIplatform\-model\fR options are \fIC410x\fR.  The \fIon\fR action
+powers on a slot, \fIoff\fR powers off a slot, and \fIstatus\fR
+returns if the current power is on or off.  If the current power
+status is on, an \fIon\fR action does nothing.  Similarly, if the
+current power status is off, an \fIoff\fR action does nothing.  The
+\fIon\fR, \fIoff\fR, and \fIstatus\fR slot power actions are not
+native and are emulated through a combination of a power toggle (using
+\fIslot\-power\-toggle\fR above) and the reading of PCIe slot watt
+sensors.  The PCIe slot number can range from 1 to 16.  Command
+confirmed to work on Dell Poweredge C410x.
+.TP
+.B get-port-map
+This OEM command will retrieve the current iPASS mapping to PCIe
+controllers/slots.  Command confirmed to work on Dell Poweredge C410x.
+.TP
+.B set-port-map \fIjumper|bmc\fR \fIipass\-mapping\fR \fI1:2|1:4|1:8\fR
+This OEM command will set an iPass mapping to PCIe controllers/slots.
+\fIjumper\fR or \fIbmc\fR must be specified to indicate if iPass
+mappings will be controlled via jumpers on the system or via a
+BMC/IPMI.  In order for reconfiguration to be done via
+\fBipmi\-oem\fR, the user must select \fIbmc\fR.  The
+\fIipass\-mapping\fR determines which iPass ports will be mapped.
+\fI1:2\fR, \fI1:4\fR, and \fI1:8\fR determine the mapping that should
+be set.  See details below for specific platforms.  Command confirmed
+to work on Dell Poweredge C410x.
+
+For the Dell Poweredge C410x, the \fIipass\-mapping\fR ranges from 1
+to 4.  \fI1\fR refers to iPass 1 and 5, \fI2\fR to 2 and 6, \fI3\fR to
+3 and 7, and \fI4\fR to 4 and 8.  For the platform \fIC410x\fR, PCIe
+slots 1, 2, 3, 4, 13, 14, 15, and 16 are attached to iPass 1, 2, 3,
+and 4.  PCIe slots 5, 6, 7, 8, 9, 10, 11, and 12 are attached to iPass
+5, 6, 7, and 8.  For example, if \fI1:2\fR is set on
+\fImapping-number\fR \fI1\fR, PCIe slots 1 and 15 will be assigned to
+iPass 1 and slots 2 and 16 will be assigned to iPass 5.  if \fI1:4\fR
+is chosen, PCIe slots 1, 2, 15, and 16 will be assigned to iPass 1 and
+iPass 5 will not be used.
+
 .RE
 .TP
 .B Fujitsu
@@ -301,8 +350,8 @@ RX100 S5.
 .RS
 .TP
 .B get-led
-This OEM command will get the current LED status.  Command confirmed
-to work on IBM x3755.
+This OEM command will get the current LED status.  This OEM command
+requires access to the SDR.  Command confirmed to work on IBM x3755.
 .RE
 .TP
 .B Intel
@@ -342,7 +391,8 @@ executing a cold-reset with
 .B IntelNM (Intel Node Manager)
 .SP
 The following OEM commands operate on Intel chipsets with Node Manager
-support.  They may work on multiple vendors motherboards.
+support.  They all require access to the SDR.  They may work on
+multiple vendors motherboards.
 .SP
 .RS
 .TP
@@ -815,12 +865,13 @@ If the verbose option is set, sensor names will be output with their
 entity ID and instance when appropriate.  (Similar to the
 \fI\-\-entity\-sensor\-names\fR option in
 .B ipmi-sensors.)
-Command confirmed to work on Sun Fire 4140 with ILOM.
+This OEM command requires access to the SDR.  Command confirmed to
+work on Sun Fire 4140 with ILOM.
 .TP
 .B set-led \fIrecord_id\fR \fIoff|on|standby|slow|fast\fR
 This OEM command will configure LED modes.  (See \fIget\-led\fR above
-for description on LED modes.)  Command confirmed to work on Sun Fire
-4140 with ILOM.
+for description on LED modes.)  This OEM command requires access to
+the SDR.  Command confirmed to work on Sun Fire 4140 with ILOM.
 .RE
 .TP
 .B Supermicro
