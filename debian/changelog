@@ -2,6 +2,7 @@ freeipmi (1.1.5-1~pre1) unstable; urgency=low
 
   * New upstream release (Closes: #635508)
     - GPLv3 licensed now
+    - additional patches: up_fixmanpages
   * debian/watch: adjusted url
   * debian/patches: adjusted for config files move
   * debian/copyright: DEP5 + years

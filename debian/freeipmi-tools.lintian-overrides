@@ -10,5 +10,4 @@ freeipmi-tools binary: manpage-has-errors-from-man usr/share/man/man5/ipmipower.
 
 # Quite a few lines in freeipmi pages might not be hypened easily, e.g. like
 # .B Chassis_Front_Panel_Buttons:Enable_Power_Off_Button_For_Power_Off_Only
-freeipmi-tools binary: manpage-has-errors-from-man usr/share/man/man8/ipmi-chassis-config.8.gz 266: warning [p 4, 10.5i]: cannot adjust line
-
+freeipmi-tools binary: manpage-has-errors-from-man usr/share/man/man8/ipmi-chassis-config.8.gz 296: warning [p 5, 3.3i]: cannot adjust line
