@@ -1,4 +1,4 @@
-freeipmi (1.1.2-1~pre1) UNRELEASED; urgency=low
+freeipmi (1.1.5-1~pre1) UNRELEASED; urgency=low
 
   * New upstream release (Closes: #635508)
     - GPLv3 licensed now
@@ -9,7 +9,7 @@ freeipmi (1.1.2-1~pre1) UNRELEASED; urgency=low
   * debian/patches: adjusted for config files move
   * debian/copyright: DEP5 + years
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 24 Feb 2012 21:58:45 -0500
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 04 Jun 2012 15:28:41 -0400
 
 freeipmi (0.8.12-3) unstable; urgency=low
 
