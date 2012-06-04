@@ -79,7 +79,7 @@ Description: GNU IPMI - IPMI node detection tool
  .
  This package contains a tool and a daemon for detecting IPMI nodes.
 
-Package: libfreeipmi10
+Package: libfreeipmi12
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-common (= ${source:Version})
