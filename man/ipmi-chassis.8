@@ -1,4 +1,4 @@
-.TH IPMI-CHASSIS 8 "2012-02-06" "ipmi-chassis 1.1.2" "System Commands"
+.TH IPMI-CHASSIS 8 "2012-05-17" "ipmi-chassis 1.1.5" "System Commands"
 .SH "NAME"
 ipmi-chassis \- IPMI chassis management utility
 .SH "SYNOPSIS"
@@ -574,7 +574,7 @@ when using Cipher Suite ID 0. The integrity check value should be 0
 length, however the remote motherboard responds with a non-empty
 field. Those hitting this issue may see "k_g invalid" errors. Issue
 observed on Supermicro X8DTG, Supermicro X8DTU, and Intel
-S5500WBV/Penguin Relion 700.
+S5500WBV/Penguin Relion 700, and Intel S2600JF/Appro 512X.
 .LP
 No IPMI 1.5 Support - Some motherboards that support IPMI 2.0 have
 been found to not support IPMI 1.5. Those hitting this issue may see
@@ -595,7 +595,7 @@ Get the chassis status of a remote machine using IPMI over LAN.
 .PP
 Get the chassis status across a cluster using IPMI over LAN.
 .PP
-.B # ipmi-chassis -h ahost -u myusername -p mypassword --chassis-control=POWER-ON
+.B # ipmi-chassis -h ahost -u myusername -p mypassword --chassis-control=POWER-UP
 .PP
 Power on a remote machine using IPMI over LAN.
 .PP

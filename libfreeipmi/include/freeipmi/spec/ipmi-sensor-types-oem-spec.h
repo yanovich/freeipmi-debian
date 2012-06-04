@@ -69,7 +69,7 @@ extern "C" {
  *******************************************/
 
 /*
- * Intel S5500WB
+ * Intel S5500WB/Penguin Computing Relion 700
  * Intel SR1625
  * Quanta QSSC-S4R/Appro GB812X-CN
  * (Quanta motherboard maintains Intel manufacturer ID)
@@ -82,6 +82,11 @@ extern "C" {
  * (Quanta motherboard maintains Intel manufacturer ID)
  */
 #define IPMI_SENSOR_TYPE_OEM_INTEL_POWER_THROTTLED              0xF3
+
+/*
+ * Intel S5000PAL
+ */
+#define IPMI_SENSOR_TYPE_OEM_INTEL_NMI_STATE                    0xC0
 
 /*
  * Intel Node Manager
@@ -131,6 +136,7 @@ extern "C" {
  * Supermicro X8DTN+-F (X8DTNPLUS_F)
  * Supermicro X8SIE
  * Supermicro X9SCA-F-O (X9SCA-F-O)
+ * Supermicro H8DGU-F (H8DGU_F)
  */
 /* achu: not official names, named based on use context */
 #define IPMI_SENSOR_TYPE_OEM_SUPERMICRO_CPU_TEMP 0xC0 

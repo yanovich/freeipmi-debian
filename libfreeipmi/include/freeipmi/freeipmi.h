@@ -146,10 +146,10 @@ extern "C" {
 #include <freeipmi/util/ipmi-dcmi-util.h>
 #include <freeipmi/util/rmcp-util.h>
 
-#define FREEIPMI_PACKAGE_VERSION       1.1.2
+#define FREEIPMI_PACKAGE_VERSION       1.1.5
 #define FREEIPMI_PACKAGE_VERSION_MAJOR 1
 #define FREEIPMI_PACKAGE_VERSION_MINOR 1
-#define FREEIPMI_PACKAGE_VERSION_PATCH 1
+#define FREEIPMI_PACKAGE_VERSION_PATCH 5
 
 /*
  * Libfreeipmi version
@@ -169,7 +169,7 @@ extern "C" {
 
 #define LIBFREEIPMI_VERSION_MAJOR 2
 #define LIBFREEIPMI_VERSION_MINOR 0
-#define LIBFREEIPMI_VERSION_PATCH 1
+#define LIBFREEIPMI_VERSION_PATCH 3
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,4 @@
-.TH FREEIPMI_INTERPRET_SENSOR 5 "2012-02-06" "FreeIPMI 1.1.2" "Configuration"
+.TH FREEIPMI_INTERPRET_SENSOR 5 "2012-05-17" "FreeIPMI 1.1.5" "Configuration"
 .SH "NAME"
 freeipmi_interpret_sensor.conf \- specify sensor interpretation rules
 .SH "DESCRIPTION"
@@ -175,6 +175,21 @@ Defaults to Nominal.
 .TP
 \fBIPMI_Voltage_State_Asserted\fR
 Defaults to Warning.
+.RE
+.TP
+.B IPMI_Voltage_Limit
+The following states correspond to Voltage sensors that report on
+limits.
+.RS
+.TP
+\fBIPMI_Voltage_Limit_No_Event\fR
+Defaults to Nominal.
+.TP
+\fBIPMI_Voltage_Limit_Not_Exceeded\fR
+Defaults to Nominal.
+.TP
+\fBIPMI_Voltage_Limit_Exceeded\fR
+Defaults to Critical.
 .RE
 .TP
 .B IPMI_Voltage_Performance
@@ -1383,6 +1398,27 @@ Defaults to Critical.
 .TP
 \fBIPMI_Battery_Battery_Presence_Detected\fR
 Defaults to Nominal.
+.RE
+.TP
+.B IPMI_Session_Audit
+The following states correspond to Session Audit sensors w/
+Session_Audit specific output states.
+.RS
+.TP
+\fBIPMI_Session_Audit_No_Event\fR
+Defaults to Nominal.
+.TP
+\fBIPMI_Session_Audit_Session_Activated\fR
+Defaults to Nominal.
+.TP
+\fBIPMI_Session_Audit_Session_Deactivated\fR
+Defaults to Nominal.
+.TP
+\fBIPMI_Session_Audit_Invalid_Username_Or_Password\fR
+Defaults to Warning.
+.TP
+\fBIPMI_Session_Audit_Invalid_Password_Disable\fR
+Defaults to Critical.
 .RE
 .TP
 .B IPMI_FRU_State

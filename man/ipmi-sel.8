@@ -1,4 +1,4 @@
-.TH IPMI-SEL 8 "2012-02-06" "ipmi-sel 1.1.2" "System Commands"
+.TH IPMI-SEL 8 "2012-05-17" "ipmi-sel 1.1.5" "System Commands"
 .SH "NAME"
 ipmi-sel \- display SEL entries
 .SH "SYNOPSIS"
@@ -685,7 +685,7 @@ when using Cipher Suite ID 0. The integrity check value should be 0
 length, however the remote motherboard responds with a non-empty
 field. Those hitting this issue may see "k_g invalid" errors. Issue
 observed on Supermicro X8DTG, Supermicro X8DTU, and Intel
-S5500WBV/Penguin Relion 700.
+S5500WBV/Penguin Relion 700, and Intel S2600JF/Appro 512X.
 .LP
 \fIassumesystemevent\fR - This workaround option will assume invalid SEL
 record types are system event records. Records may be formatted
@@ -710,9 +710,15 @@ below may be rebranded by vendors/distributors.
 .LP
 Dell Poweredge 2900, Dell Poweredge 2950, Dell Poweredge R610, Dell
 Poweredge R710, Fujitsu iRMC S1 and iRMC S2 systems, Intel
-S5500WB/Penguin Computing Relion 700, Intel S2600JF/Appro 512X,
-Inventec 5441/Dell Xanadu II, Inventec 5442/Dell Xanadu III, Quanta
-S99Q/Dell FS12-TY, Sun X4140, Quanta QSSC-S4R/Approp GB812X-CN.
+S5500WB/Penguin Computing Relion 700, Intel S2600JF/Appro 512X, Intel
+S5000PAL, Inventec 5441/Dell Xanadu II, Inventec 5442/Dell Xanadu III,
+Quanta S99Q/Dell FS12-TY, Quanta QSSC-S4R/Approp GB812X-CN, Sun X4140
+Supermicro X7DBR-3, Supermicro X7DB8, Supermicro X8DTN, Supermicro
+X7SBI-LN4, Supermicro X8DTH, Supermicro X8DTG, Supermicro X8DTU,
+Supermicro X8DT3-LN4F, Supermicro X8DTU-6+, Supermicro X8DTL,
+Supermicro X8DTL-3F, Supermicro X8SIL-F, Supermicro X9SCL, Supermicro
+X9SCM, Supermicro X8DTN+-F, Supermicro X8SIE, Supermicro X9SCA-F-O,
+Supermicro H8DGU-F.
 .SH "EXAMPLES"
 .B # ipmi-sel
 .PP

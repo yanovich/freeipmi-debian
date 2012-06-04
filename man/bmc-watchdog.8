@@ -23,7 +23,7 @@
 .\"  You should have received a copy of the GNU General Public License along
 .\"  with Bmc-Watchdog.  If not, see <http://www.gnu.org/licenses/>.
 .\"############################################################################
-.TH bmc-watchdog 8 "2012-02-06" "bmc-watchdog 1.1.2" "System Commands"
+.TH bmc-watchdog 8 "2012-05-17" "bmc-watchdog 1.1.5" "System Commands"
 .SH "NAME"
 bmc-watchdog \- BMC watchdog timer daemon and control utility
 .SH "SYNOPSIS"
@@ -108,12 +108,10 @@ Run
 .B bmc-watchdog
 as a daemon. Configurable BMC watchdog timer options are listed below
 under DAEMON OPTIONS. The configuration values are set once, then the
-daemon will reset the timer at specified periodic intervals.
-Everytime the BMC watchdog timer is reset, a log entry will be
-generated in the bmc-watchdog log. The default log is stored at
-/var/log/freeipmi/bmc-watchdog.log. The daemon can be stopped using
-the \fB\-\-stop\fR command, \fB\-\-clear\fR command, or by setting the
-stop_timer flag on the \fB\-\-set\fR command.
+daemon will reset the timer at specified periodic intervals. The
+daemon can be stopped using the \fB\-\-stop\fR command,
+\fB\-\-clear\fR command, or by setting the stop_timer flag on the
+\fB\-\-set\fR command.
 .SH "GENERAL OPTIONS"
 The following options are general options for configuring IPMI
 communication and executing general tool commands.

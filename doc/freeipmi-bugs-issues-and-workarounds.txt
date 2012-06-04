@@ -227,7 +227,7 @@ LAN Authentication Issue #13: [COMPLIANCE]
 
   Notes: Confirmed fixed in newer firmware for Inventec 5441/Dell
   Xanadu II.  Due to legacy, vendor reports will not fix on Intel
-  S5500WBV/Penguin Relion 700.
+  S5500WBV/Penguin Relion 700 and Intel S2600JF/Appro 512X.
 
 LAN Authentication Issue #14: [COMPLIANCE]
 
@@ -259,13 +259,13 @@ LAN Authentication Issue #16: [COMPLIANCE]
   be 0 length.
 
   Seen on: Supermicro X8DTG, Supermicro X8DTU, Intel S5500WBV/Penguin
-  Relion 700
+  Relion 700, Intel S2600JF/Appro 512X
 
   Resolution: Workaround option added to inform software to ignore the
   non-zero length field.
 
   Notes: Confirmed fixed in newer firmware for Supermicro X8DTG,
-  Supermicro X8DTU.
+  Supermicro X8DTU, Intel S2600JF/Appro 512X.
 
 LAN Authentication Issue #17: [COMPLIANCE]
 
@@ -321,6 +321,17 @@ LAN Authentication Issue #21: [COMPLIANCE]
   Seen on: Sun Fire 4100 with ILOM
 
   Resolution: Workaround added to parse unique cipher suite records.
+
+LAN Authentication Issue #22: [COMPLIANCE]
+
+  The motherboard reports support of Cipher Suite ID 15, however when
+  attemption authenticate with it, it is reported as unsupported.
+
+  Seen on: Intel S2600JF/Appro 512X
+
+  Resolution: None
+
+  Notes: Confirmed fixed in newer firmware.
 
 ----------------------------------------------------------------------
 
@@ -448,7 +459,7 @@ SDR Issue #3: [COMPLIANCE]
 
   Seen on: HP Proliant DL585G7
 
-  Resolution: Workaround added to adjust and handle the correct lenght
+  Resolution: Workaround added to adjust and handle the correct length
   of the record.
 
 ----------------------------------------------------------------------
@@ -1019,12 +1030,15 @@ BMC/IPMI Configuration Issue #29: [COMPLIANCE]
 
 BMC/IPMI Configuration Issue #30: [COMPLIANCE]
 
-  Cipher suite privilege levels are not configurable.  The cipher
-  suite entry count is 0.
+  Cipher Suite 1-16 are listed as supported instead of cipher suites
+  0-15.
 
   Seen on: Intel S2600JF/Appro 512X
 
-  Resolution: None
+  Resolution: Workaround added to detect this specific situation and
+  adjust appropriately.
+
+  Notes: Confirmed fixed in newer firmware.
 
 ----------------------------------------------------------------------
 
@@ -1230,15 +1244,13 @@ Sensors Issue #14: [IMPLEMENTATION]
 
   Resolution: None
 
-Sensors Issue #15: [COMPLIANCE]
+Sensors Issue #15: [INTERPRETATION]
 
-  SDR records for some sensors give conflicting information.  For
-  example, a threshold based sensor lists an event/reading type code
-  for a discrete sensor.  The analog data format indicates an
+  SDR records for some sensors list an event/reading type code for a
+  discrete sensor, but return an analog reading from a Get Sensor
+  Reading command. (The SDR's analog data format indicates an
   analog/threshold based sensor, however no threshold limits for the
-  sensor are listed in the SDR.  This can lead to software to make
-  invalid assumptions of the type of sensor it is reading and how to
-  handle it.
+  sensor are listed in the SDR.)
 
   This was discovered when FreeIPMI and IPMItool sensor output
   mismatched.  In FreeIPMI, ipmi-sensors would report discrete states
@@ -1247,9 +1259,15 @@ Sensors Issue #15: [COMPLIANCE]
   output the sensor reading (e.g. 100 Watts) but invalid/incorrect
   discrete states.
 
-  IMO, a SDR record that indicates a threshold reading w/ a discrete
-  event/reading type code is illegal.  While it is not explicitly
-  stated in the IPMI specification, it's is very strongly implied.
+  IMO, a SDR record that indicates an analog reading w/ a discrete
+  event/reading type code is illegal.  At the minimum it makes no
+  sense.  If you report an analog reading without any treshold
+  information, what is the use?  While it is not explicitly stated in
+  the IPMI specification, this is strongly implied to be wrong.  In
+  42.1, it states for threshold sensors, "The Get Sensor Reading
+  command for a threshold-based sensor contains the present 'analog'
+  reading for the sensor along in addition to the discrete threshold
+  comparison status bit field."
 
   Seen on: HP Proliant DL380 G7, HP ProLiant ML310 G5
 
