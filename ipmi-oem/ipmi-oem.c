@@ -490,6 +490,36 @@ struct ipmi_oem_command oem_intel[] =
       ipmi_oem_intel_set_smtp_config
     },
     {
+      "get-power-restore-delay",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_intel_get_power_restore_delay
+    },
+    {
+      "set-power-restore-delay",
+      "<seconds>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_intel_set_power_restore_delay
+    },
+#if 0
+    {
+      "get-bmc-service-status",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_intel_get_bmc_service_status
+    },
+    {
+      "set-bmc-service-status",
+      "<enable|disable> <ssh|http|kvm>",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_intel_set_bmc_service_status
+    },
+#endif
+    {
       "restore-configuration",
       NULL,
       0,
@@ -1404,6 +1434,10 @@ main (int argc, char **argv)
       exit_code = EXIT_SUCCESS;
       goto cleanup;
     }
+
+  /* We don't want caching info to output when are doing ranged output */
+  if (hosts_count > 1)
+    prog_data.args->sdr.quiet_cache = 1;
 
   if ((rv = pstdout_launch (prog_data.args->common.hostname,
                             _ipmi_oem,

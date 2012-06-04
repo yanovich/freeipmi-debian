@@ -1,3 +1,79 @@
+FreeIPMI 1.1.5 - 05/17/12
+-------------------------
+Tools
+------
+o Support Supermicro OEM sensors/SEL on H8DGU-F motherboards.
+o In ipmiconsole, fix password length check bug.
+o In bmc-watchdog, fix --start-if-stopped and --reset-if-running
+  options.
+o In ipmidetectd, fix usage output typos.
+o In ipmi-sensors-config, fix several parallel output corner cases.
+o For consistency to other tools, turn on quiet-caching if
+  communicating with multiple hosts in bmc-device and ipmi-oem.
+o In ipmi-sensors, fix bug in which multiple workarounds could not be
+  used or used in combination with bridging.
+o Fix start run levels in ipmidetectd init script. 
+
+Libraries
+---------
+o In libfreeipmi fru-parse API, handle additional device busy errors.
+
+Misc
+----
+o Various documentation updates.
+
+FreeIPMI 1.1.4 - 04/19/12
+-------------------------
+Tools
+------
+o In ipmi-oem, fix error message output in several Supermicro OEM
+  commands.
+o In ipmi-oem, add Intel --get-power-restore-delay and
+  --set-power-restore-delay support.
+o In ipmi-sel, support Intel S2600JF/Appro 512x OEM SEL
+  interpretations.
+
+Libraries
+----------
+o In libfreeipmi, support new sensor and SEL event interpretations,
+  including Session Audit, Voltage Limits.
+o In libfreeipmi, support new OEM interpretations for Intel S5000PAL
+  NMI State and SMI timeout sensors/SEL events.
+o In libfreeipmi, support Intel S2600JF/Appro 512x OEM SEL
+  interpretations.
+
+Misc
+----
+o Various documentation updates.
+
+FreeIPMI 1.1.3 - 03/06/12
+-------------------------
+Tools
+------
+o Support Supermicro CPU temperature SEL events.
+o In ipmi-oem, fix corner case with Dell C410x power control
+  calculation.
+o In all tools, fix error messages to differentiate between invalid
+  and unsupported cipher suite IDs.
+o In bmc-config, fix a Cipher Suite Privilege configuration
+  corner case in the workaround for an HP DL145 workaround.
+o In bmc-config, add workaround for Cipher Suite Privilege
+  configuration on Intel S2600JF/Appro 512X.
+o Various documentation updates.
+
+Libraries
+----------
+o In libfreeipmi, fix incorrect packet layout for the Get Lan
+  Configuration Parameters RMCPplus Messaging Cipher Suite Entry Support
+  response.
+o In libipmimonitoring, properly return connection timeout error on
+  connection timeout.
+
+Misc
+----
+o Fix build when using --docdir. 
+o Various documentation updates.
+
 FreeIPMI 1.1.2 - 02/06/12
 -------------------------
 Tools

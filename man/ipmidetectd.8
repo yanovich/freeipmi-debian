@@ -23,7 +23,7 @@
 .\"  You should have received a copy of the GNU General Public License along
 .\"  with Ipmidetect.  If not, see <http://www.gnu.org/licenses/>.
 .\"#############################################################################
-.TH ipmidetectd 8 "2012-02-06" "ipmidetectd 1.1.2" ipmidetectd
+.TH ipmidetectd 8 "2012-05-17" "ipmidetectd 1.1.5" ipmidetectd
 .SH "NAME"
 ipmidetectd \- IPMI node detection monitoring daemon
 .SH "SYNOPSIS"
@@ -59,7 +59,7 @@ Output help
 .TP
 \fB\-v\fR, \fB\-\-version\fR
 Output version
-.if 1 \{
+.if 0 \{
 .TP
 \fB\-c\fR \fIFILE\fR, \fB\-\-config\-file\fR
 Specify alternate configuration file
@@ -68,6 +68,8 @@ Specify alternate configuration file
 Turn on debugging and run daemon in foreground
 \}
 
+.SH "ERRORS"
+Errors are logged to syslog.
 .SH "FILES"
 /usr/local/etc/freeipmi//ipmidetectd.conf
 .SH "REPORTING BUGS"

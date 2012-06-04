@@ -1,8 +1,8 @@
 This is freeipmi-faq.info, produced by makeinfo version 4.13 from
 freeipmi-faq.texi.
 
-This manual is for FreeIPMI (version 1.1.2, 6 February 2012).
-Copyright (C) 2006-2012 FreeIPMI Core Team
+This manual is for FreeIPMI (version 1.1.5, 17 May 2012).  Copyright
+(C) 2006-2012 FreeIPMI Core Team
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -22,8 +22,8 @@ File: freeipmi-faq.info,  Node: Top,  Next: What is IPMI,  Prev: (dir),  Up: (di
 
    Frequently Asked Questions on *FreeIPMI*
 
-   This edition of the documentation was last updated on 6 February
-2012 for release 1.1.2 of the FreeIPMI.
+   This edition of the documentation was last updated on 17 May 2012 for
+release 1.1.5 of the FreeIPMI.
 
 * Menu:
 
@@ -738,30 +738,30 @@ For help, please email the <freeipmi-users@gnu.org> mailing list.
 
 
 Tag Table:
-Node: Top691
-Node: What is IPMI2051
-Node: What is FreeIPMI?3240
-Node: How did FreeIPMI start?3776
-Node: What operating systems does FreeIPMI run on?5112
-Node: FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil5868
-Node: What is special about FreeIPMI?6676
-Node: Does my system support IPMI?13076
-Node: How do I compile FreeIPMI?14627
-Node: libgcrypt requirement14992
-Node: x86-64 Compilation15632
-Node: Installing FreeIPMI on FreeBSD16315
-Node: What are some IPMI terminology or acronyms I should be aware of?16958
-Node: What setup is needed for FreeIPMI to communicate over LAN?19926
-Node: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?20520
-Node: Do I need to install or configure a driver to perform IPMI inband?22338
-Node: SSIF Driver Configuration23806
-Node: How do you setup Powerman with ipmipower?25406
-Node: How do you setup Conman with ipmiconsole or libipmiconsole?26741
-Node: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?28652
-Node: Why is the IPMI kernel driver faster than the KCS driver?29309
-Node: Why are there so many IPMI compliance bugs?30317
-Node: How do I get around an IPMI compliance bug on my motherboard?31412
-Node: How do I program with the FreeIPMI libraries?32202
-Node: Where can I get additional help or support?33536
+Node: Top688
+Node: What is IPMI2044
+Node: What is FreeIPMI?3233
+Node: How did FreeIPMI start?3769
+Node: What operating systems does FreeIPMI run on?5105
+Node: FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil5861
+Node: What is special about FreeIPMI?6669
+Node: Does my system support IPMI?13069
+Node: How do I compile FreeIPMI?14620
+Node: libgcrypt requirement14985
+Node: x86-64 Compilation15625
+Node: Installing FreeIPMI on FreeBSD16308
+Node: What are some IPMI terminology or acronyms I should be aware of?16951
+Node: What setup is needed for FreeIPMI to communicate over LAN?19919
+Node: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?20513
+Node: Do I need to install or configure a driver to perform IPMI inband?22331
+Node: SSIF Driver Configuration23799
+Node: How do you setup Powerman with ipmipower?25399
+Node: How do you setup Conman with ipmiconsole or libipmiconsole?26734
+Node: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?28645
+Node: Why is the IPMI kernel driver faster than the KCS driver?29302
+Node: Why are there so many IPMI compliance bugs?30310
+Node: How do I get around an IPMI compliance bug on my motherboard?31405
+Node: How do I program with the FreeIPMI libraries?32195
+Node: Where can I get additional help or support?33529
 
 End Tag Table

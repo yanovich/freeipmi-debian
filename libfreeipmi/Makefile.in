@@ -192,6 +192,7 @@ am_libfreeipmi_la_OBJECTS = api/libfreeipmi_la-ipmi-api.lo \
 	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-inventec.lo \
 	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.lo \
 	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo \
+	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo \
 	sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo \
 	sensor-read/libfreeipmi_la-ipmi-sensor-read.lo \
 	sensor-read/libfreeipmi_la-ipmi-sensor-read-util.lo \
@@ -624,6 +625,8 @@ libfreeipmi_la_SOURCES = \
 	sel-parse/ipmi-sel-parse-string-quanta.h \
 	sel-parse/ipmi-sel-parse-string-sun.c \
 	sel-parse/ipmi-sel-parse-string-sun.h \
+	sel-parse/ipmi-sel-parse-string-supermicro.c \
+	sel-parse/ipmi-sel-parse-string-supermicro.h \
 	sel-parse/ipmi-sel-parse-trace.h \
 	sel-parse/ipmi-sel-parse-util.c \
 	sel-parse/ipmi-sel-parse-util.h \
@@ -1032,6 +1035,8 @@ sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.lo:  \
 	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
 sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo:  \
 	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
+sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo:  \
+	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
 sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo:  \
 	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
 sensor-read/$(am__dirstamp):
@@ -1321,6 +1326,8 @@ mostlyclean-compile:
 	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.lo
 	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.$(OBJEXT)
 	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo
+	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.$(OBJEXT)
+	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo
 	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string.$(OBJEXT)
 	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string.lo
 	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-util.$(OBJEXT)
@@ -1490,6 +1497,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-inventec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-quanta.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-sun.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-supermicro.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse.Plo@am__quote@
@@ -2280,6 +2288,13 @@ sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo: sel-parse/ipmi-sel-parse-
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-string-sun.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo `test -f 'sel-parse/ipmi-sel-parse-string-sun.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-sun.c
+
+sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo: sel-parse/ipmi-sel-parse-string-supermicro.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-supermicro.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo `test -f 'sel-parse/ipmi-sel-parse-string-supermicro.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-supermicro.c
+@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-supermicro.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-supermicro.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-string-supermicro.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo `test -f 'sel-parse/ipmi-sel-parse-string-supermicro.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-supermicro.c
 
 sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo: sel-parse/ipmi-sel-parse-util.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-util.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo `test -f 'sel-parse/ipmi-sel-parse-util.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-util.c

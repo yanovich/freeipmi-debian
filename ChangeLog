@@ -1,3 +1,180 @@
+2012-05-17  Albert Chu <chu11@llnl.gov>
+
+	* NEWS, configure.ac: Update for release.
+
+	* Tagged Release-1_1_5.
+
+2012-05-16  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sensors-config/ipmi-sensors-config.c (_ipmi_sensors_config):
+	Fix several parallel output corner cases.
+
+	* ipmi-oem/ipmi-oem.c (main), bmc-device/bmc-device.c (main): Turn
+	on quiet caching if doing communication to multiple hosts.
+
+	* ipmi-sensors/ipmi-sensors.c (_ipmi_sensors): Fix bug in which
+	multiple workaround flags and workaround flags with bridging could
+	not be specified.
+
+2012-05-10  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/fru-parse/ipmi-fru-parse.c (_read_fru_data): Handle
+	additional device busy errors.
+	
+2012-05-08  Thomas Renninger <trenn@suse.de>
+
+	* etc/ipmidetectd.init: Fix start run levels.
+	
+2012-05-07  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/sdr-cache/ipmi-sdr-cache-create.c (ipmi_sdr_cache_create):
+	Fix error code return value.
+
+2012-05-06  Albert Chu <chu11@llnl.gov>
+
+	* Add Supermicro H8DGU-F support for ipmi-sel and interpret
+	library.
+
+	* Update docs for Supermicro H8DGU-F support.
+
+2012-05-06  Diego Elio Pettenò <flameeyes@flameeyes.eu>
+
+	* Add support for Supermicro H8DGU-F to ipmi-sensors.
+
+2012-05-05  Albert Chu <chu11@llnl.gov>
+
+	* ipmiconsole/ipmiconsole-argp.c (ipmiconsole_argp_parse): Fix
+	password length check bug.  (Found by Diego Elio Pettenò)
+	
+2012-05-03  Albert Chu <chu11@llnl.gov>
+
+	* ipmidetectd/ipmidetectd_config.c (_usage): Fix cut and paste
+	typo.
+	
+2012-05-02  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmidetectd.8.pre.in: Document that errors are logged to
+	syslog.
+	
+2012-05-02  Albert Chu <chu11@llnl.gov>
+
+	* man/freeipmi.conf.5.pre.in: Add ipmi-pet to list of supported
+	tools.
+
+	* man/bmc-watchdog.8.pre.in: Remove legacy information.
+
+	* bmc-watchdog/bmc-watchdog.c (_set_cmd): Fix --start-if-stopped
+	and --reset-if-running logic.
+	
+2012-04-30  Albert Chu <chu11@llnl.gov>
+
+	* NEWS, configure.ac: Update for release.
+
+	* Tagged Release-1_1_4.
+
+2012-04-19  Albert Chu <chu11@llnl.gov>
+
+	Merge branch intels2600jf
+
+	* ipmi-oem/: Add Intel --get-power-restore-delay,
+	--set-power-restore-delay, --get-bmc-service-status,
+	--set-bmc-service-status.
+
+	* libfreeipmi/include/freeipmi/spec/, libfreeipmi/sel-parse/:
+	Re-arch SEL OEM interpretations of Quanta QSSC-S4R/Appro GB812X-CN
+	to prepare for Intel S2600JF/Appro 512X.  Add QPI Interconnect
+	specific event offset messages.
+
+	* libfreeipmi/sel-parse/: Support Intel S2600JF/Appro 512X OEM SEL
+	events.
+
+	* libfreeipmi/include/: Add additions for Intel S2600JF/Appro 512x
+
+	* man/: Update documentation for Intel S2600JF/Appro 512x support.
+	
+2012-03-20  Albert Chu <chu11@llnl.gov>
+
+	Merge intels5000pal branch.
+
+	* libfreeipmi/interpret/: Support sensor Session Audit
+	intepretation.  Convert default state of
+	IPMI_Session_Audit_Invalid_Username_Or_Password from Critical to
+	Warning.  Support Voltage Limit sensors.  Support SMI timeout on
+	Intel S5000PAL motherboard.
+
+	* man/, etc/: Upate appropriately.
+	
+2012-03-12  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/ipmi-oem-supermicro.c
+	(ipmi_oem_supermicro_get_bmc_services_status,
+	ipmi_oem_supermicro_set_bmc_services_status): Fix error message
+	output.
+	
+2012-03-06  Albert Chu <chu11@llnl.gov>
+
+	* NEWS, configure.ac: Update for release.
+
+	* Tagged Release-1_1_3.
+
+2012-03-06  Thomas Renninger <trenn@suse.de>
+
+	* contrib/Makefile.am, Makefile.am, doc/Makefile.am: Fix docdir
+	usage for newer autotools.
+	
+2012-03-01  Albert Chu <chu11@llnl.gov>
+	
+	* libipmimonitoring/ipmi_monitoring_ipmi_communication.c
+	(_ipmi_1_5_init, _ipmi_2_0_init): Properly return connection
+	timeout error on connection timeout.
+
+	* man/ipmidetectd.conf.5.pre.in: Fix some English.
+	
+2012-02-26  Yaroslav Halchenko <debian@onerussian.com>
+
+	* man/ipmi-chassis.8.pre.in: Fix typos.
+	
+2012-02-22  Albert Chu <chu11@llnl.gov>
+
+	* bmc-config/bmc-config-rmcpplus-conf-privilege-section.c
+	(id_checkout): Fix cipher suite privilege
+	configuration corner cases workaround on HP DL145.
+
+	* man/manpage-common-workaround-outofband-20-text.man: Document
+	Intel S2600JF/Appro 512X workaround.
+
+	* bmc-config/bmc-config-rmcpplus-conf-privilege-section.c (_rmcpplus_cipher_suite_id_privilege_setup):
+	Workaround cipher suite privilege configuration bug in Intel
+	S2600JF/Appro 512X.
+	
+2012-02-22  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/tool-cmdline-common.c (common_parse_opt),
+	common/toolcommon/tool-config-file-common.c
+	(_config_file_cipher_suite_id): Differentiate between invalid and
+	unsupported cipher suites in error message output.
+	
+2012-02-21  Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-bugs-issues-and-workarounds.txt,
+	man/ipmi-sensors.8.pre.in: Update information concerning
+	'discretereading' workaround.
+
+	* libfreeipmi/cmds/ipmi-lan-cmds.c: Fix packet layout for
+	tmpl_cmd_get_lan_configuration_parameters_rmcpplus_messaging_cipher_suite_entry_support_rs.
+	
+2012-02-17  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/ipmi-oem-dell.c: Fix C410X corner case.
+
+2012-02-08  Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-coding.txt, README.build: Add configure notes.
+	
+2012-02-07  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/sel-parse/: Support Supermicro SEL CPU Temp events.
+	
 2012-02-06  Albert Chu <chu11@llnl.gov>
 
 	* NEWS, configure.ac: Update for release.

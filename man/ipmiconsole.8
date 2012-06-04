@@ -23,7 +23,7 @@
 .\"  You should have received a copy of the GNU General Public License along
 .\"  with Ipmiconsole.  If not, see <http://www.gnu.org/licenses/>.
 .\"############################################################################
-.TH ipmiconsole 8 "2012-02-06" "ipmiconsole 1.1.2" "System Commands"
+.TH ipmiconsole 8 "2012-05-17" "ipmiconsole 1.1.5" "System Commands"
 .SH "NAME"
 ipmiconsole \- IPMI console utility
 .SH "SYNOPSIS"
@@ -221,7 +221,7 @@ these keepalive packets do nothing.
 \fB\-\-lock-memory\fR
 Lock sensitive information (such as usernames and passwords) in
 memory.
-.if 1 \{
+.if 0 \{
 .TP
 \fB\-\-debugfile\fR
 Output debugging to the debugfile rather than to standard output.
@@ -451,7 +451,7 @@ when using Cipher Suite ID 0. The integrity check value should be 0
 length, however the remote motherboard responds with a non-empty
 field. Those hitting this issue may see "k_g invalid" errors. Issue
 observed on Supermicro X8DTG, Supermicro X8DTU, and Intel
-S5500WBV/Penguin Relion 700.
+S5500WBV/Penguin Relion 700, and Intel S2600JF/Appro 512X.
 .LP
 \fIsolpayloadsize\fR - This workaround flag will not check for valid
 SOL payload sizes and assume a proper set. It works around remote
@@ -523,7 +523,7 @@ In order to prevent brute force attacks, some BMCs will temporarily
 "lock up" after a number of remote authentication errors. You may
 need to wait awhile in order to this temporary "lock up" to pass
 before you may authenticate again.
-.if 1 \{
+.if 0 \{
 This version of ipmiconsole was compiled with debugging. When compiled
 with debugging,
 .B ipmiconsole
