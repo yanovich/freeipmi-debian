@@ -1,12 +1,13 @@
-freeipmi (1.0.8-1~pre1) UNRELEASED; urgency=low
+freeipmi (1.1.5-1~pre1) unstable; urgency=low
 
+  * Config files were moved under /etc/freeipmi.  Legacy location (under
+    /etc) is supported only for backwards compatibility.  Please migrate
+    your changes and remove configuration files from legacy locations.
   * ipmimonitoring tool was removed -- superseded by ipmi-sensors
     and the new --output-sensor-state option (thin wrapper
     /usr/sbin/ipmimonitoring is provided)
-  * Config files were moved under /etc/freeipmi.  Legacy location (under
-    /etc) is supported only for backwards compatibility.
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 01 Nov 2011 14:06:26 -0400
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 04 Jun 2012 15:46:08 -0400
 
 freeipmi (0.8.10-1) experimental; urgency=low
 
