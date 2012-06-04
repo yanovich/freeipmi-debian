@@ -8,7 +8,7 @@ Build-Depends: debhelper (>= 7.0.50~),
  chrpath,
  autoconf, automake, libtool,
  texinfo
-Standards-Version: 3.9.2
+Standards-Version: 3.9.3
 Homepage: http://www.gnu.org/software/freeipmi/
 Vcs-Browser: http://git.onerussian.com/?p=deb/freeipmi.git
 Vcs-git: git://git.onerussian.com/deb/freeipmi.git
@@ -50,7 +50,6 @@ Description: GNU implementation of the IPMI protocol - tools
   * ipmi-sensors - display IPMI sensor information
   * ipmi-sensors-config - configure sensors
   * ipmiconsole - IPMI console utility
-  * ipmimonitoring - IPMI monitoring utility
   * ipmiping - send IPMI Get Authentication Capabilitiy request
   * ipmipower - IPMI power control utility
   * pef-config - configure PEF values
