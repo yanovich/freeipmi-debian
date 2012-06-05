@@ -14,7 +14,7 @@ freeipmi (1.1.5-1~pre1) unstable; urgency=low
     - version build-dependency on autotools-dev, version 20100122.1
       deduced from autotools-dev's changelog (Closes: #619248)
     - boost policy compliance to 3.9.3 -- no further changes
-  * debian/symbols: added to overview libraries API changes
+  * debian/*.symbols: added to overview libraries API changes
   * debian/rules: use dpkg-buildflags for configure to inject hardening
     options
 

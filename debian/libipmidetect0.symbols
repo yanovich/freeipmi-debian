@@ -1,0 +1,12 @@
+libipmidetect.so.0 libipmidetect0 #MINVER#
+ ipmidetect_errnum@Base 1.1.5
+ ipmidetect_errormsg@Base 1.1.5
+ ipmidetect_get_detected_nodes_string@Base 1.1.5
+ ipmidetect_get_undetected_nodes_string@Base 1.1.5
+ ipmidetect_handle_create@Base 1.1.5
+ ipmidetect_handle_destroy@Base 1.1.5
+ ipmidetect_is_node_detected@Base 1.1.5
+ ipmidetect_is_node_undetected@Base 1.1.5
+ ipmidetect_load_data@Base 1.1.5
+ ipmidetect_perror@Base 1.1.5
+ ipmidetect_strerror@Base 1.1.5
