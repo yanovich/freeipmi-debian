@@ -1,0 +1,89 @@
+From: Albert Chu <chu11@llnl.gov>
+Date: Tue, 5 Jun 2012 20:59:40 +0000
+Subject: [PATCH] Fix -Wformat-security warnings
+
+Origin: upstream svn
+Last-Update: 2012-06-05
+
+git-svn-id: svn://svn.savannah.gnu.org/freeipmi/trunk@9160 f7bdd6f0-feb3-4745-876d-a5d75e847258
+---
+ ChangeLog                                          |    8 ++++++++
+ common/miscutil/conffile.c                         |    8 ++++----
+ libfreeipmi/util/ipmi-device-types-util.c          |    2 +-
+ .../util/ipmi-sensor-and-event-code-tables-util.c  |    2 +-
+ libfreeipmi/util/ipmi-sensor-util.c                |    2 +-
+ 5 files changed, 15 insertions(+), 7 deletions(-)
+
+diff --git a/common/miscutil/conffile.c b/common/miscutil/conffile.c
+index 0d9fcfd..04b368e 100644
+--- a/common/miscutil/conffile.c
++++ b/common/miscutil/conffile.c
+@@ -149,14 +149,14 @@ conffile_errmsg(conffile_t cf, char *buf, int buflen)
+ 
+     if (cf == NULL) 
+         rv = snprintf(errbuf, CONFFILE_MAX_ERRMSGLEN, 
+-                      _errmsg[CONFFILE_ERR_NULLHANDLE]);
++                      "%s", _errmsg[CONFFILE_ERR_NULLHANDLE]);
+     else if (cf->magic != CONFFILE_MAGIC)
+         rv = snprintf(errbuf, CONFFILE_MAX_ERRMSGLEN, 
+-                      _errmsg[CONFFILE_ERR_MAGIC]);
++                      "%s", _errmsg[CONFFILE_ERR_MAGIC]);
+     else if (cf->errnum < CONFFILE_ERR_SUCCESS 
+              || cf->errnum > CONFFILE_ERR_ERRNUMRANGE)
+         rv = snprintf(errbuf, CONFFILE_MAX_ERRMSGLEN, 
+-                      _errmsg[CONFFILE_ERR_ERRNUMRANGE]);
++                      "%s", _errmsg[CONFFILE_ERR_ERRNUMRANGE]);
+     else if (cf->errnum == CONFFILE_ERR_PARSE_OPTION_UNKNOWN
+              || cf->errnum == CONFFILE_ERR_PARSE_ARG_MISSING
+              || cf->errnum == CONFFILE_ERR_PARSE_ARG_TOOMANY
+@@ -176,7 +176,7 @@ conffile_errmsg(conffile_t cf, char *buf, int buflen)
+                       _errmsg[cf->errnum], cf->line_num);
+     else
+         rv = snprintf(errbuf, CONFFILE_MAX_ERRMSGLEN, 
+-                      _errmsg[cf->errnum]);
++                      "%s", _errmsg[cf->errnum]);
+ 
+     if (rv >= buflen)
+         return -1;
+diff --git a/libfreeipmi/util/ipmi-device-types-util.c b/libfreeipmi/util/ipmi-device-types-util.c
+index 899dbcf..187987b 100644
+--- a/libfreeipmi/util/ipmi-device-types-util.c
++++ b/libfreeipmi/util/ipmi-device-types-util.c
+@@ -55,7 +55,7 @@ _get_message (unsigned int offset,
+       return (-1);
+     }
+ 
+-  return (snprintf (buf, buflen, string_array[offset]));
++  return (snprintf (buf, buflen, "%s", string_array[offset]));
+ }
+ 
+ int
+diff --git a/libfreeipmi/util/ipmi-sensor-and-event-code-tables-util.c b/libfreeipmi/util/ipmi-sensor-and-event-code-tables-util.c
+index 9e07bc7..3dc6e76 100644
+--- a/libfreeipmi/util/ipmi-sensor-and-event-code-tables-util.c
++++ b/libfreeipmi/util/ipmi-sensor-and-event-code-tables-util.c
+@@ -1108,7 +1108,7 @@ _get_event_message (unsigned int offset,
+       return (-1);
+     }
+ 
+-  return (snprintf (buf, buflen, string_array[offset]));
++  return (snprintf (buf, buflen, "%s", string_array[offset]));
+ }
+ 
+ int
+diff --git a/libfreeipmi/util/ipmi-sensor-util.c b/libfreeipmi/util/ipmi-sensor-util.c
+index 0afeb34..943ffbb 100644
+--- a/libfreeipmi/util/ipmi-sensor-util.c
++++ b/libfreeipmi/util/ipmi-sensor-util.c
+@@ -64,7 +64,7 @@ ipmi_get_threshold_message (uint8_t offset, char *buf, unsigned int buflen)
+       return (-1);
+     }
+ 
+-  return (snprintf (buf, buflen, threshold_comparison_status_desc[offset]));
++  return (snprintf (buf, buflen, "%s", threshold_comparison_status_desc[offset]));
+ }
+ 
+ const char *
+-- 
+1.7.9.1
+

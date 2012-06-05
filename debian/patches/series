@@ -1,2 +1,3 @@
 up_fixmanpages
 deb_bmc-watchdog_noRUN
+0001-Fix-Wformat-security-warnings.patch

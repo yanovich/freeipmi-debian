@@ -5,7 +5,10 @@ freeipmi (1.1.5-1~pre1) unstable; urgency=low
     - additional patches: up_fixmanpages
     - new soversions: libipmimonitoring5, libfreeipmi12
   * debian/watch: adjusted url
-  * debian/patches: adjusted for config files move
+  * debian/patches: 
+    - adjusted for config files move
+    - 0001-Fix-Wformat-security-warnings.patch to build
+      with hardening flags
   * debian/copyright: DEP5 + years
   * debian/control:
     - version build-dependency on autotools-dev, version 20100122.1
