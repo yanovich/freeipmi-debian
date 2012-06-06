@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+dpkg-maintscript-helper mv_conffile /etc/freeipmi.conf /etc/freeipmi/freeipmi.conf 0.8.12-3 -- "$@"
+
+#DEBHELPER#
+
+exit 0

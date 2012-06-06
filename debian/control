@@ -16,7 +16,8 @@ Vcs-git: git://git.onerussian.com/deb/freeipmi.git
 Package: freeipmi-common
 Section: admin
 Architecture: all
-Depends: ${misc:Depends}, dpkg (>= 1.15.4) | install-info
+Depends: ${misc:Depends}
+Pre-Depends: dpkg (>=1.15.7.2~)
 Suggests: freeipmi-tools
 Description: GNU implementation of the IPMI protocol - common files
  FreeIPMI is a collection of Intelligent Platform Management IPMI
@@ -72,6 +73,7 @@ Package: freeipmi-ipmidetect
 Section: admin
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Pre-Depends: dpkg (>=1.15.7.2~)
 Description: GNU IPMI - IPMI node detection tool
  FreeIPMI is a collection of Intelligent Platform Management IPMI
  system software. It provides in-band and out-of-band software and a

@@ -33,3 +33,43 @@ libipmimonitoring4_0.8.12-3_amd64.deb
 drwxr-xr-x root/root         0 2011-07-18 22:35 ./etc/
 -rw-r--r-- root/root     23432 2011-07-18 22:35 ./etc/ipmi_monitoring_sensors.conf
 
+
+After
+
+$> for x in *ipmi*1.1.5-1*deb; do echo $x; dpkg -c $x | grep etc ;done 
+freeipmi-bmc-watchdog_1.1.5-1~pre1_amd64.deb
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/init.d/
+-rwxr-xr-x root/root      6424 2012-06-05 19:53 ./etc/init.d/bmc-watchdog
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/logrotate.d/
+-rw-r--r-- root/root       279 2012-06-05 20:00 ./etc/logrotate.d/bmc-watchdog
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/default/
+-rw-r--r-- root/root      1502 2012-06-05 20:00 ./etc/default/bmc-watchdog
+freeipmi-common_1.1.5-1~pre1_all.deb
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/freeipmi/
+-rw-r--r-- root/root     39572 2012-06-05 20:00 ./etc/freeipmi/freeipmi_interpret_sel.conf
+-rw-r--r-- root/root     42410 2012-06-05 20:00 ./etc/freeipmi/freeipmi_interpret_sensor.conf
+-rw-r--r-- root/root     13831 2012-06-05 20:00 ./etc/freeipmi/freeipmi.conf
+freeipmi-ipmidetect_1.1.5-1~pre1_amd64.deb
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/init.d/
+-rwxr-xr-x root/root      6440 2012-06-05 19:53 ./etc/init.d/ipmidetectd
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/default/
+-rw-r--r-- root/root       121 2012-06-05 19:53 ./etc/default/ipmidetectd
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/freeipmi/
+-rw-r--r-- root/root       589 2012-06-05 20:00 ./etc/freeipmi/ipmidetectd.conf
+-rw-r--r-- root/root       506 2012-06-05 20:00 ./etc/freeipmi/ipmidetect.conf
+freeipmi-tools_1.1.5-1~pre1_amd64.deb
+libfreeipmi10_1.1.5-1~pre1_amd64.deb
+libfreeipmi12_1.1.5-1~pre1_amd64.deb
+libfreeipmi-dev_1.1.5-1~pre1_amd64.deb
+libipmiconsole2_1.1.5-1~pre1_amd64.deb
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/
+drwxr-xr-x root/root         0 2012-06-05 20:01 ./etc/freeipmi/
+-rw-r--r-- root/root      2624 2012-06-05 20:00 ./etc/freeipmi/libipmiconsole.conf
+libipmiconsole-dev_1.1.5-1~pre1_amd64.deb
+libipmidetect0_1.1.5-1~pre1_amd64.deb
+libipmidetect-dev_1.1.5-1~pre1_amd64.deb
+libipmimonitoring5_1.1.5-1~pre1_amd64.deb
+libipmimonitoring-dev_1.1.5-1~pre1_amd64.deb
