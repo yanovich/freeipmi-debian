@@ -17,6 +17,11 @@ freeipmi (1.1.5-1~pre1) unstable; urgency=low
   * debian/*.symbols: added to overview libraries API changes
   * debian/rules: use dpkg-buildflags for configure to inject hardening
     options
+  * debian/control: rely on Pre-Depends: dpkg (>=1.15.7.2~) to avoid
+    safe-guarding of dpkg-maintscript-helper calls in maintainer scripts
+    (Closes: #659756).  Although use of Pre-Depends discouraged by policy
+    common consencus for such use seemed was 'ok':
+    https://lists.debian.org/debian-devel/2011/03/msg00751.html
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 04 Jun 2012 15:28:41 -0400
 

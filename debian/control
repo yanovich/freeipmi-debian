@@ -58,6 +58,7 @@ Description: GNU implementation of the IPMI protocol - tools
 Package: freeipmi-bmc-watchdog
 Section: admin
 Architecture: any
+Pre-Depends: dpkg (>=1.15.7.2~)
 Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-tools
 Description: GNU implementation of the IPMI protocol - BMC watchdog
  FreeIPMI is a collection of Intelligent Platform Management IPMI
