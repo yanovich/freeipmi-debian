@@ -1,3 +1,11 @@
+freeipmi (1.1.5-2) unstable; urgency=low
+
+  * Add all ipmi_monitoring*.h to the distribution within
+    libipmonitoring-dev (Closes: #676846).  Thanks Arnaud Quette for the
+    report and a perspective patch
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 10 Jun 2012 22:59:35 -0400
+
 freeipmi (1.1.5-1) unstable; urgency=low
 
   * New upstream release (Closes: #635508)
