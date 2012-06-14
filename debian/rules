@@ -80,5 +80,6 @@ override_dh_installchangelogs:
 	#dh_installdocs --link-doc=freeipmi-common
 
 # Readily usable examples
-override_dh_compress:
-	dh_compress -X.c
+# conflicts with .conf manpages -- apparently matches anywhere in the filename
+#override_dh_compress:
+#	dh_compress -X.c
