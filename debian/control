@@ -178,3 +178,13 @@ Description: GNU IPMI - ipmiconsole development package
  .
  This is the development package for libipmiconsole.
 
+Package: freeipmi
+Architecture: all
+Depends: ${misc:Depends}, freeipmi-tools, freeipmi-ipmidetect, freeipmi-bmc-watchdog
+Description: GNU implementation of the IPMI protocol
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ This meta-package depends on all separate modules of freeipmi.

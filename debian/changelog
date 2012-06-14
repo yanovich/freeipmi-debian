@@ -8,8 +8,11 @@ freeipmi (1.1.5-3) unstable; urgency=low
   * debian/rules:
     - added verification step that all "installed" materials
       are placed into packages (upon dh_installdeb step)
+  * debian/control:
+    - added freeipmi binary meta-package to pull in all components of
+      freeipmi suite
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 14 Jun 2012 15:03:10 -0400
+ -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 14 Jun 2012 15:46:22 -0400
 
 freeipmi (1.1.5-2) unstable; urgency=low
 
