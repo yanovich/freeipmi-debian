@@ -1,6 +1,9 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
+# We use some bashisms
+SHELL=/bin/bash
+
 # mega rule -- Joey knows how to do the rest
 %:
 	dh $@ --with autotools_dev
@@ -59,9 +62,9 @@ override_dh_installdeb:
 	| grep -v '\.la$$' \
 	| sed -e 's,etc/sysconfig/bmc-watchdog,etc/default/bmc-watchdog,g' \
 	| while read f; do \
-		cf=$${f//debian\/tmp}; \
-		installations=$$(/bin/ls debian/*/$$cf{,.gz} 2>/dev/null | grep -v debian/tmp | wc -l); \
-		[ "$$installations" -eq 1 ] || echo "$$installations of $$cf"; \
+		cf=$$(basename $$f); \
+		installations=$$(/usr/bin/find debian/ -name $$cf -o -name $$cf.gz | grep -v debian/tmp | wc -l); \
+		[ "$$installations" -gt 0 ] || echo "$$installations of $$cf"; \
 	done | grep . && exit 1 || :
 	dh_installdeb
 

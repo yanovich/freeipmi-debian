@@ -13,7 +13,7 @@ usr/sbin/ipmi-raw
 usr/sbin/ipmi-sel
 usr/sbin/ipmi-sensors
 usr/sbin/ipmi-sensors-config
-usr/sbin/ipmiconsole
+usr/sbin/ipmi*console
 usr/sbin/ipmimonitoring
 usr/sbin/ipmiping
 usr/sbin/ipmipower
