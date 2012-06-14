@@ -2,3 +2,4 @@ usr/lib/libfreeipmi.a
 usr/lib/libfreeipmi.so
 usr/include/freeipmi
 usr/share/doc/freeipmi/freeipmi-libraries.txt usr/share/doc/libfreeipmi-dev/
+usr/lib/pkgconfig/libfreeipmi.pc

@@ -1,7 +1,9 @@
 freeipmi (1.1.5-3) unstable; urgency=low
 
-  * Added forgotten ipmi-pet to the freeipmi-tools package
-    (Closes: #677546). Thanks Ferenc Wagner for the report
+  * Added forgotten:
+    - ipmi-pet to the freeipmi-tools package
+      (Closes: #677546). Thanks Ferenc Wagner for the report
+    - pkgconfig/*.pc files to corresponding -dev pkgs
   * Adding verification step that all "installed" materials
     are placed into packages (upon dh_installdeb step)
 

@@ -2,3 +2,4 @@ usr/lib/libipmidetect.a
 usr/lib/libipmidetect.so
 usr/include/ipmidetect.h
 usr/share/doc/freeipmi/freeipmi-libraries.txt usr/share/doc/libipmidetect-dev/
+usr/lib/pkgconfig/libipmidetect.pc

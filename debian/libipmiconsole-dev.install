@@ -2,3 +2,4 @@ usr/lib/libipmiconsole.a
 usr/lib/libipmiconsole.so
 usr/include/ipmiconsole.h
 usr/share/doc/freeipmi/freeipmi-libraries.txt usr/share/doc/libipmiconsole-dev/
+usr/lib/pkgconfig/libipmiconsole*
