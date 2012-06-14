@@ -51,7 +51,28 @@ override_dh_auto_install:
 	dh_installinit -pfreeipmi-ipmidetect \
 	 --name=ipmidetectd
 
+# Before isntalldeb check that all pieces were placed into
+# corresponding binary packages.  Increasing number of bugreports
+# pointed that I was missing pieces -- thus explicit check now
+override_dh_installdeb:
+	@find debian/tmp -type f \
+	| grep -v '\.la$$' \
+	| sed -e 's,etc/sysconfig/bmc-watchdog,etc/default/bmc-watchdog,g' \
+	| while read f; do \
+		cf=$${f//debian\/tmp}; \
+		installations=$$(/bin/ls debian/*/$$cf{,.gz} 2>/dev/null | grep -v debian/tmp | wc -l); \
+		[ "$$installations" -eq 1 ] || echo "$$installations of $$cf"; \
+	done | grep . && exit 1 || :
+	dh_installdeb
+
+override_dh_installdocs:
+	dh_installdocs NEWS README.* TODO debian/tmp/usr/share/doc/freeipmi/freeipmi-*
+
 override_dh_installchangelogs:
 	dh_installchangelogs ChangeLog ChangeLog.0
 
 	#dh_installdocs --link-doc=freeipmi-common
+
+# Readily usable examples
+override_dh_compress:
+	dh_compress -X.c
