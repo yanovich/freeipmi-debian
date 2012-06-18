@@ -4,3 +4,4 @@ usr/share/info
 usr/share/man/man5/freeipmi.conf.5
 usr/share/man/man5/freeipmi_interpret*.conf.5
 usr/share/man/man7/freeipmi.7
+usr/share/doc/freeipmi/*
