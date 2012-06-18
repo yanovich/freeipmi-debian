@@ -3,3 +3,4 @@ usr/lib/libipmimonitoring.so
 usr/include/ipmi_monitoring*.h
 usr/share/doc/freeipmi/freeipmi-libraries.txt usr/share/doc/libipmimonitoring-dev/
 usr/lib/pkgconfig/libipmimonitoring.pc
+usr/share/man/man3/libipmimonitoring.3
