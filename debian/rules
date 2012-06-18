@@ -13,9 +13,6 @@ override_dh_clean:
 
 	-rm debian/freeipmi-ipmidetectd.debhelper.log
 
-	: # Remove pulled in default file for watchdog
-	-rm $(CURDIR)/debian/freeipmi-bcm-watchdog.bmc-watchdog.default
-
 	: # Remove some other generated files
 	-rm  doc/freeipmi-faq.info doc/stamp-vti doc/version-faq.texi
 
@@ -42,11 +39,6 @@ override_dh_auto_install:
 
 	: # assure no dir.gz
 	rm -f $(CURDIR)/debian/tmp/usr/share/info/dir
-
-
-	: # Copy default file for bmc-watchdog
-	cp $(CURDIR)/debian/tmp/etc/sysconfig/bmc-watchdog \
-		$(CURDIR)/debian/freeipmi-bcm-watchdog.bmc-watchdog.default
 
 	: # Use Debian specific init files with "matching" names
 	dh_installinit -pfreeipmi-bmc-watchdog \
