@@ -1,12 +1,9 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
-# We use some bashisms
-SHELL=/bin/bash
-
 # mega rule -- Joey knows how to do the rest
 %:
-	dh $@ --with autotools_dev
+	dh $@ --with autotools_dev --fail-missing
 
 override_dh_clean:
 	dh_clean
@@ -46,32 +43,8 @@ override_dh_auto_install:
 	dh_installinit -pfreeipmi-ipmidetect \
 	 --name=ipmidetectd
 
-# Before isntalldeb check that all pieces were placed into
-# corresponding binary packages.  Increasing number of bugreports
-# pointed that I was missing pieces -- thus explicit check now.
-# Such check will be ran only if both arch-dep and -indep pkgs
-# are built which will be checked by presence of corresponding
-# directories (patch is welcome for a proper way)
-override_dh_installdeb:
-	@[ -e debian/freeipmi-common ] && [ -e debian/freeipmi-tools ] && \
-	echo "I: Verifying that everything was installed" && \
-	find debian/tmp -type f \
-	| grep -v '\.la$$' \
-	| sed -e 's,etc/sysconfig/bmc-watchdog,etc/default/bmc-watchdog,g' \
-	| while read f; do \
-		cf=$$(basename $$f); \
-		installations=$$(/usr/bin/find debian/ -name $$cf -o -name $$cf.gz | grep -v debian/tmp | wc -l); \
-		[ "$$installations" -gt 0 ] || echo "$$installations of $$cf"; \
-	done | grep . && exit 1 || :
-	dh_installdeb
-
 override_dh_installdocs:
 	dh_installdocs --link-doc=freeipmi-common
 
 override_dh_installchangelogs:
 	dh_installchangelogs ChangeLog ChangeLog.0
-
-# Readily usable examples
-# conflicts with .conf manpages -- apparently matches anywhere in the filename
-#override_dh_compress:
-#	dh_compress -X.c
