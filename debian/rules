@@ -1,9 +1,10 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
-# mega rule -- Joey knows how to do the rest
+# --fail-missing for dh_install
+# --link-doc for dh_installdocs
 %:
-	dh $@ --with autotools_dev
+	dh $@ --with autotools_dev --fail-missing --link-doc=freeipmi-common
 
 override_dh_auto_configure:
 	: # suppress multiarch support for now
@@ -43,12 +44,6 @@ override_dh_auto_install:
 	 --name=bmc-watchdog
 	dh_installinit -pfreeipmi-ipmidetect \
 	 --name=ipmidetectd
-
-override_dh_install:
-	dh_install --fail-missing
-
-override_dh_installdocs:
-	dh_installdocs --link-doc=freeipmi-common
 
 override_dh_installchangelogs:
 	dh_installchangelogs --keep
