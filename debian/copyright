@@ -9,7 +9,7 @@ Copyright: 2003-2012 FreeIPMI Core Team
            2007-2009 Lawrence Livermore National Security, LLC
 License: GPL-3+
  On Debian systems, the complete text of the GNU General
- Public License can be found in `/usr/share/common-licenses/GPL'.
+ Public License can be found in `/usr/share/common-licenses/GPL-3'.
 
 Files: common/src/portability/freeipmi-argp*
 Copyright: 2003-2009 FreeIPMI Core Team
@@ -23,4 +23,4 @@ License: LGPL-3+
 
 License: LGPL-3+
  On Debian systems, the complete text of the GNU Lesser General
- Public License can be found in `/usr/share/common-licenses/LGPL'.
+ Public License can be found in `/usr/share/common-licenses/LGPL-3'.
