@@ -26,7 +26,7 @@ override_dh_auto_install:
 	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/COPYING*
 	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/DISCLAIMER*
 	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/INSTALL*
-	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/ChangeLog*
+	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/ChangeLog
 
 	: # chrpath -- operate only on files (not on still dangling symlinks)
 	/usr/bin/find  $(CURDIR)/debian/*/usr/sbin -type f \
@@ -50,4 +50,4 @@ override_dh_installdocs:
 	dh_installdocs --link-doc=freeipmi-common
 
 override_dh_installchangelogs:
-	dh_installchangelogs ChangeLog ChangeLog.0
+	dh_installchangelogs --keep
