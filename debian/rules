@@ -3,7 +3,7 @@
 
 # mega rule -- Joey knows how to do the rest
 %:
-	dh $@ --with autotools_dev --fail-missing
+	dh $@ --with autotools_dev
 
 override_dh_clean:
 	dh_clean
@@ -42,6 +42,9 @@ override_dh_auto_install:
 	 --name=bmc-watchdog
 	dh_installinit -pfreeipmi-ipmidetect \
 	 --name=ipmidetectd
+
+override_dh_install:
+	dh_install --fail-missing --exclude=.la --exclude=/etc/init.d/bmc-watchdog --exclude=/etc/init.d/ipmidetectd
 
 override_dh_installdocs:
 	dh_installdocs --link-doc=freeipmi-common
