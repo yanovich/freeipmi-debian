@@ -1,4 +1,5 @@
 usr/sbin/ipmidetect
+usr/sbin/ipmi-detect
 usr/sbin/ipmidetectd
 etc/freeipmi/ipmidetect*.conf
 usr/share/man/man8/ipmidetectd.8

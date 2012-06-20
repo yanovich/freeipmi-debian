@@ -16,9 +16,12 @@ usr/sbin/ipmi-sensors-config
 usr/sbin/ipmi*console
 usr/sbin/ipmimonitoring
 usr/sbin/ipmiping
+usr/sbin/ipmi-ping
 usr/sbin/ipmipower
+usr/sbin/ipmi-power
 usr/sbin/pef-config
 usr/sbin/rmcpping
+usr/sbin/rmcp-ping
 var/lib/freeipmi/
 usr/share/man/man5/bmc-config.conf.5
 usr/share/man/man5/ipmiconsole.conf.5
