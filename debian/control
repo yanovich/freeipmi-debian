@@ -46,6 +46,7 @@ Description: GNU implementation of the IPMI protocol - tools
   * ipmi-fru - display FRU information
   * ipmi-locate - IPMI probing utility
   * ipmi-oem - IPMI OEM utility
+  * ipmi-pet - decode Platform Event Traps
   * ipmi-raw - IPMI raw communication utility
   * ipmi-sel - display SEL entries
   * ipmi-sensors - display IPMI sensor information
