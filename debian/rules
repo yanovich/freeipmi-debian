@@ -26,7 +26,7 @@ override_dh_auto_install:
 	: # Clean up duplicate/unneeded copyright/installation files
 	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/COPYING*
 	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/DISCLAIMER*
-	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/INSTALL*
+	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/INSTALL
 	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/ChangeLog
 
 	: # chrpath -- operate only on files (not on still dangling symlinks)
