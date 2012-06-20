@@ -1,0 +1,7 @@
+# Quite a few lines in freeipmi pages might not be hypened easily, e.g. like
+# \fBIPMI_Temperature_Transition_Severity_Transition_To_Non_Critical_From_OK\fR
+freeipmi-common binary: manpage-has-errors-from-man usr/share/man/man5/freeipmi_interpret_sel.conf.5.gz 143: warning [p 2, 10.8i, div `an-div', 0.0i]: cannot adjust line
+freeipmi-common binary: manpage-has-errors-from-man usr/share/man/man5/freeipmi_interpret_sensor.conf.5.gz 86: warning [p 2, 2.5i, div `an-div', 0.0i]: cannot adjust line
+
+# freeipmi.conf contains sensitive information
+freeipmi-common binary: non-standard-file-perm etc/freeipmi/freeipmi.conf 0640 != 0644
