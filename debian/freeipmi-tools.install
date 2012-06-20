@@ -44,4 +44,3 @@ usr/share/man/man8/*ping.8
 usr/share/man/man8/ipmi*power.8
 usr/share/man/man8/pef-config.8
 usr/share/man/man8/rmcpping.8
-usr/share/doc/freeipmi/contrib

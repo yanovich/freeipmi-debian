@@ -66,15 +66,10 @@ override_dh_installdeb:
 	dh_installdeb
 
 override_dh_installdocs:
-	rm -f debian/freeipmi/usr/share/doc/freeipmi
-	mkdir -p debian/freeipmi/usr/share/doc
-	ln -s freeipmi-common debian/freeipmi/usr/share/doc/freeipmi
-	dh_installdocs NEWS README.* TODO debian/tmp/usr/share/doc/freeipmi/freeipmi-*
+	dh_installdocs --link-doc=freeipmi-common
 
 override_dh_installchangelogs:
 	dh_installchangelogs ChangeLog ChangeLog.0
-
-	#dh_installdocs --link-doc=freeipmi-common
 
 # Readily usable examples
 # conflicts with .conf manpages -- apparently matches anywhere in the filename
