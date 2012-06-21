@@ -12,10 +12,7 @@ override_dh_auto_configure:
 
 override_dh_auto_install:
 	dh_auto_install
-	### chmod 644 $(CURDIR)/debian/tmp/etc/ipmi_monitoring_sensors.conf
-	: # since it containts sensitive information
-	chmod 640 $(CURDIR)/debian/tmp/etc/freeipmi/freeipmi.conf
-	chown root.adm $(CURDIR)/debian/tmp/etc/freeipmi/freeipmi.conf
+
 	: # Clean up duplicate/unneeded copyright/installation files
 	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/COPYING*
 	rm -f $(CURDIR)/debian/tmp/usr/share/doc/freeipmi/DISCLAIMER*
@@ -44,6 +41,13 @@ override_dh_auto_install:
 	 --name=bmc-watchdog
 	dh_installinit -pfreeipmi-ipmidetect \
 	 --name=ipmidetectd
+
+override_dh_fixperms:
+	dh_fixperms
+
+	: # since it contains sensitive information
+	chmod 640      $(CURDIR)/debian/freeipmi-common/etc/freeipmi/freeipmi.conf
+	chown root:adm $(CURDIR)/debian/freeipmi-common/etc/freeipmi/freeipmi.conf
 
 override_dh_installchangelogs:
 	dh_installchangelogs --keep
