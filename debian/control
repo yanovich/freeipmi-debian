@@ -5,9 +5,7 @@ Maintainer: Yaroslav Halchenko <debian@onerussian.com>
 Build-Depends: debhelper (>= 9),
  autotools-dev (>= 20100122.1~),
  libgcrypt11-dev,
- chrpath,
- autoconf, automake, libtool,
- texinfo
+ chrpath
 Standards-Version: 3.9.3
 Homepage: http://www.gnu.org/software/freeipmi/
 Vcs-Browser: http://git.onerussian.com/?p=deb/freeipmi.git
