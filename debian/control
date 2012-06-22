@@ -96,7 +96,7 @@ Description: GNU IPMI - libraries
 Package: libfreeipmi-dev
 Section: libdevel
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libfreeipmi12 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfreeipmi12 (= ${binary:Version}), freeipmi-common (= ${source:Version})
 Description: GNU IPMI - development package
  FreeIPMI is a collection of Intelligent Platform Management IPMI
  system software. It provides in-band and out-of-band software and a
@@ -179,7 +179,7 @@ Description: GNU IPMI - ipmiconsole development package
 
 Package: freeipmi
 Architecture: all
-Depends: ${misc:Depends}, freeipmi-tools, freeipmi-ipmidetect, freeipmi-bmc-watchdog
+Depends: ${misc:Depends}, freeipmi-tools, freeipmi-ipmidetect, freeipmi-bmc-watchdog, freeipmi-common (= ${source:Version})
 Description: GNU implementation of the IPMI protocol
  FreeIPMI is a collection of Intelligent Platform Management IPMI
  system software. It provides in-band and out-of-band software and a
