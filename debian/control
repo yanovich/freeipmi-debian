@@ -12,7 +12,6 @@ Vcs-Browser: http://git.onerussian.com/?p=deb/freeipmi.git
 Vcs-git: git://git.onerussian.com/deb/freeipmi.git
 
 Package: freeipmi-common
-Section: admin
 Architecture: all
 Depends: ${misc:Depends}
 Pre-Depends: dpkg (>=1.15.7.2~)
@@ -27,7 +26,6 @@ Description: GNU implementation of the IPMI protocol - common files
  framework and generic documentation to orient the user.
 
 Package: freeipmi-tools
-Section: admin
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-common (= ${source:Version})
 Suggests: freeipmi-ipmidetect, freeipmi-bmc-watchdog
@@ -56,7 +54,6 @@ Description: GNU implementation of the IPMI protocol - tools
   * rmcpping - send RMCP Ping to network hosts
 
 Package: freeipmi-bmc-watchdog
-Section: admin
 Architecture: any
 Pre-Depends: dpkg (>=1.15.7.2~)
 Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-tools, freeipmi-common (= ${source:Version})
@@ -69,7 +66,6 @@ Description: GNU implementation of the IPMI protocol - BMC watchdog
  This package contains a watchdog daemon for hardware BMC watchdogs.
 
 Package: freeipmi-ipmidetect
-Section: admin
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-common (= ${source:Version})
 Pre-Depends: dpkg (>=1.15.7.2~)
