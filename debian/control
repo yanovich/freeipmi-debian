@@ -186,4 +186,4 @@ Description: GNU implementation of the IPMI protocol
  development library conforming to the Intelligent Platform Management
  Interface (IPMI v1.5 and v2.0) standards.
  .
- This meta-package depends on all separate modules of freeipmi.
+ This metapackage depends on all separate modules of freeipmi.
