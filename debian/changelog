@@ -1,5 +1,6 @@
-freeipmi (1.1.5-4) unstable; urgency=low
+freeipmi (1.1.5-4) experimental; urgency=low
 
+  [ Ferenc Wágner ]
   * Refresh lintian overrides
   * Fix typo (meta-package) in control file found by lintian
   * New quilt patch to fix upstream typos found by lintian
@@ -22,7 +23,7 @@ freeipmi (1.1.5-4) unstable; urgency=low
   * debian/source/options:
     - Ignore files changed during build
 
- -- Ferenc Wágner <wferi@niif.hu>  Sat, 23 Jun 2012 17:01:50 +0200
+ -- Yaroslav Halchenko <debian@onerussian.com>  Wed, 11 Jul 2012 13:34:54 -0400
 
 freeipmi (1.1.5-3) unstable; urgency=low
 
