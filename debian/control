@@ -1,8 +1,8 @@
 Source: freeipmi
 Section: admin
 Priority: extra
-Maintainer: Yaroslav Halchenko <debian@onerussian.com>
-Uploaders: Ferenc Wágner <wferi@niif.hu>
+Maintainer: Debian FreeIPMI Maintainers <pkg-freeipmi-devel@lists.alioth.debian.org>
+Uploaders: Yaroslav Halchenko <debian@onerussian.com>, Ferenc Wágner <wferi@niif.hu>
 Build-Depends: debhelper (>= 9),
  autotools-dev (>= 20100122.1~),
  libgcrypt11-dev,
