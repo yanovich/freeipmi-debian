@@ -9,8 +9,8 @@ Build-Depends: debhelper (>= 9),
  chrpath
 Standards-Version: 3.9.3
 Homepage: http://www.gnu.org/software/freeipmi/
-Vcs-Browser: http://git.onerussian.com/?p=deb/freeipmi.git
-Vcs-git: git://git.onerussian.com/deb/freeipmi.git
+Vcs-Browser: http://git.debian.org/?p=pkg-freeipmi/pkg-freeipmi.git
+Vcs-git: git://anonscm.debian.org/pkg-freeipmi/pkg-freeipmi.git
 
 Package: freeipmi-common
 Architecture: all
