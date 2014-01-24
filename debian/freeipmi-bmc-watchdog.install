@@ -1,4 +1,3 @@
-etc/logrotate.d/bmc-watchdog
 etc/sysconfig/bmc-watchdog etc/default/
 usr/sbin/bmc-watchdog
 usr/share/man/man8/bmc-watchdog.8
