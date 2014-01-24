@@ -1,0 +1,4 @@
+etc/freeipmi/ipmiseld.conf
+usr/sbin/ipmiseld
+usr/share/man/man5/ipmiseld.conf.5
+usr/share/man/man8/ipmiseld.8

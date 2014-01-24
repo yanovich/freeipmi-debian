@@ -3,6 +3,7 @@ freeipmi (1.3.4-1) unstable; urgency=low
   * New upstream release (Closes: #734634)
     - drop /etc/logrotate.d/bmc-watcdog
     - new soversions: libfreeipmi15, libipmimonitoring5a
+    - new SEL daemon
 
  -- Sergei Ianovich <ynvich@gmail.com>  Fri, 24 Jan 2014 21:55:01 +0400
 

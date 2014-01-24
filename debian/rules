@@ -26,6 +26,7 @@ override_dh_auto_install:
 	rm $(CURDIR)/debian/tmp/usr/lib/libipmidetect.la
 	rm $(CURDIR)/debian/tmp/etc/init.d/bmc-watchdog
 	rm $(CURDIR)/debian/tmp/etc/init.d/ipmidetectd
+	rm $(CURDIR)/debian/tmp/etc/init.d/ipmiseld
 
 	: # chrpath -- operate only on files (not on still dangling symlinks)
 	/usr/bin/find  $(CURDIR)/debian/*/usr/sbin -type f \
@@ -41,6 +42,8 @@ override_dh_auto_install:
 	 --name=bmc-watchdog
 	dh_installinit -pfreeipmi-ipmidetect \
 	 --name=ipmidetectd
+	dh_installinit -pfreeipmi-sel \
+	 --name=ipmiseld
 
 override_dh_fixperms:
 	dh_fixperms

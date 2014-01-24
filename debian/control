@@ -78,6 +78,19 @@ Description: GNU IPMI - IPMI node detection tool
  .
  This package contains a tool and a daemon for detecting IPMI nodes.
 
+Package: freeipmi-sel
+Section: admin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-tools, freeipmi-common (= ${source:Version})
+Pre-Depends: dpkg (>=1.15.7.2~)
+Description: GNU IPMI - IPMI node detection tool
+ FreeIPMI is a collection of Intelligent Platform Management IPMI
+ system software. It provides in-band and out-of-band software and a
+ development library conforming to the Intelligent Platform Management
+ Interface (IPMI v1.5 and v2.0) standards.
+ .
+ This package contains a daemon for collecting SEL events.
+
 Package: libfreeipmi15
 Section: libs
 Architecture: any

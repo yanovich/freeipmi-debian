@@ -1,0 +1,5 @@
+#
+# Set to 'yes' after you have configured ipmidetectd.
+# See ipmidetectd.conf(5) manpage for more information.
+#
+RUN=no
