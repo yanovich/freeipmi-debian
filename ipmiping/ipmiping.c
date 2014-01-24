@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiping.c,v 1.75 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -469,5 +469,5 @@ main (int argc, char **argv)
 {
   ipmi_ping_setup (argc, argv, 0, IPMI_RQ_SEQ_MAX, "hVc:i:I:t:vr:s:d");
   ipmi_ping_loop (createpacket, parsepacket, latepacket, endresult);
-  exit (1);                    /* NOT REACHED */
+  exit (EXIT_FAILURE);                    /* NOT REACHED */
 }

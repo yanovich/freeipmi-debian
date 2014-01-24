@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1108,7 +1108,7 @@ _get_event_message (unsigned int offset,
       return (-1);
     }
 
-  return (snprintf (buf, buflen, string_array[offset]));
+  return (snprintf (buf, buflen, "%s", string_array[offset]));
 }
 
 int
@@ -1810,10 +1810,12 @@ ipmi_get_oem_generic_event_message (uint32_t manufacturer_id,
    *
    * Dell Poweredge R610
    * Dell Poweredge R710
+   * Dell Poweredge R720
    */
   if (manufacturer_id == IPMI_IANA_ENTERPRISE_ID_DELL
       && (product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R610
-          || product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R710))
+          || product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R710
+          || product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R720))
     {
       switch (event_reading_type_code)
         {
@@ -1823,6 +1825,12 @@ ipmi_get_oem_generic_event_message (uint32_t manufacturer_id,
                                       buflen,
                                       ipmi_generic_event_reading_type_code_oem_dell_status_max_index,
                                       ipmi_generic_event_reading_type_code_oem_dell_status));
+        case IPMI_EVENT_READING_TYPE_CODE_OEM_DELL_FAILURE:
+          return (_get_event_message (offset,
+                                      buf,
+                                      buflen,
+                                      ipmi_generic_event_reading_type_code_oem_dell_failure_max_index,
+                                      ipmi_generic_event_reading_type_code_oem_dell_failure));
         }
     }
 
@@ -1848,10 +1856,12 @@ ipmi_get_oem_sensor_type_message (uint32_t manufacturer_id,
    *
    * Dell Poweredge R610
    * Dell Poweredge R710
+   * Dell Poweredge R720
    */
   if (manufacturer_id == IPMI_IANA_ENTERPRISE_ID_DELL
       && (product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R610
-          || product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R710))
+          || product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R710
+	  || product_id == IPMI_DELL_PRODUCT_ID_POWEREDGE_R720))
     {
       switch (sensor_type)
         {
@@ -1980,6 +1990,24 @@ ipmi_get_oem_sensor_type_message (uint32_t manufacturer_id,
         }
     }
 
+  /* OEM Interpretation
+   *
+   * Wistron / Dell Poweredge C6220
+   */
+  if (manufacturer_id == IPMI_IANA_ENTERPRISE_ID_WISTRON
+      && product_id == IPMI_WISTRON_PRODUCT_ID_C6220)
+    {
+      switch (sensor_type)
+        {
+	case IPMI_SENSOR_TYPE_OEM_WISTRON_IOH_CORE_ERROR:
+          return (_get_event_message (offset,
+                                      buf,
+                                      buflen,
+                                      ipmi_sensor_type_oem_wistron_ioh_core_error_max_index,
+                                      ipmi_sensor_type_oem_wistron_ioh_core_error));
+        }
+    }
+
   SET_ERRNO (EINVAL);
   return (-1);
 }
@@ -2001,12 +2029,34 @@ ipmi_get_oem_specific_message (uint32_t manufacturer_id,
   
   /* OEM Interpretation
    *
+   * HP Proliant DL160 G8
+   */
+  if (manufacturer_id == IPMI_IANA_ENTERPRISE_ID_HP)
+    {
+      if (event_reading_type_code == IPMI_EVENT_READING_TYPE_CODE_OEM_HP_UID_LIGHT
+	  && sensor_type == IPMI_SENSOR_TYPE_OEM_HP_LED)
+	return (_get_event_message (offset,
+				    buf,
+				    buflen,
+				    ipmi_oem_hp_uid_light_max_index,
+				    ipmi_oem_hp_uid_light));
+      
+      if (event_reading_type_code == IPMI_EVENT_READING_TYPE_CODE_OEM_HP_HEALTH_LED
+	  && sensor_type == IPMI_SENSOR_TYPE_OEM_HP_LED)
+	return (_get_event_message (offset,
+				    buf,
+				    buflen,
+				    ipmi_oem_hp_health_led_max_index,
+				    ipmi_oem_hp_health_led));
+    }
+  /* OEM Interpretation
+   *
    * Intel S5500WB/Penguin Computing Relion 700
    * Quanta QSSC-S4R/Appro GB812X-CN
    * (Quanta motherboard maintains Intel manufacturer ID)
    * Intel S2600JF/Appro 512X
    */
-  if (manufacturer_id == IPMI_IANA_ENTERPRISE_ID_INTEL)
+  else if (manufacturer_id == IPMI_IANA_ENTERPRISE_ID_INTEL)
     {
       if (product_id == IPMI_INTEL_PRODUCT_ID_S5500WB)
 	{
@@ -2123,6 +2173,10 @@ _supermicro_oem_temp_level_sensor_supported (uint32_t manufacturer_id, uint16_t 
    * Supermicro X8SIE
    * Supermicro X9SCA-F-O (X9SCA_F_O)
    * Supermicro H8DGU-F (H8DGU_F)
+   * Supermicro X9DRi-F (X9DRI_F)
+   * Supermicro X9DRI-LN4F+ (X9DRI_LN4F_PLUS)
+   * Supermicro X9SPU-F-O (X9SPU_F_O)
+   * Supermicro X9SCM-iiF (X9SCM_IIF)
    *
    * Event Reading Type Code = IPMI_EVENT_READING_TYPE_CODE_OEM_SUPERMICRO_GENERIC
    * Sensor Type = IPMI_SENSOR_TYPE_OEM_SUPERMICRO_CPU_TEMP
@@ -2155,7 +2209,11 @@ _supermicro_oem_temp_level_sensor_supported (uint32_t manufacturer_id, uint16_t 
 	      || product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8DTNPLUS_F
 	      || product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8SIE
 	      || product_id == IPMI_SUPERMICRO_PRODUCT_ID_X9SCA_F_O
-	      || product_id == IPMI_SUPERMICRO_PRODUCT_ID_H8DGU_F))
+	      || product_id == IPMI_SUPERMICRO_PRODUCT_ID_H8DGU_F
+	      || product_id == IPMI_SUPERMICRO_PRODUCT_ID_X9DRI_F
+	      || product_id == IPMI_SUPERMICRO_PRODUCT_ID_X9DRI_LN4F_PLUS
+	      || product_id == IPMI_SUPERMICRO_PRODUCT_ID_X9SPU_F_O
+	      || product_id == IPMI_SUPERMICRO_PRODUCT_ID_X9SCM_IIF))
       || (manufacturer_id == IPMI_IANA_ENTERPRISE_ID_MAGNUM_TECHNOLOGIES
 	  && product_id == IPMI_SUPERMICRO_PRODUCT_ID_X8DTL))
     return (1);
@@ -2457,7 +2515,7 @@ ipmi_get_event_messages (uint8_t event_reading_type_code,
                                                 buf,
                                                 EVENT_BUFLEN);
       
-      if (len)
+      if (len > 0)
         {
           if (!(tmp_event_messages[tmp_event_messages_count] = strdup (buf)))
             {
@@ -2469,6 +2527,48 @@ ipmi_get_event_messages (uint8_t event_reading_type_code,
         }
       else
         goto oem_default_output;
+    }
+  /* OEM Interpretation
+   *
+   * HP Proliant DL160 G8
+   */
+  else if (event_reading_type_code_class == IPMI_EVENT_READING_TYPE_CODE_CLASS_OEM
+           && flags & IPMI_GET_EVENT_MESSAGES_FLAGS_INTERPRET_OEM_DATA
+	   && manufacturer_id == IPMI_IANA_ENTERPRISE_ID_HP
+	   && product_id == IPMI_HP_PRODUCT_ID_PROLIANT_DL160_G8
+	   && (sensor_type == IPMI_SENSOR_TYPE_OEM_HP_LED
+	       && (event_reading_type_code == IPMI_EVENT_READING_TYPE_CODE_OEM_HP_UID_LIGHT
+		   || event_reading_type_code == IPMI_EVENT_READING_TYPE_CODE_OEM_HP_HEALTH_LED)))
+    {
+      for (i = 0; i < IPMI_MAX_SENSOR_AND_EVENT_OFFSET; i++)
+        {
+          bitmask = 0x1 << i;
+
+          if (event_bitmask & bitmask)
+            {
+	      len = ipmi_get_oem_specific_message (manufacturer_id,
+						   product_id,
+						   event_reading_type_code,
+						   sensor_type,
+						   i,
+						   buf,
+						   EVENT_BUFLEN);
+
+	      if (len > 0)
+		{
+		  if (!(tmp_event_messages[tmp_event_messages_count] = strdup (buf)))
+		    {
+		      SET_ERRNO (ENOMEM);
+		      goto cleanup;
+		    }
+		  
+		  tmp_event_messages_count++;
+		  break;
+		}
+	      else
+		goto oem_default_output;
+	    }
+	}
     }
   else /* OEM Event */
     {

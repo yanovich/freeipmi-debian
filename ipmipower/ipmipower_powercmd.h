@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_powercmd.h,v 1.17 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,25 +24,18 @@
  *  with Ipmipower.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMIPOWER_POWERCMD_H
-#define _IPMIPOWER_POWERCMD_H
+#ifndef IPMIPOWER_POWERCMD_H
+#define IPMIPOWER_POWERCMD_H
 
 #include "ipmipower.h"
 
-/* ipmipower_powercmd_setup
- * - Setup ipmipower to process commands
- */
 void ipmipower_powercmd_setup ();
 
-/* ipmipower_powercmd_cleanup
- * - Cleanup ipmipower when we are done
- */
 void ipmipower_powercmd_cleanup ();
 
-/* ipmipower_powercmd_queue_powercmd
- * - Queue a command to be executed
- */
-void ipmipower_powercmd_queue (power_cmd_t cmd, struct ipmipower_connection *ic);
+void ipmipower_powercmd_queue (ipmipower_power_cmd_t cmd,
+			       struct ipmipower_connection *ic,
+			       const char *extra_arg);
 
 /* ipmipower_powercmd_pending
  * - Determines if any commands are still pending
@@ -58,4 +51,4 @@ int ipmipower_powercmd_pending ();
  */
 int ipmipower_powercmd_process_pending (int *timeout);
 
-#endif /* _IPMIPOWER_POWERCMD_H */
+#endif /* IPMIPOWER_POWERCMD_H */

@@ -8355,18 +8355,6 @@ AC_DEFUN([AM_OUTPUT_DEPENDENCY_COMMANDS],
      [AMDEP_TRUE="$AMDEP_TRUE" ac_aux_dir="$ac_aux_dir"])
 ])
 
-# Copyright (C) 1996, 1997, 2000, 2001, 2003, 2005
-# Free Software Foundation, Inc.
-#
-# This file is free software; the Free Software Foundation
-# gives unlimited permission to copy and/or distribute it,
-# with or without modifications, as long as this notice is preserved.
-
-# serial 8
-
-# AM_CONFIG_HEADER is obsolete.  It has been replaced by AC_CONFIG_HEADERS.
-AU_DEFUN([AM_CONFIG_HEADER], [AC_CONFIG_HEADERS($@)])
-
 # Do all the work for Automake.                             -*- Autoconf -*-
 
 # Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
@@ -8962,7 +8950,6 @@ AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
-m4_include([config/ac_bmc_watchdog_logfile.m4])
 m4_include([config/ac_dont_check_for_root.m4])
 m4_include([config/ac_freeipmi_config_file.m4])
 m4_include([config/ac_freeipmi_interpret_sel_config_file.m4])
@@ -8973,6 +8960,8 @@ m4_include([config/ac_ipmiconsole_config_file.m4])
 m4_include([config/ac_ipmidetect_config_file.m4])
 m4_include([config/ac_ipmidetectd_config_file.m4])
 m4_include([config/ac_ipmipower_config_file.m4])
+m4_include([config/ac_ipmiseld_cache_dir.m4])
+m4_include([config/ac_ipmiseld_config_file.m4])
 m4_include([config/ac_libipmiconsole_config_file.m4])
 m4_include([config/ac_lsh_gcc_attributes.m4])
 m4_include([config/acx_pthread.m4])

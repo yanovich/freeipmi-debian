@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  */
 
 
-#ifndef _RMCP_UTIL_H
-#define _RMCP_UTIL_H    1
+#ifndef RMCP_UTIL_H
+#define RMCP_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,4 +34,4 @@ int ipmi_rmcp_check_message_tag (fiid_obj_t pong, uint8_t message_tag);
 }
 #endif
 
-#endif /* rmcp-util.h */
+#endif /* RMCP_UTIL_H */

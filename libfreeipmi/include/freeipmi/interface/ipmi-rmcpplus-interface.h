@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_RMCPPLUS_INTERFACE_H
-#define _IPMI_RMCPPLUS_INTERFACE_H
+#ifndef IPMI_RMCPPLUS_INTERFACE_H
+#define IPMI_RMCPPLUS_INTERFACE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +25,9 @@ extern "C" {
 
 #include <stdint.h>
 #include <freeipmi/fiid/fiid.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
 
 /**************************
 * IPMI 2.0 Payload Types *
@@ -190,9 +193,12 @@ extern "C" {
 
 /* Refer to table 22-19 */
 /* XXX - Errata 4 defines SHA256 but not cipher suite IDs */
+/* achu: Intel support says Cipher Suite 15-19 maps to 1-5 using
+ * SHA256 instead of SHA1 and SHA256-128 instead of SHA1-96.
+ */
 /* Cipher Suite 17 confirmed via DCMI 1.1 specification */
 #define IPMI_CIPHER_SUITE_ID_MIN                          0
-#define IPMI_CIPHER_SUITE_ID_MAX                          17
+#define IPMI_CIPHER_SUITE_ID_MAX                          19
 
 /* 
  * fill* functions return 0 on success, -1 on error.
@@ -311,8 +317,26 @@ int unassemble_ipmi_rmcpplus_pkt (uint8_t authentication_algorithm,
                                   fiid_obj_t obj_rmcpplus_session_trlr,
 				  unsigned int flags);
 
+/* returns length sent on success, -1 on error */
+/* A few extra error checks, but nearly identical to system sendto() */
+ssize_t ipmi_rmcpplus_sendto (int s,
+			      const void *buf,
+			      size_t len,
+			      int flags,
+			      const struct sockaddr *to,
+			      socklen_t tolen);
+
+/* returns length received on success, 0 on orderly shutdown, -1 on error */
+/* A few extra error checks, but nearly identical to system recvfrom() */
+ssize_t ipmi_rmcpplus_recvfrom (int s,
+				void *buf,
+				size_t len,
+				int flags,
+				struct sockaddr *from,
+				socklen_t *fromlen);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* IPMI_RMCPPLUS_INTERFACE_H */

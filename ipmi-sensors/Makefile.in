@@ -39,8 +39,7 @@ sbin_PROGRAMS = ipmi-sensors$(EXEEXT)
 subdir = ipmi-sensors
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
-	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
@@ -50,6 +49,8 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_cache_dir.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_config_file.m4 \
 	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
@@ -68,15 +69,12 @@ am_ipmi_sensors_OBJECTS = ipmi_sensors-ipmi-sensors.$(OBJEXT) \
 	ipmi_sensors-ipmi-sensors-oem-intel-node-manager.$(OBJEXT) \
 	ipmi_sensors-ipmi-sensors-oem-inventec.$(OBJEXT) \
 	ipmi_sensors-ipmi-sensors-oem-quanta.$(OBJEXT) \
+	ipmi_sensors-ipmi-sensors-oem-wistron.$(OBJEXT) \
 	ipmi_sensors-ipmi-sensors-output-common.$(OBJEXT) \
 	ipmi_sensors-ipmi-sensors-simple-output.$(OBJEXT)
 ipmi_sensors_OBJECTS = $(am_ipmi_sensors_OBJECTS)
 ipmi_sensors_DEPENDENCIES =  \
 	$(top_builddir)/common/toolcommon/libtoolcommon.la \
-	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
-	$(top_builddir)/common/tooloem/libtooloem.la \
-	$(top_builddir)/common/toolsdr/libtoolsdr.la \
-	$(top_builddir)/common/toolsensor/libtoolsensor.la \
 	$(top_builddir)/common/miscutil/libmiscutil.la \
 	$(top_builddir)/common/parsecommon/libparsecommon.la \
 	$(top_builddir)/common/portability/libportability.la \
@@ -130,7 +128,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BMC_WATCHDOG_LOGFILE_DEFAULT = @BMC_WATCHDOG_LOGFILE_DEFAULT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -158,8 +155,6 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
 INSTALL_IPMISDRCACHEDIR = @INSTALL_IPMISDRCACHEDIR@
-INSTALL_LOGDIR = @INSTALL_LOGDIR@
-INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -169,6 +164,8 @@ IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
 IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
+IPMISELD_CACHE_DIRECTORY = @IPMISELD_CACHE_DIRECTORY@
+IPMISELD_CONFIG_FILE_DEFAULT = @IPMISELD_CONFIG_FILE_DEFAULT@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
 IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
@@ -279,23 +276,16 @@ top_srcdir = @top_srcdir@
 sbin_SCRIPTS = ipmimonitoring
 ipmi_sensors_CPPFLAGS = \
 	-I$(top_srcdir)/common/toolcommon \
-	-I$(top_srcdir)/common/toolhostrange \
-	-I$(top_srcdir)/common/tooloem \
-	-I$(top_srcdir)/common/toolsdr \
-	-I$(top_srcdir)/common/toolsensor \
 	-I$(top_srcdir)/common/miscutil \
 	-I$(top_srcdir)/common/parsecommon \
 	-I$(top_srcdir)/common/portability \
+	-I$(top_builddir)/libfreeipmi/include \
 	-I$(top_srcdir)/libfreeipmi/include \
 	-D_GNU_SOURCE \
 	-D_REENTRANT
 
 ipmi_sensors_LDADD = \
 	$(top_builddir)/common/toolcommon/libtoolcommon.la \
-	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
-	$(top_builddir)/common/tooloem/libtooloem.la \
-	$(top_builddir)/common/toolsdr/libtoolsdr.la \
-	$(top_builddir)/common/toolsensor/libtoolsensor.la \
 	$(top_builddir)/common/miscutil/libmiscutil.la \
 	$(top_builddir)/common/parsecommon/libparsecommon.la \
 	$(top_builddir)/common/portability/libportability.la \
@@ -317,6 +307,8 @@ ipmi_sensors_SOURCES = \
 	ipmi-sensors-oem-inventec.h \
 	ipmi-sensors-oem-quanta.c \
 	ipmi-sensors-oem-quanta.h \
+	ipmi-sensors-oem-wistron.c \
+	ipmi-sensors-oem-wistron.h \
 	ipmi-sensors-output-common.c \
 	ipmi-sensors-output-common.h \
 	ipmi-sensors-simple-output.c \
@@ -451,6 +443,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-intel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-inventec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-quanta.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-wistron.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-output-common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors-simple-output.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_sensors-ipmi-sensors.Po@am__quote@
@@ -576,6 +569,20 @@ ipmi_sensors-ipmi-sensors-oem-quanta.obj: ipmi-sensors-oem-quanta.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-oem-quanta.c' object='ipmi_sensors-ipmi-sensors-oem-quanta.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-oem-quanta.obj `if test -f 'ipmi-sensors-oem-quanta.c'; then $(CYGPATH_W) 'ipmi-sensors-oem-quanta.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-oem-quanta.c'; fi`
+
+ipmi_sensors-ipmi-sensors-oem-wistron.o: ipmi-sensors-oem-wistron.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-oem-wistron.o -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-wistron.Tpo -c -o ipmi_sensors-ipmi-sensors-oem-wistron.o `test -f 'ipmi-sensors-oem-wistron.c' || echo '$(srcdir)/'`ipmi-sensors-oem-wistron.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-wistron.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-wistron.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-oem-wistron.c' object='ipmi_sensors-ipmi-sensors-oem-wistron.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-oem-wistron.o `test -f 'ipmi-sensors-oem-wistron.c' || echo '$(srcdir)/'`ipmi-sensors-oem-wistron.c
+
+ipmi_sensors-ipmi-sensors-oem-wistron.obj: ipmi-sensors-oem-wistron.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-oem-wistron.obj -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-wistron.Tpo -c -o ipmi_sensors-ipmi-sensors-oem-wistron.obj `if test -f 'ipmi-sensors-oem-wistron.c'; then $(CYGPATH_W) 'ipmi-sensors-oem-wistron.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-oem-wistron.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-wistron.Tpo $(DEPDIR)/ipmi_sensors-ipmi-sensors-oem-wistron.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-sensors-oem-wistron.c' object='ipmi_sensors-ipmi-sensors-oem-wistron.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_sensors-ipmi-sensors-oem-wistron.obj `if test -f 'ipmi-sensors-oem-wistron.c'; then $(CYGPATH_W) 'ipmi-sensors-oem-wistron.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-sensors-oem-wistron.c'; fi`
 
 ipmi_sensors-ipmi-sensors-output-common.o: ipmi-sensors-output-common.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_sensors_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_sensors-ipmi-sensors-output-common.o -MD -MP -MF $(DEPDIR)/ipmi_sensors-ipmi-sensors-output-common.Tpo -c -o ipmi_sensors-ipmi-sensors-output-common.o `test -f 'ipmi-sensors-output-common.c' || echo '$(srcdir)/'`ipmi-sensors-output-common.c
@@ -820,18 +827,6 @@ ipmimonitoring: ipmimonitoring.in
 	chmod +x ipmimonitoring
 
 $(top_builddir)/common/toolcommon/libtoolcommon.la : force-dependency-check
-	@cd `dirname $@` && $(MAKE) `basename $@`
-
-$(top_builddir)/common/toolhostrange/libtoolhostrange.la : force-dependency-check
-	@cd `dirname $@` && $(MAKE) `basename $@`
-
-$(top_builddir)/common/tooloem/libtooloem.la : force-dependency-check
-	@cd `dirname $@` && $(MAKE) `basename $@`
-
-$(top_builddir)/common/toolsdr/libtoolsdr.la : force-dependency-check
-	@cd `dirname $@` && $(MAKE) `basename $@`
-
-$(top_builddir)/common/toolsensor/libtoolsensor.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/common/miscutil/libmiscutil.la : force-dependency-check

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_INTERPRET_UTIL_H
-#define _IPMI_INTERPRET_UTIL_H
+#ifndef IPMI_INTERPRET_UTIL_H
+#define IPMI_INTERPRET_UTIL_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -31,13 +31,12 @@
 #include <errno.h>
 
 #include "freeipmi/interpret/ipmi-interpret.h"
-#include "freeipmi/sel-parse/ipmi-sel-parse.h"
+#include "freeipmi/sel/ipmi-sel.h"
 
 #include "ipmi-interpret-defs.h"
 
 void interpret_set_interpret_errnum_by_errno (ipmi_interpret_ctx_t ctx, int __errno);
 
-void interpret_set_interpret_errnum_by_sel_parse_ctx (ipmi_interpret_ctx_t ctx, ipmi_sel_parse_ctx_t sel_parse_ctx);
+void interpret_set_interpret_errnum_by_sel_ctx (ipmi_interpret_ctx_t ctx, ipmi_sel_ctx_t sel_ctx);
 
-#endif /* ipmi-interpret-util.h */
-
+#endif /* IPMI_INTERPRET_UTIL_H */

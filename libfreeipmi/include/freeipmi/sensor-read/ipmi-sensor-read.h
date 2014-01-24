@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SENSOR_READ_H
-#define _IPMI_SENSOR_READ_H
+#ifndef IPMI_SENSOR_READ_H
+#define IPMI_SENSOR_READ_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +25,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <freeipmi/api/ipmi-api.h>
-#include <freeipmi/sdr-cache/ipmi-sdr-cache.h>
+#include <freeipmi/sdr/ipmi-sdr.h>
 
 /* note: SENSOR_READING_UNAVAILABLE and SENSOR_SCANNING_DISABLED are
  * because of configuration of a sensor.  It is "ok" to some extent.
@@ -111,4 +111,4 @@ int ipmi_sensor_read (ipmi_sensor_read_ctx_t ctx,
 }
 #endif
 
-#endif /* _IPMI_SENSOR_READ_H */
+#endif /* IPMI_SENSOR_READ_H */

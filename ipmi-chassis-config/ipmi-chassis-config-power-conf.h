@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,12 @@
  */
 
 
-#ifndef _IPMI_CHASSIS_CONFIG_POWER_CONF_H_
-#define _IPMI_CHASSIS_CONFIG_POWER_CONF_H_
+#ifndef IPMI_CHASSIS_CONFIG_POWER_CONF_H
+#define IPMI_CHASSIS_CONFIG_POWER_CONF_H
 
 #include "ipmi-chassis-config.h"
 #include "ipmi-chassis-config-sections.h"
 
 struct config_section * ipmi_chassis_config_power_conf_get (ipmi_chassis_config_state_data_t *state_data);
 
-#endif /* _IPMI_CHASSIS_CONFIG_POWER_CONF_H_ */
+#endif /* IPMI_CHASSIS_CONFIG_POWER_CONF_H */

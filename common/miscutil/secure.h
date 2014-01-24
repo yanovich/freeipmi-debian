@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: secure.h,v 1.6 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,8 +24,8 @@
  *  with Ipmiconsole.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _SECURE_H
-#define _SECURE_H
+#ifndef SECURE_H
+#define SECURE_H
 
 #include <sys/types.h>
 
@@ -36,4 +36,4 @@ void *secure_malloc (size_t len);
 
 void secure_free (void *ptr, size_t len);
 
-#endif /* _SECURE_H */
+#endif /* SECURE_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 /*****************************************************************************\
  *  $Id: ipmi-dcmi-cmds.c,v 1.7 2010-07-28 21:19:56 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2009-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2009-2013 Lawrence Livermore National Security, LLC.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
  *  LLNL-CODE-413270
@@ -66,6 +66,7 @@ fiid_template_t tmpl_dcmi_rolling_average_time_period =
   {
     { 6, "time_duration", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
     { 2, "time_duration_units", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
+    { 0, "", 0}
   };
 
 fiid_template_t tmpl_cmd_dcmi_get_dcmi_capability_info_rq =
@@ -145,6 +146,8 @@ fiid_template_t tmpl_cmd_dcmi_get_dcmi_capability_info_mandatory_platform_attrib
     /* in parameter revision >= 02h, reserved */
     { 1, "temperature_monitoring.baseboard_temperature", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
     { 5, "temperature_monitoring.reserved", FIID_FIELD_REQUIRED | FIID_FIELD_LENGTH_FIXED},
+    /* in parameter revision >= 02h */
+    { 8, "temperature_monitoring.sampling_period", FIID_FIELD_OPTIONAL | FIID_FIELD_LENGTH_FIXED},
     { 0, "", 0}
   };
 

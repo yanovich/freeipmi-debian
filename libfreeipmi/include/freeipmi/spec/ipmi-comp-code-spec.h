@@ -1,6 +1,5 @@
-
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +17,8 @@
  */
 
 
-#ifndef _IPMI_COMP_CODE_SPEC_H
-#define _IPMI_COMP_CODE_SPEC_H
+#ifndef IPMI_COMP_CODE_SPEC_H
+#define IPMI_COMP_CODE_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -518,6 +517,16 @@ extern "C" {
 /*
  * Sensor Device Commands
  */
+/* IPMI_CMD_SET_SENSOR_READING_AND_EVENT_STATUS */
+#define IPMI_COMP_CODE_SENSOR_READING_OR_STATUS_NOT_SETTABLE                                                          0x80
+#define IPMI_COMP_CODE_SENSOR_READING_OR_STATUS_NOT_SETTABLE_STR \
+  "Attempt to change reading or set or clear status bits that " \
+  "are not settable via this command"
+
+#define IPMI_COMP_CODE_EVENT_DATA_BYTES_NOT_SETTABLE                                                                  0x81
+#define IPMI_COMP_CODE_EVENT_DATA_BYTES_NOT_SETTABLE_STR \
+  "Attempted to set Event Data Bytes, but setting Event Data Bytes is not " \
+  "supported for this sensor."
 
 /*
  * FRU Device Commands
@@ -675,9 +684,30 @@ extern "C" {
  * OEM Bridge Commands
  */
 
+#define IPMI_COMP_CODE_GENERIC_COMPLETION_CODES_MIN 0xC0
+#define IPMI_COMP_CODE_GENERIC_COMPLETION_CODES_MAX 0xFF
+
+#define IPMI_COMP_CODE_GENERIC_COMPLETION_CODES(__comp_code) \
+  (((__comp_code) == IPMI_COMP_CODE_COMMAND_SUCCESS \
+    || ((__comp_code) >= IPMI_COMP_CODE_GENERIC_COMPLETION_CODES_MIN \
+	&& (__comp_code) <= IPMI_COMP_CODE_GENERIC_COMPLETION_CODES_MAX)) ? 1 : 0)
+
+#define IPMI_COMP_CODE_DEVICE_SPECIFIC_CODES_MIN 0x01
+#define IPMI_COMP_CODE_DEVICE_SPECIFIC_CODES_MAX 0x7E
+
+#define IPMI_COMP_CODE_DEVICE_SPECIFIC_CODES(__comp_code) \
+  (((__comp_code) >= IPMI_COMP_CODE_DEVICE_SPECIFIC_CODES_MIN \
+    && (__comp_code) <= IPMI_COMP_CODE_DEVICE_SPECIFIC_CODES_MAX) ? 1 : 0)
+
+#define IPMI_COMP_CODE_COMMAND_SPECIFIC_CODES_MIN 0x80
+#define IPMI_COMP_CODE_COMMAND_SPECIFIC_CODES_MAX 0xBE
+
+#define IPMI_COMP_CODE_COMMAND_SPECIFIC_CODES(__comp_code) \
+  (((__comp_code) >= IPMI_COMP_CODE_COMMAND_SPECIFIC_CODES_MIN \
+    && (__comp_code) <= IPMI_COMP_CODE_COMMAND_SPECIFIC_CODES_MAX) ? 1 : 0)
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _IPMI_COMP_CODE_SPEC_H */
-
+#endif /* IPMI_COMP_CODE_SPEC_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,11 @@
  * 
  */
 
-#ifndef _IPMI_OEM_IBM_H
-#define _IPMI_OEM_IBM_H
+#ifndef IPMI_OEM_IBM_H
+#define IPMI_OEM_IBM_H
 
 #include "ipmi-oem.h"
 
 int ipmi_oem_ibm_get_led (ipmi_oem_state_data_t *state_data);
 
-#endif
+#endif /* IPMI_OEM_IBM_H */

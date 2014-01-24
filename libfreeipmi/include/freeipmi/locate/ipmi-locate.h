@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_LOCATE_H
-#define _IPMI_LOCATE_H  1
+#ifndef IPMI_LOCATE_H
+#define IPMI_LOCATE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -131,5 +131,4 @@ int ipmi_locate_dmidecode_get_device_info (ipmi_locate_ctx_t ctx,
 }
 #endif
 
-#endif /* ipmi-locate.h */
-
+#endif /* IPMI_LOCATE_H */

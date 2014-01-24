@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_UTIL_H
-#define _IPMI_UTIL_H    1
+#ifndef IPMI_UTIL_H
+#define IPMI_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +27,11 @@ extern "C" {
 #include <freeipmi/fiid/fiid.h>
 
 uint8_t ipmi_checksum (const void *buf, unsigned int buflen);
+
+/* Call first time w/ checksum_initial 0, pass in result for subsequent calls */
+uint8_t ipmi_checksum_incremental (const void *buf, unsigned int buflen, uint8_t checksum_initial);
+/* Can pass NULL/0 for final buf/buflen */
+uint8_t ipmi_checksum_final (const void *buf, unsigned int buflen, uint8_t checksum_initial);
 
 /* returns 1 on pass, 0 on fail, -1 on error */
 int ipmi_check_cmd (fiid_obj_t obj_cmd, uint8_t cmd);
@@ -73,6 +78,4 @@ const char *ipmi_cmd_str (uint8_t net_fn, uint8_t cmd);
 }
 #endif
 
-#endif /* ipmi-util.h */
-
-
+#endif /* IPMI_UTIL_H */

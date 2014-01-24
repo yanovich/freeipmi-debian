@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 FreeIPMI Core Team
+ * Copyright (C) 2007-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ _get_alert_string_keys (ipmi_pef_config_state_data_t *state_data,
     {
       config_err_t ret;
 
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_get_pef_configuration_parameters_alert_string_keys: %s\n",
@@ -153,7 +153,7 @@ _set_alert_string_keys (ipmi_pef_config_state_data_t *state_data,
     {
       config_err_t ret;
 
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_set_pef_configuration_parameters_alert_string_keys: %s\n",
@@ -338,7 +338,7 @@ alert_string_checkout (const char *section_name,
         {
           config_err_t ret;
 
-          if (state_data->prog_data->args->config_args.common.debug)
+          if (state_data->prog_data->args->config_args.common_args.debug)
             pstdout_fprintf (state_data->pstate,
                              stderr,
                              "ipmi_cmd_get_pef_configuration_parameters_alert_string: %s\n",
@@ -459,7 +459,7 @@ alert_string_commit (const char *section_name,
         {
           config_err_t ret;
       
-          if (state_data->prog_data->args->config_args.common.debug)
+          if (state_data->prog_data->args->config_args.common_args.debug)
             pstdout_fprintf (state_data->pstate,
                              stderr,
                              "ipmi_cmd_set_pef_configuration_parameters_alert_strings: %s\n",
@@ -494,20 +494,15 @@ alert_string_validate (const char *section_name,
 }
 
 struct config_section *
-ipmi_pef_config_alert_string_section_get (ipmi_pef_config_state_data_t *state_data, int num)
+ipmi_pef_config_alert_string_section_get (ipmi_pef_config_state_data_t *state_data,
+					  unsigned int num)
 {
   struct config_section *section = NULL;
   char buf[CONFIG_MAX_SECTION_NAME_LEN];
 
-  if (num <= 0)
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "Invalid Num = %d\n", num);
-      return (NULL);
-    }
+  assert (state_data);
 
-  snprintf (buf, CONFIG_MAX_SECTION_NAME_LEN, "Alert_String_%d", num);
+  snprintf (buf, CONFIG_MAX_SECTION_NAME_LEN, "Alert_String_%u", num);
 
   if (!(section = config_section_create (state_data->pstate,
                                          buf,

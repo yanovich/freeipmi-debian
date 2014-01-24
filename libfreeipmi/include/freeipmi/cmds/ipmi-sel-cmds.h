@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SEL_CMDS_H
-#define _IPMI_SEL_CMDS_H
+#ifndef IPMI_SEL_CMDS_H
+#define IPMI_SEL_CMDS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,6 +40,16 @@ extern "C" {
 #define IPMI_SEL_CLEAR_ERASE_COMPLETED        0x1
 
 #define IPMI_SEL_READ_ENTIRE_RECORD_BYTES_TO_READ  0xFF
+
+#define IPMI_SEL_TIME_UTC_OFFSET_MIN -1440
+#define IPMI_SEL_TIME_UTC_OFFSET_MAX 1440
+
+#define IPMI_SEL_TIME_UTC_OFFSET_UNSPECIFIED 0x07FF
+
+#define IPMI_SEL_TIME_UTC_OFFSET_VALID(__val) \
+  ((((__val) >= IPMI_SEL_TIME_UTC_OFFSET_MIN  \
+     && (__val) <= IPMI_SEL_TIME_UTC_OFFSET_MAX) \
+    || (__val) == IPMI_SEL_TIME_UTC_OFFSET_UNSPECIFIED) ? 1 : 0)
 
 #define IPMI_AUXILIARY_LOG_TYPE_MCA  0x00
 #define IPMI_AUXILIARY_LOG_TYPE_OEM1 0x01
@@ -83,6 +93,12 @@ extern fiid_template_t tmpl_cmd_get_sel_time_rs;
 extern fiid_template_t tmpl_cmd_set_sel_time_rq;
 extern fiid_template_t tmpl_cmd_set_sel_time_rs;
 
+extern fiid_template_t tmpl_cmd_get_sel_time_utc_offset_rq;
+extern fiid_template_t tmpl_cmd_get_sel_time_utc_offset_rs;
+
+extern fiid_template_t tmpl_cmd_set_sel_time_utc_offset_rq;
+extern fiid_template_t tmpl_cmd_set_sel_time_utc_offset_rs;
+
 extern fiid_template_t tmpl_cmd_get_auxiliary_log_status_rq;
 extern fiid_template_t tmpl_cmd_get_auxiliary_log_status_rs;
 extern fiid_template_t tmpl_cmd_get_auxiliary_log_status_mca_rs;
@@ -115,6 +131,10 @@ int fill_cmd_get_sel_time (fiid_obj_t obj_cmd_rq);
 
 int fill_cmd_set_sel_time (uint32_t time, fiid_obj_t obj_cmd_rq);
 
+int fill_cmd_get_sel_time_utc_offset (fiid_obj_t obj_cmd_rq);
+
+int fill_cmd_set_sel_time_utc_offset (int16_t offset, fiid_obj_t obj_cmd_rq);
+
 int fill_cmd_get_auxiliary_log_status (uint8_t log_type,
                                        fiid_obj_t obj_cmd_rq);
 
@@ -127,4 +147,4 @@ int fill_cmd_set_auxiliary_log_status (uint8_t log_type,
 }
 #endif
 
-#endif
+#endif /* IPMI_SEL_CMDS_H */

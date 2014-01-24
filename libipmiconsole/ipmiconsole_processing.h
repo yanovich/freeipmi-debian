@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiconsole_processing.h,v 1.12 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,8 +24,8 @@
  *  with Ipmiconsole.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMICONSOLE_PROCESSING_H
-#define _IPMICONSOLE_PROCESSING_H
+#ifndef IPMICONSOLE_PROCESSING_H
+#define IPMICONSOLE_PROCESSING_H
 
 #include "ipmiconsole.h"
 
@@ -33,4 +33,4 @@
 
 int ipmiconsole_process_ctxs (List console_engine_ctxs, unsigned int *timeout);
 
-#endif /* _IPMICONSOLE_PROCESSING_H */
+#endif /* IPMICONSOLE_PROCESSING_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _BMC_CONFIG_UTILS_H
-#define _BMC_CONFIG_UTILS_H
+#ifndef BMC_CONFIG_UTILS_H
+#define BMC_CONFIG_UTILS_H
 
 #include "bmc-config.h"
 
@@ -39,4 +39,4 @@ config_err_t get_sol_channel_number (bmc_config_state_data_t *state_data,
 				     const char *section_name,
 				     uint8_t *channel_number);
 
-#endif
+#endif /* BMC_CONFIG_UTILS_H */

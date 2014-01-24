@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: argv.c,v 1.14 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -82,7 +82,7 @@ static char *_nextargv(char **strp, char *ignore)
     if (len > 0) {
         if (!(cpy = (char *)malloc(len + 1))) {
             fprintf (stderr, "malloc: %s", strerror (errno));
-            exit (1);
+            exit (EXIT_FAILURE);
         }
         memcpy(cpy, word, len);
         cpy[len] = '\0';
@@ -120,7 +120,7 @@ char **argv_create(char *cmdline, char *ignore)
 
     if (!(argv = (char **)malloc(sizeof(char *) * (argc + 1)))) {
         fprintf (stderr, "malloc: %s", strerror (errno));
-        exit (1);
+        exit (EXIT_FAILURE);
     }
 
     for (i = 0; i < argc; i++) {

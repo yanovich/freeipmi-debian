@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_ENTITY_IDS_SPEC_H
-#define _IPMI_ENTITY_IDS_SPEC_H
+#ifndef IPMI_ENTITY_IDS_SPEC_H
+#define IPMI_ENTITY_IDS_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -120,6 +120,21 @@ extern "C" {
   (((__entity_id) >= IPMI_ENTITY_ID_OEM_SYSTEM_INTEGRATOR_DEFINED_MIN \
     && ((__entity_id - 1) <= (IPMI_ENTITY_ID_OEM_SYSTEM_INTEGRATOR_DEFINED_MAX - 1))) ? 1 : 0)
 
+#define IPMI_ENTITY_INSTANCE_SYSTEM_RELATIVE_MIN 0x00
+#define IPMI_ENTITY_INSTANCE_SYSTEM_RELATIVE_MAX 0x5F
+
+#define IPMI_ENTITY_INSTANCE_DEVICE_RELATIVE_MIN 0x60
+#define IPMI_ENTITY_INSTANCE_DEVICE_RELATIVE_MAX 0x7F
+
+/* To avoid gcc warnings, add +1 in comparison */
+#define IPMI_ENTITY_INSTANCE_SYSTEM_RELATIVE(__entity_instance) \
+  (((__entity_instance + 1) >= (IPMI_ENTITY_INSTANCE_SYSTEM_RELATIVE_MIN + 1)) \
+   && ((__entity_instance) >= IPMI_ENTITY_INSTANCE_SYSTEM_RELATIVE_MAX) ? 1 : 0)
+
+#define IPMI_ENTITY_INSTANCE_DEVICE_RELATIVE(__entity_instance) \
+  (((__entity_instance) >= IPMI_ENTITY_INSTANCE_DEVICE_RELATIVE_MIN)	\
+   && ((__entity_instance) >= IPMI_ENTITY_INSTANCE_DEVICE_RELATIVE_MAX) ? 1 : 0)
+  
 extern const char *const ipmi_entity_ids[];
 extern const char *const ipmi_entity_id_chassis_specific;
 extern const char *const ipmi_entity_id_board_set_specific;
@@ -132,4 +147,4 @@ extern const char *const ipmi_entity_ids_pretty[];
 }
 #endif
 
-#endif
+#endif /* IPMI_ENTITY_IDS_SPEC_H */

@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_prompt.h,v 1.14 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,8 +24,8 @@
  *  with Ipmipower.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMIPOWER_PROMPT_H
-#define _IPMIPOWER_PROMPT_H
+#ifndef IPMIPOWER_PROMPT_H
+#define IPMIPOWER_PROMPT_H
 
 #include "ipmipower.h"
 
@@ -36,4 +36,4 @@
  */
 int ipmipower_prompt_process_cmdline (void);
 
-#endif /* _IPMIPOWER_PROMPT_H */
+#endif /* IPMIPOWER_PROMPT_H */

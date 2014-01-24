@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiconsole_ctx.h,v 1.18 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,8 +24,8 @@
  *  with Ipmiconsole.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMICONSOLE_CTX_H
-#define _IPMICONSOLE_CTX_H
+#ifndef IPMICONSOLE_CTX_H
+#define IPMICONSOLE_CTX_H
 
 #include "ipmiconsole.h"
 
@@ -38,6 +38,7 @@ void ipmiconsole_ctx_list_cleanup (ipmiconsole_ctx_t c);
 
 int ipmiconsole_ctx_config_setup (ipmiconsole_ctx_t c,
                                   const char *hostname,
+				  uint16_t port,
                                   struct ipmiconsole_ipmi_config *ipmi_config,
                                   struct ipmiconsole_protocol_config *protocol_config,
                                   struct ipmiconsole_engine_config *engine_config);
@@ -76,4 +77,4 @@ int ipmiconsole_ctx_get_errnum (ipmiconsole_ctx_t c);
 
 void ipmiconsole_ctx_set_errnum (ipmiconsole_ctx_t c, int errnum);
 
-#endif /* _IPMICONSOLE_CTX_H */
+#endif /* IPMICONSOLE_CTX_H */

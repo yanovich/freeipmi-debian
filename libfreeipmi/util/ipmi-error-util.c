@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,12 +137,12 @@ ipmi_completion_code_strerror_r (uint8_t cmd,
       SNPRINTF_RETURN (IPMI_COMP_CODE_UNSPECIFIED_ERROR_STR);
     }
 
-  /* OEM completion codes */
-  if ((comp_code >= 0x01) && (comp_code <= 0x7E))
+  /* Device Specific OEM completion codes */
+  if (IPMI_COMP_CODE_DEVICE_SPECIFIC_CODES (comp_code))
     SNPRINTF_RETURN ("Device specific (OEM) completion code %02Xh.", comp_code);
 
   /* Command specific completion codes */
-  if ((comp_code >= 0x80) && (comp_code <= 0xBE))
+  if (IPMI_COMP_CODE_COMMAND_SPECIFIC_CODES (comp_code))
     {
       if (!IPMI_NET_FN_VALID (netfn))
         {
@@ -232,6 +232,16 @@ ipmi_completion_code_strerror_r (uint8_t cmd,
                   SNPRINTF_RETURN (IPMI_COMP_CODE_ALERT_IPMI_MESSAGING_SESSION_ACTIVE_STR);
                 }
               break;
+	    case IPMI_CMD_SET_SENSOR_READING_AND_EVENT_STATUS:
+	      switch (comp_code)
+		{
+		case IPMI_COMP_CODE_SENSOR_READING_OR_STATUS_NOT_SETTABLE:
+		  SNPRINTF_RETURN (IPMI_COMP_CODE_SENSOR_READING_OR_STATUS_NOT_SETTABLE_STR);
+		  
+		case IPMI_COMP_CODE_EVENT_DATA_BYTES_NOT_SETTABLE:
+		  SNPRINTF_RETURN (IPMI_COMP_CODE_EVENT_DATA_BYTES_NOT_SETTABLE_STR);
+		}
+	      break;
             }
           break;
 

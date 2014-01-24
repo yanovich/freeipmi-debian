@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_OEM_DELL_H
-#define _IPMI_OEM_DELL_H
+#ifndef IPMI_OEM_DELL_H
+#define IPMI_OEM_DELL_H
 
 #include "ipmi-oem.h"
 
@@ -25,6 +25,9 @@ int ipmi_oem_dell_get_system_info (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_dell_get_nic_selection (ipmi_oem_state_data_t *state_data);
 int ipmi_oem_dell_set_nic_selection (ipmi_oem_state_data_t *state_data);
+
+int ipmi_oem_dell_get_nic_selection_failover (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_dell_set_nic_selection_failover (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_dell_get_active_lom_status (ipmi_oem_state_data_t *state_data);
 
@@ -68,6 +71,16 @@ int ipmi_oem_dell_set_power_capacity_status (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_dell_get_chassis_identify_status (ipmi_oem_state_data_t *state_data);
 
+int ipmi_oem_dell_power_monitoring_over_interval (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_dell_power_monitoring_interval_range (ipmi_oem_state_data_t *state_data);
+
+#if 0
+/* cannot verify */
+int ipmi_oem_dell_get_blade_slot_id (ipmi_oem_state_data_t *state_data);
+#endif
+
+int ipmi_oem_dell_get_last_post_code (ipmi_oem_state_data_t *state_data);
+
 int ipmi_oem_dell_slot_power_toggle (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_dell_slot_power_control (ipmi_oem_state_data_t *state_data);
@@ -76,4 +89,4 @@ int ipmi_oem_dell_get_port_map (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_dell_set_port_map (ipmi_oem_state_data_t *state_data);
 
-#endif
+#endif /* IPMI_OEM_DELL_H */

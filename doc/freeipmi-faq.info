@@ -1,8 +1,8 @@
 This is freeipmi-faq.info, produced by makeinfo version 4.13 from
 freeipmi-faq.texi.
 
-This manual is for FreeIPMI (version 1.1.5, 17 May 2012).  Copyright
-(C) 2006-2012 FreeIPMI Core Team
+This manual is for FreeIPMI (version 1.3.4, 2 December 2013).
+Copyright (C) 2006-2012 FreeIPMI Core Team
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -18,16 +18,16 @@ END-INFO-DIR-ENTRY
    Copyright (C) 2003-2012 FreeIPMI Core Team.
 
 
-File: freeipmi-faq.info,  Node: Top,  Next: What is IPMI,  Prev: (dir),  Up: (dir)
+File: freeipmi-faq.info,  Node: Top,  Next: What is IPMI?,  Prev: (dir),  Up: (dir)
 
    Frequently Asked Questions on *FreeIPMI*
 
-   This edition of the documentation was last updated on 17 May 2012 for
-release 1.1.5 of the FreeIPMI.
+   This edition of the documentation was last updated on 12 December
+2013 for release 1.3.4 of the FreeIPMI.
 
 * Menu:
 
-* What is IPMI::
+* What is IPMI?::
 * What is FreeIPMI?::
 * How did FreeIPMI start?::
 * What operating systems does FreeIPMI run on?::
@@ -46,17 +46,20 @@ release 1.1.5 of the FreeIPMI.
 * How do you setup Powerman with ipmipower?::
 * How do you setup Conman with ipmiconsole or libipmiconsole?::
 * How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?::
+* Why are times reported by FreeIPMI tools wrong?::
 * Why is the IPMI kernel driver faster than the KCS driver?::
+* Why is the output from FreeIPMI different than another software?::
 * Why are there so many IPMI compliance bugs?::
 * How do I get around an IPMI compliance bug on my motherboard?::
+* Why am I seeing so many 'internal IPMI error' or 'driver busy' messages?::
 * How do I program with the FreeIPMI libraries?::
 * Where can I get additional help or support?::
 
 
-File: freeipmi-faq.info,  Node: What is IPMI,  Next: What is FreeIPMI?,  Prev: Top,  Up: Top
+File: freeipmi-faq.info,  Node: What is IPMI?,  Next: What is FreeIPMI?,  Prev: Top,  Up: Top
 
-0.1 IPMI - Platform Management Standard
-=======================================
+0.1 What is IPMI?
+=================
 
 The IPMI specifications define standardized, abstracted interfaces to
 the platform management subsystem.  IPMI includes the definition of
@@ -76,7 +79,7 @@ the alert without aid of run-time software.  Lastly it includes
 inventory information that can help identify a failed hardware unit.
 
 
-File: freeipmi-faq.info,  Node: What is FreeIPMI?,  Next: How did FreeIPMI start?,  Prev: What is IPMI,  Up: Top
+File: freeipmi-faq.info,  Node: What is FreeIPMI?,  Next: How did FreeIPMI start?,  Prev: What is IPMI?,  Up: Top
 
 0.2 What is FreeIPMI?
 =====================
@@ -85,8 +88,8 @@ FreeIPMI is a collection of Intelligent Platform Management IPMI system
 software.  It provides in-band and out-of-band software and a
 development library conforming to the Intelligent Platform Management
 Interface (IPMI v1.5 and v2.0) standards.  FreeIPMI also supports
-IPMI-related specifications such as the Data Center Management
-Interface (DCMI) and Intel Node Manager.
+IPMI-related specifications such as the Data Center Management Interface
+(DCMI) and Intel Node Manager.
 
 
 File: freeipmi-faq.info,  Node: How did FreeIPMI start?,  Next: What operating systems does FreeIPMI run on?,  Prev: What is FreeIPMI?,  Up: Top
@@ -101,18 +104,18 @@ from CDC and LLNL merging the IPMI software developed by both
 organizations into FreeIPMI.
 
    Anand Babu, Balamurugan and Ian Zimmerman at CDC contributed the
-in-band KCS driver, ipmi-sensors, bmc-config, ipmi-sel, bmc-info, and
-portions of libfreeipmi.  Albert Chu and Jim Garlick at LLNL
-contributed ipmipower, bmc-watchdog, ipmiping, rmcpping, portions of
-libfreeipmi, and ipmi support in Powerman.  In October 2004, FreeIPMI
-0.1.0 was officially released.
+in-band KCS driver, `ipmi-sensors', `bmc-config', `ipmi-sel',
+`bmc-info', and portions of libfreeipmi.  Albert Chu and Jim Garlick at
+LLNL contributed `ipmipower', `bmc-watchdog', `ipmiping', `rmcpping',
+portions of libfreeipmi, and IPMI support in Powerman.  In October
+2004, FreeIPMI 0.1.0 was officially released.
 
    Since the 0.1.0 release, Z Research developers have contributed
-ipmi-chassis, ipmi-raw, ipmi-locate, and portions of ipmi-pef-config.
-LLNL has contributed IPMI 2.0 support, hostrange support, ipmiconsole,
-libipmiconsole, ipmidetect, ipmi-sensors-config, ipmi-chassis-config,
-bmc-device, ipmi-oem, ipmi-dcmi, libipmimonitoring, and portions of
-ipmi-pef-config.
+`ipmi-chassis', `ipmi-raw', `ipmi-locate', and portions of
+`ipmi-pef-config'.  LLNL has contributed IPMI 2.0 support, hostrange
+support, `ipmiconsole', libipmiconsole, `ipmidetect',
+`ipmi-sensors-config', `ipmi-chassis-config', `bmc-device', `ipmi-oem',
+`ipmi-dcmi', libipmimonitoring, and portions of `ipmi-pef-config'.
 
    (Note: The original FreeIPMI developers from California Digital
 Corp. are now at Zresearch Inc.)
@@ -158,143 +161,150 @@ File: freeipmi-faq.info,  Node: What is special about FreeIPMI?,  Next: Does my 
 In our eyes, there are several reasons why FreeIPMI is particularly
 special.
 
-   1) Support for HPC and large data centers
+  1. Support for HPC and large data centers
 
-   A number of features have been added into the tools to support HPC
-and/or large data centers.  Much of this original support was added to
-support the large cluster environments at Lawrence Livermore National
-Laboratory (LLNL).
+     A number of features have been added into the tools to support HPC
+     and/or large data centers.  Much of this original support was
+     added to support the large cluster environments at Lawrence
+     Livermore National Laboratory (LLNL).
 
-   Scalable parallel execution of many FreeIPMI tools (ipmi-sensors,
-ipmi-sel, bmc-info, etc.) across a cluster is supported through
-hostranged input and output.  For example:
+     Scalable parallel execution of many FreeIPMI tools
+     (`ipmi-sensors', `ipmi-sel', `bmc-info', etc.)  across a cluster
+     is supported through hostranged input and output.  For example:
 
-     # > bmc-info -h "pwopr[0-5]" -u XXX -p XXX --get-device-id -C
-     ----------------
-     pwopr[0-1,5]
-     ----------------
-     Device ID             : 34
-     Device Revision       : 1
-     Device SDRs           : unsupported
-     Firmware Revision     : 1.0c
-     Device Available      : yes (normal operation)
-     IPMI Version          : 2.0
-     Sensor Device         : supported
-     SDR Repository Device : supported
-     SEL Device            : supported
-     FRU Inventory Device  : supported
-     IPMB Event Receiver   : unsupported
-     IPMB Event Generator  : unsupported
-     Bridge                : unsupported
-     Chassis Device        : supported
-     Manufacturer ID       : Peppercon AG (10437)
-     Product ID            : 4
-     Auxiliary Firmware Revision Information : 38420000h
-     ----------------
-     pwopr[2-4]
-     ----------------
-     Device ID             : 34
-     Device Revision       : 1
-     Device SDRs           : unsupported
-     Firmware Revision     : 1.17
-     Device Available      : yes (normal operation)
-     IPMI Version          : 2.0
-     Sensor Device         : supported
-     SDR Repository Device : supported
-     SEL Device            : supported
-     FRU Inventory Device  : supported
-     IPMB Event Receiver   : unsupported
-     IPMB Event Generator  : unsupported
-     Bridge                : unsupported
-     Chassis Device        : supported
-     Manufacturer ID       : Peppercon AG (10437)
-     Product ID            : 4
-     Auxiliary Firmware Revision Information : 38420000h
+          # > bmc-info -h "pwopr[0-5]" -u XXX -p XXX --get-device-id -C
+          ----------------
+          pwopr[0-1,5]
+          ----------------
+          Device ID             : 34
+          Device Revision       : 1
+          Device SDRs           : unsupported
+          Firmware Revision     : 1.0c
+          Device Available      : yes (normal operation)
+          IPMI Version          : 2.0
+          Sensor Device         : supported
+          SDR Repository Device : supported
+          SEL Device            : supported
+          FRU Inventory Device  : supported
+          IPMB Event Receiver   : unsupported
+          IPMB Event Generator  : unsupported
+          Bridge                : unsupported
+          Chassis Device        : supported
+          Manufacturer ID       : Peppercon AG (10437)
+          Product ID            : 4
+          Auxiliary Firmware Revision Information : 38420000h
+          ----------------
+          pwopr[2-4]
+          ----------------
+          Device ID             : 34
+          Device Revision       : 1
+          Device SDRs           : unsupported
+          Firmware Revision     : 1.17
+          Device Available      : yes (normal operation)
+          IPMI Version          : 2.0
+          Sensor Device         : supported
+          SDR Repository Device : supported
+          SEL Device            : supported
+          FRU Inventory Device  : supported
+          IPMB Event Receiver   : unsupported
+          IPMB Event Generator  : unsupported
+          Bridge                : unsupported
+          Chassis Device        : supported
+          Manufacturer ID       : Peppercon AG (10437)
+          Product ID            : 4
+          Auxiliary Firmware Revision Information : 38420000h
 
-   In the above example, its clear to see that pwopr[2-4] have different
-firmware than pwopr[0-1,5].  More information about hostrange support
-can be found in the document freeipmi-hostrange.txt
-(`http://www.gnu.org/software/freeipmi/freeipmi-hostrange.txt').
+     In the above example, its clear to see that pwopr[2-4] have
+     different firmware than pwopr[0-1,5].  More information about
+     hostrange support can be found in the document
+     `freeipmi-hostrange.txt'
+     (`http://www.gnu.org/software/freeipmi/freeipmi-hostrange.txt').
 
-   Ipmipower is capable of scaling to large nodes for cluster support
-and is supported by Powerman (`http://code.google.com/p/powerman/') for
-scalable power management.  At LLNL, in conjunction with Powerman,
-ipmipower is used for power control on clusters ranging from sizes of 4
-to 2000.  It has been used to determine power status or power control
-LLNL's largest clusters in under a second.
+     `Ipmipower' is capable of scaling to large nodes for cluster
+     support and is supported by Powerman
+     (`http://code.google.com/p/powerman/') for scalable power
+     management.  At LLNL, in conjunction with Powerman, ipmipower is
+     used for power control on clusters ranging from sizes of 4 to
+     2000.  It has been used to determine power status or power control
+     LLNL's largest clusters in under a second.
 
-   Ipmiconsole is currently supported by Conman
-(`http://conman.googlecode.com/') for scalable console management.
+     `Ipmiconsole' is currently supported by Conman
+     (`http://conman.googlecode.com/') for scalable console management.
 
-   Ipmi-sensors and libipmimonitoring are capable of interpreting sensor
-readings as well as just reporting them.  It can be used for host
-monitoring IPMI sensor severity on a cluster.  By mapping sensor
-readings into NOMINAL, WARNING, or CRITICAL states, it makes monitoring
-sensors easier across large numbers of nodes.  Skummee
-(`http://sourceforge.net/projects/skummee') currently uses
-libipmimonitoring to monitoring sensors on LLNL clusters of up to 2000
-nodes in size.  FreeIPMI sensor monitoring plugins for Ganglia
-(`http://ganglia.info/') and Nagios (`http://www.nagios.org/') have
-also been developed and made available for download
-(`http://www.gnu.org/software/freeipmi/download.html').
+     `Ipmi-sensors' and libipmimonitoring are capable of interpreting
+     sensor readings as well as just reporting them.  It can be used
+     for host monitoring IPMI sensor severity on a cluster.  By mapping
+     sensor readings into NOMINAL, WARNING, or CRITICAL states, it
+     makes monitoring sensors easier across large numbers of nodes.
+     Skummee (`http://sourceforge.net/projects/skummee') currently uses
+     libipmimonitoring to monitoring sensors on LLNL clusters of up to
+     2000 nodes in size.  FreeIPMI sensor monitoring plugins for
+     Ganglia (`http://ganglia.info/') and Nagios
+     (`http://www.nagios.org/') have also been developed and made
+     available for download
+     (`http://www.gnu.org/software/freeipmi/download.html').
 
-   Ipmi-sel and libipmimonitoring are capable of interpreting system
-event log (SEL) entries as well as just reporting them.  It can be used
-for host monitoring IPMI event severity on a cluster.  By mapping
-events into NOMINAL, WARNING, or CRITICAL states, it makes monitoring
-system events easier across large numbers of nodes.  Skummee
-(`http://sourceforge.net/projects/skummee') currently uses
-libipmimonitoring to monitoring the SEL on LLNL clusters of up to 2000
-nodes in size.
+     `Ipmi-sel' and libipmimonitoring are capable of interpreting
+     system event log (SEL) entries as well as just reporting them.  It
+     can be used for host monitoring IPMI event severity on a cluster.
+     By mapping events into NOMINAL, WARNING, or CRITICAL states, it
+     makes monitoring system events easier across large numbers of
+     nodes.  Skummee (`http://sourceforge.net/projects/skummee')
+     currently uses libipmimonitoring to monitoring the SEL on LLNL
+     clusters of up to 2000 nodes in size.
 
-   The bmc-config, ipmi-chassis-config, ipmi-pef-config,
-ipmi-sensors-config, and configuration file and command-line interface
-are used to easily copy the BMC configuration from one node to every
-other node in a cluster quickly.  It has been used to modify the BMC
-configuration across large LLNL clusters in a few minutes.  They also
-have the capability to verify (via the diff option) that the desired
-configuration has been properly stored to firmware.
+     The `bmc-config', `ipmi-chassis-config', `ipmi-pef-config',
+     `ipmi-sensors-config', and configuration file and command-line
+     interface are used to easily copy the BMC configuration from one
+     node to every other node in a cluster quickly.  It has been used
+     to modify the BMC configuration across large LLNL clusters in a
+     few minutes.  They also have the capability to verify (via the
+     diff option) that the desired configuration has been properly
+     stored to firmware.
 
-   Ipmidetect can be used to enhance the efficiency of the hostranged
-input by eliminating those nodes in the cluster that have been
-temporarily removed for servicing.
+     `Ipmidetect' can be used to enhance the efficiency of the
+     hostranged input by eliminating those nodes in the cluster that
+     have been temporarily removed for servicing.
 
-   2) Additional OEM support
+  2. Additional OEM support
 
-   FreeIPMI contains support for a number of OEM extensions and OEM
-sensors and/or events.  Ipmi-oem currently supports OEM command
-extensions for motherboards made by Dell, Fujitsu, IBM, Intel,
-Inventec, Quanta, Sun Microsystems, and Supermicro.  Ipmi-sensors and
-Ipmi-sel support OEM sensors and/or events for motherboards made from
-Dell, Fujitsu, Intel, Inventec, Quanta, Sun Microsystems, and
-Supermicro.  (Some of the motherboards may have been rebranded by
-vendors, see manpages for official list of confirmed supported
-motherboards.)
+     FreeIPMI contains support for a number of OEM extensions and OEM
+     sensors and/or events.  `Ipmi-oem' currently supports OEM command
+     extensions for motherboards made by Dell, Fujitsu, IBM, Intel,
+     Inventec, Quanta, Sun Microsystems, Supermicro, and Wistron.
+     `Ipmi-sensors' and `ipmi-sel' support OEM sensors and/or events
+     for motherboards made from Dell, Fujitsu, HP, Intel, Inventec,
+     Quanta, Sun Microsystems, Supermicro, and Wistron.  (Some of the
+     motherboards may have been rebranded by vendors, see manpages for
+     official list of confirmed supported motherboards.)
 
-   3) Additional flexibility and features
+  3. Additional flexibility and features
 
-   By implementing various IPMI sub-sections into multiple tools, each
-tool is capable of providing the user with more flexibility and
-ultimately more features in addition to those listed above.  It may not
-be as easy (or architecturally possible) to do in an all-in-one tool.
+     By implementing various IPMI sub-sections into multiple tools,
+     each tool is capable of providing the user with more flexibility
+     and ultimately more features in addition to those listed above.
+     It may not be as easy (or architecturally possible) to do in an
+     all-in-one tool.
 
-   4) Extra IPMI support
+  4. Extra IPMI support
 
-   In addition to the features listed above, FreeIPMI also supports
-specifications related to IPMI.  The Data Center Management Interface,
-or DCMI, is supported via the FreeIPMI tool ipmi-dcmi.  Some aspects of
-the Intel Power Node Manager are supported in ipmi-oem.
+     In addition to the features listed above, FreeIPMI also supports
+     specifications related to IPMI.  The Data Center Management
+     Interface, or DCMI, is supported via the FreeIPMI tool
+     `ipmi-dcmi'.  Some aspects of the Intel Power Node Manager are
+     supported in `ipmi-oem'.
 
-   5) Easy setup
+  5. Easy setup
 
-   By implementing drivers in userspace libraries, there is no need to
-build/setup/manage any kernel modules/drivers.
+     By implementing drivers in userspace libraries, there is no need to
+     build/setup/manage any kernel modules/drivers.
 
-   6) Portability
+  6. Portability
 
-   Likewise, by implementing everything in userspace libraries and
-tools, portability to multiple operating systems and architectures
-should be easier.
+     Likewise, by implementing everything in userspace libraries and
+     tools, portability to multiple operating systems and architectures
+     should be easier.
+
 
 
 File: freeipmi-faq.info,  Node: Does my system support IPMI?,  Next: How do I compile FreeIPMI?,  Prev: What is special about FreeIPMI?,  Up: Top
@@ -305,31 +315,33 @@ File: freeipmi-faq.info,  Node: Does my system support IPMI?,  Next: How do I co
 Unfortunately, there are no universally defined mechanisms for
 determining if a system supports IPMI.  The following may provide hints.
 
-   1) FreeIPMI's ipmi-locate can be used to determine if IPMI can be
-found on your system.  Users are cautioned though, the failure to
-discover IPMI via ipmi-locate is not sufficient to disprove that IPMI
-exists on your system.  Your system may not publish such information or
-may expect clients to communicate at default locations.
+  1. FreeIPMI's `ipmi-locate' can be used to determine if IPMI can be
+     found on your system.  Users are cautioned though, the failure to
+     discover IPMI via `ipmi-locate' is not sufficient to disprove that
+     IPMI exists on your system.  Your system may not publish such
+     information or may expect clients to communicate at default
+     locations.
 
-   2) dmidecode may be similarly used to probe for devices that support
-IPMI on your system.  You may grep for IPMI or specifying the IPMI DMI
-type on the command line.
+  2. `dmidecode' may be similarly used to probe for devices that
+     support IPMI on your system.  You may grep for IPMI or specifying
+     the IPMI DMI type on the command line.
 
-     # > dmidecode --type 38
-     # dmidecode 2.10
-     SMBIOS 2.5 present.
+          # > dmidecode --type 38
+          # dmidecode 2.10
+          SMBIOS 2.5 present.
 
-     Handle 0x0049, DMI type 38, 18 bytes
-     IPMI Device Information
-             Interface Type: KCS (Keyboard Control Style)
-             Specification Version: 2.0
-             I2C Slave Address: 0x10
-             NV Storage Device: Not Present
-             Base Address: 0x0000000000000CA2 (I/O)
-             Register Spacing: Successive Byte Boundaries
+          Handle 0x0049, DMI type 38, 18 bytes
+          IPMI Device Information
+                  Interface Type: KCS (Keyboard Control Style)
+                  Specification Version: 2.0
+                  I2C Slave Address: 0x10
+                  NV Storage Device: Not Present
+                  Base Address: 0x0000000000000CA2 (I/O)
+                  Register Spacing: Successive Byte Boundaries
 
-   Again, the failure to find an IPMI supported device is not sufficient
-to show lack of IPMI support.
+
+   Again, the failure to find an IPMI supported device is not
+sufficient to show lack of IPMI support.
 
    Ultimately, some amount of information from product documents or
 trial and error may be necessary to determine if IPMI is supported on
@@ -357,7 +369,7 @@ and receive a 'libgcrypt required to build libfreeipmi' error, please
 install libgcrypt.  For Linux users, this may require the install of
 the libgcrypt-devel package as well.  For those who do not need IPMI
 2.0 encryption, FreeIPMI may be built without it by specifying
--without-encryption when executing configure.
+`--without-encryption' when executing configure.
 
 
 File: freeipmi-faq.info,  Node: x86-64 Compilation,  Next: Installing FreeIPMI on FreeBSD,  Prev: libgcrypt requirement,  Up: Top
@@ -371,7 +383,7 @@ libraries.  However, some multi-architecture installs (e.g. you have 32
 bit and 64 bit libraries installed) may lead to builds and installs of
 32 bit instead of 64 bit.  For those noticing this, pass libdir
 appropriately to the configure script to workaround this problem. (e.g.
--libdir=/usr/lib64)
+`--libdir=/usr/lib64')
 
    Example:
        # ./configure  --prefix=/usr --libdir=/usr/lib64
@@ -400,58 +412,68 @@ File: freeipmi-faq.info,  Node: What are some IPMI terminology or acronyms I sho
 Good question, here are some terms and acronyms with general definition
 you might want to know.
 
-   *BMC* stands for *Baseboard Management Controller*.  The BMC is the
-management chip on the system that is responsible for IPMI.  It is
-common to refer to configuring the "BMC" as synonymous for configuring
-IPMI.
+*BMC*
+     The *Baseboard Management Controller* is the management chip on
+     the system that is responsible for IPMI.  It is common to refer to
+     configuring the "BMC" as synonymous for configuring IPMI.
 
-   *inband* IPMI communication refers to communication on a system
-locally (i.e. not over a network).
+*inband*
+     *inband* IPMI communication refers to communication on a system
+     locally (i.e. not over a network).
 
-   *outofband* and *IPMI over LAN* refer to IPMI communication over a
-network, typically ethernet.
+*outofband*
+     *outofband* and *IPMI over LAN* refer to IPMI communication over a
+     network, typically ethernet.
 
-   *SDR* stands for *Sensor Data Repository*.  The SDR is a database of
-system information that is needed by many other IPMI functions.  It is
-commonly read before some IPMI action can be taken.  For example, it
-contains a list of all sensors on a system, so it must be downloaded
-before sensors on a system can be read.  In FreeIPMI, the SDR is cached
-in a common location and can be used by a number of tools, such as
-ipmi-sensors, ipmi-sel, and ipmi-fru.
+*SDR*
+     The *Sensor Data Repository* is a database of system information
+     that is needed by many other IPMI functions.  It is commonly read
+     before some IPMI action can be taken.  For example, it contains a
+     list of all sensors on a system, so it must be downloaded before
+     sensors on a system can be read.  In FreeIPMI, the SDR is cached
+     in a common location and can be used by a number of tools, such as
+     `ipmi-sensors', `ipmi-sel', and `ipmi-fru'.
 
-   *SEL* stands for *System Event Log*.  The SEL is a log of events
-stored on the system for later diagnostics.  In FreeIPMI, ipmi-sel can
-be used to read the SEL.
+*SEL*
+     The *System Event Log* is a log of events stored on the system for
+     later diagnostics.  In FreeIPMI, `ipmi-sel' can be used to read
+     the SEL.
 
-   *FRU* stands for *Field Replaceable Unit*.  While FRU is a general
-computing term refering to a replaceable unit of electronics, in IPMI
-is is common to refer to the "FRU" as the database of all FRU
-components on a system.  In FreeIPMI, ipmi-fru can be used to read the
-FRU components on a system.
+*FRU*
+     The *Field Replaceable Unit* is a general computing term refering
+     to a replaceable unit of electronics.  In IPMI it is common to
+     refer to the "FRU" as the database of all FRU components on a
+     system.  In FreeIPMI, `ipmi-fru' can be used to read the FRU
+     components on a system.
 
-   *PEF* stands for *Platform Event Filtering*.  PEF refers to the
-rules that determine when PETs are generated and where they are sent.
-In FreeIPMI, PEF can be configured via ipmi-pef-config.
+*PEF*
+     *Platform Event Filtering* refers to the rules that determine when
+     PETs are generated and where they are sent.  In FreeIPMI, PEF can
+     be configured via `ipmi-pef-config'.
 
-   *PET* stands for *Platform Event Trap*.  PET refers to a trap that
-can be sent by a system to an SNMP agent to indicate an event has
-occurred on the system.  In FreeIPMI, a PET trap can be interpreted via
-ipmi-pet.
+*PET*
+     *Platform Event Trap* refers to a trap that can be sent by a
+     system to an SNMP agent to indicate an event has occurred on the
+     system.  In FreeIPMI, a PET trap can be interpreted via `ipmi-pet'.
 
-   *DCMI* stands for *Data Center Management Interface*.  DCMI is a
-management interface defined by a group of vendors that use IPMI as the
-backend for their system management definition.  In FreeIPMI, ipmi-dcmi
-can be used to read/configuring DCMI.
+*DCMI*
+     The *Data Center Management Interface* is a management interface
+     defined by a group of vendors that use IPMI as the backend for
+     their system management definition.  In FreeIPMI, `ipmi-dcmi' can
+     be used to read/configuring DCMI.
 
-   *SOL* stands for *Serial over LAN*.  SOL refers to the forwarding of
-serial system traffic over a network, typically an ethernet network.
-It is typically used to access a remote system console.  In FreeIPMI,
-ipmiconsole is used to access a remote console via SOL.
+*SOL*
+     *Serial over LAN* refers to the forwarding of serial system
+     traffic over a network, typically an ethernet network.  It is
+     typically used to access a remote system console.  In FreeIPMI,
+     ipmiconsole is used to access a remote console via SOL.
 
-   *RMCP* stands for *Remote Management Control Protocol*.  The RMCP
-protocol is another remote management protocol which IPMI is defined
-within for outofband communication.  For most IPMI users, you will
-never need to know about RMCP.
+*RMCP*
+     The *Remote Management Control Protocol* protocol is another
+     remote management protocol which IPMI is defined within for
+     outofband communication.  For most IPMI users, you will never need
+     to know about RMCP.
+
 
 
 File: freeipmi-faq.info,  Node: What setup is needed for FreeIPMI to communicate over LAN?,  Next: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?,  Prev: What are some IPMI terminology or acronyms I should be aware of?,  Up: Top
@@ -469,32 +491,34 @@ File: freeipmi-faq.info,  Node: What setup is needed for Serial over LAN (SOL) o
 0.14 What setup is needed for Serial over LAN (SOL) or Ipmiconsole?
 ===================================================================
 
-The setup of Serial-over-LAN (SOL) and/or Ipmiconsole is highly
+The setup of Serial-over-LAN (SOL) and/or `Ipmiconsole' is highly
 dependent on your system.  However, most motherboardss require the
 following:
 
-   1) Adjust the BIOS COM port for serial redirection over SOL instead
-of the normal serial port and set the appropriate baud rate.  If you do
-not know which port is the SOL port, you may need to play around and
-guess.  It is likely a non-default setting, since many manufacturers
-may still assume the default redirection is out of the normal serial
-port.  If you do not have a serial port on your motherboard, this part
-can probably be skipped.
+  1. Adjust the BIOS COM port for serial redirection over SOL instead
+     of the normal serial port and set the appropriate baud rate.  If
+     you do not know which port is the SOL port, you may need to play
+     around and guess.  It is likely a non-default setting, since many
+     manufacturers may still assume the default redirection is out of
+     the normal serial port.  If you do not have a serial port on your
+     motherboard, this part can probably be skipped.
 
-   2) Configure IPMI on the motherboard to use SOL.  Many motherboards
-may have this enabled by default, however you may wish to verify with
-FreeIPMI's bmc-config.  More information can be found in the
-bmc-config.conf(5) manpage on the settings.  However, the key settings
-are to enable SOL on the system, enable SOL for individual users, and
-select the appropriate baud.  On many motherboards, the selected baud
-must match what is configured in the BIOS.
+  2. Configure IPMI on the motherboard to use SOL.  Many motherboards
+     may have this enabled by default, however you may wish to verify
+     with FreeIPMI's `bmc-config'.  More information can be found in
+     the bmc-config.conf(5) manpage on the settings.  However, the key
+     settings are to enable SOL on the system, enable SOL for
+     individual users, and select the appropriate baud.  On many
+     motherboards, the selected baud must match what is configured in
+     the BIOS.
 
-   3) Adjust your operating systems serial console settings to use the
-appropriate COM port.  For Linux, the following guide
-(`http://www.vanemery.com/Linux/Serial/serial-console.html') provides a
-pretty good overview of setting of a serial console on Linux.  The only
-difference for setting up a serial console with Ipmiconsole or SOL, is
-the ttySX terminal may need to be changed.
+  3. Adjust your operating systems serial console settings to use the
+     appropriate COM port.  For Linux, the following guide
+     (`http://www.vanemery.com/Linux/Serial/serial-console.html')
+     provides a pretty good overview of setting of a serial console on
+     Linux.  The only difference for setting up a serial console with
+     `Ipmiconsole' or SOL, is the ttySX terminal may need to be changed.
+
 
 
 File: freeipmi-faq.info,  Node: Do I need to install or configure a driver to perform IPMI inband?,  Next: SSIF Driver Configuration,  Prev: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?,  Up: Top
@@ -507,11 +531,11 @@ For most people the answer is no.
    FreeIPMI includes a userspace driver that works on most motherboards
 without any driver installation, loading, or configuration required.
 FreeIPMI also includes support of a Linux SSIF driver through the SSIF
-device (i.e. /dev/i2c-0), the OpenIPMI Linux kernel driver (i.e.
-/dev/ipmi0), and the Sun/Solaris BMC driver (i.e. /dev/bmc).  If you
-communicate through one of these mechanisms, the appropriate drivers
-for them should be loaded.  Most systems should automatically load the
-appropriate drivers you need.
+device (i.e. `/dev/i2c-0'), the OpenIPMI Linux kernel driver (i.e.
+`/dev/ipmi0'), and the Sun/Solaris BMC driver (i.e. `/dev/bmc').  If
+you communicate through one of these mechanisms, the appropriate
+drivers for them should be loaded.  Most systems should automatically
+load the appropriate drivers you need.
 
    Under most scenarios, the FreeIPMI tools should automatically
 discover which in-band interface to use and the proper settings to use.
@@ -572,7 +596,7 @@ File: freeipmi-faq.info,  Node: How do you setup Powerman with ipmipower?,  Next
 There are additional details in the Powerman
 (`http://code.google.com/p/powerman/') documentation, however here are
 the basics.  In the powerman.conf file, you want to include the
-ipmipower.dev device file, setup an ipmipower device in co-process
+`ipmipower.dev' device file, setup an ipmipower device in co-process
 mode, then configure hosts to use that device.
 
      include "/etc/powerman/ipmipower.dev"
@@ -587,7 +611,7 @@ device line:
      device "ipmi0" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h mynodes[0-10] -u username -p password |&"
 
    although you will probably want to do some of this configuration
-(especially the username and password) in freeipmi.conf.
+(especially the username and password) in `freeipmi.conf'.
 
    If you use an alternate set of hostnames for IPMI from the primary
 hostname, that can configured like this:
@@ -595,6 +619,45 @@ hostname, that can configured like this:
      device "ipmi0" "ipmipower" "/usr/sbin/ipmipower -h altname[0-10] |&"
 
      node "primaryname[0-10]"  "ipmi0" "altname[0-10]"
+
+   Configuration can be trickier if you want to configure Powerman to
+use ipmipower with an OEM extension specified through
+`--oem-power-type'.  Many OEM extensions in ipmipower must include
+additional arguments, which can be passed in via the node argument.  In
+addition, while `ipmipower' can take a host range as an additional
+argument, Powerman may not.
+
+   For example, the following would be suitable to configure OEM
+extension support the Dell Poweredge C410x.  A specific node identifier
+is used to map to a specific node and additional argument (i.e.
+mynodes0-1 maps to mynodes0+1).
+
+     include "/etc/powerman/ipmipower.dev"
+
+     device "ipmi0" "ipmipower" "/usr/sbin/ipmipower -h mynodes[0-10]+[1-16] --oem-power-type=c410x -l admin |&"
+
+     node "mynodes[0-10]-1" "ipmi0" "mynodes[0-10]+1"
+     node "mynodes[0-10]-2" "ipmi0" "mynodes[0-10]+2"
+     node "mynodes[0-10]-3" "ipmi0" "mynodes[0-10]+3"
+     node "mynodes[0-10]-4" "ipmi0" "mynodes[0-10]+4"
+     node "mynodes[0-10]-5" "ipmi0" "mynodes[0-10]+5"
+     node "mynodes[0-10]-6" "ipmi0" "mynodes[0-10]+6"
+     node "mynodes[0-10]-7" "ipmi0" "mynodes[0-10]+7"
+     node "mynodes[0-10]-8" "ipmi0" "mynodes[0-10]+8"
+     node "mynodes[0-10]-9" "ipmi0" "mynodes[0-10]+9"
+     node "mynodes[0-10]-10" "ipmi0" "mynodes[0-10]+10"
+     node "mynodes[0-10]-11" "ipmi0" "mynodes[0-10]+11"
+     node "mynodes[0-10]-12" "ipmi0" "mynodes[0-10]+12"
+     node "mynodes[0-10]-13" "ipmi0" "mynodes[0-10]+13"
+     node "mynodes[0-10]-14" "ipmi0" "mynodes[0-10]+14"
+     node "mynodes[0-10]-15" "ipmi0" "mynodes[0-10]+15"
+     node "mynodes[0-10]-16" "ipmi0" "mynodes[0-10]+16"
+
+   As noted in the manpage, the Dell Poweredge C410x appears to have
+difficulty handling new slot power control requests until prior ones
+have completed.  Users may wish to configure `ipmipower' with
+`--wait-until-on', `--wait-until-off', and consider using the
+`ipmipower-serial.dev' device file instead of `ipmipower.dev'.
 
 
 File: freeipmi-faq.info,  Node: How do you setup Conman with ipmiconsole or libipmiconsole?,  Next: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?,  Prev: How do you setup Powerman with ipmipower?,  Up: Top
@@ -608,15 +671,15 @@ here are some basics.
 
    To configure Conman to connect via the ipmiconsole tool, Conman comes
 with an expect script named ipmiconsole.exp, typically installed into
-/usr/lib/conman/exec/ipmiconsole.exp.  Consoles can be setup by adding
-lines to conman.conf like:
+`/usr/lib/conman/exec/ipmiconsole.exp'.  Consoles can be setup by
+adding lines to `conman.conf' like:
 
      CONSOLE name="myserver"   dev="/usr/lib/conman/exec/ipmiconsole.exp myserver myusername mypassword"
 
    One of the useful aspects of using the ipmiconsole.exp script is that
 the same configuration options you may have already configured into
-freeipmi.conf, may be loaded automatically when ipmiconsole is executed
-via this expect script.
+`freeipmi.conf', may be loaded automatically when ipmiconsole is
+executed via this expect script.
 
    However, as can be expected, scalability may be a problem as you must
 launch a process for every node in your cluster.
@@ -639,10 +702,10 @@ libipmiconsole library natively is that Conman is able to detect and
 manage additional IPMI error cases.
 
 
-File: freeipmi-faq.info,  Node: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?,  Next: Why is the IPMI kernel driver faster than the KCS driver?,  Prev: How do you setup Conman with ipmiconsole or libipmiconsole?,  Up: Top
+File: freeipmi-faq.info,  Node: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?,  Next: Why are times reported by FreeIPMI tools wrong?,  Prev: How do you setup Conman with ipmiconsole or libipmiconsole?,  Up: Top
 
-0.19 How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?,
-==============================================================================
+0.19 How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?
+=============================================================================
 
 Scripts to monitor IPMI via FreeIPMI in Ganglia and Nagios have been
 developed and are downloadable on the FreeIPMI homepage
@@ -650,9 +713,28 @@ developed and are downloadable on the FreeIPMI homepage
 for setup can be found at the top of the scripts.
 
 
-File: freeipmi-faq.info,  Node: Why is the IPMI kernel driver faster than the KCS driver?,  Next: Why are there so many IPMI compliance bugs?,  Prev: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?,  Up: Top
+File: freeipmi-faq.info,  Node: Why are times reported by FreeIPMI tools wrong?,  Next: Why is the IPMI kernel driver faster than the KCS driver?,  Prev: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?,  Up: Top
 
-0.20 Why is the IPMI kernel driver faster than the KCS driver?
+0.20 Why are times reported by FreeIPMI tools wrong?
+====================================================
+
+Times reported by various FreeIPMI tools (such as `ipmi-sel') are
+reported under the assumption that timestamps are written in localtime.
+This is by definition in the IPMI specification.
+
+   Whether or not a system truly stored the timestamps in localtime
+varies on many factors, such as the vendor, BIOS, and operating system.
+
+   If the times reported by the tool are off, there is a strong
+likelihood the time may be stored in GMT/UTC and needs to be converted
+into localtime.  In FreeIPMI tools that have time outputs, the
+`--utc-to-localtime' option can be specified or the `utc-to-localtime'
+option can be specified in `freeipmi.conf'.
+
+
+File: freeipmi-faq.info,  Node: Why is the IPMI kernel driver faster than the KCS driver?,  Next: Why is the output from FreeIPMI different than another software?,  Prev: Why are times reported by FreeIPMI tools wrong?,  Up: Top
+
+0.21 Why is the IPMI kernel driver faster than the KCS driver?
 ==============================================================
 
 Internally the IPMI kernel driver chooses to spin while polling for a
@@ -667,19 +749,105 @@ response time to the IPMI kernel driver, users can specify the
 'spinpoll' workaround.
 
 
-File: freeipmi-faq.info,  Node: Why are there so many IPMI compliance bugs?,  Next: How do I get around an IPMI compliance bug on my motherboard?,  Prev: Why is the IPMI kernel driver faster than the KCS driver?,  Up: Top
+File: freeipmi-faq.info,  Node: Why is the output from FreeIPMI different than another software?,  Next: Why are there so many IPMI compliance bugs?,  Prev: Why is the IPMI kernel driver faster than the KCS driver?,  Up: Top
 
-0.21 Why are there so many IPMI compliance bugs?
+0.22 Why is the output from FreeIPMI different than another software?
+=====================================================================
+
+Due to minor implementation differences and or incorrect IPMI firmware,
+the resulting output from FreeIPMI tools can differ from other
+software.  Here are some of the more common inconsistencies that have
+been seen before.  More inconsistencies can be seen/fixed by specifying
+a number of the workarounds available to many of the FreeIPMI tools.
+
+   * In FreeIPMI's `ipmi-sel' and `ipmi-sensors' there are options for
+     FreeIPMI to interpret the SEL or sensor readings and give them a
+     NOMINAL, WARNING, or CRITICAL status.  Other IPMI software may
+     have different interpretations for their sensors and/or SEL
+     readings that map to NOMINAL, WARNING, or CRITICAL differently.
+     These interpretations are configurable in FreeIPMI via the
+     `freeipmi_interpret_sel.conf' and `freeipmi_interpret_sensor.conf'
+     configuration files.
+
+   * In some IPMI software, sensor and/or FRU records are bridged by
+     default and read off satellite controllers.  In FreeIPMI they are
+     not due to the discovery that many vendors do not implement their
+     bridging correctly or publish invalid slave addresses in the SDR.
+     In order to bridge sensors the `--bridge-sensors' option must be
+     specified in `ipmi-sensors'.  In order to bridge FRU records, the
+     `--bridge-fru' must be specified in `ipmi-fru'.
+
+   * In some IPMI software, shared sensors may be read by default.  In
+     FreeIPMI's `ipmi-sensors', they are not read by default due to
+     discovery that too many systems implement this incorrectly.
+     Shared sensors can be read by specifying the `--shared-sensors'
+     option.
+
+   * In vendor provided IPMI software, OEM specific sensors, SEL
+     records, or FRU records may be output correctly because the vendor
+     is aware of how to properly read/output OEM specific information.
+     FreeIPMI may not be able to do this by default.  For the
+     motherboards in which OEM information is known, it can be output
+     using the `--interpret-oem-data'.  This option is available in
+     `ipmi-sensors', `ipmi-sel', and `ipmi-fru'.
+
+   * In some vendor IPMI software, sensor "names" are constructured
+     through a combination of the multiple data in the SDR, rather than
+     just the device name listed in the SDR.  This can lead to
+     different sensor names listed in tools like `ipmi-sensors' and
+     `ipmi-sel'.  In both tools, this can be alleviated through the use
+     of the `--entity-sensor-names' option.
+
+   * On several HP systems (observed on HP Proliant DL380 G7 and HP
+     ProLiant ML310 G5), the SDR lists sensors using inconsistent
+     information.  Some analog sensors are listed as discrete sensors
+     or vice versa.  This inconsistency, and implementation differences
+     between `ipmi-sensors' and other IPMI software lead to different
+     outputs.  For example, this is one such sensor that was seen in
+     `ipmi-sensors':
+
+          2  | Power Supply 1  | Power Supply | N/A        | N/A   | 'Presence detected'
+
+     but this same sensor was see in `ipmitool' as
+
+          Power Supply 1   | 120 Watts         | nc
+
+     In this example, `ipmi-sensors' did not output a Watts reading but
+     outputs the proper "Presence Detected" state.  `Ipmitool' outputs
+     the correct watts reading, but outputs the invalid non-critical
+     "nc" state.
+
+     In FreeIPMI, this problem can be worked around using the
+     'discretereading' workaround flag.
+
+   * In FreeIPMI's `ipmi-fru', all multirecord FRU entries are output
+     by default.  In `ipmitool' and perhaps other software, they are
+     not.  The resulting output from `ipmi-fru' is much larger than
+     other software.  To get similar output in `ipmitool', the `-v'
+     option must be set.
+
+   * In FreeIPMI's `ipmi-fru', FRU record checksums are automatically
+     checked and errors are output if a FRU record cannot assumed to be
+     valid due to a failed checksum check.  Other IPMI software has
+     been shown to ignore the checksums and assume records are valid.
+     If your system has invalid checksummed FRU entries, the
+     'skipchecks' workaround can be used to get around them.
+
+
+
+File: freeipmi-faq.info,  Node: Why are there so many IPMI compliance bugs?,  Next: How do I get around an IPMI compliance bug on my motherboard?,  Prev: Why is the output from FreeIPMI different than another software?,  Up: Top
+
+0.23 Why are there so many IPMI compliance bugs?
 ================================================
 
 The IPMI specification is very large.  At last check, the IPMI
 specification was 601 pages.  This does not count the various side
 specifications related to IPMI, including DCMI, PET, FRU, and the
 various OEM extension specifications (e.g. Intel Node Manager).  Many
-sections of text can be ambiguous.  Many components of IPMI are
-optional and aren't required to be implemented.  There is some leeway
-for implementation interpretation as well.  Ultimately, bugs will
-happen.  In all fairness, FreeIPMI has had bugs too.
+sections of text can be ambiguous.  Many components of IPMI are optional
+and aren't required to be implemented.  There is some leeway for
+implementation interpretation as well.  Ultimately, bugs will happen.
+In all fairness, FreeIPMI has had bugs too.
 
    A number of the IPMI compliance bugs found by FreeIPMI are documented
 in the freeipmi-bugs-issues-and-workarounds.txt document (you can find
@@ -687,9 +855,9 @@ it on the website here:
 `http://www.gnu.org/software/freeipmi/freeipmi-bugs-issues-and-workarounds.txt').
 
 
-File: freeipmi-faq.info,  Node: How do I get around an IPMI compliance bug on my motherboard?,  Next: How do I program with the FreeIPMI libraries?,  Prev: Why are there so many IPMI compliance bugs?,  Up: Top
+File: freeipmi-faq.info,  Node: How do I get around an IPMI compliance bug on my motherboard?,  Next: Why am I seeing so many 'internal IPMI error' or 'driver busy' messages?,  Prev: Why are there so many IPMI compliance bugs?,  Up: Top
 
-0.22 How do I get around an IPMI compliance bug on my motherboard?
+0.24 How do I get around an IPMI compliance bug on my motherboard?
 ==================================================================
 
 Most of the FreeIPMI tools and libraries have flags to workaround a
@@ -702,9 +870,67 @@ has not yet been implemented, please contact the maintainers on the
 <freeipmi-devel@gnu.org> mailing list.
 
 
-File: freeipmi-faq.info,  Node: How do I program with the FreeIPMI libraries?,  Next: Where can I get additional help or support?,  Prev: How do I get around an IPMI compliance bug on my motherboard?,  Up: Top
+File: freeipmi-faq.info,  Node: Why am I seeing so many 'internal IPMI error' or 'driver busy' messages?,  Next: How do I program with the FreeIPMI libraries?,  Prev: How do I get around an IPMI compliance bug on my motherboard?,  Up: Top
 
-0.23 How do I program with the FreeIPMI libraries?
+0.25 Why am I seeing so many 'internal IPMI error' or 'driver busy' messages?
+=============================================================================
+
+In some Linux distributions (atleast with Redhat Enterprise Linux 6.4 /
+RHEL 6.4 and CentOS 6.4), the distributions began compiling the IPMI
+kernel driver (i.e. ipmi_msghandler and ipmi_si modules) into the
+kernel instead of as loadable modules.  This was apparently due to a
+need for the IPMI kernel drivers to work with ACPI.
+
+   Due to compiling the IPMI kernel driver into the kernel, there is the
+potential for inband IPMI communication to occur in the kernel w/o any
+knowledge of it from outside software in userspace.  Normally, the IPMI
+service (i.e. /etc/init.d/ipmi) is started to create a device file
+(i.e. /dev/ipmi0) so that userspace software will know to communicate
+through this device.  However, some of these distros disable the ipmi
+service so that a device file is never created.
+
+   Because of this, multiple IPMI software can communicate inband to the
+BMC simultaneously, subsequently racing with each other.  Ultimately,
+this can lead to communication problems.  In FreeIPMI, this is most
+commonly seen through 'internal IPMI error' or 'driver busy' messages.
+
+   There are several possible solutions for this in FreeIPMI.  If you
+start the ipmi service (i.e. /etc/init.d/ipmi start), a device file
+will be created which FreeIPMI will recognize.  FreeIPMI will
+subsequently communicate via inband IPMI through this device file, thus
+eliminating racing with the IPMI occurring in the kernel.
+
+   The other option is to disable the IPMI kernel thread so that
+FreeIPMI can perform inband communication with the BMC through its own
+mechanisms.  The following is from the Linux kernel documentation.
+
+     When compiled into the kernel, the parameters can be specified on the
+     kernel command line as:
+
+       ipmi_si.type=<type1>,<type2>...
+            ipmi_si.ports=<port1>,<port2>... ipmi_si.addrs=<addr1>,<addr2>...
+            ipmi_si.irqs=<irq1>,<irq2>... ipmi_si.trydefaults=[0|1]
+            ipmi_si.regspacings=<sp1>,<sp2>,...
+            ipmi_si.regsizes=<size1>,<size2>,...
+            ipmi_si.regshifts=<shift1>,<shift2>,...
+            ipmi_si.slave_addrs=<addr1>,<addr2>,...
+            ipmi_si.force_kipmid=<enable1>,<enable2>,...
+            ipmi_si.kipmid_max_busy_us=<ustime1>,<ustime2>,...
+
+     ...
+
+     If your IPMI interface does not support interrupts and is a KCS or
+     SMIC interface, the IPMI driver will start a kernel thread for the
+     interface to help speed things up.  This is a low-priority kernel
+     thread that constantly polls the IPMI driver while an IPMI operation
+     is in progress.  The force_kipmid module parameter will all the user to
+     force this thread on or off.  If you force it off and don't have
+     interrupts, the driver will run VERY slowly.
+
+
+File: freeipmi-faq.info,  Node: How do I program with the FreeIPMI libraries?,  Next: Where can I get additional help or support?,  Prev: Why am I seeing so many 'internal IPMI error' or 'driver busy' messages?,  Up: Top
+
+0.26 How do I program with the FreeIPMI libraries?
 ==================================================
 
 If you are looking for a high level library to do Serial-over-LAN (SOL)
@@ -723,14 +949,14 @@ specification.  It is recommended most use the higher level libraries
 described above.
 
    A more detailed description of the available FreeIPMI libraries can
-be found in the freeipmi-libraries.txt document (you can find it on the
-website here:
+be found in the `freeipmi-libraries.txt' document (you can find it on
+the website here:
 `http://www.gnu.org/software/freeipmi/freeipmi-libraries.txt').
 
 
 File: freeipmi-faq.info,  Node: Where can I get additional help or support?,  Prev: How do I program with the FreeIPMI libraries?,  Up: Top
 
-0.24 Where can I get additional help or support?
+0.27 Where can I get additional help or support?
 ================================================
 
 For help, please email the <freeipmi-users@gnu.org> mailing list.
@@ -738,30 +964,33 @@ For help, please email the <freeipmi-users@gnu.org> mailing list.
 
 
 Tag Table:
-Node: Top688
-Node: What is IPMI2044
-Node: What is FreeIPMI?3233
-Node: How did FreeIPMI start?3769
-Node: What operating systems does FreeIPMI run on?5105
-Node: FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil5861
-Node: What is special about FreeIPMI?6669
-Node: Does my system support IPMI?13069
-Node: How do I compile FreeIPMI?14620
-Node: libgcrypt requirement14985
-Node: x86-64 Compilation15625
-Node: Installing FreeIPMI on FreeBSD16308
-Node: What are some IPMI terminology or acronyms I should be aware of?16951
-Node: What setup is needed for FreeIPMI to communicate over LAN?19919
-Node: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?20513
-Node: Do I need to install or configure a driver to perform IPMI inband?22331
-Node: SSIF Driver Configuration23799
-Node: How do you setup Powerman with ipmipower?25399
-Node: How do you setup Conman with ipmiconsole or libipmiconsole?26734
-Node: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?28645
-Node: Why is the IPMI kernel driver faster than the KCS driver?29302
-Node: Why are there so many IPMI compliance bugs?30310
-Node: How do I get around an IPMI compliance bug on my motherboard?31405
-Node: How do I program with the FreeIPMI libraries?32195
-Node: Where can I get additional help or support?33529
+Node: Top691
+Node: What is IPMI?2252
+Node: What is FreeIPMI?3398
+Node: How did FreeIPMI start?3935
+Node: What operating systems does FreeIPMI run on?5312
+Node: FreeIPMI vs OpenIPMI vs Ipmitool vs Ipmiutil6068
+Node: What is special about FreeIPMI?6876
+Node: Does my system support IPMI?13869
+Node: How do I compile FreeIPMI?15515
+Node: libgcrypt requirement15880
+Node: x86-64 Compilation16523
+Node: Installing FreeIPMI on FreeBSD17209
+Node: What are some IPMI terminology or acronyms I should be aware of?17852
+Node: What setup is needed for FreeIPMI to communicate over LAN?20875
+Node: What setup is needed for Serial over LAN (SOL) or Ipmiconsole?21469
+Node: Do I need to install or configure a driver to perform IPMI inband?23381
+Node: SSIF Driver Configuration24855
+Node: How do you setup Powerman with ipmipower?26455
+Node: How do you setup Conman with ipmiconsole or libipmiconsole?29750
+Node: How do you setup Ganglia or Nagios to monitor IPMI sensors via FreeIPMI?31667
+Node: Why are times reported by FreeIPMI tools wrong?32312
+Node: Why is the IPMI kernel driver faster than the KCS driver?33302
+Node: Why is the output from FreeIPMI different than another software?34306
+Node: Why are there so many IPMI compliance bugs?38808
+Node: How do I get around an IPMI compliance bug on my motherboard?39909
+Node: Why am I seeing so many 'internal IPMI error' or 'driver busy' messages?40726
+Node: How do I program with the FreeIPMI libraries?43853
+Node: Where can I get additional help or support?45200
 
 End Tag Table

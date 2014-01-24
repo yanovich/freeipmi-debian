@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,6 +137,7 @@ _parse_workaround_flags (const char *str,
 			 unsigned int *workaround_flags_outofband,
 			 unsigned int *workaround_flags_outofband_2_0,
 			 unsigned int *workaround_flags_inband,
+			 unsigned int *workaround_flags_sdr,
 			 unsigned int *section_specific_workaround_flags,
 			 int command_line_flag)
 {
@@ -154,6 +155,8 @@ _parse_workaround_flags (const char *str,
     (*workaround_flags_outofband_2_0) = 0;
   if (workaround_flags_inband)
     (*workaround_flags_inband) = 0;
+  if (workaround_flags_sdr)
+    (*workaround_flags_sdr) = 0;
   if (section_specific_workaround_flags)
     (*section_specific_workaround_flags) = 0;
 
@@ -169,6 +172,8 @@ _parse_workaround_flags (const char *str,
 	    (*workaround_flags_outofband_2_0) = 0;
 	  if (workaround_flags_inband)
 	    (*workaround_flags_inband) = 0;
+	  if (workaround_flags_sdr)
+	    (*workaround_flags_sdr) = 0;
 	  if (section_specific_workaround_flags)
 	    (*section_specific_workaround_flags) = 0;
 	  break;
@@ -180,8 +185,16 @@ _parse_workaround_flags (const char *str,
           if (workaround_flags_outofband)
             (*workaround_flags_outofband) |= IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_AUTHENTICATION_CAPABILITIES;
           if (workaround_flags_outofband_2_0)
-            (*workaround_flags_outofband_2_0) |= IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_AUTHENTICATION_CAPABILITIES;
+            (*workaround_flags_outofband_2_0) |= IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_AUTHENTICATION_CAPABILITIES;
         }
+      /* special case, may apply to outofband and outofband_2_0 */
+      else if (!strcasecmp (tok, IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_NO_CHECKSUM_CHECK_STR))
+	{
+          if (workaround_flags_outofband)
+            (*workaround_flags_outofband) |= IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_NO_CHECKSUM_CHECK;
+          if (workaround_flags_outofband_2_0)
+            (*workaround_flags_outofband_2_0) |= IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_NO_CHECKSUM_CHECK;
+	}
       else if (workaround_flags_outofband
                && !strcasecmp (tok, IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_ACCEPT_SESSION_ID_ZERO_STR))
         (*workaround_flags_outofband) |= IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_ACCEPT_SESSION_ID_ZERO;
@@ -194,6 +207,9 @@ _parse_workaround_flags (const char *str,
       else if (workaround_flags_outofband
                && !strcasecmp (tok, IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_BIG_ENDIAN_SEQUENCE_NUMBER_STR))
         (*workaround_flags_outofband) |= IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_BIG_ENDIAN_SEQUENCE_NUMBER;
+      else if (workaround_flags_outofband
+               && !strcasecmp (tok, IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_NO_AUTH_CODE_CHECK_STR))
+        (*workaround_flags_outofband) |= IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_NO_AUTH_CODE_CHECK;
 #if 0
       /* handled above w/ special case */
       else if (workaround_flags_outofband_2_0
@@ -215,12 +231,15 @@ _parse_workaround_flags (const char *str,
       else if (workaround_flags_outofband_2_0
                && !strcasecmp (tok, IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE_STR))
         (*workaround_flags_outofband_2_0) |= IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE;
-      else if (workaround_flags_outofband_2_0
+      else if (workaround_flags_inband
                && !strcasecmp (tok, IPMI_PARSE_WORKAROUND_FLAGS_INBAND_ASSUME_IO_BASE_ADDRESS_STR))
         (*workaround_flags_inband) |= IPMI_PARSE_WORKAROUND_FLAGS_INBAND_ASSUME_IO_BASE_ADDRESS;
-      else if (workaround_flags_outofband_2_0
+      else if (workaround_flags_inband
                && !strcasecmp (tok, IPMI_PARSE_WORKAROUND_FLAGS_INBAND_SPIN_POLL_STR))
         (*workaround_flags_inband) |= IPMI_PARSE_WORKAROUND_FLAGS_INBAND_SPIN_POLL;
+      else if (workaround_flags_sdr
+               && !strcasecmp (tok, IPMI_PARSE_WORKAROUND_FLAGS_SDR_ASSUME_MAX_SDR_RECORD_COUNT_STR))
+        (*workaround_flags_sdr) |= IPMI_PARSE_WORKAROUND_FLAGS_SDR_ASSUME_MAX_SDR_RECORD_COUNT;
       else if (section_specific_workaround_flags
                && !strcasecmp (tok, IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_IGNORE_SOL_PAYLOAD_SIZE_STR))
         (*section_specific_workaround_flags) |= IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_IGNORE_SOL_PAYLOAD_SIZE;
@@ -230,6 +249,9 @@ _parse_workaround_flags (const char *str,
       else if (section_specific_workaround_flags
                && !strcasecmp (tok, IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SKIP_SOL_ACTIVATION_STATUS_STR))
         (*section_specific_workaround_flags) |= IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SKIP_SOL_ACTIVATION_STATUS;
+      else if (section_specific_workaround_flags
+               && !strcasecmp (tok, IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SKIP_CHANNEL_PAYLOAD_SUPPORT_STR))
+        (*section_specific_workaround_flags) |= IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SKIP_CHANNEL_PAYLOAD_SUPPORT;
       else if (section_specific_workaround_flags
                && !strcasecmp (tok, IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SKIP_CHECKS_STR))
         (*section_specific_workaround_flags) |= IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SKIP_CHECKS;
@@ -276,12 +298,14 @@ parse_workaround_flags (const char *str,
 			unsigned int *workaround_flags_outofband,
 			unsigned int *workaround_flags_outofband_2_0,
 			unsigned int *workaround_flags_inband,
+			unsigned int *workaround_flags_sdr,
 			unsigned int *section_specific_workaround_flags)
 {
   return (_parse_workaround_flags (str,
 				   workaround_flags_outofband,
 				   workaround_flags_outofband_2_0,
 				   workaround_flags_inband,
+				   workaround_flags_sdr,
 				   section_specific_workaround_flags,
 				   0));
 }
@@ -291,12 +315,14 @@ parse_workaround_flags_tool (const char *str,
 			     unsigned int *workaround_flags_outofband,
 			     unsigned int *workaround_flags_outofband_2_0,
 			     unsigned int *workaround_flags_inband,
+			     unsigned int *workaround_flags_sdr,
 			     unsigned int *section_specific_workaround_flags)
 {
   return (_parse_workaround_flags (str,
 				   workaround_flags_outofband,
 				   workaround_flags_outofband_2_0,
 				   workaround_flags_inband,
+				   workaround_flags_sdr,
 				   section_specific_workaround_flags,
 				   1));
 }
@@ -354,4 +380,67 @@ parse_kg (void *out, unsigned int outlen, const char *in)
     }
 
   return (rv);
+}
+
+void
+parse_get_freeipmi_outofband_flags (unsigned int parse_workaround_flags_outofband,
+				    unsigned int *freeipmi_workaround_flags_outofband)
+{
+  assert (freeipmi_workaround_flags_outofband);
+
+  (*freeipmi_workaround_flags_outofband) = 0;
+
+  if (parse_workaround_flags_outofband & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_AUTHENTICATION_CAPABILITIES)
+    (*freeipmi_workaround_flags_outofband) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_AUTHENTICATION_CAPABILITIES;
+  if (parse_workaround_flags_outofband & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_ACCEPT_SESSION_ID_ZERO)
+    (*freeipmi_workaround_flags_outofband) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_ACCEPT_SESSION_ID_ZERO;
+  if (parse_workaround_flags_outofband & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_FORCE_PERMSG_AUTHENTICATION)
+    (*freeipmi_workaround_flags_outofband) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_FORCE_PERMSG_AUTHENTICATION;
+  if (parse_workaround_flags_outofband & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_CHECK_UNEXPECTED_AUTHCODE)
+    (*freeipmi_workaround_flags_outofband) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_CHECK_UNEXPECTED_AUTHCODE;
+  if (parse_workaround_flags_outofband & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_BIG_ENDIAN_SEQUENCE_NUMBER)
+    (*freeipmi_workaround_flags_outofband) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_BIG_ENDIAN_SEQUENCE_NUMBER;
+  if (parse_workaround_flags_outofband & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_NO_AUTH_CODE_CHECK)
+    (*freeipmi_workaround_flags_outofband) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_NO_AUTH_CODE_CHECK;
+  if (parse_workaround_flags_outofband & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_NO_CHECKSUM_CHECK)
+    (*freeipmi_workaround_flags_outofband) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_NO_CHECKSUM_CHECK;
+}
+
+void
+parse_get_freeipmi_outofband_2_0_flags (unsigned int parse_workaround_flags_outofband_2_0,
+					unsigned int *freeipmi_workaround_flags_outofband_2_0)
+{
+  assert (freeipmi_workaround_flags_outofband_2_0);
+
+  (*freeipmi_workaround_flags_outofband_2_0) = 0;
+
+  if (parse_workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_AUTHENTICATION_CAPABILITIES)
+    (*freeipmi_workaround_flags_outofband_2_0) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_AUTHENTICATION_CAPABILITIES;
+  if (parse_workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION)
+    (*freeipmi_workaround_flags_outofband_2_0) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION;
+  if (parse_workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUPERMICRO_2_0_SESSION)
+    (*freeipmi_workaround_flags_outofband_2_0) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUPERMICRO_2_0_SESSION;
+  if (parse_workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUN_2_0_SESSION)
+    (*freeipmi_workaround_flags_outofband_2_0) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUN_2_0_SESSION;
+  if (parse_workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_OPEN_SESSION_PRIVILEGE)
+    (*freeipmi_workaround_flags_outofband_2_0) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_OPEN_SESSION_PRIVILEGE;
+  if (parse_workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE)
+    (*freeipmi_workaround_flags_outofband_2_0) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE;
+  if (parse_workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_NO_CHECKSUM_CHECK)
+    (*freeipmi_workaround_flags_outofband_2_0) |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_NO_CHECKSUM_CHECK;
+}
+
+void
+parse_get_freeipmi_inband_flags (unsigned int parse_workaround_flags_inband,
+				 unsigned int *freeipmi_workaround_flags_inband)
+{
+  assert (freeipmi_workaround_flags_inband);
+
+  (*freeipmi_workaround_flags_inband) = 0;
+
+  if (parse_workaround_flags_inband & IPMI_PARSE_WORKAROUND_FLAGS_INBAND_ASSUME_IO_BASE_ADDRESS)
+    (*freeipmi_workaround_flags_inband) |= IPMI_WORKAROUND_FLAGS_INBAND_ASSUME_IO_BASE_ADDRESS;
+  
+  if (parse_workaround_flags_inband & IPMI_PARSE_WORKAROUND_FLAGS_INBAND_SPIN_POLL)
+    (*freeipmi_workaround_flags_inband) |= IPMI_WORKAROUND_FLAGS_INBAND_SPIN_POLL;
 }

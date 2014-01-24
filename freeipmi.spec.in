@@ -44,7 +44,6 @@ Group: Applications/System
 Requires: freeipmi = %{version}-%{release}
 Requires(post): /sbin/chkconfig
 Requires(preun): /sbin/chkconfig
-Requires: logrotate
 %description bmc-watchdog
 Provides a watchdog daemon for OS monitoring and recovery.
 
@@ -55,7 +54,17 @@ Requires: freeipmi = %{version}-%{release}
 Requires(post): /sbin/chkconfig
 Requires(preun): /sbin/chkconfig
 %description ipmidetectd
-IPMI node detection daemon.
+IPMI node detection daemon.  Regularly IPMI-pings remote nodes to
+provide data for a number of IPMI detection tools and features.
+
+%package ipmiseld
+Summary: IPMI SEL syslog logging daemon
+Group: Applications/System
+Requires: freeipmi = %{version}-%{release}
+Requires(post): /sbin/chkconfig
+Requires(preun): /sbin/chkconfig
+%description ipmiseld
+IPMI SEL syslog logging daemon.
 
 %if %{?_with_debug:1}%{!?_with_debug:0}
   %define _enable_debug --enable-debug --enable-trace
@@ -80,6 +89,7 @@ if [[ "%{_sysconfdir}/init.d" != "%{_initrddir}" ]]
 then
 mv $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/bmc-watchdog $RPM_BUILD_ROOT/%{_initrddir}/bmc-watchdog
 mv $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/ipmidetectd $RPM_BUILD_ROOT/%{_initrddir}/ipmidetectd
+mv $RPM_BUILD_ROOT/%{_sysconfdir}/init.d/ipmiseld $RPM_BUILD_ROOT/%{_initrddir}/ipmiseld
 fi
 rm -f %{buildroot}%{_infodir}/dir
 # kludge to get around rpmlint complaining about 0 length semephore file
@@ -164,6 +174,36 @@ if [ "$1" = 0 ]; then
           %{_initrddir}/ipmidetectd stop
        fi
        /sbin/chkconfig --del ipmidetectd
+    fi
+fi
+
+%post ipmiseld
+if [ "$1" = 1 ]; then
+   if [ -x %{_initrddir}/ipmiseld ]; then
+      /sbin/chkconfig --add ipmiseld
+      /sbin/chkconfig ipmiseld off
+   fi
+fi
+if [ $1 -ge 1 ]; then
+   if [ -x %{_initrddir}/ipmiseld ]; then
+      if %{_initrddir}/ipmiseld status | grep -q running; then
+         %{_initrddir}/ipmiseld restart
+      else
+         %{_initrddir}/ipmiseld condrestart
+      fi
+   fi
+fi
+
+%preun ipmiseld
+#
+# Stop ipmiseld if it is running 
+#
+if [ "$1" = 0 ]; then
+    if [ -x %{_initrddir}/ipmiseld ]; then
+       if %{_initrddir}/ipmiseld status | grep -q running; then
+          %{_initrddir}/ipmiseld stop
+       fi
+       /sbin/chkconfig --del ipmiseld
     fi
 fi
 
@@ -301,7 +341,6 @@ fi
 %{_mandir}/man7/freeipmi.7*
 %{_mandir}/man5/libipmiconsole.conf.5*
 %dir %{_localstatedir}/cache/ipmimonitoringsdrcache
-%dir %{_localstatedir}/log/freeipmi
 
 %files devel
 %defattr(-,root,root)
@@ -317,15 +356,14 @@ fi
 %dir %{_includedir}/freeipmi/debug
 %dir %{_includedir}/freeipmi/driver
 %dir %{_includedir}/freeipmi/fiid
-%dir %{_includedir}/freeipmi/fru-parse
+%dir %{_includedir}/freeipmi/fru
 %dir %{_includedir}/freeipmi/interface
 %dir %{_includedir}/freeipmi/interpret
 %dir %{_includedir}/freeipmi/locate
 %dir %{_includedir}/freeipmi/payload
 %dir %{_includedir}/freeipmi/record-format
-%dir %{_includedir}/freeipmi/sdr-cache
-%dir %{_includedir}/freeipmi/sdr-parse
-%dir %{_includedir}/freeipmi/sel-parse
+%dir %{_includedir}/freeipmi/sdr
+%dir %{_includedir}/freeipmi/sel
 %dir %{_includedir}/freeipmi/sensor-read
 %dir %{_includedir}/freeipmi/spec
 %dir %{_includedir}/freeipmi/templates
@@ -339,15 +377,14 @@ fi
 %{_includedir}/freeipmi/debug/*.h
 %{_includedir}/freeipmi/driver/*.h
 %{_includedir}/freeipmi/fiid/*.h
-%{_includedir}/freeipmi/fru-parse/*.h
+%{_includedir}/freeipmi/fru/*.h
 %{_includedir}/freeipmi/interface/*.h
 %{_includedir}/freeipmi/interpret/*.h
 %{_includedir}/freeipmi/locate/*.h
 %{_includedir}/freeipmi/payload/*.h
 %{_includedir}/freeipmi/record-format/*.h
-%{_includedir}/freeipmi/sdr-cache/*.h
-%{_includedir}/freeipmi/sdr-parse/*.h
-%{_includedir}/freeipmi/sel-parse/*.h
+%{_includedir}/freeipmi/sdr/*.h
+%{_includedir}/freeipmi/sel/*.h
 %{_includedir}/freeipmi/sensor-read/*.h
 %{_includedir}/freeipmi/spec/*.h
 %{_includedir}/freeipmi/templates/*.h
@@ -361,7 +398,6 @@ fi
 %doc %{_datadir}/doc/%{name}/DISCLAIMER.bmc-watchdog.UC
 %config(noreplace) %{_initrddir}/bmc-watchdog
 %config(noreplace) %{_sysconfdir}/sysconfig/bmc-watchdog
-%config(noreplace) %{_sysconfdir}/logrotate.d/bmc-watchdog
 %{_sbindir}/bmc-watchdog
 %{_mandir}/man8/bmc-watchdog.8*
 
@@ -373,7 +409,25 @@ fi
 %{_mandir}/man5/ipmidetectd.conf.5*
 %{_mandir}/man8/ipmidetectd.8*
 
+%files ipmiseld
+%defattr(-,root,root)
+%doc %{_datadir}/doc/%{name}/COPYING.ipmiseld
+%doc %{_datadir}/doc/%{name}/DISCLAIMER.ipmiseld
+%config(noreplace) %{_initrddir}/ipmiseld
+%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/freeipmi/ipmiseld.conf
+%{_sbindir}/ipmiseld
+%{_mandir}/man5/ipmiseld.conf.5*
+%{_mandir}/man8/ipmiseld.8*
+%dir %{_localstatedir}/cache/ipmiseld
+
 %changelog
+* Tue Jul 10 2012 Albert Chu <chu11@llnl.gov> 1.2.1
+- Add ipmiseld daemon and subpackage.
+- Update paths for libfreeipmi changes.
+
+* Mon May 3 2012 Albert Chu <chu11@llnl.gov> 1.2.1
+- Remove bmc-watchdog logrotate file.
+
 * Mon Dec 12 2011 Albert Chu <chu11@llnl.gov> 1.1.1
 - Add contrib and ipmi-pet files.
 - Make main package own logdir.

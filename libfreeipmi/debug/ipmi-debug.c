@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,13 +86,13 @@ ipmi_obj_dump (int fd,
       return (-1);
     }
 
-  if (ipmi_debug_set_prefix (prefix_buf, IPMI_DEBUG_MAX_PREFIX_LEN, prefix) < 0)
+  if (debug_set_prefix (prefix_buf, IPMI_DEBUG_MAX_PREFIX_LEN, prefix) < 0)
     {
       ERRNO_TRACE (errno);
       return (-1);
     }
 
-  if (ipmi_debug_output_str (fd, prefix_buf, hdr) < 0)
+  if (debug_output_str (fd, prefix_buf, hdr) < 0)
     {
       ERRNO_TRACE (errno);
       return (-1);
@@ -129,7 +129,7 @@ ipmi_obj_dump (int fd,
 
       if (prefix)
         {
-          if (ipmi_debug_dprintf (fd, "%s", prefix_buf) < 0)
+          if (debug_dprintf (fd, "%s", prefix_buf) < 0)
             {
               ERRNO_TRACE (errno);
               goto cleanup;
@@ -140,7 +140,8 @@ ipmi_obj_dump (int fd,
       if (field_len <= 64
           && strcasecmp (key, "raw_data")
           && strcasecmp (key, "user_name")
-          && strcasecmp (key, "payload_data"))
+          && strcasecmp (key, "payload_data")
+	  && strcasecmp (key, "record_data"))
         {
           uint64_t val = 0;
 
@@ -150,7 +151,7 @@ ipmi_obj_dump (int fd,
               goto cleanup;
             }
 
-          if (ipmi_debug_dprintf (fd, "[%16" PRIX64 "h] = %s[%2ub]\n", (uint64_t) val, key, field_len) < 0)
+          if (debug_dprintf (fd, "[%16" PRIX64 "h] = %s[%2ub]\n", (uint64_t) val, key, field_len) < 0)
             {
               ERRNO_TRACE (errno);
               goto cleanup;
@@ -161,7 +162,7 @@ ipmi_obj_dump (int fd,
           uint8_t buf[IPMI_DEBUG_MAX_BUF_LEN];
           int len;
 
-          if (ipmi_debug_dprintf (fd, "[  BYTE ARRAY ... ] = %s[%2uB]\n", key, BITS_ROUND_BYTES (field_len)) < 0)
+          if (debug_dprintf (fd, "[  BYTE ARRAY ... ] = %s[%2uB]\n", key, BITS_ROUND_BYTES (field_len)) < 0)
             {
               ERRNO_TRACE (errno);
               goto cleanup;
@@ -173,7 +174,7 @@ ipmi_obj_dump (int fd,
               goto cleanup;
             }
 
-          if (ipmi_debug_output_byte_array (fd, prefix_buf, buf, len) < 0)
+          if (debug_output_byte_array (fd, prefix_buf, buf, len) < 0)
             {
               ERRNO_TRACE (errno);
               goto cleanup;
@@ -183,7 +184,7 @@ ipmi_obj_dump (int fd,
       fiid_iterator_next (iter);
     }
 
-  if (ipmi_debug_output_str (fd, prefix_buf, trlr) < 0)
+  if (debug_output_str (fd, prefix_buf, trlr) < 0)
     {
       ERRNO_TRACE (errno);
       goto cleanup;
@@ -228,13 +229,13 @@ ipmi_obj_dump_ipmb (int fd,
       return (-1);
     }
 
-  if (ipmi_debug_set_prefix (prefix_buf, IPMI_DEBUG_MAX_PREFIX_LEN, prefix) < 0)
+  if (debug_set_prefix (prefix_buf, IPMI_DEBUG_MAX_PREFIX_LEN, prefix) < 0)
     {
       ERRNO_TRACE (errno);
       return (-1);
     }
 
-  if (ipmi_debug_output_str (fd, prefix_buf, hdr) < 0)
+  if (debug_output_str (fd, prefix_buf, hdr) < 0)
     {
       ERRNO_TRACE (errno);
       return (-1);
@@ -275,16 +276,16 @@ ipmi_obj_dump_ipmb (int fd,
 
   if (ipmb_buf_len)
     {
-      if (ipmi_debug_dump_ipmb (fd,
-                                prefix,
-                                ipmb_buf,
-                                ipmb_buf_len,
-                                tmpl_ipmb_msg_hdr,
-                                tmpl_ipmb_cmd) < 0)
+      if (debug_dump_ipmb (fd,
+			   prefix,
+			   ipmb_buf,
+			   ipmb_buf_len,
+			   tmpl_ipmb_msg_hdr,
+			   tmpl_ipmb_cmd) < 0)
         goto cleanup;
     }
 
-  if (ipmi_debug_output_str (fd, prefix_buf, trlr) < 0)
+  if (debug_output_str (fd, prefix_buf, trlr) < 0)
     {
       ERRNO_TRACE (errno);
       goto cleanup;
@@ -313,13 +314,13 @@ ipmi_dump_hex (int fd,
       return (-1);
     }
 
-  if (ipmi_debug_set_prefix (prefix_buf, IPMI_DEBUG_MAX_PREFIX_LEN, prefix) < 0)
+  if (debug_set_prefix (prefix_buf, IPMI_DEBUG_MAX_PREFIX_LEN, prefix) < 0)
     {
       ERRNO_TRACE (errno);
       return (-1);
     }
 
-  if (ipmi_debug_output_str (fd, prefix_buf, hdr) < 0)
+  if (debug_output_str (fd, prefix_buf, hdr) < 0)
     {
       ERRNO_TRACE (errno);
       return (-1);
@@ -327,26 +328,26 @@ ipmi_dump_hex (int fd,
 
   if (prefix)
     {
-      if (ipmi_debug_dprintf (fd, "%s", prefix_buf) < 0)
+      if (debug_dprintf (fd, "%s", prefix_buf) < 0)
         {
           ERRNO_TRACE (errno);
           goto cleanup;
         }
     }
 
-  if (ipmi_debug_dprintf (fd, "[  HEX DUMP ..... ] = %s[%2uB]\n", "HEX", buf_len) < 0)
+  if (debug_dprintf (fd, "[  HEX DUMP ..... ] = %s[%2uB]\n", "HEX", buf_len) < 0)
     {
       ERRNO_TRACE (errno);
       goto cleanup;
     }
 
-  if (ipmi_debug_output_byte_array (fd, prefix_buf, buf, buf_len) < 0)
+  if (debug_output_byte_array (fd, prefix_buf, buf, buf_len) < 0)
     {
       ERRNO_TRACE (errno);
       goto cleanup;
     }
 
-  if (ipmi_debug_output_str (fd, prefix_buf, trlr) < 0)
+  if (debug_output_str (fd, prefix_buf, trlr) < 0)
     {
       ERRNO_TRACE (errno);
       goto cleanup;

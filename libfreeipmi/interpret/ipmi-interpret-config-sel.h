@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,19 +16,18 @@
  * 
  */
 
-#ifndef _IPMI_INTERPRET_CONFIG_SEL_H
-#define _IPMI_INTERPRET_CONFIG_SEL_H
+#ifndef IPMI_INTERPRET_CONFIG_SEL_H
+#define IPMI_INTERPRET_CONFIG_SEL_H
 
 #include "freeipmi/interpret/ipmi-interpret.h"
 
 #include "ipmi-interpret-defs.h"
 
-int ipmi_interpret_sel_init (ipmi_interpret_ctx_t ctx);
+int interpret_sel_init (ipmi_interpret_ctx_t ctx);
 
-void ipmi_interpret_sel_destroy (ipmi_interpret_ctx_t ctx);
+void interpret_sel_destroy (ipmi_interpret_ctx_t ctx);
 
-int ipmi_interpret_sel_config_parse (ipmi_interpret_ctx_t ctx,
-                                     const char *sel_config_file);
+int interpret_sel_config_parse (ipmi_interpret_ctx_t ctx,
+				const char *sel_config_file);
 
-#endif /* ipmi-interpret-config-sel.h */
-
+#endif /* IPMI_INTERPRET_CONFIG_SEL_H */

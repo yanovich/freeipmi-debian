@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_API_H
-#define _IPMI_API_H
+#ifndef IPMI_API_H
+#define IPMI_API_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,12 +29,80 @@ extern "C" {
 
 /* ERROR CODE NOTES
  *
+ * IPMI_ERR_BMC_BUSY vs IPMI_ERR_DRIVER_BUSY
+ *
+ * BMC_BUSY indicates the BMC cannot handle more requests, it is an
+ * error typically from a completion code returned from the BMC.  The
+ * DRIVER_BUSY error indicates a driver is too busy to handle
+ * additional requests, the error does not come from the BMC.
+ *
  * IPMI_ERR_MESSAGE_TIMEOUT
  *
  * message timeout is typical of bridging commands.  The
  * session/connection has not timed out and is fine, but a
  * bridging command could not get its bridged response back in a
  * reasonable timeframe.
+ */
+
+/* IPMI COMPLETION CODE / RMCPPLUS CODE MAPPING
+ *
+ * For most users, the high level error codes listed below will
+ * suffice.  However, for those who want/need to see deeper IPMI
+ * completion code or RMCPPlus errors, the following are mappings of
+ * IPMI completion codes and RMCPPlus codes to their respective error
+ * codes.
+ *
+ * Not that other factors outside of completion codes/RMCPPlus codes
+ * could also lead to these IPMI errors.  For example, depending on
+ * motherboard support of username types, a IPMI_ERR_USERNAME_INVALID
+ * could be returned even though no IPMI error occurred.  In addition,
+ * completion codes/RMCPPlus codes could map to different error codes,
+ * depending on when the error occurred (such as during session
+ * authentication vs. after authentication).
+ *
+ * (*) - Completion code is specific to an IPMI command
+ *
+ * IPMI_ERR_USERNAME_INVALID
+ * - IPMI_COMP_CODE_GET_SESSION_CHALLENGE_INVALID_USERNAME (*)
+ * - IPMI_COMP_CODE_GET_SESSION_CHALLENGE_NULL_USERNAME_NOT_ENABLED (*)
+ *
+ * IPMI_ERR_PASSWORD_INVALID
+ * - RMCPPLUS_STATUS_INVALID_INTEGRITY_CHECK_VALUE
+ *
+ * IPMI_ERR_PRIVILEGE_LEVEL_INSUFFICIENT
+ * - IPMI_COMP_CODE_INSUFFICIENT_PRIVILEGE_LEVEL
+ *
+ * IPMI_ERR_PRIVILEGE_LEVEL_CANNOT_BE_OBTAINED
+ * - IPMI_COMP_CODE_ACTIVATE_SESSION_EXCEEDS_PRIVILEGE_LEVEL (*)
+ * - IPMI_COMP_CODE_INSUFFICIENT_PRIVILEGE_LEVEL
+ * - IPMI_COMP_CODE_SET_SESSION_PRIVILEGE_LEVEL_REQUESTED_LEVEL_NOT_AVAILABLE_FOR_USER (*)
+ * - IPMI_COMP_CODE_SET_SESSION_PRIVILEGE_LEVEL_REQUESTED_LEVEL_EXCEEDS_USER_PRIVILEGE_LIMIT (*)
+ * - RMCPPLUS_STATUS_INVALID_ROLE
+ * - RMCPPLUS_STATUS_UNAUTHORIZED_ROLE_OR_PRIVILEGE_LEVEL_REQUESTED
+ *
+ * IPMI_ERR_CIPHER_SUITE_ID_UNAVAILABLE
+ * - RMCPPLUS_STATUS_NO_CIPHER_SUITE_MATCH_WITH_PROPOSED_SECURITY_ALGORITHMS
+ *
+ * IPMI_ERR_MESSAGE_TIMEOUT
+ * - IPMI_COMP_CODE_COMMAND_TIMEOUT
+ *
+ * IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED
+ * - IPMI_COMP_CODE_INVALID_COMMAND
+ * - IPMI_COMP_CODE_COMMAND_INVALID_FOR_LUN  
+ * - IPMI_COMP_CODE_REQUEST_DATA_LENGTH_INVALID
+ * - IPMI_COMP_CODE_REQUEST_DATA_LENGTH_LIMIT_EXCEEDED
+ * - IPMI_COMP_CODE_PARAMETER_OUT_OF_RANGE
+ * - IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST
+ *
+ * IPMI_ERR_BMC_BUSY
+ * - IPMI_COMP_CODE_NODE_BUSY
+ * - IPMI_COMP_CODE_OUT_OF_SPACE
+ * - IPMI_COMP_CODE_SDR_REPOSITORY_IN_UPDATE_MODE
+ * - IPMI_COMP_CODE_DEVICE_IN_FIRMWARE_UPDATE_MODE
+ * - IPMI_COMP_CODE_BMC_INITIALIZATION_IN_PROGRESS
+ *
+ * All other IPMI completion codes will map to IPMI_ERR_BAD_COMPLETION_CODE.
+ * All other RMCPPlus codes will map to IPMI_ERR_BAD_RMCPPLUS_STATUS_CODE.
  */
 
 enum ipmi_errnum
@@ -58,21 +126,23 @@ enum ipmi_errnum
     IPMI_ERR_DEVICE_NOT_OPEN = 16,
     IPMI_ERR_DEVICE_NOT_SUPPORTED = 17,
     IPMI_ERR_DEVICE_NOT_FOUND = 18,
-    IPMI_ERR_DRIVER_TIMEOUT = 19,
-    IPMI_ERR_MESSAGE_TIMEOUT = 20,
-    IPMI_ERR_COMMAND_INVALID_FOR_SELECTED_INTERFACE = 21,
-    IPMI_ERR_BAD_COMPLETION_CODE = 22,
-    IPMI_ERR_BAD_RMCPPLUS_STATUS_CODE = 23,
-    IPMI_ERR_NOT_FOUND = 24,
-    IPMI_ERR_BMC_BUSY = 25,
-    IPMI_ERR_OUT_OF_MEMORY = 26,
-    IPMI_ERR_HOSTNAME_INVALID = 27,
-    IPMI_ERR_PARAMETERS = 28,
-    IPMI_ERR_DRIVER_PATH_REQUIRED = 29,
-    IPMI_ERR_IPMI_ERROR = 30,
-    IPMI_ERR_SYSTEM_ERROR = 31,
-    IPMI_ERR_INTERNAL_ERROR = 32,
-    IPMI_ERR_ERRNUMRANGE = 33,
+    IPMI_ERR_DRIVER_BUSY = 19,
+    IPMI_ERR_DRIVER_TIMEOUT = 20,
+    IPMI_ERR_MESSAGE_TIMEOUT = 21,
+    IPMI_ERR_COMMAND_INVALID_FOR_SELECTED_INTERFACE = 22,
+    IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED = 23,
+    IPMI_ERR_BAD_COMPLETION_CODE = 24,
+    IPMI_ERR_BAD_RMCPPLUS_STATUS_CODE = 25,
+    IPMI_ERR_NOT_FOUND = 26,
+    IPMI_ERR_BMC_BUSY = 27,
+    IPMI_ERR_OUT_OF_MEMORY = 28,
+    IPMI_ERR_HOSTNAME_INVALID = 29,
+    IPMI_ERR_PARAMETERS = 30,
+    IPMI_ERR_DRIVER_PATH_REQUIRED = 31,
+    IPMI_ERR_IPMI_ERROR = 32,
+    IPMI_ERR_SYSTEM_ERROR = 33,
+    IPMI_ERR_INTERNAL_ERROR = 34,
+    IPMI_ERR_ERRNUMRANGE = 35,
   };
 typedef enum ipmi_errnum ipmi_errnum_type_t;
 
@@ -90,6 +160,9 @@ enum ipmi_driver_type
 };
 typedef enum ipmi_driver_type ipmi_driver_type_t;
 
+#define IPMI_SESSION_TIMEOUT_DEFAULT                                        20000
+#define IPMI_RETRANSMISSION_TIMEOUT_DEFAULT                                 1000
+
 #define IPMI_WORKAROUND_FLAGS_DEFAULT                                       0x00000000
 
 /* For use w/ ipmi_ctx_open_outofband() */
@@ -98,6 +171,8 @@ typedef enum ipmi_driver_type ipmi_driver_type_t;
 #define IPMI_WORKAROUND_FLAGS_OUTOFBAND_FORCE_PERMSG_AUTHENTICATION         0x00000004
 #define IPMI_WORKAROUND_FLAGS_OUTOFBAND_CHECK_UNEXPECTED_AUTHCODE           0x00000008
 #define IPMI_WORKAROUND_FLAGS_OUTOFBAND_BIG_ENDIAN_SEQUENCE_NUMBER          0x00000010
+#define IPMI_WORKAROUND_FLAGS_OUTOFBAND_NO_AUTH_CODE_CHECK                  0x00000020
+#define IPMI_WORKAROUND_FLAGS_OUTOFBAND_NO_CHECKSUM_CHECK                   0x00000040
 
 /* For use w/ ipmi_ctx_open_outofband_2_0() */
 #define IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_AUTHENTICATION_CAPABILITIES     0x00000001
@@ -106,6 +181,7 @@ typedef enum ipmi_driver_type ipmi_driver_type_t;
 #define IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUN_2_0_SESSION                 0x00000008
 #define IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_OPEN_SESSION_PRIVILEGE          0x00000010
 #define IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE 0x00000020
+#define IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_NO_CHECKSUM_CHECK               0x00000040
 
 /* For use w/ ipmi_ctx_open_inband() or ipmi_ctx_find_inband() */
 #define IPMI_WORKAROUND_FLAGS_INBAND_ASSUME_IO_BASE_ADDRESS                 0x00000001
@@ -144,6 +220,11 @@ typedef enum ipmi_driver_type ipmi_driver_type_t;
  * IGNORE_AUTHENTICATION_CODE - for IPMI 1.5 packets, do not check the
  * authentication code on response packets.  Useful to workaround
  * around non-compliant motherboards implementing invalid code/hashes.
+ * Note that this is different than
+ * IPMI_WORKAROUND_FLAGS_OUTOFBAND_NO_AUTH_CODE_CHECK above.  With the
+ * workaround flag, all authentication codes will be ignored during
+ * the entire IPMI session.  With this flag, specific packets can have
+ * their authentication codes ignored.
  */
 
 #define IPMI_FLAGS_DEFAULT                    0x00000000
@@ -219,12 +300,36 @@ int ipmi_ctx_find_inband (ipmi_ctx_t ctx,
                           unsigned int workaround_flags,
                           unsigned int flags);
 
+/* Set target channel and slave address so all ipmi_cmd() calls and
+ * library API calls use ipmb.
+ *
+ * To set only one parameter, pass in NULL for the other parameter.
+ * When only one parameter is passed, the other will be the default
+ * target channel of IPMI_CHANNEL_NUMBER_PRIMARY_IPMB (0x0) or the
+ * default rs_addr of IPMI_SLAVE_ADDRESS_BMC (0x20).
+ *
+ * To reset to defaults, pass in NULL for both parameters.
+ *
+ * Can only be called after device opened. 
+ */ 
+int ipmi_ctx_set_target (ipmi_ctx_t ctx, 
+			 uint8_t *channel_number,
+			 uint8_t *rs_addr);
+
+int ipmi_ctx_get_target (ipmi_ctx_t ctx, 
+			 uint8_t *channel_number,
+			 uint8_t *rs_addr);
+
 int ipmi_cmd (ipmi_ctx_t ctx,
               uint8_t lun,
               uint8_t net_fn,
               fiid_obj_t obj_cmd_rq,
               fiid_obj_t obj_cmd_rs);
 
+/* convenience function to perform a single bridged IPMI command.
+ * Will effectively call ipmi_ctx_set_target(), then ipmi_cmd(), then
+ * will set targets back to prior originals.
+ */
 int ipmi_cmd_ipmb (ipmi_ctx_t ctx,
                    uint8_t channel_number,
                    uint8_t rs_addr,
@@ -244,9 +349,10 @@ int ipmi_cmd_raw (ipmi_ctx_t ctx,
                   void *buf_rs,
                   unsigned int buf_rs_len);
 
-/* for request/response, byte #1 = cmd */
-/* for response, byte #2 (typically) = completion code */
-/* returns length written into buf_fs on success, -1 on error */
+/* convenience function to perform a single bridged IPMI raw command.
+ * Will effectively call ipmi_ctx_set_target(), then ipmi_cmd_raw(),
+ * then will set targets back to prior originals.
+ */
 int ipmi_cmd_raw_ipmb (ipmi_ctx_t ctx,
 		       uint8_t channel_number,
 		       uint8_t rs_addr,
@@ -265,4 +371,4 @@ void ipmi_ctx_destroy (ipmi_ctx_t ctx);
 }
 #endif
 
-#endif /* _IPMI_API_H */
+#endif /* IPMI_API_H */

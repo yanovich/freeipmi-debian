@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmi_monitoring_debug.h,v 1.12 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,8 +24,8 @@
  *  with Ipmimonitoring.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMI_MONITORING_DEBUG_H
-#define _IPMI_MONITORING_DEBUG_H
+#ifndef IPMI_MONITORING_DEBUG_H
+#define IPMI_MONITORING_DEBUG_H
 
 #include <freeipmi/freeipmi.h>
 
@@ -60,4 +60,4 @@ void ipmi_monitoring_debug (const char *fmt, ...);
 
 char * __debug_msg_create (const char *fmt, ...);
 
-#endif /* _IPMI_MONITORING_DEBUG_H */
+#endif /* IPMI_MONITORING_DEBUG_H */

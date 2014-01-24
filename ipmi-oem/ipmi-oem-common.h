@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_OEM_COMMON_H
-#define _IPMI_OEM_COMMON_H
+#ifndef IPMI_OEM_COMMON_H
+#define IPMI_OEM_COMMON_H
 
 #include "ipmi-oem.h"
 
@@ -28,6 +28,7 @@
 #define IPMI_OEM_FMT_BUFLEN     1024
 #define IPMI_OEM_STR_BUFLEN     2048
 
+/* returns 1 if found OEM specific error message, 0 if not, -1 on error */
 typedef int (*Ipmi_oem_comp_code_strerror)(ipmi_oem_state_data_t *state_data,
                                            uint8_t comp_code,
                                            uint8_t cmd,
@@ -92,4 +93,12 @@ int ipmi_oem_parse_string (ipmi_oem_state_data_t *state_data,
                            char *stringbuf,
                            unsigned int stringbuflen);
 
-#endif
+int ipmi_oem_get_system_info_string (ipmi_oem_state_data_t *state_data,
+				     uint8_t parameter_selector,
+				     uint8_t set_selector,
+				     uint8_t block_selector,
+				     char *string,
+				     unsigned int string_len,
+				     unsigned int *string_len_ret);
+
+#endif /* IPMI_OEM_COMMON_H */

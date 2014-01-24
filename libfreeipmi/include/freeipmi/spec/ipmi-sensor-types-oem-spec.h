@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SENSOR_TYPES_OEM_SPEC_H
-#define _IPMI_SENSOR_TYPES_OEM_SPEC_H
+#ifndef IPMI_SENSOR_TYPES_OEM_SPEC_H
+#define IPMI_SENSOR_TYPES_OEM_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +30,7 @@ extern "C" {
 /*
  * Dell Poweredge R610
  * Dell Poweredge R710
+ * Dell Poweredge R720
  */
 
 /* achu: names taken from code, are correct names? */
@@ -63,6 +64,16 @@ extern "C" {
 #define IPMI_SENSOR_TYPE_OEM_FUJITSU_FLASH                      0xEC // Events only
 #define IPMI_SENSOR_TYPE_OEM_FUJITSU_EVENT                      0xEE // Reserved
 #define IPMI_SENSOR_TYPE_OEM_FUJITSU_CONFIG_BACKUP              0xEF
+
+/*******************************************
+ * HP                                      *
+ *******************************************/
+
+/*
+ * HP Proliant DL160 G8
+ */
+
+#define IPMI_SENSOR_TYPE_OEM_HP_LED                             0xC0
 
 /*******************************************
  * Intel                                   *
@@ -137,12 +148,26 @@ extern "C" {
  * Supermicro X8SIE
  * Supermicro X9SCA-F-O (X9SCA-F-O)
  * Supermicro H8DGU-F (H8DGU_F)
+ * Supermicro X9DRi-F (X9DRI_F)
+ * Supermicro X9DRI-LN4F+ (X9DRI_LN4F_PLUS)
+ * Supermicro X9SPU-F-O (X9SPU-F-O)
+ * Supermicro X9SCM-iiF (X9SCM_IIF)
  */
 /* achu: not official names, named based on use context */
 #define IPMI_SENSOR_TYPE_OEM_SUPERMICRO_CPU_TEMP 0xC0 
+
+/******************************************* 
+ * Wistron                                 *
+ *******************************************/
+
+/*
+ * Wistron / Dell Poweredge C6220
+ */
+
+#define IPMI_SENSOR_TYPE_OEM_WISTRON_IOH_CORE_ERROR 0xC0
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* IPMI_SENSOR_TYPES_OEM_SPEC_H */

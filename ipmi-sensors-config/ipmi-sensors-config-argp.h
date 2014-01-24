@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,11 @@
  * 
  */
 
-#ifndef _IPMI_SENSORS_CONFIG_ARGP_H
-#define _IPMI_SENSORS_CONFIG_ARGP_H
+#ifndef IPMI_SENSORS_CONFIG_ARGP_H
+#define IPMI_SENSORS_CONFIG_ARGP_H
 
 #include "ipmi-sensors-config.h"
 
 void ipmi_sensors_config_argp_parse (int argc, char **argv, struct ipmi_sensors_config_arguments *cmd_args);
 
-#endif
+#endif /* IPMI_SENSORS_CONFIG_ARGP_H */

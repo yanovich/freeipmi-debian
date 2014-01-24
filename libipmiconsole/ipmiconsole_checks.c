@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiconsole_checks.c,v 1.48 2010-08-03 00:10:59 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -67,6 +67,15 @@ ipmiconsole_check_checksum (ipmiconsole_ctx_t c, ipmiconsole_packet_type_t p)
           || p == IPMICONSOLE_PACKET_TYPE_GET_CHANNEL_PAYLOAD_VERSION_RS
           || p == IPMICONSOLE_PACKET_TYPE_DEACTIVATE_PAYLOAD_RS
           || p == IPMICONSOLE_PACKET_TYPE_CLOSE_SESSION_RS);
+
+  /* IPMI Workaround
+   *
+   * Discovered on Supermicro X9SCM-iiF, Supermicro X9DRi-F
+   *
+   * Checksums are computed incorrectly.
+   */
+  if (c->config.workaround_flags & IPMICONSOLE_WORKAROUND_NO_CHECKSUM_CHECK)
+    return (1);
 
   obj_cmd = ipmiconsole_packet_object (c, p);
   if ((rv = ipmi_lan_check_checksum (c->connection.obj_lan_msg_hdr_rs,
@@ -308,22 +317,37 @@ ipmiconsole_check_command (ipmiconsole_ctx_t c, ipmiconsole_packet_type_t p)
     }
   cmd = val;
 
-  if (p == IPMICONSOLE_PACKET_TYPE_GET_AUTHENTICATION_CAPABILITIES_RS)
-    expected_cmd = IPMI_CMD_GET_CHANNEL_AUTHENTICATION_CAPABILITIES;
-  else if (p == IPMICONSOLE_PACKET_TYPE_SET_SESSION_PRIVILEGE_LEVEL_RS)
-    expected_cmd = IPMI_CMD_SET_SESSION_PRIVILEGE_LEVEL;
-  else if (p == IPMICONSOLE_PACKET_TYPE_GET_CHANNEL_PAYLOAD_SUPPORT_RS)
-    expected_cmd = IPMI_CMD_GET_CHANNEL_PAYLOAD_SUPPORT;
-  else if (p == IPMICONSOLE_PACKET_TYPE_GET_PAYLOAD_ACTIVATION_STATUS_RS)
-    expected_cmd = IPMI_CMD_GET_PAYLOAD_ACTIVATION_STATUS;
-  else if (p == IPMICONSOLE_PACKET_TYPE_ACTIVATE_PAYLOAD_RS)
-    expected_cmd = IPMI_CMD_ACTIVATE_PAYLOAD;
-  else if (p == IPMICONSOLE_PACKET_TYPE_GET_CHANNEL_PAYLOAD_VERSION_RS)
-    expected_cmd = IPMI_CMD_GET_CHANNEL_PAYLOAD_VERSION;
-  else if (p == IPMICONSOLE_PACKET_TYPE_DEACTIVATE_PAYLOAD_RS)
-    expected_cmd = IPMI_CMD_DEACTIVATE_PAYLOAD;
-  else /* p == IPMICONSOLE_PACKET_TYPE_CLOSE_SESSION_RS */
-    expected_cmd = IPMI_CMD_CLOSE_SESSION;
+  switch (p)
+    {
+    case IPMICONSOLE_PACKET_TYPE_GET_AUTHENTICATION_CAPABILITIES_RS:
+      expected_cmd = IPMI_CMD_GET_CHANNEL_AUTHENTICATION_CAPABILITIES;
+      break;
+    case IPMICONSOLE_PACKET_TYPE_SET_SESSION_PRIVILEGE_LEVEL_RS:
+      expected_cmd = IPMI_CMD_SET_SESSION_PRIVILEGE_LEVEL;
+      break;
+    case IPMICONSOLE_PACKET_TYPE_GET_CHANNEL_PAYLOAD_SUPPORT_RS:
+      expected_cmd = IPMI_CMD_GET_CHANNEL_PAYLOAD_SUPPORT;
+      break;
+    case IPMICONSOLE_PACKET_TYPE_GET_PAYLOAD_ACTIVATION_STATUS_RS:
+      expected_cmd = IPMI_CMD_GET_PAYLOAD_ACTIVATION_STATUS;
+      break;
+    case IPMICONSOLE_PACKET_TYPE_ACTIVATE_PAYLOAD_RS:
+      expected_cmd = IPMI_CMD_ACTIVATE_PAYLOAD;
+      break;
+    case IPMICONSOLE_PACKET_TYPE_GET_CHANNEL_PAYLOAD_VERSION_RS:
+      expected_cmd = IPMI_CMD_GET_CHANNEL_PAYLOAD_VERSION;
+      break;
+    case IPMICONSOLE_PACKET_TYPE_DEACTIVATE_PAYLOAD_RS:
+      expected_cmd = IPMI_CMD_DEACTIVATE_PAYLOAD;
+      break;
+    case IPMICONSOLE_PACKET_TYPE_CLOSE_SESSION_RS:
+      expected_cmd = IPMI_CMD_CLOSE_SESSION;
+      break;
+    default:
+      IPMICONSOLE_CTX_DEBUG (c, ("invalid packet type: p = %d", p));
+      ipmiconsole_ctx_set_errnum (c, IPMICONSOLE_ERR_INTERNAL_ERROR);
+      return (-1);
+    }
 
   if (cmd != expected_cmd)
     IPMICONSOLE_CTX_DEBUG (c, ("command check failed; p = %d; cmd = %Xh; expected_cmd = %Xh", p, cmd, expected_cmd));

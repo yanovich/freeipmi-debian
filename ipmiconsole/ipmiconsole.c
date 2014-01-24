@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiconsole.c,v 1.73 2010-06-10 22:18:23 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -60,7 +60,6 @@
 #include "ipmiconsole-argp.h"
 
 #include "freeipmi-portability.h"
-#include "error.h"
 #include "secure.h"
 
 static struct termios saved_tty;
@@ -265,12 +264,9 @@ main (int argc, char **argv)
   int debug_flags = 0;
   int fd = -1;
 
-  err_init (argv[0]);
-  err_set_flags (ERROR_STDOUT);
-
   ipmiconsole_argp_parse (argc, argv, &cmd_args);
 
-  if (cmd_args.common.debug)
+  if (cmd_args.common_args.debug)
     {
 #ifndef NDEBUG
       if (cmd_args.debugfile)
@@ -287,57 +283,64 @@ main (int argc, char **argv)
     {
       /* Argh, it doesn't return an errno, oh well */
       perror ("signal");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   if (ipmiconsole_engine_init (1, debug_flags) < 0)
     {
       perror ("ipmiconsole_setup");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   /* convert config information to ipmiconsole configuration */
 
   memset (&ipmi_config, '\0', sizeof (struct ipmiconsole_ipmi_config));
-  ipmi_config.username = cmd_args.common.username;
-  ipmi_config.password = cmd_args.common.password;
-  ipmi_config.k_g = cmd_args.common.k_g;
-  ipmi_config.k_g_len = cmd_args.common.k_g_len;
+  ipmi_config.username = cmd_args.common_args.username;
+  ipmi_config.password = cmd_args.common_args.password;
+  ipmi_config.k_g = cmd_args.common_args.k_g;
+  ipmi_config.k_g_len = cmd_args.common_args.k_g_len;
 
-  if (cmd_args.common.privilege_level == IPMI_PRIVILEGE_LEVEL_USER)
+  if (cmd_args.common_args.privilege_level == IPMI_PRIVILEGE_LEVEL_USER)
     ipmi_config.privilege_level = IPMICONSOLE_PRIVILEGE_USER;
-  else if (cmd_args.common.privilege_level == IPMI_PRIVILEGE_LEVEL_OPERATOR)
+  else if (cmd_args.common_args.privilege_level == IPMI_PRIVILEGE_LEVEL_OPERATOR)
     ipmi_config.privilege_level = IPMICONSOLE_PRIVILEGE_OPERATOR;
-  else if (cmd_args.common.privilege_level == IPMI_PRIVILEGE_LEVEL_ADMIN)
+  else if (cmd_args.common_args.privilege_level == IPMI_PRIVILEGE_LEVEL_ADMIN)
     ipmi_config.privilege_level = IPMICONSOLE_PRIVILEGE_ADMIN;
   else
-    err_exit ("Config Error: Invalid privilege level");
+    {
+      fprintf (stderr, "Config Error: Invalid privilege level");
+      exit (EXIT_FAILURE);
+    }
 
-  ipmi_config.cipher_suite_id = cmd_args.common.cipher_suite_id;
+  ipmi_config.cipher_suite_id = cmd_args.common_args.cipher_suite_id;
 
-  if (cmd_args.common.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_AUTHENTICATION_CAPABILITIES)
+  if (cmd_args.common_args.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_AUTHENTICATION_CAPABILITIES)
     ipmi_config.workaround_flags |= IPMICONSOLE_WORKAROUND_AUTHENTICATION_CAPABILITIES;
-  if (cmd_args.common.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION)
+  if (cmd_args.common_args.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_INTEL_2_0_SESSION)
     ipmi_config.workaround_flags |= IPMICONSOLE_WORKAROUND_INTEL_2_0_SESSION;
-  if (cmd_args.common.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUPERMICRO_2_0_SESSION)
+  if (cmd_args.common_args.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUPERMICRO_2_0_SESSION)
     ipmi_config.workaround_flags |= IPMICONSOLE_WORKAROUND_SUPERMICRO_2_0_SESSION;
-  if (cmd_args.common.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUN_2_0_SESSION)
+  if (cmd_args.common_args.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_SUN_2_0_SESSION)
     ipmi_config.workaround_flags |= IPMICONSOLE_WORKAROUND_SUN_2_0_SESSION;
-  if (cmd_args.common.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_OPEN_SESSION_PRIVILEGE)
+  if (cmd_args.common_args.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_OPEN_SESSION_PRIVILEGE)
     ipmi_config.workaround_flags |= IPMICONSOLE_WORKAROUND_OPEN_SESSION_PRIVILEGE;
-  if (cmd_args.common.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE)
+  if (cmd_args.common_args.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE)
     ipmi_config.workaround_flags |= IPMICONSOLE_WORKAROUND_NON_EMPTY_INTEGRITY_CHECK_VALUE;
+  if (cmd_args.common_args.workaround_flags_outofband_2_0 & IPMI_PARSE_WORKAROUND_FLAGS_OUTOFBAND_2_0_NO_CHECKSUM_CHECK)
+    ipmi_config.workaround_flags |= IPMICONSOLE_WORKAROUND_NO_CHECKSUM_CHECK;
 
-  if (cmd_args.common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_IGNORE_SOL_PAYLOAD_SIZE)
+  if (cmd_args.common_args.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_IGNORE_SOL_PAYLOAD_SIZE)
     ipmi_config.workaround_flags |= IPMICONSOLE_WORKAROUND_IGNORE_SOL_PAYLOAD_SIZE;
-  if (cmd_args.common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_IGNORE_SOL_PORT)
+  if (cmd_args.common_args.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_IGNORE_SOL_PORT)
     ipmi_config.workaround_flags |= IPMICONSOLE_WORKAROUND_IGNORE_SOL_PORT;
-  if (cmd_args.common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SKIP_SOL_ACTIVATION_STATUS)
+  if (cmd_args.common_args.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SKIP_SOL_ACTIVATION_STATUS)
     ipmi_config.workaround_flags |= IPMICONSOLE_WORKAROUND_SKIP_SOL_ACTIVATION_STATUS;
+  if (cmd_args.common_args.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SKIP_CHANNEL_PAYLOAD_SUPPORT)
+    ipmi_config.workaround_flags |= IPMICONSOLE_WORKAROUND_SKIP_CHANNEL_PAYLOAD_SUPPORT;
 
   memset (&protocol_config, '\0', sizeof (struct ipmiconsole_protocol_config));
-  protocol_config.session_timeout_len = cmd_args.common.session_timeout;
-  protocol_config.retransmission_timeout_len = cmd_args.common.retransmission_timeout;
+  protocol_config.session_timeout_len = cmd_args.common_args.session_timeout;
+  protocol_config.retransmission_timeout_len = cmd_args.common_args.retransmission_timeout;
   protocol_config.retransmission_backoff_count = -1;
   protocol_config.keepalive_timeout_len = -1;
   protocol_config.retransmission_keepalive_timeout_len = -1;
@@ -359,15 +362,28 @@ main (int argc, char **argv)
     engine_config.behavior_flags |= IPMICONSOLE_BEHAVIOR_ERROR_ON_SOL_INUSE;
   if (cmd_args.deactivate)
     engine_config.behavior_flags |= IPMICONSOLE_BEHAVIOR_DEACTIVATE_ONLY;
+  if (cmd_args.deactivate_all_instances)
+    engine_config.behavior_flags |= IPMICONSOLE_BEHAVIOR_DEACTIVATE_ALL_INSTANCES;
   engine_config.debug_flags = debug_flags;
 
-  if (!(c = ipmiconsole_ctx_create (cmd_args.common.hostname,
+  if (!(c = ipmiconsole_ctx_create (cmd_args.common_args.hostname,
                                     &ipmi_config,
                                     &protocol_config,
                                     &engine_config)))
     {
       perror ("ipmiconsole_ctx_create");
       goto cleanup;
+    }
+
+  if (cmd_args.sol_payload_instance)
+    {
+      if (ipmiconsole_ctx_set_config (c,
+				      IPMICONSOLE_CTX_CONFIG_OPTION_SOL_PAYLOAD_INSTANCE,
+				      &(cmd_args.sol_payload_instance)) < 0)
+	{
+	  fprintf (stderr, "ipmiconsole_submit_block: %s\r\n", ipmiconsole_ctx_errormsg (c));
+	  goto cleanup;
+	}
     }
 
   if (ipmiconsole_engine_submit_block (c) < 0)
@@ -518,5 +534,5 @@ main (int argc, char **argv)
   _reset_mode ();
 #endif /* !NDEBUG */
 
-  return (0);
+  return (EXIT_SUCCESS);
 }

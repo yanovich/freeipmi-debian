@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_ping.c,v 1.54 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -83,7 +83,7 @@ ipmipower_ping_process_pings (int *timeout)
 
   assert (timeout);
 
-  if (!cmd_args.common.hostname)
+  if (!cmd_args.common_args.hostname)
     return;
 
   if (!cmd_args.ping_interval)
@@ -92,7 +92,7 @@ ipmipower_ping_process_pings (int *timeout)
   if (gettimeofday (&cur_time, NULL) < 0)
     {
       IPMIPOWER_ERROR (("gettimeofday: %s", strerror (errno)));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   if (timeval_gt (&cur_time, &next_ping_sends_time) || force_discovery_sweep)
@@ -121,9 +121,9 @@ ipmipower_ping_process_pings (int *timeout)
               if (ics[i].ping_packet_count_send == cmd_args.ping_packet_count)
                 {
                   if ((((double)(ics[i].ping_packet_count_send - ics[i].ping_packet_count_recv))/ics[i].ping_packet_count_send) > ((double)cmd_args.ping_percent/100))
-                    ics[i].link_state = LINK_BAD;
+                    ics[i].link_state = IPMIPOWER_LINK_STATE_BAD;
                   else
-                    ics[i].link_state = LINK_GOOD;
+                    ics[i].link_state = IPMIPOWER_LINK_STATE_GOOD;
 
                   ics[i].ping_packet_count_send = 0;
                   ics[i].ping_packet_count_recv = 0;
@@ -145,19 +145,19 @@ ipmipower_ping_process_pings (int *timeout)
           if (!(rmcp_hdr = fiid_obj_create (tmpl_rmcp_hdr)))
             {
               IPMIPOWER_ERROR (("fiid_obj_create: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           if (!(rmcp_ping = fiid_obj_create (tmpl_cmd_asf_presence_ping)))
             {
               IPMIPOWER_ERROR (("fiid_obj_create: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           if (fill_rmcp_hdr_asf (rmcp_hdr) < 0)
             {
               IPMIPOWER_ERROR (("fill_rmcp_hdr_asf: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           if (fill_cmd_asf_presence_ping ((ics[i].ping_sequence_number_counter %
@@ -165,7 +165,7 @@ ipmipower_ping_process_pings (int *timeout)
                                           rmcp_ping) < 0)
             {
               IPMIPOWER_ERROR (("fill_cmd_asf_presence_ping: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           if ((len = assemble_rmcp_pkt (rmcp_hdr,
@@ -175,7 +175,7 @@ ipmipower_ping_process_pings (int *timeout)
 					IPMI_INTERFACE_FLAGS_DEFAULT)) < 0)
             {
               IPMIPOWER_ERROR (("assemble_rmcp_pkt: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
 #ifndef NDEBUG
@@ -204,13 +204,13 @@ ipmipower_ping_process_pings (int *timeout)
           if ((ret = cbuf_write (ics[i].ping_out, buf, len, &dropped)) < 0)
             {
               IPMIPOWER_ERROR (("cbuf_write: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           if (ret != len)
             {
               IPMIPOWER_ERROR (("cbuf_write: incorrect bytes written %d", ret));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           if (dropped)
@@ -239,13 +239,13 @@ ipmipower_ping_process_pings (int *timeout)
           if (!(rmcp_hdr = fiid_obj_create (tmpl_rmcp_hdr)))
             {
               IPMIPOWER_ERROR (("fiid_obj_create: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           if (!(rmcp_pong = fiid_obj_create (tmpl_cmd_asf_presence_pong)))
             {
               IPMIPOWER_ERROR (("fiid_obj_create: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
 #ifndef NDEBUG
@@ -278,7 +278,7 @@ ipmipower_ping_process_pings (int *timeout)
 					  IPMI_INTERFACE_FLAGS_DEFAULT)) < 0)
             {
               IPMIPOWER_ERROR (("unassemble_rmcp_pkt: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           if (ret)
@@ -298,7 +298,7 @@ ipmipower_ping_process_pings (int *timeout)
                 {
                   IPMIPOWER_ERROR (("FIID_OBJ_GET: 'message_type': %s",
                                     fiid_obj_errormsg (rmcp_pong)));
-                  exit (1);
+                  exit (EXIT_FAILURE);
                 }
               message_type = val;
               
@@ -308,7 +308,7 @@ ipmipower_ping_process_pings (int *timeout)
                 {
                   IPMIPOWER_ERROR (("FIID_OBJ_GET: 'supported_entities.ipmi_supported': %s",
                                     fiid_obj_errormsg (rmcp_pong)));
-                  exit (1);
+                  exit (EXIT_FAILURE);
                 }
               ipmi_supported = val;
               
@@ -331,20 +331,20 @@ ipmipower_ping_process_pings (int *timeout)
                   
                   if (cmd_args.ping_packet_count && cmd_args.ping_percent)
                     {
-                      if (ics[i].link_state == LINK_GOOD)
-                        ics[i].discover_state = STATE_DISCOVERED;
+                      if (ics[i].link_state == IPMIPOWER_LINK_STATE_GOOD)
+                        ics[i].discover_state = IPMIPOWER_DISCOVER_STATE_DISCOVERED;
                       else
                         {
                           if (cmd_args.ping_consec_count
                               && ics[i].ping_consec_count >= cmd_args.ping_consec_count)
-                            ics[i].discover_state = STATE_DISCOVERED;
+                            ics[i].discover_state = IPMIPOWER_DISCOVER_STATE_DISCOVERED;
                           else
-                            ics[i].discover_state = STATE_BADCONNECTION;
+                            ics[i].discover_state = IPMIPOWER_DISCOVER_STATE_BADCONNECTION;
                         }
                     }
                   else
                     {
-                      ics[i].discover_state = STATE_DISCOVERED;
+                      ics[i].discover_state = IPMIPOWER_DISCOVER_STATE_DISCOVERED;
                     }
                   ics[i].last_ping_recv.tv_sec = cur_time.tv_sec;
                   ics[i].last_ping_recv.tv_usec = cur_time.tv_usec;
@@ -359,7 +359,7 @@ ipmipower_ping_process_pings (int *timeout)
       timeval_sub (&cur_time, &ics[i].last_ping_recv, &result);
       timeval_millisecond_calc (&result, &ms_time);
       if (ms_time >= cmd_args.ping_timeout)
-        ics[i].discover_state = STATE_UNDISCOVERED;
+        ics[i].discover_state = IPMIPOWER_DISCOVER_STATE_UNDISCOVERED;
     }
 
   timeval_sub (&next_ping_sends_time, &cur_time, &result);

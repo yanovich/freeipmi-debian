@@ -98,6 +98,14 @@ Set SEL time.  Input format = "MM/DD/YYYY - HH:MM:SS".  Note that
 hours are input in 24 hour form.  Alternatively, the local
 system time can be specified with "now".
 .TP
+\fB\-\-get\-sel\-time\-utc\-offset\fR
+Get SEL time UTC offset.
+.TP
+\fB\-\-set\-sel\-time\-utc\-offset\fR=\fIMINUTES\fR
+Set SEL time UTC offset.  Input is in minutes difference from UTC
+time, ranging from -1440 to 1440 minutes.  A special case value of
+"none" can be specified so no UTC offset is specified. 
+.TP
 \fB\-\-platform\-event\fR=\fI"[generator_id] <event_message_format_version> <sensor_type> <sensor_number> <event_type> <event_direction> <event_data1> <event_data2> <event_data3>"\fR
 Instruct the BMC to process the specified event data.  Typically, this
 data will be logged to the System Event Log (SEL), but depending on
@@ -110,6 +118,21 @@ IPMI 1.5.  The \fIgenerator_id\fR above is optional, however it is
 required if generating the event via a system interface (i.e. inband).
 If generating the event via a system interface, the system management
 software generator id range is 0x41 to 6Fh.
+.TP
+\fB\-\-set\-sensor\-reading\-and\-event\-status\fR=\fI"<sensor_number> <sensor_reading> <sensor_reading_operation> <assertion_bitmask> <assertion_bitmask_operation> <deassertion_bitmask> <deassertion_bitmask_operation> <event_data1> <event_data2> <event_data3> <event_data_operation>"\fR
+Instruct the BMC to set a sensor reading and/or event status.  How the
+various fields are written depends on a set of operation instructions
+specified.  The \fIsensor_reading\fR can be written or not changed
+with the respective operation \fIwrite\fR and \fInochange\fR.  For the
+\fIassertion_bitmask\fR and \fIdeassertion_bitmask\fR, the 0 bits of
+the bitmask can clear the bits of the status, the 1 bits of the
+bitmask can set the bits of the status, the entire bitmask can be
+written as the status, or the status cannot be changed respecitvely
+with the respective operations \fIclear0bits\fR, \fIset1bits\fR,
+\fIwrite\fR, and \fInochange\fR.  The \fIevent_data1\fR byte can be
+written fully, written without the event offset (bits 3:0), or not be
+changed via the \fIwrite\fR, \fInooffsetwrite\fR, or \fInochange\fR
+operations.
 .TP
 \fB\-\-get\-mca\-auxiliary\-log\-status\fR
 Get machine check architecture (MCA) auxiliary log status information.
@@ -140,7 +163,11 @@ Set Operating System Name.
 .TP
 \fB\-\-verbose\fR
 Increase verbosity in output.
-#include <@top_srcdir@/man/manpage-common-sdr-options.man>
+#include <@top_srcdir@/man/manpage-common-sdr-cache-options-heading.man>
+#include <@top_srcdir@/man/manpage-common-sdr-cache-options.man>
+#include <@top_srcdir@/man/manpage-common-sdr-cache-file-directory.man>
+#include <@top_srcdir@/man/manpage-common-time-options-heading.man>
+#include <@top_srcdir@/man/manpage-common-time-options.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-options-header.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-buffer.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-consolidate.man>
@@ -162,6 +189,7 @@ Increase verbosity in output.
 #include <@top_srcdir@/man/manpage-common-workaround-outofband-common-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-outofband-15-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-outofband-20-text.man>
+#include <@top_srcdir@/man/manpage-common-workaround-sdr-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-extra-text.man>
 .SH "EXAMPLES"
 .B # bmc-device --cold-reset
@@ -176,10 +204,12 @@ Perform a cold reset of a remote machine using IPMI over LAN.
 .PP
 Perform a cold reset across a cluster using IPMI over LAN.
 .PP
+#include <@top_srcdir@/man/manpage-common-diagnostics.man>
+#include <@top_srcdir@/man/manpage-common-diagnostics-hostranged-text.man>
 #include <@top_srcdir@/man/manpage-common-known-issues.man>
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright \(co 2008-2012 FreeIPMI Core Team.  
+Copyright \(co 2008-2013 FreeIPMI Core Team.  
 #include <@top_srcdir@/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
 freeipmi.conf(5), freeipmi(7)

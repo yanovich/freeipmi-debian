@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _FREEIPMI_H
-#define _FREEIPMI_H     1
+#ifndef FREEIPMI_H
+#define FREEIPMI_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,7 +65,7 @@ extern "C" {
 #include <freeipmi/driver/ipmi-openipmi-driver.h>
 #include <freeipmi/driver/ipmi-sunbmc-driver.h>
 #include <freeipmi/fiid/fiid.h>
-#include <freeipmi/fru-parse/ipmi-fru-parse.h>
+#include <freeipmi/fru/ipmi-fru.h>
 #include <freeipmi/interface/ipmi-interface.h>
 #include <freeipmi/interface/ipmi-ipmb-interface.h>
 #include <freeipmi/interface/ipmi-kcs-interface.h>
@@ -76,14 +76,16 @@ extern "C" {
 #include <freeipmi/locate/ipmi-locate.h>
 #include <freeipmi/payload/ipmi-sol-payload.h>
 #include <freeipmi/record-format/ipmi-cipher-suite-record-format.h>
+#include <freeipmi/record-format/ipmi-fru-dimmspd-record-format.h>
 #include <freeipmi/record-format/ipmi-fru-information-record-format.h>
+#include <freeipmi/record-format/ipmi-fru-oem-record-format.h>
 #include <freeipmi/record-format/ipmi-platform-event-trap-record-format.h>
 #include <freeipmi/record-format/ipmi-sdr-record-format.h>
 #include <freeipmi/record-format/ipmi-sdr-oem-record-format.h>
 #include <freeipmi/record-format/ipmi-sel-record-format.h>
-#include <freeipmi/sdr-cache/ipmi-sdr-cache.h>
-#include <freeipmi/sdr-parse/ipmi-sdr-parse.h>
-#include <freeipmi/sel-parse/ipmi-sel-parse.h>
+#include <freeipmi/sdr/ipmi-sdr.h>
+#include <freeipmi/sdr/ipmi-sdr-oem.h>
+#include <freeipmi/sel/ipmi-sel.h>
 #include <freeipmi/sensor-read/ipmi-sensor-read.h>
 #include <freeipmi/spec/ipmi-authentication-type-spec.h>
 #include <freeipmi/spec/ipmi-channel-spec.h>
@@ -102,10 +104,12 @@ extern "C" {
 #include <freeipmi/spec/ipmi-fru-language-codes-spec.h>
 #include <freeipmi/spec/ipmi-iana-enterprise-numbers-spec.h>
 #include <freeipmi/spec/ipmi-ipmb-lun-spec.h>
+#include <freeipmi/spec/ipmi-jedec-manufacturer-identification-code-spec.h>
 #include <freeipmi/spec/ipmi-lan-configuration-parameters-spec.h>
 #include <freeipmi/spec/ipmi-lan-configuration-parameters-oem-spec.h>
 #include <freeipmi/spec/ipmi-netfn-spec.h>
 #include <freeipmi/spec/ipmi-netfn-oem-spec.h>
+#include <freeipmi/spec/ipmi-oem-spec.h>
 #include <freeipmi/spec/ipmi-pef-configuration-parameters-spec.h>
 #include <freeipmi/spec/ipmi-pef-configuration-parameters-oem-spec.h>
 #include <freeipmi/spec/ipmi-privilege-level-spec.h>
@@ -136,12 +140,13 @@ extern "C" {
 #include <freeipmi/util/ipmi-error-dcmi-util.h>
 #include <freeipmi/util/ipmi-iana-enterprise-numbers-util.h>
 #include <freeipmi/util/ipmi-ipmb-util.h>
+#include <freeipmi/util/ipmi-jedec-manufacturer-identification-code-util.h>
 #include <freeipmi/util/ipmi-lan-util.h>
 #include <freeipmi/util/ipmi-outofband-util.h>
 #include <freeipmi/util/ipmi-rmcpplus-util.h>
 #include <freeipmi/util/ipmi-sensor-and-event-code-tables-util.h>
 #include <freeipmi/util/ipmi-sensor-util.h>
-#include <freeipmi/util/ipmi-sensor-units-util.h>
+#include <freeipmi/util/ipmi-timestamp-util.h>
 #include <freeipmi/util/ipmi-util.h>
 #include <freeipmi/util/ipmi-dcmi-util.h>
 #include <freeipmi/util/rmcp-util.h>
@@ -175,5 +180,5 @@ extern "C" {
 }
 #endif
 
-#endif /* freeipmi.h */
+#endif /* FREEIPMI_H */
 

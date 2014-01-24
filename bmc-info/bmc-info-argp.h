@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,11 @@
  * 
  */
 
-#ifndef _BMC_INFO_ARGP_H
-#define _BMC_INFO_ARGP_H
+#ifndef BMC_INFO_ARGP_H
+#define BMC_INFO_ARGP_H
 
 #include "bmc-info.h"
 
 void bmc_info_argp_parse (int argc, char **argv, struct bmc_info_arguments *cmd_args);
 
-#endif
+#endif /* BMC_INFO_ARGP_H */

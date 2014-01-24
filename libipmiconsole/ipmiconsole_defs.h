@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiconsole_defs.h,v 1.80 2010-06-10 22:10:12 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -54,12 +54,15 @@
 
 #include "scbuf.h"
 
-#ifndef _IPMICONSOLE_DEFS_H
-#define _IPMICONSOLE_DEFS_H
+#ifndef IPMICONSOLE_DEFS_H
+#define IPMICONSOLE_DEFS_H
 
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 64
 #endif /* MAXHOSTNAMELEN */
+
+/* +5 for digits (max 65535) and +1 for colon ':' */
+#define MAXHOSTNAMELEN_WITH_PORT (MAXHOSTNAMELEN + 6)
 
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 4096
@@ -185,6 +188,10 @@ typedef enum
 #define IPMI_SESSION_INITIAL_OUTBOUND_SEQUENCE_NUMBER              1
 #define IPMI_SOL_SESSION_INITIAL_PACKET_SEQUENCE_NUMBER            1
 
+/* API magic determines if the context has been destroyed by the user
+ * and can no longer be used.  However, it may not necessarily have
+ * been garbage cleaned up by the libipmiconsole engine library.
+ */
 #define IPMICONSOLE_CTX_MAGIC                 0x74AB8831
 #define IPMICONSOLE_CTX_API_MAGIC             0x83FB9202
 
@@ -209,9 +216,11 @@ typedef enum
    | IPMICONSOLE_WORKAROUND_SUN_2_0_SESSION                 \
    | IPMICONSOLE_WORKAROUND_OPEN_SESSION_PRIVILEGE          \
    | IPMICONSOLE_WORKAROUND_NON_EMPTY_INTEGRITY_CHECK_VALUE \
+   | IPMICONSOLE_WORKAROUND_NO_CHECKSUM_CHECK               \
    | IPMICONSOLE_WORKAROUND_IGNORE_SOL_PAYLOAD_SIZE         \
    | IPMICONSOLE_WORKAROUND_IGNORE_SOL_PORT                 \
-   | IPMICONSOLE_WORKAROUND_SKIP_SOL_ACTIVATION_STATUS)
+   | IPMICONSOLE_WORKAROUND_SKIP_SOL_ACTIVATION_STATUS      \
+   | IPMICONSOLE_WORKAROUND_SKIP_CHANNEL_PAYLOAD_SUPPORT)
 
 #define IPMICONSOLE_ENGINE_MASK                    \
   (IPMICONSOLE_ENGINE_CLOSE_FD                     \
@@ -222,7 +231,8 @@ typedef enum
 
 #define IPMICONSOLE_BEHAVIOR_MASK           \
   (IPMICONSOLE_BEHAVIOR_ERROR_ON_SOL_INUSE  \
-   | IPMICONSOLE_BEHAVIOR_DEACTIVATE_ONLY)
+   | IPMICONSOLE_BEHAVIOR_DEACTIVATE_ONLY   \
+   | IPMICONSOLE_BEHAVIOR_DEACTIVATE_ALL_INSTANCES)
 
 #define IPMICONSOLE_BLOCKING_NOTIFICATION_SOL_SESSION_ESTABLISHED 0x1
 #define IPMICONSOLE_BLOCKING_NOTIFICATION_SOL_SESSION_ERROR       0x2
@@ -233,6 +243,7 @@ struct ipmiconsole_ctx_config {
 
   /* ipmi config */
   char hostname[MAXHOSTNAMELEN+1];
+  uint16_t port;
   char username[IPMI_MAX_USER_NAME_LENGTH+1];
   char password[IPMI_2_0_MAX_PASSWORD_LENGTH+1];
   uint8_t k_g[IPMI_MAX_K_G_LENGTH+1];
@@ -254,6 +265,9 @@ struct ipmiconsole_ctx_config {
   unsigned int engine_flags;
   unsigned int behavior_flags;
   unsigned int debug_flags;
+
+  /* advanced config */
+  unsigned int sol_payload_instance;
 
   /* Data based on Configuration Parameters */
   uint8_t authentication_algorithm;
@@ -347,6 +361,11 @@ struct ipmiconsole_ctx_session {
   ipmiconsole_protocol_state_t protocol_state;
   int close_session_flag;
   int try_new_port_flag;
+  int deactivate_payload_instances;
+  /* if deactivate_payload_instances_and_try_again_flag set,
+   * deactivate_payload_instances should always be set, but not vice
+   * versa
+   */
   int deactivate_payload_instances_and_try_again_flag;
   int close_timeout_flag;
   int deactivate_only_succeeded_flag;
@@ -380,7 +399,6 @@ struct ipmiconsole_ctx_session {
   void *confidentiality_key_ptr;
   unsigned int confidentiality_key_len;
 
-  uint8_t sol_payload_instance;
   uint32_t sol_instance_capacity;
   uint8_t sol_instances_activated[IPMI_INSTANCES_ACTIVATED_LENGTH];
   uint32_t sol_instances_activated_count;
@@ -526,4 +544,4 @@ struct ipmiconsole_ctx {
   unsigned int session_submitted;
 };
 
-#endif /* _IPMICONSOLE_DEFS_H */
+#endif /* IPMICONSOLE_DEFS_H */

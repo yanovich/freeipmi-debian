@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SOL_CMDS_TEMPLATES_H
-#define _IPMI_SOL_CMDS_TEMPLATES_H
+#ifndef IPMI_SOL_CMDS_TEMPLATES_H
+#define IPMI_SOL_CMDS_TEMPLATES_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -314,4 +314,4 @@ FIID Template: tmpl_cmd_get_sol_configuration_parameters_sol_payload_port_number
 }
 #endif
 
-#endif  /* _IPMI_SOL_CMDS_TEMPLATES_H */
+#endif /* IPMI_SOL_CMDS_TEMPLATES_H */

@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: bmc-watchdog.h,v 1.10 2010-06-17 20:49:54 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2004-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -25,8 +25,8 @@
  *  with Bmc-Watchdog.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _BMC_WATCHDOG_H
-#define _BMC_WATCHDOG_H
+#ifndef BMC_WATCHDOG_H
+#define BMC_WATCHDOG_H
 
 #include <freeipmi/freeipmi.h>
 
@@ -42,6 +42,7 @@ enum bmc_watchdog_argp_option_keys
     CLEAR_KEY = 'c',
     DAEMON_KEY = 'd',
     LOGFILE_KEY = 'f',
+    VERBOSE_LOGGING_KEY = 'v',
     NO_LOGGING_KEY = 'n',
     TIMER_USE_KEY = 'u',
     STOP_TIMER_KEY = 'm',
@@ -68,7 +69,7 @@ enum bmc_watchdog_argp_option_keys
 
 struct bmc_watchdog_arguments
 {
-  struct common_cmd_args common;
+  struct common_cmd_args common_args;
   int set;
   int get;
   int reset;
@@ -76,7 +77,7 @@ struct bmc_watchdog_arguments
   int stop;
   int clear;
   int daemon;
-  char *logfile;
+  int verbose_logging;
   int no_logging;
   int timer_use;
   uint8_t timer_use_arg;
@@ -111,4 +112,4 @@ struct bmc_watchdog_arguments
   int version;
 };
 
-#endif
+#endif /* BMC_WATCHDOG_H */

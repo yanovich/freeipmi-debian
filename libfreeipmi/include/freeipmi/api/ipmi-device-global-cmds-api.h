@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_DEVICE_GLOBAL_CMDS_API_H
-#define _IPMI_DEVICE_GLOBAL_CMDS_API_H
+#ifndef IPMI_DEVICE_GLOBAL_CMDS_API_H
+#define IPMI_DEVICE_GLOBAL_CMDS_API_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,4 +58,4 @@ int ipmi_cmd_get_device_guid (ipmi_ctx_t ctx, fiid_obj_t obj_cmd_rs);
 }
 #endif
 
-#endif /* _IPMI_DEVICE_GLOBAL_CMDS_API_H */
+#endif /* IPMI_DEVICE_GLOBAL_CMDS_API_H */

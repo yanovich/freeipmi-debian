@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SEL_RECORD_FORMAT_TEMPLATES_H
-#define _IPMI_SEL_RECORD_FORMAT_TEMPLATES_H
+#ifndef IPMI_SEL_RECORD_FORMAT_TEMPLATES_H
+#define IPMI_SEL_RECORD_FORMAT_TEMPLATES_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,8 +92,8 @@ FIID Template: tmpl_sel_system_event_record
     { 8, "event_data3", REQUIRED, LENGTH-FIXED }
 
 
-SEL System Event Record (with Event flags)
-------------------------------------------
+SEL System Event Record (with Event Fields)
+-------------------------------------------
 
 FIID Template: tmpl_sel_system_event_record_event_fields
 
@@ -183,4 +183,4 @@ FIID Template: tmpl_sel_non_timestamped_oem_record
 }
 #endif
 
-#endif  /* _IPMI_SEL_RECORD_FORMAT_TEMPLATES_H */
+#endif /* IPMI_SEL_RECORD_FORMAT_TEMPLATES_H */

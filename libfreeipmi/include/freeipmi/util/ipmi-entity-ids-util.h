@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,8 @@
  * 
  */
 
-
-#ifndef _IPMI_ENTITY_IDS_H
-#define _IPMI_ENTITY_IDS_H
+#ifndef IPMI_ENTITY_IDS_H
+#define IPMI_ENTITY_IDS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,4 +31,4 @@ const char *ipmi_get_entity_id_string (uint8_t entity_id);
 }
 #endif
 
-#endif /* _IPMI_ENTITY_IDS_H */
+#endif /* IPMI_ENTITY_IDS_H */

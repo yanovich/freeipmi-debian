@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@
 #include "ipmi-oem-quanta.h"
 #include "ipmi-oem-sun.h"
 #include "ipmi-oem-supermicro.h"
+#include "ipmi-oem-wistron.h"
 
 #include "freeipmi-portability.h"
 #include "pstdout.h"
@@ -48,6 +49,7 @@
 #include "tool-cmdline-common.h"
 #include "tool-sdr-cache-common.h"
 #include "tool-hostrange-common.h"
+#include "tool-util-common.h"
 
 typedef int (*oem_callback)(ipmi_oem_state_data_t *);
 
@@ -94,10 +96,24 @@ struct ipmi_oem_command oem_dell[] =
       ipmi_oem_dell_set_nic_selection
     },
     {
-      "get-active-lom-status",
+      "get-nic-selection-failover",
       NULL,
       0,
       IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_get_nic_selection_failover
+    },
+    {
+      "set-nic-selection-failover",
+      "<dedicated|lom1|lom2|lom3|lom4> <none|lom1|lom2|lom3|lom4|all>",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_set_nic_selection_failover
+    },
+    {
+      "get-active-lom-status",
+      "[v1|v2]",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
       ipmi_oem_dell_get_active_lom_status
     },
     {
@@ -345,6 +361,37 @@ struct ipmi_oem_command oem_dell[] =
       ipmi_oem_inventec_set_sol_inactivity_timeout
     },
     {
+      "power-monitoring-over-interval",
+      "<interval> <systempower|cpu1|cpu2|cpu3|cpu4|memory1|memory2|memory3|memory4|drives|fans|pciecards|gpucables>",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_power_monitoring_over_interval
+    },
+    {
+      "power-monitoring-interval-range",
+      "<systempower|cpu1|cpu2|cpu3|cpu4|memory1|memory2|memory3|memory4|drives|fans|pciecards|gpucables>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_power_monitoring_interval_range
+    },
+#if 0
+/* cannot verify */
+    {
+      "get-blade-slot-id",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_get_blade_slot_id
+    },
+#endif
+    { 
+      "get-last-post-code",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_dell_get_last_post_code
+    },
+    {
       "slot-power-toggle",
       "<slot-number>",
       1,
@@ -550,6 +597,90 @@ struct ipmi_oem_command oem_intelnm[] =
       0,
       IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
       ipmi_oem_intelnm_reset_node_manager_statistics
+    },
+    {
+      "get-node-manager-capabilities",
+      "[domainid=num] [policytrigger=none|inlet] [policytype=powercontrol]",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intelnm_get_node_manager_capabilities
+    },
+    {
+      "node-manager-policy-control",
+      "<enable|disable> [domainid=num] [policyid=num]",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intelnm_node_manager_policy_control
+    },
+    {
+      "get-node-manager-policy",
+      "[domainid=num] [policyid=num]",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intelnm_get_node_manager_policy
+    },
+    {
+      "set-node-manager-policy",
+      "domainid=num policyid=num policytrigger=none|inlet powerlimit=watts correctiontimelimit=ms policytriggerlimit=num statisticsreportingperiod=seconds [policystate=enable|disable] [policyexceptionaction=alert|shutdown]",
+      7,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intelnm_set_node_manager_policy
+    },
+    {
+      "remove-node-manager-policy",
+      "domainid=num policyid=num",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_intelnm_remove_node_manager_policy
+    },
+    {
+      "get-node-manager-alert-thresholds",
+      "[domainid=num] [policyid=num]",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intelnm_get_node_manager_alert_thresholds
+    },
+    {
+      "set-node-manager-alert-thresholds",
+      "domainid=num policyid=num [threshold1=num] [threshold2=num] [threshold3=num]",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intelnm_set_node_manager_alert_thresholds
+    },
+    {
+      "get-node-manager-policy-suspend-periods",
+      "[domainid=num] [policyid=num]",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intelnm_get_node_manager_policy_suspend_periods
+    },
+    {
+      "set-node-manager-policy-suspend-periods",
+      "domainid=num policyid=num suspendperiodstartX=time suspendperiodstopX=time suspendperiodrepeatX=monday|tuesday|wednesday|thursday|friday|saturday|sunday",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intelnm_set_node_manager_policy_suspend_periods
+    },
+    {
+      "set-node-manager-power-draw-range",
+      "domainid=num minpowerdrawrange=watts maxpowerdrawrange=watts",
+      3,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_intelnm_set_node_manager_power_draw_range
+    },
+    {
+      "get-node-manager-alert-destination",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_intelnm_get_node_manager_alert_destination
+    },
+    {
+      "set-node-manager-alert-destination",
+      "[channelnumber=num] [slaveaddress=address] [destinationselector=num] [alertstringselector=num] [sendalertstring=yes|no] [register=yes|no]",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_intelnm_set_node_manager_alert_destination
     },
     {
       "get-node-manager-version",
@@ -1072,6 +1203,318 @@ struct ipmi_oem_command oem_supermicro[] =
     },
   };
 
+struct ipmi_oem_command oem_wistron[] =
+  {
+    {
+      "get-system-info",
+      "<KEY>",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_wistron_get_system_info
+    },
+    {
+      "get-nic-mode",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_nic_mode
+    },
+    {
+      "set-nic-mode",
+      "<dedicated|shared>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_set_nic_mode
+    },
+    {
+      "get-shared-nic-selection",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_shared_nic_selection
+    },
+    {
+      "set-shared-nic-selection",
+      "<nic1|nic2|nic3|nic4|clear>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_set_shared_nic_selection
+    },
+    {
+      "get-bmc-services",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_bmc_services
+    },
+    {
+      "set-bmc-services",
+      "<enable|disable> <all|kvm|http|ssh|snmp|telnet>",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_set_bmc_services
+    },
+    {
+      "get-account-status",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_account_status
+    },
+    {
+      "get-dns-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_dns_config
+    },
+    {
+      "set-dns-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_wistron_set_dns_config
+    },
+    {
+      "get-web-server-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_web_server_config
+    },
+    {
+      "set-web-server-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_wistron_set_web_server_config
+    },
+#if 0
+/* can't verify - doesn't appear to work */
+    {
+      "get-server-services-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_server_services_config
+    },
+    {
+      "set-server-services-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_wistron_set_server_services_config
+    },
+#endif
+    {
+      "get-power-management-config",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_power_management_config
+    },
+    {
+      "set-power-management-config",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_wistron_set_power_management_config
+    },
+#if 0
+/* can't verify - doesn't appear to work */
+    {
+      "get-firmware-information",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_firmware_information
+    },
+#endif
+#if 0
+/* can't verify - doesn't appear to work */
+    {
+      "user-default-setting",
+      "<set|reset>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_user_default_setting
+    },
+#endif
+    {
+      "get-ipv6-settings",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_ipv6_settings
+    },
+    {
+      "set-ipv6-settings",
+      "KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_wistron_set_ipv6_settings
+    },
+    {
+      "get-ipv6-trap-settings",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_ipv6_trap_settings
+    },
+    {
+      "set-ipv6-trap-settings",
+      "index KEY=VALUE ...",
+      0,
+      IPMI_OEM_COMMAND_FLAGS_OPTIONS_COUNT_VARIABLE,
+      ipmi_oem_wistron_set_ipv6_trap_settings
+    },
+    {
+      "get-sol-idle-timeout",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_sol_idle_timeout
+    },
+    {
+      "set-sol-idle-timeout",
+      "<idle-timeout>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_set_sol_idle_timeout
+    },
+    {
+      "get-telnet-redirect-function",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_telnet_redirect_function
+    },
+    {
+      "set-telnet-redirect-function",
+      "<disable|solenable|smashenable>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_set_telnet_redirect_function
+    },
+#if 0
+/* can't verify - doesn't appear to work */
+    {
+      "get-ssh-redirect-function",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_ssh_redirect_function
+    },
+    {
+      "set-ssh-redirect-function",
+      "<disable|solenable|smashenable>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_set_ssh_redirect_function
+    },
+#endif
+#if 0
+/* can't verify - doesn't appear to work */
+    {
+      "get-chassis-power-readings",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_chassis_power_readings
+    },
+#endif
+#if 0
+/* can't verify - doesn't appear to work */
+    {
+      "get-chassis-led-status",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_chassis_led_status
+    },
+    {
+      "set-chassis-led-status",
+      "<identify-off|identify-solid|identify-blink> <fault-off|fault-solid|fault-blink>",
+      2,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_set_chassis_led_status
+    },
+#endif
+    {
+      "get-dhcp-retry",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_dhcp_retry
+    },
+    {
+      "set-dhcp-retry",
+      "<retry-count> <retry-interval> <retry-timeout>",
+      3,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_set_dhcp_retry
+    },
+    {
+      "get-link-status-change-control",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_get_link_status_change_control
+    },
+    {
+      "set-link-status-change-control",
+      "<link_resilience|dhcp_rediscovery>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_set_link_status_change_control
+    },
+    {
+      "set-password-policy",
+      "<enable|disable>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_set_password_policy
+    },
+    {
+      "read-proprietary-string",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_read_proprietary_string
+    },
+    {
+      "write-proprietary-string",
+      "<string>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_write_proprietary_string
+    },
+    {
+      "clear-proprietary-string",
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_clear_proprietary_string
+    },
+#if 0
+/* can't verify - doesn't appear to work */
+    {
+      "reset-to-defaults",
+      "<all|user|lan|sol|serial|pef>",
+      1,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      ipmi_oem_wistron_reset_to_defaults
+    },
+#endif
+    {
+      NULL,
+      NULL,
+      0,
+      IPMI_OEM_COMMAND_FLAGS_DEFAULT,
+      NULL
+    },
+  };
+
 struct ipmi_oem_id oem_cb[] =
   {
     {
@@ -1111,6 +1554,10 @@ struct ipmi_oem_id oem_cb[] =
       oem_supermicro
     },
     {
+      "Wistron",
+      oem_wistron
+    },
+    {
       NULL,
       NULL
     },
@@ -1146,22 +1593,6 @@ _list (void)
       oem_id++;
     }
 
-  return (0);
-}
-
-static int
-_flush_cache (ipmi_oem_state_data_t *state_data)
-{
-  assert (state_data);
-  
-  if (sdr_cache_flush_cache (state_data->sdr_cache_ctx,
-                             state_data->pstate,
-                             state_data->prog_data->args->sdr.quiet_cache,
-                             state_data->hostname,
-                             state_data->prog_data->args->sdr.sdr_cache_directory,
-                             state_data->prog_data->args->sdr.sdr_cache_file) < 0)
-    return (-1);
-  
   return (0);
 }
 
@@ -1287,9 +1718,7 @@ run_cmd_args (ipmi_oem_state_data_t *state_data)
   assert (args->oem_id);
   assert (strcasecmp (args->oem_id, "list"));
   assert (strcasecmp (args->oem_id, "help"));
-
-  if (args->sdr.flush_cache)
-    return (_flush_cache (state_data));
+  assert (!args->common_args.flush_cache);
 
   if (_run_oem_cmd (state_data) < 0)
     goto cleanup;
@@ -1306,81 +1735,49 @@ _ipmi_oem (pstdout_state_t pstate,
 {
   ipmi_oem_state_data_t state_data;
   ipmi_oem_prog_data_t *prog_data;
-  char errmsg[IPMI_OPEN_ERRMSGLEN];
-  int exit_code = -1;
+  int exit_code = EXIT_FAILURE;
+
+  assert (pstate);
+  assert (arg);
 
   prog_data = (ipmi_oem_prog_data_t *)arg;
-  memset (&state_data, '\0', sizeof (ipmi_oem_state_data_t));
 
+  if (prog_data->args->common_args.flush_cache)
+    {
+      if (sdr_cache_flush_cache (pstate,
+                                 hostname,
+                                 &prog_data->args->common_args) < 0)
+	return (EXIT_FAILURE);
+      return (EXIT_SUCCESS);
+    }
+
+  memset (&state_data, '\0', sizeof (ipmi_oem_state_data_t));
   state_data.prog_data = prog_data;
   state_data.pstate = pstate;
   state_data.hostname = (char *)hostname;
 
-  /* Special case, just flush, don't do an IPMI connection */
   /* Special case, we're going to output help info, don't do an IPMI connection */
-  if (!prog_data->args->sdr.flush_cache
-      && prog_data->args->oem_command)
+  if (prog_data->args->oem_command)
     {
       if (!(state_data.ipmi_ctx = ipmi_open (prog_data->progname,
 					     hostname,
-					     &(prog_data->args->common),
-					     errmsg,
-					     IPMI_OPEN_ERRMSGLEN)))
-	{
-	  pstdout_fprintf (pstate,
-			   stderr,
-			   "%s\n",
-			   errmsg);
-	  exit_code = EXIT_FAILURE;
-	  goto cleanup;
-	}
+					     &(prog_data->args->common_args),
+					     state_data.pstate)))
+	goto cleanup;
     }
 
-  if (!(state_data.sdr_cache_ctx = ipmi_sdr_cache_ctx_create ()))
+  if (!(state_data.sdr_ctx = ipmi_sdr_ctx_create ()))
     {
-      pstdout_perror (pstate, "ipmi_sdr_cache_ctx_create()");
-      exit_code = EXIT_FAILURE;
+      pstdout_perror (pstate, "ipmi_sdr_ctx_create()");
       goto cleanup;
     }
 
-  if (state_data.prog_data->args->common.debug)
-    {
-      /* Don't error out, if this fails we can still continue */
-      if (ipmi_sdr_cache_ctx_set_flags (state_data.sdr_cache_ctx,
-                                        IPMI_SDR_CACHE_FLAGS_DEBUG_DUMP) < 0)
-        pstdout_fprintf (pstate,
-                         stderr,
-                         "ipmi_sdr_cache_ctx_set_flags: %s\n",
-                         ipmi_sdr_cache_ctx_strerror (ipmi_sdr_cache_ctx_errnum (state_data.sdr_cache_ctx)));
-      
-      if (hostname)
-        {
-          if (ipmi_sdr_cache_ctx_set_debug_prefix (state_data.sdr_cache_ctx,
-                                                   hostname) < 0)
-            pstdout_fprintf (pstate,
-                             stderr,
-                             "ipmi_sdr_cache_ctx_set_debug_prefix: %s\n",
-                             ipmi_sdr_cache_ctx_strerror (ipmi_sdr_cache_ctx_errnum (state_data.sdr_cache_ctx)));
-        }
-    }
-  
-  if (!(state_data.sdr_parse_ctx = ipmi_sdr_parse_ctx_create ()))
-    {
-      pstdout_perror (pstate, "ipmi_sdr_parse_ctx_create()");
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
- 
   if (run_cmd_args (&state_data) < 0)
-    {
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
+    goto cleanup;
   
-  exit_code = 0;
+  exit_code = EXIT_SUCCESS;
  cleanup:
-  ipmi_sdr_cache_ctx_destroy (state_data.sdr_cache_ctx);
-  ipmi_sdr_parse_ctx_destroy (state_data.sdr_parse_ctx);
+  ipmi_sdr_ctx_destroy (state_data.sdr_ctx);
   ipmi_ctx_close (state_data.ipmi_ctx);
   ipmi_ctx_destroy (state_data.ipmi_ctx);
   return (exit_code);
@@ -1391,7 +1788,6 @@ main (int argc, char **argv)
 {
   ipmi_oem_prog_data_t prog_data;
   struct ipmi_oem_arguments cmd_args;
-  int exit_code;
   int hosts_count;
   int rv;
 
@@ -1410,47 +1806,30 @@ main (int argc, char **argv)
       || cmd_args.list)
     {
       if (_list () < 0)
-        {
-          exit_code = EXIT_FAILURE;
-          goto cleanup;
-        }
-      exit_code = EXIT_SUCCESS;
-      goto cleanup;
+	return (EXIT_FAILURE);
+      return (EXIT_SUCCESS);
     }
 
-  if ((hosts_count = pstdout_setup (&(prog_data.args->common.hostname),
-                                    prog_data.args->hostrange.buffer_output,
-                                    prog_data.args->hostrange.consolidate_output,
-                                    prog_data.args->hostrange.fanout,
-                                    prog_data.args->hostrange.eliminate,
-                                    prog_data.args->hostrange.always_prefix)) < 0)
-    {
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
+  if ((hosts_count = pstdout_setup (&(prog_data.args->common_args.hostname),
+				    &(prog_data.args->common_args))) < 0)
+    return (EXIT_FAILURE);
 
   if (!hosts_count)
-    {
-      exit_code = EXIT_SUCCESS;
-      goto cleanup;
-    }
+    return (EXIT_SUCCESS);
 
   /* We don't want caching info to output when are doing ranged output */
   if (hosts_count > 1)
-    prog_data.args->sdr.quiet_cache = 1;
+    prog_data.args->common_args.quiet_cache = 1;
 
-  if ((rv = pstdout_launch (prog_data.args->common.hostname,
+  if ((rv = pstdout_launch (prog_data.args->common_args.hostname,
                             _ipmi_oem,
                             &prog_data)) < 0)
     {
       fprintf (stderr,
                "pstdout_launch: %s\n",
                pstdout_strerror (pstdout_errnum));
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
+      return (EXIT_FAILURE);
     }
 
-  exit_code = rv;
- cleanup:
-  return (exit_code);
+  return (rv);
 }

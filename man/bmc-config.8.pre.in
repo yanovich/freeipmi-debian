@@ -178,7 +178,7 @@ accomplished through a cold-reset.  A cold-reset can be executed via
 #include <@top_srcdir@/man/manpage-common-workaround-extra-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-config-tool.man>
 .LP
-"solchannelassumelanchannel" - This workaround will force
+\fIsolchannelassumelanchannel\fR - This workaround will force
 .B bmc-config
 to assume that the channel used SOL is identical to the channel used
 for LAN.  On some motherboards, the SOL channel is reported
@@ -214,10 +214,11 @@ Commit key 'lan_conf_misc:gratuitous_arp_interval' of value '4'.
 .PP
 Commit all configuration values from bmc-data-updt.conf and key 'lan_conf_misc:gratuitous_arp_interval' of value '4'.
 .PP
+#include <@top_srcdir@/man/manpage-common-config-diagnostics.man>
 #include <@top_srcdir@/man/manpage-common-known-issues.man>
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright \(co 2003-2012 FreeIPMI Core Team.  
+Copyright \(co 2003-2013 FreeIPMI Core Team.  
 #include <@top_srcdir@/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
 bmc-config.conf(5), freeipmi(7), ipmi-chassis-config(8),

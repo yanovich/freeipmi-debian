@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiconsole_debug.h,v 1.13 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,8 +24,8 @@
  *  with Ipmiconsole.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMICONSOLE_DEBUG_H
-#define _IPMICONSOLE_DEBUG_H
+#ifndef IPMICONSOLE_DEBUG_H
+#define IPMICONSOLE_DEBUG_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -34,11 +34,6 @@
 #include "ipmiconsole.h"
 #include "ipmiconsole_defs.h"
 
-#ifndef NDEBUG
-#define IPMICONSOLE_DEBUG_DIRECTORY    "/tmp"
-#else  /* !NDEBUG */
-#define IPMICONSOLE_DEBUG_DIRECTORY    "/var/log/ipmiconsole"
-#endif /* !NDEBUG */
 #define IPMICONSOLE_DEBUG_FILENAME     "ipmiconsole_debug"
 
 #define IPMICONSOLE_DEBUG_ERROR_BUFLEN 4096
@@ -103,4 +98,4 @@ void ipmiconsole_ctx_debug (ipmiconsole_ctx_t c, const char *fmt, ...);
 
 char * __debug_msg_create (const char *fmt, ...);
 
-#endif /* _IPMICONSOLE_DEBUG_H */
+#endif /* IPMICONSOLE_DEBUG_H */

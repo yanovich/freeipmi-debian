@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_NETFN_OEM_SPEC_H
-#define _IPMI_NETFN_OEM_SPEC_H
+#ifndef IPMI_NETFN_OEM_SPEC_H
+#define IPMI_NETFN_OEM_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +30,7 @@ extern "C" {
 /*
  * Dell Poweredge R610
  * Dell Poweredge R710
+ * Dell Poweredge R720 
  * Dell Poweredge C410x
  */
 /* achu: not official names, named based on use context */
@@ -120,8 +121,21 @@ extern "C" {
 #define IPMI_NET_FN_OEM_SUPERMICRO_PEPPERCON_RQ 0x3C
 #define IPMI_NET_FN_OEM_SUPERMICRO_PEPPERCON_RS 0x3D
 
+/******************************************* 
+ * Wistron                                 *
+ *******************************************/
+
+/*
+ * Wistron / Dell Poweredge C6220
+ */
+
+/* achu: not official names, named based on use context */
+#define IPMI_NET_FN_OEM_WISTRON_GENERIC_RQ 0x30
+#define IPMI_NET_FN_OEM_WISTRON_GENERIC_RS 0x31
+
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* ipmi-netfn-oem-spec.h */
+#endif /* IPMI_NETFN_OEM_SPEC_H */

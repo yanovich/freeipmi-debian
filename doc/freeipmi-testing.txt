@@ -4,8 +4,7 @@ by
 
 Albert Chu
 chu11@llnl.gov
-
-Updated: 12/08/09 for FreeIPMI 0.8.1
+Last Updated: September 20, 2012
 
 The following is a list of tests I've (semi) regularly done to measure
 the compliance of a motherboard to IPMI as well as FreeIPMI's
@@ -729,6 +728,25 @@ ipmiconsole, authenticating with SOL1, verify tool:
 
 Test)
 
+Establish a SOL session with SOL payload instance 1
+(--sol-payload-instance=1).
+
+While a session is currently active, in a different window, execute
+ipmiconsole, using a different payload instance
+(i.e. --sol-payload-instance=2):
+
+If multiple SOL instances are support, verify tool:
+- Establishes a SOL session by outputting "[SOL established]" in the
+  second session.
+- The original SOL session has not been terminated, and continues to
+  work.
+
+If multiple SOL instances are not supported, verify tool:
+- Errors out appropriately.  Most likely/best error message
+  "BMC Busy."
+
+Test)
+
 Configure "pristine" configuration.
 
 Execute ipmiconsole, authentication with SOL1, with option -I 0
@@ -1332,6 +1350,35 @@ Execute bmc-info, authenticating with ADMIN1, with privilege level admin (-l adm
 verify tool:
 - Exits with error.  Most likely/best error message "cipher suite id unavailable".
 * It is most important that the connection not succeed.
+
+Test)
+
+Begin with "pristine" configuration.
+
+Configure each user to have a password > 16 bytes in length.
+
+Execute all below tests with IPMI 2.0 (-D lan_2_0)
+
+Execute bmc-info, authenticating with USER1
+Execute bmc-info, authenticating with OPERATOR1
+Execute bmc-info, authenticating with ADMIN1
+verify tool:
+- Executes without errors for each test.
+
+Test)
+
+Begin with "pristine" configuration.
+
+Configure each user to have a password > 16 bytes in length.
+
+Execute all below tests with IPMI 1.5 (-D lan)
+
+Execute bmc-info, authenticating with USER1
+Execute bmc-info, authenticating with OPERATOR1
+Execute bmc-info, authenticating with ADMIN1
+- Exits with error.  Most likely/best error message "password verification timeout".
+* It is most important that the connection not succeed.
+
 
 Misc: Bad Password Threshold
 ----------------------------

@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_output.c,v 1.58 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -46,7 +46,8 @@
 
 extern cbuf_t ttyout;
 extern struct ipmipower_arguments cmd_args;
-extern hostlist_t output_hostrange[MSG_TYPE_NUM_ENTRIES];
+extern hostlist_t output_hostrange[IPMIPOWER_MSG_TYPE_NUM_ENTRIES];
+extern unsigned int output_counts[IPMIPOWER_MSG_TYPE_NUM_ENTRIES];
 
 static char *ipmipower_outputs[] =
   {
@@ -71,42 +72,50 @@ static char *ipmipower_outputs[] =
     "unconfigured hostname",
     "out of resources",
     "ipmi 2.0 unavailable",
+    "invalid argument for OEM extension",
     "BMC busy",
     "BMC error"
   };
 
 void
-ipmipower_output (msg_type_t num, const char *hostname)
+ipmipower_output (ipmipower_msg_type_t num, const char *hostname, const char *extra_arg)
 {
-  assert (MSG_TYPE_VALID (num));
+  assert (IPMIPOWER_MSG_TYPE_VALID (num));
   assert (hostname);
 
-  if (cmd_args.hostrange.consolidate_output)
+  /* If extra argument required, then we can't do consolidated output */
+
+  if (cmd_args.common_args.consolidate_output
+      && !IPMIPOWER_OEM_POWER_TYPE_REQUIRES_EXTRA_ARGUMENT (cmd_args.oem_power_type))
     {
       if (!hostlist_push_host (output_hostrange[num], hostname))
         {
           IPMIPOWER_ERROR (("hostlist_push_host: %s", strerror(errno)));
-          exit (1);
+          exit (EXIT_FAILURE);
         }
     }
   else
     ipmipower_cbuf_printf (ttyout,
-                           "%s: %s\n",
-                           hostname,
-                           ipmipower_outputs[num]);
+			   "%s%s%s: %s\n",
+			   hostname,
+			   extra_arg ? "+" : "",
+			   extra_arg ? extra_arg : "",
+			   ipmipower_outputs[num]);
 
+  output_counts[num]++;
   return;
 }
 
 void
 ipmipower_output_finish (void)
 {
-  if (cmd_args.hostrange.consolidate_output)
+  if (cmd_args.common_args.consolidate_output
+      && !IPMIPOWER_OEM_POWER_TYPE_REQUIRES_EXTRA_ARGUMENT (cmd_args.oem_power_type))
     {
       int i, rv;
       char buf[IPMIPOWER_OUTPUT_BUFLEN];
 
-      for (i = 0; i < MSG_TYPE_NUM_ENTRIES; i++)
+      for (i = 0; i < IPMIPOWER_MSG_TYPE_NUM_ENTRIES; i++)
         {
           if (hostlist_count (output_hostrange[i]) > 0)
             {
@@ -119,7 +128,7 @@ ipmipower_output_finish (void)
                                                 buf)) < 0)
                 {
                   IPMIPOWER_ERROR (("hostlist_ranged_string: %s", strerror(errno)));
-                  exit (1);
+                  exit (EXIT_FAILURE);
                 }
               
               if (rv > 0)

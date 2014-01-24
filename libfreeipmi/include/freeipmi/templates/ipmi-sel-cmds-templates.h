@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SEL_CMDS_TEMPLATES_H
-#define _IPMI_SEL_CMDS_TEMPLATES_H
+#ifndef IPMI_SEL_CMDS_TEMPLATES_H
+#define IPMI_SEL_CMDS_TEMPLATES_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -212,6 +212,38 @@ FIID Template: tmpl_cmd_set_sel_time_rs
     { 8, "cmd", REQUIRED, LENGTH-FIXED, MAKES-PACKET-SUFFICIENT }
     { 8, "comp_code", REQUIRED, LENGTH-FIXED, MAKES-PACKET-SUFFICIENT }
 
+Get SEL Time UTC Offset Request
+-------------------------------
+
+FIID Template: tmpl_cmd_get_sel_time_utc_offset_rq
+
+    { 8, "cmd", REQUIRED, LENGTH-FIXED }
+
+Get SEL Time UTC Offset Response
+--------------------------------
+
+FIID Template: tmpl_cmd_get_sel_time_utc_offset_rs
+
+    { 8, "cmd", REQUIRED, LENGTH-FIXED, MAKES-PACKET-SUFFICIENT }
+    { 8, "comp_code", REQUIRED, LENGTH-FIXED, MAKES-PACKET-SUFFICIENT }
+    { 16, "offset", REQUIRED, LENGTH-FIXED }
+
+Set SEL Time UTC Offset Request
+-------------------------------
+
+FIID Template: tmpl_cmd_set_sel_time_utc_offset_rq
+
+    { 8, "cmd", REQUIRED, LENGTH-FIXED }
+    { 16, "offset", REQUIRED, LENGTH-FIXED }
+
+Set SEL Time UTC Offset Response
+--------------------------------
+
+FIID Template: tmpl_cmd_set_sel_time_utc_offset_rs
+
+    { 8, "cmd", REQUIRED, LENGTH-FIXED, MAKES-PACKET-SUFFICIENT }
+    { 8, "comp_code", REQUIRED, LENGTH-FIXED, MAKES-PACKET-SUFFICIENT }
+
 Get Auxiliary Log Status Request
 --------------------------------
 
@@ -276,4 +308,4 @@ FIID Template: tmpl_cmd_set_auxiliary_log_status_rs
 }
 #endif
 
-#endif  /* _IPMI_SEL_CMDS_TEMPLATES_H */
+#endif /* IPMI_SEL_CMDS_TEMPLATES_H */

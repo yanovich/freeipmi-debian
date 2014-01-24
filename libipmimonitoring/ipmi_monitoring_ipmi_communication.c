@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmi_monitoring_ipmi_communication.c,v 1.39 2010-06-10 22:10:12 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -205,27 +205,27 @@ _ipmi_1_5_init (ipmi_monitoring_ctx_t c,
                                         | IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_ACCEPT_SESSION_ID_ZERO
                                         | IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_FORCE_PERMSG_AUTHENTICATION
                                         | IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_CHECK_UNEXPECTED_AUTHCODE
-                                        | IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_BIG_ENDIAN_SEQUENCE_NUMBER);
+                                        | IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_BIG_ENDIAN_SEQUENCE_NUMBER
+					| IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_NO_AUTH_CODE_CHECK
+					| IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_NO_CHECKSUM_CHECK);
 
   assert (c);
   assert (c->magic == IPMI_MONITORING_MAGIC);
   assert (c->ipmi_ctx);
   assert (hostname);
 
-  if (strlen (hostname) > MAXHOSTNAMELEN
-      || (config
-          && ((config->username && strlen (config->username) > IPMI_MAX_USER_NAME_LENGTH)
-              || (config->password && strlen (config->password) > IPMI_1_5_MAX_PASSWORD_LENGTH)
-              || (config->privilege_level >= 0
-                  && (config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_USER
-                      && config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_OPERATOR
-                      && config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_ADMIN))
-              || (config->authentication_type >= 0
-                  && (config->authentication_type != IPMI_MONITORING_AUTHENTICATION_TYPE_NONE
-                      && config->authentication_type != IPMI_MONITORING_AUTHENTICATION_TYPE_STRAIGHT_PASSWORD_KEY
-                      && config->authentication_type != IPMI_MONITORING_AUTHENTICATION_TYPE_MD2
-                      && config->authentication_type != IPMI_MONITORING_AUTHENTICATION_TYPE_MD5))
-              || (config->workaround_flags & ~workaround_flags_mask))))
+  /* hostname, username, password length/input check handled via lib calls */
+  if (config
+      && ((config->privilege_level >= 0
+	   && (config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_USER
+	       && config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_OPERATOR
+	       && config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_ADMIN))
+	  || (config->authentication_type >= 0
+	      && (config->authentication_type != IPMI_MONITORING_AUTHENTICATION_TYPE_NONE
+		  && config->authentication_type != IPMI_MONITORING_AUTHENTICATION_TYPE_STRAIGHT_PASSWORD_KEY
+		  && config->authentication_type != IPMI_MONITORING_AUTHENTICATION_TYPE_MD2
+		  && config->authentication_type != IPMI_MONITORING_AUTHENTICATION_TYPE_MD5))
+	  || (config->workaround_flags & ~workaround_flags_mask)))
     {
       c->errnum = IPMI_MONITORING_ERR_PARAMETERS;
       return (-1);
@@ -276,6 +276,8 @@ _ipmi_1_5_init (ipmi_monitoring_ctx_t c,
   workaround_flags = 0;
   if (config && config->workaround_flags)
     {
+      if (config->workaround_flags & IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_AUTHENTICATION_CAPABILITIES)
+        workaround_flags |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_AUTHENTICATION_CAPABILITIES;
       if (config->workaround_flags & IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_ACCEPT_SESSION_ID_ZERO)
         workaround_flags |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_ACCEPT_SESSION_ID_ZERO;
       if (config->workaround_flags & IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_FORCE_PERMSG_AUTHENTICATION)
@@ -284,8 +286,10 @@ _ipmi_1_5_init (ipmi_monitoring_ctx_t c,
         workaround_flags |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_CHECK_UNEXPECTED_AUTHCODE;
       if (config->workaround_flags & IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_BIG_ENDIAN_SEQUENCE_NUMBER)
         workaround_flags |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_BIG_ENDIAN_SEQUENCE_NUMBER;
-      if (config->workaround_flags & IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_AUTHENTICATION_CAPABILITIES)
-        workaround_flags |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_AUTHENTICATION_CAPABILITIES;
+      if (config->workaround_flags & IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_NO_AUTH_CODE_CHECK)
+        workaround_flags |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_NO_AUTH_CODE_CHECK;
+      if (config->workaround_flags & IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_NO_CHECKSUM_CHECK)
+        workaround_flags |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_NO_CHECKSUM_CHECK;
     }
 
   if ((_ipmi_monitoring_flags & IPMI_MONITORING_FLAGS_DEBUG)
@@ -359,32 +363,22 @@ _ipmi_2_0_init (ipmi_monitoring_ctx_t c,
                                     | IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_SUPERMICRO_2_0_SESSION
                                     | IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_SUN_2_0_SESSION
                                     | IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_OPEN_SESSION_PRIVILEGE
-                                    | IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE);
+                                    | IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE
+				    | IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_NO_CHECKSUM_CHECK);
   assert (c);
   assert (c->magic == IPMI_MONITORING_MAGIC);
   assert (c->ipmi_ctx);
   assert (hostname);
 
-  if (strlen (hostname) > MAXHOSTNAMELEN
-      || (config
-          && ((config->username && strlen (config->username) > IPMI_MAX_USER_NAME_LENGTH)
-              || (config->password && strlen (config->password) > IPMI_2_0_MAX_PASSWORD_LENGTH)
-              || (config->k_g && config->k_g_len > IPMI_MAX_K_G_LENGTH)
-              || (config->privilege_level >= 0
-                  && (config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_USER
-                      && config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_OPERATOR
-                      && config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_ADMIN))
-              || (config->cipher_suite_id >= 0
-                  && (config->cipher_suite_id != 0
-                      && config->cipher_suite_id != 1
-                      && config->cipher_suite_id != 2
-                      && config->cipher_suite_id != 3
-                      && config->cipher_suite_id != 6
-                      && config->cipher_suite_id != 7
-                      && config->cipher_suite_id != 8
-                      && config->cipher_suite_id != 11
-                      && config->cipher_suite_id != 12))
-              || (config->workaround_flags & ~workaround_flags_mask))))
+  /* hostname, username, password, k_g length/input check handled via lib calls */
+  if (config
+      && ((config->privilege_level >= 0
+	   && (config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_USER
+	       && config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_OPERATOR
+	       && config->privilege_level != IPMI_MONITORING_PRIVILEGE_LEVEL_ADMIN))
+	  || (config->cipher_suite_id >= 0
+	      && !IPMI_CIPHER_SUITE_ID_SUPPORTED (config->cipher_suite_id))
+	  || (config->workaround_flags & ~workaround_flags_mask)))
     {
       c->errnum = IPMI_MONITORING_ERR_PARAMETERS;
       return (-1);
@@ -438,6 +432,8 @@ _ipmi_2_0_init (ipmi_monitoring_ctx_t c,
         workaround_flags |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_OPEN_SESSION_PRIVILEGE;
       if (config->workaround_flags & IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE)
         workaround_flags |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE;
+      if (config->workaround_flags & IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_NO_CHECKSUM_CHECK)
+        workaround_flags |= IPMI_WORKAROUND_FLAGS_OUTOFBAND_2_0_NO_CHECKSUM_CHECK;
     }
 
   if ((_ipmi_monitoring_flags & IPMI_MONITORING_FLAGS_DEBUG)
@@ -511,11 +507,11 @@ _outofband_init (ipmi_monitoring_ctx_t c,
   assert (c->ipmi_ctx);
   assert (hostname);
 
-  if (strlen (hostname) > MAXHOSTNAMELEN
-      || (config
-          && ((config->protocol_version >= 0
-               && (config->protocol_version != IPMI_MONITORING_PROTOCOL_VERSION_1_5
-                   && config->protocol_version != IPMI_MONITORING_PROTOCOL_VERSION_2_0)))))
+  /* hostname length/input check in later functions */
+  if (config
+      && ((config->protocol_version >= 0
+	   && (config->protocol_version != IPMI_MONITORING_PROTOCOL_VERSION_1_5
+	       && config->protocol_version != IPMI_MONITORING_PROTOCOL_VERSION_2_0))))
     {
       c->errnum = IPMI_MONITORING_ERR_PARAMETERS;
       return (-1);

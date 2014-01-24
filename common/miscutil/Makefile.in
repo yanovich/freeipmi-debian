@@ -37,8 +37,7 @@ host_triplet = @host@
 subdir = common/miscutil
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
-	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
@@ -48,6 +47,8 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_cache_dir.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_config_file.m4 \
 	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
@@ -62,9 +63,9 @@ libmiscutil_la_LIBADD =
 am_libmiscutil_la_OBJECTS = libmiscutil_la-cbuf.lo \
 	libmiscutil_la-conffile.lo libmiscutil_la-error.lo \
 	libmiscutil_la-fd.lo libmiscutil_la-hash.lo \
-	libmiscutil_la-hostlist.lo libmiscutil_la-list.lo \
-	libmiscutil_la-secure.lo libmiscutil_la-timeval.lo \
-	libmiscutil_la-thread.lo
+	libmiscutil_la-heap.lo libmiscutil_la-hostlist.lo \
+	libmiscutil_la-list.lo libmiscutil_la-secure.lo \
+	libmiscutil_la-timeval.lo libmiscutil_la-thread.lo
 libmiscutil_la_OBJECTS = $(am_libmiscutil_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/config
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -92,7 +93,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BMC_WATCHDOG_LOGFILE_DEFAULT = @BMC_WATCHDOG_LOGFILE_DEFAULT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -120,8 +120,6 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
 INSTALL_IPMISDRCACHEDIR = @INSTALL_IPMISDRCACHEDIR@
-INSTALL_LOGDIR = @INSTALL_LOGDIR@
-INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -131,6 +129,8 @@ IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
 IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
+IPMISELD_CACHE_DIRECTORY = @IPMISELD_CACHE_DIRECTORY@
+IPMISELD_CONFIG_FILE_DEFAULT = @IPMISELD_CONFIG_FILE_DEFAULT@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
 IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
@@ -256,6 +256,8 @@ libmiscutil_la_SOURCES = \
 	fd.h \
 	hash.c \
 	hash.h \
+	heap.c \
+	heap.h \
 	hostlist.c \
 	hostlist.h \
 	list.c \
@@ -324,6 +326,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmiscutil_la-error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmiscutil_la-fd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmiscutil_la-hash.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmiscutil_la-heap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmiscutil_la-hostlist.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmiscutil_la-list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmiscutil_la-secure.Plo@am__quote@
@@ -388,6 +391,13 @@ libmiscutil_la-hash.lo: hash.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='hash.c' object='libmiscutil_la-hash.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmiscutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libmiscutil_la-hash.lo `test -f 'hash.c' || echo '$(srcdir)/'`hash.c
+
+libmiscutil_la-heap.lo: heap.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmiscutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libmiscutil_la-heap.lo -MD -MP -MF $(DEPDIR)/libmiscutil_la-heap.Tpo -c -o libmiscutil_la-heap.lo `test -f 'heap.c' || echo '$(srcdir)/'`heap.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libmiscutil_la-heap.Tpo $(DEPDIR)/libmiscutil_la-heap.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='heap.c' object='libmiscutil_la-heap.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmiscutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libmiscutil_la-heap.lo `test -f 'heap.c' || echo '$(srcdir)/'`heap.c
 
 libmiscutil_la-hostlist.lo: hostlist.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmiscutil_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libmiscutil_la-hostlist.lo -MD -MP -MF $(DEPDIR)/libmiscutil_la-hostlist.Tpo -c -o libmiscutil_la-hostlist.lo `test -f 'hostlist.c' || echo '$(srcdir)/'`hostlist.c

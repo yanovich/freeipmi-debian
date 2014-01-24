@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_ping.h,v 1.14 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,19 +24,13 @@
  *  with Ipmipower.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMIPOWER_PING_H
-#define _IPMIPOWER_PING_H
+#ifndef IPMIPOWER_PING_H
+#define IPMIPOWER_PING_H
 
 #include "ipmipower.h"
 
-/* ipmipower_ping_force_discovery_sweep
- * - Force a sweep of discovery when a new set of hostnames are set
- */
 void ipmipower_ping_force_discovery_sweep ();
 
-/* ipmipower_ping_process
- * - Process pings
- */
 void ipmipower_ping_process_pings (int *timeout);
 
-#endif /* _IPMIPOWER_PING_H */
+#endif /* IPMIPOWER_PING_H */

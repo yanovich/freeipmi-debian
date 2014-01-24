@@ -37,8 +37,7 @@ host_triplet = @host@
 subdir = common/toolcommon
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
-	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
@@ -48,6 +47,8 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_cache_dir.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_config_file.m4 \
 	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
@@ -59,10 +60,21 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libtoolcommon_la_LIBADD =
-am_libtoolcommon_la_OBJECTS = libtoolcommon_la-tool-common.lo \
+am_libtoolcommon_la_OBJECTS = libtoolcommon_la-pstdout.lo \
+	libtoolcommon_la-tool-common.lo \
 	libtoolcommon_la-tool-config-file-common.lo \
-	libtoolcommon_la-tool-cmdline-common.lo
+	libtoolcommon_la-tool-cmdline-common.lo \
+	libtoolcommon_la-tool-daemon-common.lo \
+	libtoolcommon_la-tool-event-common.lo \
+	libtoolcommon_la-tool-hostrange-common.lo \
+	libtoolcommon_la-tool-oem-common.lo \
+	libtoolcommon_la-tool-sdr-cache-common.lo \
+	libtoolcommon_la-tool-sensor-common.lo \
+	libtoolcommon_la-tool-util-common.lo
 libtoolcommon_la_OBJECTS = $(am_libtoolcommon_la_OBJECTS)
+libtoolcommon_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libtoolcommon_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/config
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -89,7 +101,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BMC_WATCHDOG_LOGFILE_DEFAULT = @BMC_WATCHDOG_LOGFILE_DEFAULT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -117,8 +128,6 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
 INSTALL_IPMISDRCACHEDIR = @INSTALL_IPMISDRCACHEDIR@
-INSTALL_LOGDIR = @INSTALL_LOGDIR@
-INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -128,6 +137,8 @@ IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
 IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
+IPMISELD_CACHE_DIRECTORY = @IPMISELD_CACHE_DIRECTORY@
+IPMISELD_CONFIG_FILE_DEFAULT = @IPMISELD_CONFIG_FILE_DEFAULT@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
 IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
@@ -238,24 +249,42 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = \
 	libtoolcommon.la
 
+libtoolcommon_la_LDFLAGS = \
+	$(PTHREAD_LIBS)
+
 libtoolcommon_la_CPPFLAGS = \
 	-I$(top_srcdir)/common/miscutil \
 	-I$(top_srcdir)/common/parsecommon \
 	-I$(top_srcdir)/common/portability \
-	-I$(top_srcdir)/common/toolhostrange \
-	-I$(top_srcdir)/common/toolsdr \
-	-I$(top_srcdir)/common/toolsensor \
+	-I$(top_builddir)/libipmidetect \
+	-I$(top_builddir)/libfreeipmi/include \
 	-I$(top_srcdir)/libfreeipmi/include \
 	-D_GNU_SOURCE \
 	-D_REENTRANT
 
 libtoolcommon_la_SOURCES = \
+	pstdout.c \
+	pstdout.h \
 	tool-common.c \
 	tool-common.h \
 	tool-config-file-common.c \
 	tool-config-file-common.h \
 	tool-cmdline-common.c \
-	tool-cmdline-common.h
+	tool-cmdline-common.h \
+	tool-daemon-common.c \
+	tool-daemon-common.h \
+	tool-event-common.c \
+	tool-event-common.h \
+	tool-hostrange-common.c \
+	tool-hostrange-common.h \
+	tool-oem-common.c \
+	tool-oem-common.h \
+	tool-sdr-cache-common.c \
+	tool-sdr-cache-common.h \
+	tool-sensor-common.c \
+	tool-sensor-common.h \
+	tool-util-common.c \
+	tool-util-common.h
 
 all: all-am
 
@@ -301,7 +330,7 @@ clean-noinstLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 libtoolcommon.la: $(libtoolcommon_la_OBJECTS) $(libtoolcommon_la_DEPENDENCIES) 
-	$(LINK)  $(libtoolcommon_la_OBJECTS) $(libtoolcommon_la_LIBADD) $(LIBS)
+	$(libtoolcommon_la_LINK)  $(libtoolcommon_la_OBJECTS) $(libtoolcommon_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -309,9 +338,17 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtoolcommon_la-pstdout.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtoolcommon_la-tool-cmdline-common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtoolcommon_la-tool-common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtoolcommon_la-tool-config-file-common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtoolcommon_la-tool-daemon-common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtoolcommon_la-tool-event-common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtoolcommon_la-tool-hostrange-common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtoolcommon_la-tool-oem-common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtoolcommon_la-tool-sdr-cache-common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtoolcommon_la-tool-sensor-common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtoolcommon_la-tool-util-common.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -337,6 +374,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
+libtoolcommon_la-pstdout.lo: pstdout.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtoolcommon_la-pstdout.lo -MD -MP -MF $(DEPDIR)/libtoolcommon_la-pstdout.Tpo -c -o libtoolcommon_la-pstdout.lo `test -f 'pstdout.c' || echo '$(srcdir)/'`pstdout.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libtoolcommon_la-pstdout.Tpo $(DEPDIR)/libtoolcommon_la-pstdout.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pstdout.c' object='libtoolcommon_la-pstdout.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtoolcommon_la-pstdout.lo `test -f 'pstdout.c' || echo '$(srcdir)/'`pstdout.c
+
 libtoolcommon_la-tool-common.lo: tool-common.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtoolcommon_la-tool-common.lo -MD -MP -MF $(DEPDIR)/libtoolcommon_la-tool-common.Tpo -c -o libtoolcommon_la-tool-common.lo `test -f 'tool-common.c' || echo '$(srcdir)/'`tool-common.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libtoolcommon_la-tool-common.Tpo $(DEPDIR)/libtoolcommon_la-tool-common.Plo
@@ -357,6 +401,55 @@ libtoolcommon_la-tool-cmdline-common.lo: tool-cmdline-common.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tool-cmdline-common.c' object='libtoolcommon_la-tool-cmdline-common.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtoolcommon_la-tool-cmdline-common.lo `test -f 'tool-cmdline-common.c' || echo '$(srcdir)/'`tool-cmdline-common.c
+
+libtoolcommon_la-tool-daemon-common.lo: tool-daemon-common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtoolcommon_la-tool-daemon-common.lo -MD -MP -MF $(DEPDIR)/libtoolcommon_la-tool-daemon-common.Tpo -c -o libtoolcommon_la-tool-daemon-common.lo `test -f 'tool-daemon-common.c' || echo '$(srcdir)/'`tool-daemon-common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libtoolcommon_la-tool-daemon-common.Tpo $(DEPDIR)/libtoolcommon_la-tool-daemon-common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tool-daemon-common.c' object='libtoolcommon_la-tool-daemon-common.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtoolcommon_la-tool-daemon-common.lo `test -f 'tool-daemon-common.c' || echo '$(srcdir)/'`tool-daemon-common.c
+
+libtoolcommon_la-tool-event-common.lo: tool-event-common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtoolcommon_la-tool-event-common.lo -MD -MP -MF $(DEPDIR)/libtoolcommon_la-tool-event-common.Tpo -c -o libtoolcommon_la-tool-event-common.lo `test -f 'tool-event-common.c' || echo '$(srcdir)/'`tool-event-common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libtoolcommon_la-tool-event-common.Tpo $(DEPDIR)/libtoolcommon_la-tool-event-common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tool-event-common.c' object='libtoolcommon_la-tool-event-common.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtoolcommon_la-tool-event-common.lo `test -f 'tool-event-common.c' || echo '$(srcdir)/'`tool-event-common.c
+
+libtoolcommon_la-tool-hostrange-common.lo: tool-hostrange-common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtoolcommon_la-tool-hostrange-common.lo -MD -MP -MF $(DEPDIR)/libtoolcommon_la-tool-hostrange-common.Tpo -c -o libtoolcommon_la-tool-hostrange-common.lo `test -f 'tool-hostrange-common.c' || echo '$(srcdir)/'`tool-hostrange-common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libtoolcommon_la-tool-hostrange-common.Tpo $(DEPDIR)/libtoolcommon_la-tool-hostrange-common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tool-hostrange-common.c' object='libtoolcommon_la-tool-hostrange-common.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtoolcommon_la-tool-hostrange-common.lo `test -f 'tool-hostrange-common.c' || echo '$(srcdir)/'`tool-hostrange-common.c
+
+libtoolcommon_la-tool-oem-common.lo: tool-oem-common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtoolcommon_la-tool-oem-common.lo -MD -MP -MF $(DEPDIR)/libtoolcommon_la-tool-oem-common.Tpo -c -o libtoolcommon_la-tool-oem-common.lo `test -f 'tool-oem-common.c' || echo '$(srcdir)/'`tool-oem-common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libtoolcommon_la-tool-oem-common.Tpo $(DEPDIR)/libtoolcommon_la-tool-oem-common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tool-oem-common.c' object='libtoolcommon_la-tool-oem-common.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtoolcommon_la-tool-oem-common.lo `test -f 'tool-oem-common.c' || echo '$(srcdir)/'`tool-oem-common.c
+
+libtoolcommon_la-tool-sdr-cache-common.lo: tool-sdr-cache-common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtoolcommon_la-tool-sdr-cache-common.lo -MD -MP -MF $(DEPDIR)/libtoolcommon_la-tool-sdr-cache-common.Tpo -c -o libtoolcommon_la-tool-sdr-cache-common.lo `test -f 'tool-sdr-cache-common.c' || echo '$(srcdir)/'`tool-sdr-cache-common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libtoolcommon_la-tool-sdr-cache-common.Tpo $(DEPDIR)/libtoolcommon_la-tool-sdr-cache-common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tool-sdr-cache-common.c' object='libtoolcommon_la-tool-sdr-cache-common.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtoolcommon_la-tool-sdr-cache-common.lo `test -f 'tool-sdr-cache-common.c' || echo '$(srcdir)/'`tool-sdr-cache-common.c
+
+libtoolcommon_la-tool-sensor-common.lo: tool-sensor-common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtoolcommon_la-tool-sensor-common.lo -MD -MP -MF $(DEPDIR)/libtoolcommon_la-tool-sensor-common.Tpo -c -o libtoolcommon_la-tool-sensor-common.lo `test -f 'tool-sensor-common.c' || echo '$(srcdir)/'`tool-sensor-common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libtoolcommon_la-tool-sensor-common.Tpo $(DEPDIR)/libtoolcommon_la-tool-sensor-common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tool-sensor-common.c' object='libtoolcommon_la-tool-sensor-common.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtoolcommon_la-tool-sensor-common.lo `test -f 'tool-sensor-common.c' || echo '$(srcdir)/'`tool-sensor-common.c
+
+libtoolcommon_la-tool-util-common.lo: tool-util-common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libtoolcommon_la-tool-util-common.lo -MD -MP -MF $(DEPDIR)/libtoolcommon_la-tool-util-common.Tpo -c -o libtoolcommon_la-tool-util-common.lo `test -f 'tool-util-common.c' || echo '$(srcdir)/'`tool-util-common.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libtoolcommon_la-tool-util-common.Tpo $(DEPDIR)/libtoolcommon_la-tool-util-common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='tool-util-common.c' object='libtoolcommon_la-tool-util-common.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libtoolcommon_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libtoolcommon_la-tool-util-common.lo `test -f 'tool-util-common.c' || echo '$(srcdir)/'`tool-util-common.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

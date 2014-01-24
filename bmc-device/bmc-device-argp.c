@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #else /* !HAVE_ARGP_H */
 #include "freeipmi-argp.h"
 #endif /* !HAVE_ARGP_H */
+#include <assert.h>
 
 #include "bmc-device.h"
 #include "bmc-device-argp.h"
@@ -40,7 +41,7 @@
 
 const char *argp_program_version =
   "bmc-device - " PACKAGE_VERSION "\n"
-  "Copyright (C) 2008-2012 FreeIPMI Core Team\n"
+  "Copyright (C) 2008-2013 FreeIPMI Core Team\n"
   "This program is free software; you may redistribute it under the terms of\n"
   "the GNU General Public License.  This program has absolutely no warranty.";
 
@@ -62,59 +63,67 @@ static struct argp_option cmdline_options[] =
     ARGP_COMMON_OPTIONS_PRIVILEGE_LEVEL,
     ARGP_COMMON_OPTIONS_CONFIG_FILE,
     ARGP_COMMON_OPTIONS_WORKAROUND_FLAGS,
-    ARGP_COMMON_SDR_OPTIONS,
+    ARGP_COMMON_SDR_CACHE_OPTIONS,
+    ARGP_COMMON_SDR_CACHE_OPTIONS_FILE_DIRECTORY,
+    ARGP_COMMON_TIME_OPTIONS,
     ARGP_COMMON_HOSTRANGED_OPTIONS,
     ARGP_COMMON_OPTIONS_DEBUG,
     { "cold-reset", COLD_RESET_KEY, NULL, 0,
-      "Perform a cold reset.", 30},
+      "Perform a cold reset.", 40},
     { "warm-reset", WARM_RESET_KEY, NULL, 0,
-      "Perform a warm reset.", 31},
+      "Perform a warm reset.", 41},
     { "get-self-test-results", GET_SELF_TEST_RESULTS_KEY, NULL, 0,
-      "Output BMC self test results.", 32},
+      "Output BMC self test results.", 42},
     { "get-acpi-power-state", GET_ACPI_POWER_STATE_KEY, NULL, 0,
-      "Get ACPI system and device power state.", 33},
+      "Get ACPI system and device power state.", 43},
     { "set-acpi-power-state", SET_ACPI_POWER_STATE_KEY, NULL, 0,
-      "Set ACPI power state.", 34},
+      "Set ACPI power state.", 44},
     { "set-acpi-system-power-state", SET_ACPI_SYSTEM_POWER_STATE_KEY, "SYSTEM_POWER_STATE", 0,
-      "Set ACPI system power state.", 35},
+      "Set ACPI system power state.", 45},
     { "set-acpi-device-power-state", SET_ACPI_DEVICE_POWER_STATE_KEY, "DEVICE_POWER_STATE", 0,
-      "Set ACPI device power state.", 36},
+      "Set ACPI device power state.", 46},
     { "get-lan-statistics", GET_LAN_STATISTICS_KEY, NULL, 0,
-      "Get IP, UDP, and RMCP statistics.", 37},
+      "Get IP, UDP, and RMCP statistics.", 47},
     { "clear-lan-statistics", CLEAR_LAN_STATISTICS_KEY, NULL, 0,
-      "Clear IP, UDP, and RMCP statistics.", 38},
+      "Clear IP, UDP, and RMCP statistics.", 48},
     { "rearm-sensor", REARM_SENSOR_KEY, "<record_id> [<assertion_bitmask> <deassertion_bitmask>]", 0,
-      "Re-arm a sensor.", 39},
+      "Re-arm a sensor.", 49},
     { "get-sdr-repository-time",   GET_SDR_REPOSITORY_TIME_KEY,  0, 0,
-      "Get SDR repository time.", 40},
+      "Get SDR repository time.", 50},
     { "set-sdr-repository-time",   SET_SDR_REPOSITORY_TIME_KEY,  "TIME", 0,
-      "Set SDR repository time.  Input format = \"MM/DD/YYYY - HH:MM:SS\" or \"now\".", 41},
+      "Set SDR repository time.  Input format = \"MM/DD/YYYY - HH:MM:SS\" or \"now\".", 51},
     { "get-sel-time", GET_SEL_TIME_KEY,  0, 0,
-      "Get SEL time.", 42},
+      "Get SEL time.", 52},
     { "set-sel-time", SET_SEL_TIME_KEY,  "TIME", 0,
-      "Set SEL time.  Input format = \"MM/DD/YYYY - HH:MM:SS\" or \"now\".", 43},
+      "Set SEL time.  Input format = \"MM/DD/YYYY - HH:MM:SS\" or \"now\".", 53},
+    { "get-sel-time-utc-offset", GET_SEL_TIME_UTC_OFFSET_KEY,  0, 0,
+      "Get SEL time UTC offset.", 53},
+    { "set-sel-time-utc-offset", SET_SEL_TIME_UTC_OFFSET_KEY,  "OFFSET", 0,
+      "Set SEL time UTC offset.  Offset in minutes or \"none\".", 54},
     { "platform-event", PLATFORM_EVENT_KEY, "[generator_id] <event_message_format_version> <sensor_type> <sensor_number> <event_type> <event_direction> <event_data1> <event_data2> <event_data3>", 0,
-      "Instruct the BMC to process the specified event data.", 44},
+      "Instruct the BMC to process the specified event data.", 54},
+    { "set-sensor-reading-and-event-status", SET_SENSOR_READING_AND_EVENT_STATUS_KEY, "<sensor_number> <sensor_reading> <sensor_reading_operation> <assertion_bitmask> <assertion_bitmask_operation> <deassertion_bitmask> <deassertion_bitmask_operation> <event_data1> <event_data2> <event_data3> <event_data_operation>", 0,
+      "Instruct the BMC to set a sensor reading and/or event status.", 55},
     { "get-mca-auxiliary-log-status", GET_MCA_AUXILIARY_LOG_STATUS_KEY, NULL, 0,
-      "Get machine check architecture (MCA) auxiliary log status information.", 45},
+      "Get machine check architecture (MCA) auxiliary log status information.", 56},
     { "get-ssif-interface-capabilities", GET_SSIF_INTERFACE_CAPABILITIES_KEY, NULL, 0,
-      "Get SSIF interface capabilities.", 46},
+      "Get SSIF interface capabilities.", 57},
     { "get-kcs-interface-capabilities", GET_KCS_INTERFACE_CAPABILITIES_KEY, NULL, 0,
-      "Get KCS interface capabilities.", 47},
+      "Get KCS interface capabilities.", 58},
     { "get-bt-interface-capabilities", GET_BT_INTERFACE_CAPABILITIES_KEY, NULL, 0,
-      "Get BT interface capabilities.", 48},
+      "Get BT interface capabilities.", 59},
     { "get-bmc-global-enables", GET_BMC_GLOBAL_ENABLES_KEY, NULL, 0,
-      "Get BMC Global Enables.", 49},
+      "Get BMC Global Enables.", 60},
     { "set-system-firmware-version", SET_SYSTEM_FIRMWARE_VERSION_KEY, "STRING", 0,
-      "Set System Firmware Version.", 50},
+      "Set System Firmware Version.", 61},
     { "set-system-name", SET_SYSTEM_NAME_KEY, "STRING", 0,
-      "Set System Name.", 51},
+      "Set System Name.", 62},
     { "set-primary-operating-system-name", SET_PRIMARY_OPERATING_SYSTEM_NAME_KEY, "STRING", 0,
-      "Set Primary Operating System Name.", 52},
+      "Set Primary Operating System Name.", 63},
     { "set-operating-system-name", SET_OPERATING_SYSTEM_NAME_KEY, "STRING", 0,
-      "Set Operating System Name.", 53},
+      "Set Operating System Name.", 64},
     { "verbose", VERBOSE_KEY, 0, 0,
-      "Increase verbosity in output.", 54},
+      "Increase verbosity in output.", 65},
     { NULL, 0, NULL, 0, NULL, 0}
   };
 
@@ -133,8 +142,11 @@ static struct argp cmdline_config_file_argp = { cmdline_options,
 static error_t
 cmdline_parse (int key, char *arg, struct argp_state *state)
 {
-  struct bmc_device_arguments *cmd_args = state->input;
-  error_t ret;
+  struct bmc_device_arguments *cmd_args;
+
+  assert (state);
+  
+  cmd_args = state->input;
 
   switch (key)
     {
@@ -191,7 +203,7 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
       else
         {
           fprintf (stderr, "invalid value for system power state\n");
-          exit (1);
+          exit (EXIT_FAILURE);
         }
       break;
     case SET_ACPI_DEVICE_POWER_STATE_KEY:
@@ -208,7 +220,7 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
       else
         {
           fprintf (stderr, "invalid value for device power state\n");
-          exit (1);
+          exit (EXIT_FAILURE);
         }
       break;
     case GET_LAN_STATISTICS_KEY:
@@ -235,9 +247,20 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
       cmd_args->set_sel_time = 1;
       cmd_args->set_sel_time_arg = arg;
       break;
+    case GET_SEL_TIME_UTC_OFFSET_KEY:
+      cmd_args->get_sel_time_utc_offset = 1;
+      break;
+    case SET_SEL_TIME_UTC_OFFSET_KEY:
+      cmd_args->set_sel_time_utc_offset = 1;
+      cmd_args->set_sel_time_utc_offset_arg = arg;
+      break;
     case PLATFORM_EVENT_KEY:
       cmd_args->platform_event = 1;
       cmd_args->platform_event_arg = arg;
+      break;
+    case SET_SENSOR_READING_AND_EVENT_STATUS_KEY:
+      cmd_args->set_sensor_reading_and_event_status = 1;
+      cmd_args->set_sensor_reading_and_event_status_arg = arg;
       break;
     case GET_MCA_AUXILIARY_LOG_STATUS_KEY:
       cmd_args->get_mca_auxiliary_log_status = 1;
@@ -280,12 +303,7 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
     case ARGP_KEY_END:
       break;
     default:
-      ret = common_parse_opt (key, arg, &(cmd_args->common));
-      if (ret == ARGP_ERR_UNKNOWN)
-	ret = sdr_parse_opt (key, arg, &(cmd_args->sdr));
-      if (ret == ARGP_ERR_UNKNOWN)
-        ret = hostrange_parse_opt (key, arg, &(cmd_args->hostrange));
-      return (ret);
+      return (common_parse_opt (key, arg, &(cmd_args->common_args)));
     }
 
   return (0);
@@ -294,24 +312,26 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
 static void
 _bmc_device_config_file_parse (struct bmc_device_arguments *cmd_args)
 {
-  if (config_file_parse (cmd_args->common.config_file,
+  assert (cmd_args);
+
+  if (config_file_parse (cmd_args->common_args.config_file,
                          0,
-                         &(cmd_args->common),
-                         &(cmd_args->sdr),
-                         &(cmd_args->hostrange),
-                         CONFIG_FILE_INBAND | CONFIG_FILE_OUTOFBAND | CONFIG_FILE_SDR | CONFIG_FILE_HOSTRANGE,
+                         &(cmd_args->common_args),
+                         CONFIG_FILE_INBAND | CONFIG_FILE_OUTOFBAND | CONFIG_FILE_SDR | CONFIG_FILE_TIME | CONFIG_FILE_HOSTRANGE,
                          CONFIG_FILE_TOOL_BMC_DEVICE,
                          NULL) < 0)
     {
       fprintf (stderr, "config_file_parse: %s\n", strerror (errno));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 }
 
 static void
 _bmc_device_args_validate (struct bmc_device_arguments *cmd_args)
 {
-  if (!cmd_args->sdr.flush_cache
+  assert (cmd_args);
+
+  if (!cmd_args->common_args.flush_cache
       && !cmd_args->cold_reset
       && !cmd_args->warm_reset
       && !cmd_args->get_self_test_results
@@ -324,7 +344,10 @@ _bmc_device_args_validate (struct bmc_device_arguments *cmd_args)
       && !cmd_args->set_sdr_repository_time
       && !cmd_args->get_sel_time
       && !cmd_args->set_sel_time
+      && !cmd_args->get_sel_time_utc_offset
+      && !cmd_args->set_sel_time_utc_offset
       && !cmd_args->platform_event
+      && !cmd_args->set_sensor_reading_and_event_status
       && !cmd_args->get_mca_auxiliary_log_status
       && !cmd_args->get_ssif_interface_capabilities
       && !cmd_args->get_kcs_interface_capabilities
@@ -337,10 +360,10 @@ _bmc_device_args_validate (struct bmc_device_arguments *cmd_args)
     {
       fprintf (stderr,
                "No command specified.\n");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
-  if ((cmd_args->sdr.flush_cache
+  if ((cmd_args->common_args.flush_cache
        + cmd_args->cold_reset
        + cmd_args->warm_reset
        + cmd_args->get_self_test_results
@@ -353,7 +376,10 @@ _bmc_device_args_validate (struct bmc_device_arguments *cmd_args)
        + cmd_args->set_sdr_repository_time
        + cmd_args->get_sel_time
        + cmd_args->set_sel_time
+       + cmd_args->get_sel_time_utc_offset
+       + cmd_args->set_sel_time_utc_offset
        + cmd_args->platform_event
+       + cmd_args->set_sensor_reading_and_event_status
        + cmd_args->get_mca_auxiliary_log_status
        + cmd_args->get_ssif_interface_capabilities
        + cmd_args->get_kcs_interface_capabilities
@@ -367,7 +393,7 @@ _bmc_device_args_validate (struct bmc_device_arguments *cmd_args)
     {
       fprintf (stderr,
                "Multiple commands specified.\n");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
   
   if (cmd_args->set_acpi_power_state
@@ -376,7 +402,7 @@ _bmc_device_args_validate (struct bmc_device_arguments *cmd_args)
     {
       fprintf (stderr,
                "No acpi power state configuration changes specified\n");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   if (cmd_args->set_system_firmware_version
@@ -384,7 +410,7 @@ _bmc_device_args_validate (struct bmc_device_arguments *cmd_args)
     {
       fprintf (stderr,
 	       "system firmware version string too long\n");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
   
   if (cmd_args->set_system_name
@@ -392,7 +418,7 @@ _bmc_device_args_validate (struct bmc_device_arguments *cmd_args)
     {
       fprintf (stderr,
 	       "system name string too long\n");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
   
   if (cmd_args->set_primary_operating_system_name
@@ -400,7 +426,7 @@ _bmc_device_args_validate (struct bmc_device_arguments *cmd_args)
     {
       fprintf (stderr,
 	       "primary operating system name string too long\n");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
   
   if (cmd_args->set_operating_system_name
@@ -408,16 +434,18 @@ _bmc_device_args_validate (struct bmc_device_arguments *cmd_args)
     {
       fprintf (stderr,
 	       "operating system name string too long\n");
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 }
 
 void
 bmc_device_argp_parse (int argc, char **argv, struct bmc_device_arguments *cmd_args)
 {
-  init_common_cmd_args_admin (&(cmd_args->common));
-  init_sdr_cmd_args (&(cmd_args->sdr));
-  init_hostrange_cmd_args (&(cmd_args->hostrange));
+  assert (argc >= 0);
+  assert (argv);
+  assert (cmd_args);
+
+  init_common_cmd_args_admin (&(cmd_args->common_args));
 
   cmd_args->cold_reset = 0;
   cmd_args->warm_reset = 0;
@@ -436,8 +464,13 @@ bmc_device_argp_parse (int argc, char **argv, struct bmc_device_arguments *cmd_a
   cmd_args->get_sel_time = 0;
   cmd_args->set_sel_time = 0;
   cmd_args->set_sel_time_arg = NULL;
+  cmd_args->get_sel_time_utc_offset = 0;
+  cmd_args->set_sel_time_utc_offset = 0;
+  cmd_args->set_sel_time_utc_offset_arg = NULL;
   cmd_args->platform_event = 0;
   cmd_args->platform_event_arg = NULL;
+  cmd_args->set_sensor_reading_and_event_status = 0;
+  cmd_args->set_sensor_reading_and_event_status_arg = NULL;
   cmd_args->get_mca_auxiliary_log_status = 0;
   cmd_args->get_ssif_interface_capabilities = 0;
   cmd_args->get_kcs_interface_capabilities = 0;
@@ -458,7 +491,7 @@ bmc_device_argp_parse (int argc, char **argv, struct bmc_device_arguments *cmd_a
               argv,
               ARGP_IN_ORDER,
               NULL,
-              &(cmd_args->common));
+              &(cmd_args->common_args));
 
   _bmc_device_config_file_parse (cmd_args);
 
@@ -469,8 +502,7 @@ bmc_device_argp_parse (int argc, char **argv, struct bmc_device_arguments *cmd_a
               NULL,
               cmd_args);
 
-  verify_common_cmd_args (&(cmd_args->common));
-  verify_hostrange_cmd_args (&(cmd_args->hostrange));
+  verify_common_cmd_args (&(cmd_args->common_args));
   _bmc_device_args_validate (cmd_args);
 }
 

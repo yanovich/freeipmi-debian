@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ping-tool-common.h,v 1.11 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,8 +24,8 @@
  *  with Ipmiping.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _PING_TOOL_COMMON_H
-#define _PING_TOOL_COMMON_H
+#ifndef PING_TOOL_COMMON_H
+#define PING_TOOL_COMMON_H
 
 #define IPMI_PING_VERSION_1_5    0
 #define IPMI_PING_VERSION_2_0    1
@@ -91,4 +91,4 @@ void ipmi_ping_loop (Ipmi_Ping_CreatePacket _create,
                      Ipmi_Ping_LatePacket _late,
                      Ipmi_Ping_EndResult _end);
 
-#endif /* _PING_TOOL_COMMON_H */
+#endif /* PING_TOOL_COMMON_H */

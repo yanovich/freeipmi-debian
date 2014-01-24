@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_FILL_UTIL_H
-#define _IPMI_FILL_UTIL_H 1
+#ifndef IPMI_FILL_UTIL_H
+#define IPMI_FILL_UTIL_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -58,4 +58,4 @@
       }                                                                     \
   } while (0)
 
-#endif /* ipmi-fill-util.h */
+#endif /* IPMI_FILL_UTIL_H */

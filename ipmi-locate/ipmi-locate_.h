@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@
 
 /* file is "ipmi-locate_.h", so double underscore */
 
-#ifndef _IPMI_LOCATE__H
-#define _IPMI_LOCATE__H
+#ifndef IPMI_LOCATE__H
+#define IPMI_LOCATE__H
 
 #include <freeipmi/freeipmi.h>
 
@@ -40,4 +40,4 @@ struct ipmi_locate_arguments
   int defaults;
 };
 
-#endif
+#endif /* IPMI_LOCATE__H */

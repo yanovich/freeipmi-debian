@@ -80,10 +80,12 @@ Get BMC information of a remote machine using IPMI over LAN.
 .PP
 Get BMC information across a cluster using IPMI over LAN.
 .PP
+#include <@top_srcdir@/man/manpage-common-diagnostics.man>
+#include <@top_srcdir@/man/manpage-common-diagnostics-hostranged-text.man>
 #include <@top_srcdir@/man/manpage-common-known-issues.man>
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright \(co 2003-2012 FreeIPMI Core Team.  
+Copyright \(co 2003-2013 FreeIPMI Core Team.  
 #include <@top_srcdir@/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
 freeipmi.conf(5), freeipmi(7), bmc-config(8)

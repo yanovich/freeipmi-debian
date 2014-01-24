@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SEL_RECORD_FORMAT_H
-#define _IPMI_SEL_RECORD_FORMAT_H
+#ifndef IPMI_SEL_RECORD_FORMAT_H
+#define IPMI_SEL_RECORD_FORMAT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -93,4 +93,4 @@ extern fiid_template_t tmpl_oem_event_data;
 }
 #endif
 
-#endif
+#endif /* IPMI_SEL_RECORD_FORMAT_H */

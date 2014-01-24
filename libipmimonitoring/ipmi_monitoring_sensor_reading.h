@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmi_monitoring_sensor_reading.h,v 1.15 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,8 +24,8 @@
  *  with Ipmimonitoring.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMI_MONITORING_SENSOR_READING_H
-#define _IPMI_MONITORING_SENSOR_READING_H
+#ifndef IPMI_MONITORING_SENSOR_READING_H
+#define IPMI_MONITORING_SENSOR_READING_H
 
 #include "ipmi_monitoring.h"
 
@@ -35,10 +35,8 @@ int ipmi_monitoring_sensor_reading_cleanup (ipmi_monitoring_ctx_t c);
 
 int ipmi_monitoring_get_sensor_reading (ipmi_monitoring_ctx_t c,
                                         unsigned int sensor_reading_flags,
-                                        uint8_t *sdr_record,
-                                        unsigned int sdr_record_len,
                                         unsigned int shared_sensor_number_offset,
                                         unsigned int *sensor_types,
                                         unsigned int sensor_types_len);
 
-#endif /* _IPMI_MONITORING_SENSOR_READING_H */
+#endif /* IPMI_MONITORING_SENSOR_READING_H */

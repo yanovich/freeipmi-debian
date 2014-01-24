@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmi-md5.c,v 1.17 2010-02-08 22:09:40 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -87,7 +87,7 @@ static uint32_t T[64] =
 #define D               ctx->d
 #define M               ctx->m
 #define Mlen            ctx->mlen
-#define MD5_MAGIC  0xcafebabe
+#define MD5_MAGIC       0xfb0fdb0d
 
 #define F(x,y,z)  (((x) & (y)) | ((~(x)) & (z)))
 #define G(x,y,z)  (((x) & (z)) | ((y) & (~(z))))

@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmi_monitoring_parse_common.h,v 1.1 2010-03-19 22:07:58 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,12 +24,12 @@
  *  with Ipmimonitoring.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMI_MONITORING_PARSE_COMMON_H
-#define _IPMI_MONITORING_PARSE_COMMON_H
+#ifndef IPMI_MONITORING_PARSE_COMMON_H
+#define IPMI_MONITORING_PARSE_COMMON_H
 
 #include "ipmi_monitoring.h"
 
 int ipmi_monitoring_get_sensor_type (ipmi_monitoring_ctx_t c,
                                      uint8_t sensor_type);
 
-#endif /* _IPMI_MONITORING_PARSE_COMMON_H */
+#endif /* IPMI_MONITORING_PARSE_COMMON_H */

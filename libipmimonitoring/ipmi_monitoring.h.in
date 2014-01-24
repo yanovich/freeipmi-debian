@@ -24,8 +24,8 @@
  *  with Ipmimonitoring.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMI_MONITORING_H
-#define _IPMI_MONITORING_H
+#ifndef IPMI_MONITORING_H
+#define IPMI_MONITORING_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -160,7 +160,7 @@ enum ipmi_monitoring_sensor_type
     IPMI_MONITORING_SENSOR_TYPE_OEM_MIN                             = 0xC0,
     IPMI_MONITORING_SENSOR_TYPE_OEM_MAX                             = 0xFF,
     IPMI_MONITORING_SENSOR_TYPE_UNKNOWN                             = 0xFFFF,
-  } ipmi_monitoring_sensor_type_t;
+  };
 
 enum ipmi_monitoring_sel_event_direction
   {
@@ -236,6 +236,8 @@ enum ipmi_monitoring_workaround_flags
     IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_FORCE_PERMSG_AUTHENTICATION     = 0x00000004,
     IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_CHECK_UNEXPECTED_AUTHCODE       = 0x00000008,
     IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_BIG_ENDIAN_SEQUENCE_NUMBER      = 0x00000010,
+    IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_NO_AUTH_CODE_CHECK              = 0x00000020,
+    IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_1_5_NO_CHECKSUM_CHECK               = 0x00000040,
 
     /* For use w/ IPMI_MONITORING_PROTOCOL_VERSION_2_0 */
     IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_AUTHENTICATION_CAPABILITIES     = 0x00000001,
@@ -244,6 +246,7 @@ enum ipmi_monitoring_workaround_flags
     IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_SUN_2_0_SESSION                 = 0x00000008,
     IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_OPEN_SESSION_PRIVILEGE          = 0x00000010,
     IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_NON_EMPTY_INTEGRITY_CHECK_VALUE = 0x00000020,
+    IPMI_MONITORING_WORKAROUND_FLAGS_PROTOCOL_VERSION_2_0_NO_CHECKSUM_CHECK               = 0x00000040,
 
     /* For use w/ an In-band driver */
     IPMI_MONITORING_WORKAROUND_FLAGS_INBAND_ASSUME_IO_BASE_ADDRESS                        = 0x00000001,
@@ -256,12 +259,20 @@ enum ipmi_monitoring_workaround_flags
  *
  * ASSUME_SYSTEM_EVENT_RECORD - If an event record is illegal, assume
  * it is a bug in the system and actually a system event record.
+ *
+ * ENTITY_SENSOR_NAMES - Return sensor names with appropriate entity
+ * id and instance prefixed when appropriate.
+ *
+ * ASSUME_MAX_SDR_RECORD_COUNT - If motherboard does not implement SDR
+ * record reading properly, do not fail out.  Assume a max count.
  */
 enum ipmi_monitoring_sel_flags
   {
-    IPMI_MONITORING_SEL_FLAGS_REREAD_SDR_CACHE           = 0x00000001,
-    IPMI_MONITORING_SEL_FLAGS_INTERPRET_OEM_DATA         = 0x00000002,
-    IPMI_MONITORING_SEL_FLAGS_ASSUME_SYSTEM_EVENT_RECORD = 0x00000004,
+    IPMI_MONITORING_SEL_FLAGS_REREAD_SDR_CACHE            = 0x00000001,
+    IPMI_MONITORING_SEL_FLAGS_INTERPRET_OEM_DATA          = 0x00000002,
+    IPMI_MONITORING_SEL_FLAGS_ASSUME_SYSTEM_EVENT_RECORD  = 0x00000004,
+    IPMI_MONITORING_SEL_FLAGS_ENTITY_SENSOR_NAMES         = 0x00000008,
+    IPMI_MONITORING_SEL_FLAGS_ASSUME_MAX_SDR_RECORD_COUNT = 0x00000010,
   };
 
 /* REREAD_SDR_CACHE - Re-read the SDR cache
@@ -287,6 +298,13 @@ enum ipmi_monitoring_sel_flags
  * ASSUME_BMC_OWNER - Assume the BMC is the sensor owner no matter what.  This option
  *                    works around motherboards that incorrectly indicate a non-BMC
  *                    sensor owner (e.g. usually bridging is required).
+ *
+ * ENTITY_SENSOR_NAMES - Return sensor names with appropriate entity
+ *                       id and instance prefixed when appropriate.
+ *
+ * ASSUME_MAX_SDR_RECORD_COUNT - If motherboard does not implement SDR
+ *                               record reading properly, do not fail
+ *                               out.  Assume a max count.
  */
 enum ipmi_monitoring_sensor_reading_flags
   {
@@ -297,7 +315,9 @@ enum ipmi_monitoring_sensor_reading_flags
     IPMI_MONITORING_SENSOR_READING_FLAGS_SHARED_SENSORS                   = 0x00000010,
     IPMI_MONITORING_SENSOR_READING_FLAGS_DISCRETE_READING                 = 0x00000020,
     IPMI_MONITORING_SENSOR_READING_FLAGS_IGNORE_SCANNING_DISABLED         = 0x00000040,	
-    IPMI_MONITORING_SENSOR_READING_FLAGS_ASSUME_BMC_OWNER                 = 0x00000040,	
+    IPMI_MONITORING_SENSOR_READING_FLAGS_ASSUME_BMC_OWNER                 = 0x00000080,
+    IPMI_MONITORING_SENSOR_READING_FLAGS_ENTITY_SENSOR_NAMES              = 0x00000100,
+    IPMI_MONITORING_SENSOR_READING_FLAGS_ASSUME_MAX_SDR_RECORD_COUNT      = 0x00000200,
     IPMI_MONITORING_SENSOR_READING_FLAGS_IGNORE_UNREADABLE_SENSORS        = 0x00000002, /* legacy macro */
   };
 
@@ -407,6 +427,9 @@ enum ipmi_monitoring_sensor_reading_flags
  *   8 - A = HMAC-MD5; I = HMAC-MD5-128; C = AES-CBC-128
  *   11 - A = HMAC-MD5; I = MD5-128; C = None
  *   12 - A = HMAC-MD5; I = MD5-128; C = AES-CBC-128
+ *   15 - A = HMAC-SHA256; I = None; C = None
+ *   16 - A = HMAC-SHA256; I = HMAC-SHA256-128; C = None
+ *   17 - A = HMAC-SHA256; I = HMAC-SHA256-128; C = AES-CBC-128
  *
  *   Pass < 0 for default of 3.
  *
@@ -1029,4 +1052,4 @@ int ipmi_monitoring_sensor_read_event_reading_type_code (ipmi_monitoring_ctx_t c
 }
 #endif
 
-#endif /* _IPMI_MONITORING_H */
+#endif /* IPMI_MONITORING_H */

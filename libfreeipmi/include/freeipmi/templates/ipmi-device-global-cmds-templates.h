@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_DEVICE_GLOBAL_CMDS_TEMPLATES_H
-#define _IPMI_DEVICE_GLOBAL_CMDS_TEMPLATES_H
+#ifndef IPMI_DEVICE_GLOBAL_CMDS_TEMPLATES_H
+#define IPMI_DEVICE_GLOBAL_CMDS_TEMPLATES_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -220,4 +220,4 @@ FIID Template: tmpl_cmd_get_device_guid_format_rs
 }
 #endif
 
-#endif  /* _IPMI_DEVICE_GLOBAL_CMDS_TEMPLATES_H */
+#endif /* IPMI_DEVICE_GLOBAL_CMDS_TEMPLATES_H */

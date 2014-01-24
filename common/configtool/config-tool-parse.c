@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,8 +56,8 @@ config_parse (pstdout_state_t pstate,
 
       if (!str)
         {
-          if (cmd_args->common.debug)
-            PSTDOUT_FPRINTF (pstate,
+          if (cmd_args->common_args.debug)
+            pstdout_fprintf (pstate,
                              stderr,
                              "%d: empty line\n",
                              line_num);
@@ -66,8 +66,8 @@ config_parse (pstdout_state_t pstate,
 
       if (str[0] == '#')
         {
-          if (cmd_args->common.debug)
-            PSTDOUT_FPRINTF (pstate,
+          if (cmd_args->common_args.debug)
+            pstdout_fprintf (pstate,
                              stderr,
                              "Comment on line %d\n",
                              line_num);
@@ -78,7 +78,7 @@ config_parse (pstdout_state_t pstate,
         {
           if (!(tok = strtok (NULL, " \t\n")))
             {
-              PSTDOUT_FPRINTF (pstate,
+              pstdout_fprintf (pstate,
                                stderr,
                                "FATAL: Error parsing line number %d\n",
                                line_num);
@@ -88,15 +88,15 @@ config_parse (pstdout_state_t pstate,
           if (!(section = config_find_section (sections,
                                                tok)))
             {
-              PSTDOUT_FPRINTF (pstate,
+              pstdout_fprintf (pstate,
                                stderr,
                                "Unknown section `%s'\n",
                                tok);
               goto cleanup;
             }
 
-          if (cmd_args->common.debug)
-            PSTDOUT_FPRINTF (pstate,
+          if (cmd_args->common_args.debug)
+            pstdout_fprintf (pstate,
                              stderr,
                              "Entering section `%s'\n",
                              section->section_name);
@@ -109,15 +109,15 @@ config_parse (pstdout_state_t pstate,
         {
           if (!section)
             {
-              PSTDOUT_FPRINTF (pstate,
+              pstdout_fprintf (pstate,
                                stderr,
                                "FATAL: encountered `%s' without a matching Section\n",
                                str);
               goto cleanup;
             }
 
-          if (cmd_args->common.debug)
-            PSTDOUT_FPRINTF (pstate,
+          if (cmd_args->common_args.debug)
+            pstdout_fprintf (pstate,
                              stderr,
                              "Leaving section `%s'\n",
                              section->section_name);
@@ -129,7 +129,7 @@ config_parse (pstdout_state_t pstate,
 
       if (!section)
         {
-          PSTDOUT_FPRINTF (pstate,
+          pstdout_fprintf (pstate,
                            stderr,
                            "FATAL: Key `%s' not inside a valid Section\n",
                            str);
@@ -139,7 +139,7 @@ config_parse (pstdout_state_t pstate,
       if (!(key = config_find_key (section,
                                    str)))
         {
-          PSTDOUT_FPRINTF (pstate,
+          pstdout_fprintf (pstate,
                            stderr,
                            "Unknown key `%s' in section `%s'\n",
                            str,
@@ -151,8 +151,8 @@ config_parse (pstdout_state_t pstate,
       if (!tok)
         tok = "";
 
-      if (cmd_args->common.debug)
-        PSTDOUT_FPRINTF (pstate,
+      if (cmd_args->common_args.debug)
+        pstdout_fprintf (pstate,
                          stderr,
                          "Parsed `%s:%s=%s'\n",
                          section->section_name,
@@ -162,7 +162,7 @@ config_parse (pstdout_state_t pstate,
       if (config_find_keyvalue (section,
                                 key->key_name))
         {
-          PSTDOUT_FPRINTF (pstate,
+          pstdout_fprintf (pstate,
                            stderr,
                            "Key '%s' specified twice in section '%s'\n",
                            key->key_name,

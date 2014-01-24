@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SEL_CMDS_API_H
-#define _IPMI_SEL_CMDS_API_H
+#ifndef IPMI_SEL_CMDS_API_H
+#define IPMI_SEL_CMDS_API_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,6 +68,13 @@ int ipmi_cmd_set_sel_time (ipmi_ctx_t ctx,
                            uint32_t time,
                            fiid_obj_t obj_cmd_rs);
 
+int ipmi_cmd_get_sel_time_utc_offset (ipmi_ctx_t ctx,
+				      fiid_obj_t obj_cmd_rs);
+
+int ipmi_cmd_set_sel_time_utc_offset (ipmi_ctx_t ctx,
+				      int16_t offset,
+				      fiid_obj_t obj_cmd_rs);
+
 int ipmi_cmd_get_auxiliary_log_status (ipmi_ctx_t ctx,
                                        uint8_t log_type,
                                        fiid_obj_t obj_cmd_rs);
@@ -82,4 +89,4 @@ int ipmi_cmd_set_auxiliary_log_status (ipmi_ctx_t ctx,
 }
 #endif
 
-#endif
+#endif /* IPMI_SEL_CMDS_API_H */

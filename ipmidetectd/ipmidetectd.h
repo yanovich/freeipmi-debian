@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmidetectd.h,v 1.11 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,24 +24,35 @@
  *  with Ipmidetect.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMIDETECTD_H
-#define _IPMIDETECTD_H 1
+#ifndef IPMIDETECTD_H
+#define IPMIDETECTD_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <limits.h>             /* MAXHOSTNAMELEN */
-#ifdef HAVE_NETDB_H
-#include <netdb.h>              /* MAXHOSTNAMELEN Solaris */
-#endif /* HAVE_NETDB_H */
+#include <freeipmi/freeipmi.h>
 
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 64
-#endif /* MAXHOSTNAMELEN */
+#include "hostlist.h"
 
-#ifndef MAXPATHLEN
-#define MAXPATHLEN 4096
-#endif /* MAXPATHLEN */
+enum ipmidetectd_argp_option_keys
+  {
+    IPMIDETECTD_CONFIG_FILE_KEY = 'c',
+    IPMIDETECTD_LEGACY_CONFIG_FILE_KEY = 160,	/* legacy */
+    IPMIDETECTD_DEBUG_KEY = 'd',
+  };
 
-#endif /* _IPMIDETECTD_H */
+struct ipmidetectd_config
+{
+  int ipmiping_period;
+  int ipmidetectd_server_port;
+  hostlist_t hosts;
+};
+
+struct ipmidetectd_arguments
+{
+  int debug;
+  char *config_file;
+};
+
+#endif /* IPMIDETECTD_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SDR_OEM_RECORD_FORMAT_H
-#define _IPMI_SDR_OEM_RECORD_FORMAT_H
+#ifndef IPMI_SDR_OEM_RECORD_FORMAT_H
+#define IPMI_SDR_OEM_RECORD_FORMAT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -142,4 +142,4 @@ extern fiid_template_t tmpl_sdr_oem_intel_node_manager_record;
 }
 #endif
 
-#endif
+#endif /* IPMI_SDR_OEM_RECORD_FORMAT_H */

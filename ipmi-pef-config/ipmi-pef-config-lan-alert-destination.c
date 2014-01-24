@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 FreeIPMI Core Team
+ * Copyright (C) 2007-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ _get_destination_type (ipmi_pef_config_state_data_t *state_data,
                                                                   IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                   obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_get_lan_configuration_parameters_destination_type: %s\n",
@@ -193,7 +193,7 @@ _set_destination_type (ipmi_pef_config_state_data_t *state_data,
                                                                  dt->alert_retries,
                                                                  obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_set_lan_configuration_parameters_destination_type: %s\n",
@@ -488,7 +488,7 @@ _get_destination_addresses (ipmi_pef_config_state_data_t *state_data,
                                                                       IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                       obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_get_lan_configuration_parameters_destination_addresses: %s\n",
@@ -614,7 +614,7 @@ _set_destination_addresses (ipmi_pef_config_state_data_t *state_data,
                                                                        alert_mac_address_val,
                                                                        obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_set_lan_configuration_parameters_destination_addresses: %s\n",
@@ -811,7 +811,6 @@ ipmi_pef_config_lan_alert_destination_section_get (ipmi_pef_config_state_data_t 
   char section_name_base[CONFIG_MAX_SECTION_NAME_LEN];
 
   assert (state_data);
-  assert (num);
 
   snprintf (section_name_base, CONFIG_MAX_SECTION_NAME_LEN, "Lan_Alert_Destination_%u", num);
 

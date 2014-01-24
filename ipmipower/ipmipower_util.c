@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_util.c,v 1.37 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -60,6 +60,74 @@
 
 extern struct ipmipower_arguments cmd_args;
 
+char *
+ipmipower_power_cmd_to_string (ipmipower_power_cmd_t cmd)
+{
+  assert (IPMIPOWER_POWER_CMD_VALID (cmd));
+
+  switch (cmd)
+    {
+    case IPMIPOWER_POWER_CMD_POWER_OFF:
+      return ("off");
+    case IPMIPOWER_POWER_CMD_POWER_ON:
+      return ("on");
+    case IPMIPOWER_POWER_CMD_POWER_CYCLE:
+      return ("cycle");
+    case IPMIPOWER_POWER_CMD_POWER_RESET:
+      return ("reset");
+    case IPMIPOWER_POWER_CMD_POWER_STATUS:
+      return ("status");
+    case IPMIPOWER_POWER_CMD_PULSE_DIAGNOSTIC_INTERRUPT:
+      return ("diagnostic interrupt");
+    case IPMIPOWER_POWER_CMD_SOFT_SHUTDOWN_OS:
+      return ("soft shutdown os");
+    case IPMIPOWER_POWER_CMD_IDENTIFY_ON:
+      return ("identify on");
+    case IPMIPOWER_POWER_CMD_IDENTIFY_OFF:
+      return ("identify off");
+    case IPMIPOWER_POWER_CMD_IDENTIFY_STATUS:
+      return ("identify status");
+    default:
+      IPMIPOWER_ERROR (("ipmipower_power_cmd_to_string: invalid power cmd type: %d", cmd));
+      exit (EXIT_FAILURE);
+    }
+  
+  return (NULL);		/* NOT REACHED */
+}
+
+int
+ipmipower_power_cmd_check_privilege (ipmipower_power_cmd_t cmd,
+				     char *errbuf,
+				     unsigned int errbuflen)
+{
+  int rv = -1;
+  
+  assert (IPMIPOWER_POWER_CMD_VALID (cmd));
+  assert (errbuf);
+  assert (errbuflen);
+  assert (cmd_args.oem_power_type == IPMIPOWER_OEM_POWER_TYPE_NONE);
+  
+  if (cmd_args.common_args.privilege_level == IPMI_PRIVILEGE_LEVEL_USER
+      && IPMIPOWER_POWER_CMD_REQUIRES_OPERATOR_PRIVILEGE_LEVEL (cmd))
+    {
+      char *power_cmd_str;
+      
+      power_cmd_str = ipmipower_power_cmd_to_string (cmd);
+      
+      snprintf (errbuf,
+		errbuflen, 
+		"'%s' requires atleast operator privilege",
+		power_cmd_str);
+      
+      rv = 0;
+      goto cleanup;
+    }
+
+  rv = 1; 
+ cleanup:
+  return (rv);
+}
+
 int
 ipmipower_poll (struct pollfd *ufds, unsigned int nfds, int timeout)
 {
@@ -77,7 +145,7 @@ ipmipower_poll (struct pollfd *ufds, unsigned int nfds, int timeout)
       if (gettimeofday(&start, NULL) < 0)
         {
           IPMIPOWER_ERROR (("gettimeofday: %s", strerror (errno)));
-          exit (1);
+          exit (EXIT_FAILURE);
         }
     }
   else
@@ -95,7 +163,7 @@ ipmipower_poll (struct pollfd *ufds, unsigned int nfds, int timeout)
       if (n < 0 && errno != EINTR)
         {
           IPMIPOWER_ERROR (("poll: %s", strerror (errno)));
-          exit (1);
+          exit (EXIT_FAILURE);
         }
 
       if (n < 0 && timeout >= 0)      /* EINTR - adjust timeout */
@@ -103,7 +171,7 @@ ipmipower_poll (struct pollfd *ufds, unsigned int nfds, int timeout)
           if (gettimeofday(&end, NULL) < 0)
             {
               IPMIPOWER_ERROR (("gettimeofday: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           timersub(&end, &start, &delta);     /* delta = end-start */
@@ -132,7 +200,7 @@ ipmipower_cbuf_printf(cbuf_t cbuf, const char *fmt, ...)
   if (written < 0)
     {
       IPMIPOWER_ERROR (("cbuf_write: %s", strerror (errno)));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
   
   va_end(ap);
@@ -150,7 +218,7 @@ ipmipower_cbuf_peek_and_drop (cbuf_t buf, void *buffer, int len)
   if ((r_len = cbuf_peek (buf, buffer, len)) < 0)
     {
       IPMIPOWER_ERROR (("cbuf_peek: %s", strerror (errno)));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   /* Nothing there */
@@ -160,19 +228,19 @@ ipmipower_cbuf_peek_and_drop (cbuf_t buf, void *buffer, int len)
   if ((dropped = cbuf_drop (buf, len)) < 0)
     {
       IPMIPOWER_ERROR (("cbuf_drop: %s", strerror (errno)));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   if (dropped != r_len)
     {
       IPMIPOWER_ERROR (("cbuf_drop: dropped incorrect bytes: %d", dropped));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   if ((rv = cbuf_drop (buf, -1)) < 0)
     {
       IPMIPOWER_ERROR (("cbuf_drop: %s", strerror (errno)));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   if (rv > 0)

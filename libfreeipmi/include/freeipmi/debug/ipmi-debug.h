@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_DEBUG_H
-#define _IPMI_DEBUG_H
+#ifndef IPMI_DEBUG_H
+#define IPMI_DEBUG_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -148,6 +148,4 @@ int ipmi_dump_hex (int fd,
 }
 #endif
 
-#endif /* ipmi-debug.h */
-
-
+#endif /* IPMI_DEBUG_H */

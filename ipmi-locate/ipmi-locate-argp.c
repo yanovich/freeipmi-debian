@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 FreeIPMI Core Team
+ * Copyright (C) 2005-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #else /* !HAVE_ARGP_H */
 #include "freeipmi-argp.h"
 #endif /* !HAVE_ARGP_H */
+#include <assert.h>
 
 #include "ipmi-locate_.h"
 #include "ipmi-locate-argp.h"
@@ -35,7 +36,7 @@
 
 const char *argp_program_version =
   "ipmi-locate - " PACKAGE_VERSION "\n"
-  "Copyright (C) 2005-2012 FreeIPMI Core Team\n"
+  "Copyright (C) 2005-2013 FreeIPMI Core Team\n"
   "This program is free software; you may redistribute it under the terms of\n"
   "the GNU General Public License.  This program has absolutely no warranty.";
 
@@ -50,7 +51,7 @@ static char cmdline_args_doc[] = "";
 static struct argp_option cmdline_options[] =
   {
     { "defaults", DEFAULTS_KEY, NULL, 0,
-      "Display system defaults.", 30},
+      "Display system defaults.", 40},
     { NULL, 0, NULL, 0, NULL, 0}
   };
 
@@ -64,7 +65,11 @@ static struct argp cmdline_argp = { cmdline_options,
 static error_t
 cmdline_parse (int key, char *arg, struct argp_state *state)
 {
-  struct ipmi_locate_arguments *cmd_args = state->input;
+  struct ipmi_locate_arguments *cmd_args;
+
+  assert (state);
+  
+  cmd_args = state->input;
 
   switch (key)
     {
@@ -87,6 +92,10 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
 void
 ipmi_locate_argp_parse (int argc, char **argv, struct ipmi_locate_arguments *cmd_args)
 {
+  assert (argc >= 0);
+  assert (argv);
+  assert (cmd_args);
+
   cmd_args->defaults = 0;
 
   argp_parse (&cmdline_argp,

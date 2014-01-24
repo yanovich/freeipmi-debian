@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _CONFIG_TOOL_COMMENT_H
-#define _CONFIG_TOOL_COMMENT_H
+#ifndef CONFIG_TOOL_COMMENT_H
+#define CONFIG_TOOL_COMMENT_H
 
 #include <stdio.h>
 
@@ -27,4 +27,5 @@ int config_section_comments (pstdout_state_t pstate,
                              const char *section_name,
                              const char *in,
                              FILE *fp);
-#endif
+
+#endif /* CONFIG_TOOL_COMMENT_H */

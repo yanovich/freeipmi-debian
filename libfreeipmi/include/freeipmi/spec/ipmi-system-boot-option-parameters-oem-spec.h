@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SYSTEM_BOOT_OPTION_PARAMETERS_OEM_SPEC_H
-#define _IPMI_SYSTEM_BOOT_OPTION_PARAMETERS_OEM_SPEC_H
+#ifndef IPMI_SYSTEM_BOOT_OPTION_PARAMETERS_OEM_SPEC_H
+#define IPMI_SYSTEM_BOOT_OPTION_PARAMETERS_OEM_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,4 +26,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif /* _IPMI_SYSTEM_BOOT_OPTION_PARAMETERS_OEM_SPEC_H */
+#endif /* IPMI_SYSTEM_BOOT_OPTION_PARAMETERS_OEM_SPEC_H */

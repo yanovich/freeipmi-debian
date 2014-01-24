@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_output.h,v 1.16 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,19 +24,16 @@
  *  with Ipmipower.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMIPOWER_OUTPUT_H
-#define _IPMIPOWER_OUTPUT_H
+#ifndef IPMIPOWER_OUTPUT_H
+#define IPMIPOWER_OUTPUT_H
 
 #include "ipmipower.h"
 
-/* ipmipower_output
- * - Output msg with hostname prefix to ttyout
- */
-void ipmipower_output (msg_type_t num, const char *hostname);
+void ipmipower_output (ipmipower_msg_type_t num, const char *hostname, const char *extra_arg);
 
 /* ipmipower_output_finish
- * - Output final results
+ * - Output final results, mostly notably w/ consolidated output.
  */
 void ipmipower_output_finish (void);
 
-#endif /* _IPMIPOWER_OUTPUT_H */
+#endif /* IPMIPOWER_OUTPUT_H */

@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiconsole_checks.h,v 1.13 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,8 +24,8 @@
  *  with Ipmiconsole.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMICONSOLE_CHECKS_H
-#define _IPMICONSOLE_CHECKS_H
+#ifndef IPMICONSOLE_CHECKS_H
+#define IPMICONSOLE_CHECKS_H
 
 #include <freeipmi/freeipmi.h>
 #include "ipmiconsole.h"
@@ -52,4 +52,4 @@ int ipmiconsole_check_rakp_4_integrity_check_value (ipmiconsole_ctx_t c, ipmicon
 int ipmiconsole_check_payload_pad (ipmiconsole_ctx_t c, ipmiconsole_packet_type_t p);
 int ipmiconsole_check_integrity_pad (ipmiconsole_ctx_t c, ipmiconsole_packet_type_t p);
 
-#endif /* _IPMICONSOLE_CHECKS_H */
+#endif /* IPMICONSOLE_CHECKS_H */

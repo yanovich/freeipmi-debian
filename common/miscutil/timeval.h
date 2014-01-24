@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: timeval.h,v 1.6 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,8 +24,8 @@
  *  with Ipmiconsole.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _TIMEVAL_H
-#define _TIMEVAL_H
+#ifndef TIMEVAL_H
+#define TIMEVAL_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -60,4 +60,4 @@ void timeval_sub_ms (struct timeval *a, unsigned int ms, struct timeval *result)
 
 void timeval_millisecond_calc (struct timeval *a, unsigned int *ms);
 
-#endif /* _TIMEVAL_H */
+#endif /* TIMEVAL_H */

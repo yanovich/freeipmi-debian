@@ -1,7 +1,7 @@
 .\"#############################################################################
 .\"$Id: ipmi-dcmi.8.pre.in,v 1.8 2010-02-08 22:02:30 chu11 Exp $
 .\"#############################################################################
-.\"  Copyright (C) 2009-2012 Lawrence Livermore National Security, LLC.
+.\"  Copyright (C) 2009-2013 Lawrence Livermore National Security, LLC.
 .\"  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
 .\"  Written by Albert Chu <chu11@llnl.gov>
 .\"  LLNL-CODE-413270
@@ -140,6 +140,8 @@ the \fB\-\-set\-power\-limit\fR option.
 \fB\-\-activate\-deactivate\-power\-limit\fR=\fIOPERATION\fR
 Activate or deactivate power limit.  Allowed values: ACTIVATE, DEACTIVATE.
 #include <@top_srcdir@/man/manpage-common-interpret-oem-data.man>
+#include <@top_srcdir@/man/manpage-common-time-options-heading.man>
+#include <@top_srcdir@/man/manpage-common-time-options.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-options-header.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-buffer.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-consolidate.man>
@@ -156,6 +158,7 @@ Activate or deactivate power limit.  Allowed values: ACTIVATE, DEACTIVATE.
 #include <@top_srcdir@/man/manpage-common-troubleshooting-heading-end.man>
 #include <@top_srcdir@/man/manpage-common-troubleshooting-outofband.man>
 #include <@top_srcdir@/man/manpage-common-troubleshooting-inband.man>
+#include <@top_srcdir@/man/manpage-common-troubleshooting-inband-outofband.man>
 #include <@top_srcdir@/man/manpage-common-workaround-heading-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-inband-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-outofband-common-text.man>
@@ -178,10 +181,12 @@ Get power limit of a remote machine using IPMI over LAN.
 .PP
 Get power limit across a cluster using IPMI over LAN.
 .PP
+#include <@top_srcdir@/man/manpage-common-diagnostics.man>
+#include <@top_srcdir@/man/manpage-common-diagnostics-hostranged-text.man>
 #include <@top_srcdir@/man/manpage-common-known-issues.man>
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright (C) 2009-2012 Lawrence Livermore National Security, LLC.
+Copyright (C) 2009-2013 Lawrence Livermore National Security, LLC.
 #include <@top_srcdir@/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
 freeipmi(7), bmc-config(8), ipmi-chassis(8), ipmi-sel(8),

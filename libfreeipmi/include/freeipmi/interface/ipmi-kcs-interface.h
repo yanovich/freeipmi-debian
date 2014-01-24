@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_KCS_INTERFACE_H
-#define _IPMI_KCS_INTERFACE_H 1
+#ifndef IPMI_KCS_INTERFACE_H
+#define IPMI_KCS_INTERFACE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,5 +62,4 @@ int unassemble_ipmi_kcs_pkt (const void *pkt,
 }
 #endif
 
-#endif /* ipmi-kcs-interface.h */
-
+#endif /* IPMI_KCS_INTERFACE_H */

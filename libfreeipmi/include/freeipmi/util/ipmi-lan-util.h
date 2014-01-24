@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_LAN_UTIL_H
-#define _IPMI_LAN_UTIL_H        1
+#ifndef IPMI_LAN_UTIL_H
+#define IPMI_LAN_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,6 +68,4 @@ int ipmi_lan_check_packet_checksum (const void *pkt, unsigned int pkt_len);
 }
 #endif
 
-#endif /* ipmi-lan-util.h */
-
-
+#endif /* IPMI_LAN_UTIL_H */

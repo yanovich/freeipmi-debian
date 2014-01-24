@@ -27,7 +27,7 @@ sensor reading cannot be read.  This is typical of a sensor that is
 busy or a reading that cannot be calculated.  If sensors report
 "Unrecognized State", it is indicative of an unkown sensor type,
 typically an OEM sensor.  If the sensor OEM interpretation is
-available, the \fB\-\-intepret\-oem\-data\fR may be able to report
+available, the \fB\-\-interpret\-oem\-data\fR may be able to report
 the appropriate sensor state.  Sensors need not always report a sensor
 event.  When a sensor event is not present, "OK" is typically
 reported.
@@ -156,6 +156,12 @@ previously output by
 Specify an alternate sensor state configuration file.  Option ignored
 if \fB\-\-output\-sensor\-state\fR not specified.
 #include <@top_srcdir@/man/manpage-common-entity-sensor-names.man>
+.TP
+\fB\-\-output\-sensor\-thresholds\fR
+Output sensor thresholds in output.  This will add columns to the
+default output for lower non-recoverable, lower critical, lower
+non-critical, upper non-critical, upper critical, and upper
+non-recoverable thresholds.
 #include <@top_srcdir@/man/manpage-common-no-sensor-type-output.man>
 #include <@top_srcdir@/man/manpage-common-comma-separated-output.man>
 #include <@top_srcdir@/man/manpage-common-no-header-output.man>
@@ -166,7 +172,11 @@ if \fB\-\-output\-sensor\-state\fR not specified.
 Output legacy format of legacy
 .B ipmimonitoring
 tool.  Newer options may not be applicable to legacy output.
-#include <@top_srcdir@/man/manpage-common-sdr-options.man>
+#include <@top_srcdir@/man/manpage-common-sdr-cache-options-heading.man>
+#include <@top_srcdir@/man/manpage-common-sdr-cache-options.man>
+#include <@top_srcdir@/man/manpage-common-sdr-cache-file-directory.man>
+#include <@top_srcdir@/man/manpage-common-time-options-heading.man>
+#include <@top_srcdir@/man/manpage-common-time-options.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-options-header.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-buffer.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-consolidate.man>
@@ -183,6 +193,7 @@ tool.  Newer options may not be applicable to legacy output.
 #include <@top_srcdir@/man/manpage-common-troubleshooting-heading-end.man>
 #include <@top_srcdir@/man/manpage-common-troubleshooting-outofband.man>
 #include <@top_srcdir@/man/manpage-common-troubleshooting-inband.man>
+#include <@top_srcdir@/man/manpage-common-troubleshooting-inband-outofband.man>
 .LP
 "sensor config file parse error" - A parse error was found in the
 sensor interpretation configuration file.  Please see
@@ -192,6 +203,7 @@ sensor interpretation configuration file.  Please see
 #include <@top_srcdir@/man/manpage-common-workaround-outofband-common-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-outofband-15-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-outofband-20-text.man>
+#include <@top_srcdir@/man/manpage-common-workaround-sdr-text.man>
 .LP
 \fIdiscretereading\fR - This workaround option will allow analog
 sensor readings (i.e. rpm, degrees, etc.) to be read even if the
@@ -239,14 +251,17 @@ the \fB\-\-bridge\-sensors\fR is used.)
 #include <@top_srcdir@/man/manpage-common-workaround-extra-text.man>
 #include <@top_srcdir@/man/manpage-common-oem-interpretation.man>
 .LP
-Dell Poweredge R210, Dell Poweredge R610, Dell Poweredge R710, Fujitsu
-iRMC S1 and iRMC S2 systems, Intel S5500WB/Penguin Computing Relion
-700, Intel S2600JF/Appro 512X, Intel S5000PAL, Supermicro X7DBR-3,
-Supermicro X7DB8, Supermicro X8DTN, Supermicro X7SBI-LN4, Supermicro
-X8DTH, Supermicro X8DTG, Supermicro X8DTU, Supermicro X8DT3-LN4F,
-Supermicro X8DTU-6+, Supermicro X8DTL, Supermicro X8DTL-3F, Supermicro
-X8SIL-F, Supermicro X9SCL, Supermicro X9SCM, Supermicro X8DTN+-F,
-Supermicro X8SIE, Supermicro X9SCA-F-O, Supermicro H8DGU-F.
+Dell Poweredge R210, Dell Poweredge R610, Dell Poweredge R710, Dell
+Poweredge R720, Fujitsu iRMC S1 and iRMC S2 systems, HP Proliant DL160
+G8, Intel S5500WB/Penguin Computing Relion 700, Intel S2600JF/Appro
+512X, Intel S5000PAL, Supermicro X7DBR-3, Supermicro X7DB8, Supermicro
+X8DTN, Supermicro X7SBI-LN4, Supermicro X8DTH, Supermicro X8DTG,
+Supermicro X8DTU, Supermicro X8DT3-LN4F, Supermicro X8DTU-6+,
+Supermicro X8DTL, Supermicro X8DTL-3F, Supermicro X8SIL-F, Supermicro
+X9SCL, Supermicro X9SCM, Supermicro X8DTN+-F, Supermicro X8SIE,
+Supermicro X9SCA-F-O, Supermicro H8DGU-F, Supermicro X9DRi-F,
+Supermicro X9DRI-LN4F+, Supermicro X9SPU-F-O, Supermicro X9SCM-iiF,
+Wistron/Dell Poweredge C6220.
 .SH "EXAMPLES"
 .B # ipmi-sensors 
 .PP
@@ -272,6 +287,8 @@ Show all sensors on a remote machine using IPMI over LAN.
 .PP
 Show all sensors across a cluster using IPMI over LAN.
 .PP
+#include <@top_srcdir@/man/manpage-common-diagnostics.man>
+#include <@top_srcdir@/man/manpage-common-diagnostics-hostranged-text.man>
 #include <@top_srcdir@/man/manpage-common-known-issues.man>
 .LP
 Some sensors may be output as not available (i.e. N/A) because the
@@ -281,7 +298,7 @@ or \fB\-\-bridge\-sensors\fR options.
 
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright \(co 2003-2012 FreeIPMI Core Team.  
+Copyright \(co 2003-2013 FreeIPMI Core Team.  
 #include <@top_srcdir@/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
 freeipmi(7), bmc-config(8), bmc-device(8), ipmi-sensors-config(8),

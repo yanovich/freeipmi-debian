@@ -1,11 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([freeipmi],[1.1.5],[freeipmi-devel@gnu.org])
+AC_INIT([freeipmi],[1.3.4],[freeipmi-devel@gnu.org])
 AC_REVISION([$Id: configure.ac,v 1.208 2010-08-06 21:02:29 chu11 Exp $])
 AC_CONFIG_MACRO_DIR([config])
 
 FREEIPMI_PACKAGE_VERSION_MAJOR=1
-FREEIPMI_PACKAGE_VERSION_MINOR=1
-FREEIPMI_PACKAGE_VERSION_PATCH=5
+FREEIPMI_PACKAGE_VERSION_MINOR=3
+FREEIPMI_PACKAGE_VERSION_PATCH=4
 
 AC_SUBST(FREEIPMI_PACKAGE_VERSION_MAJOR)
 AC_SUBST(FREEIPMI_PACKAGE_VERSION_MINOR)
@@ -22,7 +22,7 @@ AC_CONFIG_SRCDIR([ChangeLog.0])
 AM_INIT_AUTOMAKE([tar-ustar subdir-objects 1.9])
 
 dnl create a config.h file
-AM_CONFIG_HEADER([config/config.h])
+AC_CONFIG_HEADERS([config/config.h])
 
 dnl define output files
 AC_CONFIG_FILES([
@@ -40,11 +40,6 @@ AC_CONFIG_FILES([
         common/pingtool/Makefile
         common/portability/Makefile
         common/toolcommon/Makefile
-        common/toolevent/Makefile
-        common/toolhostrange/Makefile
-        common/tooloem/Makefile
-        common/toolsdr/Makefile
-        common/toolsensor/Makefile
         contrib/Makefile
         doc/Makefile 
         etc/Makefile
@@ -65,6 +60,7 @@ AC_CONFIG_FILES([
         ipmidetectd/Makefile
         ipmiping/Makefile
         ipmipower/Makefile 
+        ipmiseld/Makefile
         libfreeipmi/Makefile 
         libfreeipmi/libfreeipmi.pc
         libfreeipmi/include/Makefile 
@@ -105,6 +101,8 @@ AC_CONFIG_FILES([
 	man/ipmidetectd.conf.5.pre
 	man/ipmiping.8.pre
 	man/ipmipower.8.pre
+	man/ipmiseld.8.pre
+	man/ipmiseld.conf.5.pre
         man/libfreeipmi.3.pre
         man/freeipmi_interpret_sensor.conf.5.pre
         man/freeipmi_interpret_sel.conf.5.pre
@@ -132,7 +130,7 @@ AC_SUBST([ISODATE])
 # If any interfaces have been removed or changed since the last public
 # release, then set age to 0.
 #
-LIBFREEIPMI_CURRENT=12
+LIBFREEIPMI_CURRENT=15
 LIBFREEIPMI_REVISION=3
 LIBFREEIPMI_AGE=0
 
@@ -153,7 +151,7 @@ AC_SUBST([LIBFREEIPMI_VERSION_INFO])
 #         incremented due to bug fixes or minor features.  Interfaces are
 #         forward and backward compatible to other PATCH versions.
 
-LIBFREEIPMI_VERSION_MAJOR=2
+LIBFREEIPMI_VERSION_MAJOR=4
 LIBFREEIPMI_VERSION_MINOR=0
 LIBFREEIPMI_VERSION_PATCH=3
 
@@ -175,9 +173,9 @@ AC_SUBST(LIBFREEIPMI_VERSION_PATCH)
 # If any interfaces have been removed or changed since the last public
 # release, then set age to 0.
 #
-LIBIPMICONSOLE_CURRENT=4
-LIBIPMICONSOLE_REVISION=1
-LIBIPMICONSOLE_AGE=2
+LIBIPMICONSOLE_CURRENT=5
+LIBIPMICONSOLE_REVISION=2
+LIBIPMICONSOLE_AGE=3
 LIBIPMICONSOLE_VERSION_INFO=$LIBIPMICONSOLE_CURRENT:$LIBIPMICONSOLE_REVISION:$LIBIPMICONSOLE_AGE
 AC_SUBST([LIBIPMICONSOLE_VERSION_INFO])
 
@@ -195,8 +193,8 @@ AC_SUBST([LIBIPMICONSOLE_VERSION_INFO])
 #
 
 LIBIPMICONSOLE_VERSION_MAJOR=1
-LIBIPMICONSOLE_VERSION_MINOR=1
-LIBIPMICONSOLE_VERSION_PATCH=1
+LIBIPMICONSOLE_VERSION_MINOR=2
+LIBIPMICONSOLE_VERSION_PATCH=2
 
 AC_SUBST(LIBIPMICONSOLE_VERSION_MAJOR)
 AC_SUBST(LIBIPMICONSOLE_VERSION_MINOR)
@@ -217,7 +215,7 @@ AC_SUBST(LIBIPMICONSOLE_VERSION_PATCH)
 # release, then set age to 0.
 #
 LIBIPMIMONITORING_CURRENT=5
-LIBIPMIMONITORING_REVISION=2
+LIBIPMIMONITORING_REVISION=5
 LIBIPMIMONITORING_AGE=0
 LIBIPMIMONITORING_VERSION_INFO=$LIBIPMIMONITORING_CURRENT:$LIBIPMIMONITORING_REVISION:$LIBIPMIMONITORING_AGE
 AC_SUBST([LIBIPMIMONITORING_VERSION_INFO])
@@ -237,7 +235,7 @@ AC_SUBST([LIBIPMIMONITORING_VERSION_INFO])
 
 LIBIPMIMONITORING_VERSION_MAJOR=1
 LIBIPMIMONITORING_VERSION_MINOR=0
-LIBIPMIMONITORING_VERSION_PATCH=2
+LIBIPMIMONITORING_VERSION_PATCH=5
 
 AC_SUBST(LIBIPMIMONITORING_VERSION_MAJOR)
 AC_SUBST(LIBIPMIMONITORING_VERSION_MINOR)
@@ -353,25 +351,6 @@ if test x"$enable_init_scripts" = xno; then
    INSTALL_INIT_SCRIPTS=
 fi
 AC_SUBST(INSTALL_INIT_SCRIPTS)
-
-dnl Option to disable installing logrotate config
-AC_ARG_ENABLE(logrotate-config,
-   AC_HELP_STRING([--disable-logrotate-config],
-      [don\'t install logrotate configuration files]))
-INSTALL_LOGROTATE_CONFIG=install-logrotate-config
-if test x"$enable_logrotate_config" = xno; then
-   INSTALL_LOGROTATE_CONFIG=
-fi
-AC_SUBST(INSTALL_LOGROTATE_CONFIG)
-
-dnl Option to disable creating log directory
-AC_ARG_ENABLE([logdir],
-   AC_HELP_STRING([--disable-logdir], [don\'t create log directory]))
-INSTALL_LOGDIR=install-logdir
-if test x"$enable_logdir" = xno; then
-   INSTALL_LOGDIR=
-fi
-AC_SUBST(INSTALL_LOGDIR)
 
 dnl Option to disable creating ipmi sdr cache directory
 AC_ARG_ENABLE([ipmisdrcachedir],
@@ -694,7 +673,6 @@ FREEIPMI_SYSCONFDIR=${sysconfdir}/freeipmi/
 AC_SUBST(FREEIPMI_SYSCONFDIR)
 
 AC_FREEIPMI_CONFIG_FILE
-AC_BMC_WATCHDOG_LOGFILE_DEFAULT
 AC_IPMI_MONITORING_SDR_CACHE_DIR
 dnl legacy
 AC_IPMI_MONITORING_SENSOR_CONFIG_FILE
@@ -706,6 +684,8 @@ AC_INTERPRET_SENSOR_CONFIG_FILE
 AC_INTERPRET_SEL_CONFIG_FILE
 AC_IPMIDETECT_CONFIG_FILE
 AC_IPMIDETECTD_CONFIG_FILE
+AC_IPMISELD_CONFIG_FILE
+AC_IPMISELD_CACHE_DIRECTORY
 AC_LIBIPMICONSOLE_CONFIG_FILE
 AC_DONT_CHECK_FOR_ROOT
 

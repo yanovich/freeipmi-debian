@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SUNBMC_DRIVER_H
-#define _IPMI_SUNBMC_DRIVER_H 1
+#ifndef IPMI_SUNBMC_DRIVER_H
+#define IPMI_SUNBMC_DRIVER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,5 +71,4 @@ int ipmi_sunbmc_cmd (ipmi_sunbmc_ctx_t ctx,
 }
 #endif
 
-#endif /* ipmi-sunbmc-driver.h */
-
+#endif /* IPMI_SUNBMC_DRIVER_H */

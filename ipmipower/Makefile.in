@@ -38,8 +38,7 @@ sbin_PROGRAMS = ipmipower$(EXEEXT)
 subdir = ipmipower
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
-	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
@@ -49,6 +48,8 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_cache_dir.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_config_file.m4 \
 	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
@@ -66,6 +67,7 @@ am_ipmipower_OBJECTS = ipmipower-argv.$(OBJEXT) \
 	ipmipower-ipmipower_check.$(OBJEXT) \
 	ipmipower-ipmipower_connection.$(OBJEXT) \
 	ipmipower-ipmipower_error.$(OBJEXT) \
+	ipmipower-ipmipower_oem.$(OBJEXT) \
 	ipmipower-ipmipower_output.$(OBJEXT) \
 	ipmipower-ipmipower_packet.$(OBJEXT) \
 	ipmipower-ipmipower_ping.$(OBJEXT) \
@@ -75,7 +77,6 @@ am_ipmipower_OBJECTS = ipmipower-argv.$(OBJEXT) \
 ipmipower_OBJECTS = $(am_ipmipower_OBJECTS)
 ipmipower_DEPENDENCIES =  \
 	$(top_builddir)/common/toolcommon/libtoolcommon.la \
-	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
 	$(top_builddir)/common/debugutil/libdebugutil.la \
 	$(top_builddir)/common/miscutil/libmiscutil.la \
 	$(top_builddir)/common/parsecommon/libparsecommon.la \
@@ -108,7 +109,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BMC_WATCHDOG_LOGFILE_DEFAULT = @BMC_WATCHDOG_LOGFILE_DEFAULT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -136,8 +136,6 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
 INSTALL_IPMISDRCACHEDIR = @INSTALL_IPMISDRCACHEDIR@
-INSTALL_LOGDIR = @INSTALL_LOGDIR@
-INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -147,6 +145,8 @@ IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
 IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
+IPMISELD_CACHE_DIRECTORY = @IPMISELD_CACHE_DIRECTORY@
+IPMISELD_CONFIG_FILE_DEFAULT = @IPMISELD_CONFIG_FILE_DEFAULT@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
 IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
@@ -256,12 +256,12 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ipmipower_CPPFLAGS = \
 	-I$(top_srcdir)/common/toolcommon \
-	-I$(top_srcdir)/common/toolhostrange \
 	-I$(top_srcdir)/common/debugutil \
 	-I$(top_srcdir)/common/miscutil \
 	-I$(top_srcdir)/common/parsecommon \
 	-I$(top_srcdir)/common/portability \
-	-I$(top_srcdir)/libipmidetect \
+	-I$(top_builddir)/libipmidetect \
+	-I$(top_builddir)/libfreeipmi/include \
 	-I$(top_srcdir)/libfreeipmi/include \
 	-DWITH_LSD_FATAL_ERROR_FUNC=1 \
 	-DWITH_LSD_NOMEM_ERROR_FUNC=1 \
@@ -270,7 +270,6 @@ ipmipower_CPPFLAGS = \
 
 ipmipower_LDADD = \
 	$(top_builddir)/common/toolcommon/libtoolcommon.la \
-	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
 	$(top_builddir)/common/debugutil/libdebugutil.la \
 	$(top_builddir)/common/miscutil/libmiscutil.la \
 	$(top_builddir)/common/parsecommon/libparsecommon.la \
@@ -291,6 +290,8 @@ ipmipower_SOURCES = \
 	ipmipower_connection.h \
 	ipmipower_error.c \
 	ipmipower_error.h \
+	ipmipower_oem.c \
+	ipmipower_oem.h \
 	ipmipower_output.c \
 	ipmipower_output.h \
 	ipmipower_packet.c \
@@ -397,6 +398,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_check.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_connection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_error.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_oem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_output.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmipower-ipmipower_ping.Po@am__quote@
@@ -511,6 +513,20 @@ ipmipower-ipmipower_error.obj: ipmipower_error.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_error.c' object='ipmipower-ipmipower_error.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_error.obj `if test -f 'ipmipower_error.c'; then $(CYGPATH_W) 'ipmipower_error.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_error.c'; fi`
+
+ipmipower-ipmipower_oem.o: ipmipower_oem.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_oem.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_oem.Tpo -c -o ipmipower-ipmipower_oem.o `test -f 'ipmipower_oem.c' || echo '$(srcdir)/'`ipmipower_oem.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_oem.Tpo $(DEPDIR)/ipmipower-ipmipower_oem.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_oem.c' object='ipmipower-ipmipower_oem.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_oem.o `test -f 'ipmipower_oem.c' || echo '$(srcdir)/'`ipmipower_oem.c
+
+ipmipower-ipmipower_oem.obj: ipmipower_oem.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_oem.obj -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_oem.Tpo -c -o ipmipower-ipmipower_oem.obj `if test -f 'ipmipower_oem.c'; then $(CYGPATH_W) 'ipmipower_oem.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_oem.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmipower-ipmipower_oem.Tpo $(DEPDIR)/ipmipower-ipmipower_oem.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmipower_oem.c' object='ipmipower-ipmipower_oem.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmipower-ipmipower_oem.obj `if test -f 'ipmipower_oem.c'; then $(CYGPATH_W) 'ipmipower_oem.c'; else $(CYGPATH_W) '$(srcdir)/ipmipower_oem.c'; fi`
 
 ipmipower-ipmipower_output.o: ipmipower_output.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmipower_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmipower-ipmipower_output.o -MD -MP -MF $(DEPDIR)/ipmipower-ipmipower_output.Tpo -c -o ipmipower-ipmipower_output.o `test -f 'ipmipower_output.c' || echo '$(srcdir)/'`ipmipower_output.c
@@ -808,9 +824,6 @@ uninstall-am: uninstall-sbinPROGRAMS
 
 
 $(top_builddir)/common/toolcommon/libtoolcommon.la : force-dependency-check
-	@cd `dirname $@` && $(MAKE) `basename $@`
-
-$(top_builddir)/common/toolhostrange/libtoolhostrange.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/common/debugutil/libdebugutil.la : force-dependency-check

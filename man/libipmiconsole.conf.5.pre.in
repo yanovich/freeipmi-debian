@@ -1,7 +1,7 @@
 .\"#############################################################################
 .\"$Id: ipmiconsole.8.pre.in,v 1.52 2010-06-30 21:56:36 chu11 Exp $
 .\"#############################################################################
-.\"  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+.\"  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
 .\"  Copyright (C) 2006-2007 The Regents of the University of California.
 .\"  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
 .\"  Written by Albert Chu <chu11@llnl.gov>
@@ -80,7 +80,8 @@ ids are supported: 0, 1, 2, 3, 6, 7, 8, 11, 12.
 Specify default workaround flags to use.  Multiple workarounds can be
 specified separated by whitespace.  The following workarounds are
 supported: authcap, intel20, supermicro20, sun20, opensesspriv,
-integritycheckvalue, solpayloadsize, solport, solstatus.
+integritycheckvalue, solpayloadsize, solport, solstatus,
+solchannelsupport.
 .SH "CONTEXT PROTOCOL CONFIG OPTIONS"
 Every SOL session is housed within an libipmiconsole context.  The
 following defines protocol config default values for each context created.
@@ -123,19 +124,21 @@ outputonsolestablished, lockmemory, serialkeepalive.
 \fBlibipmiconsole\-context\-behavior\-flags\fR \fIFLAGS\fR
 Specify default behavior flags to use.  Multiple flags can be
 specified separated by whitespace.  The following flags are supported:
-erroronsolinuse, deactivateonly.
+erroronsolinuse, deactivateonly, deactivateallinstances.
 .TP
 \fBlibipmiconsole\-context\-debug\-flags\fR \fIFLAGS\fR
 Specify default debug flags to use.  Multiple flags can be specified
 separated by whitespace.  The following flags are supported: stdout,
 stderr, syslog, file, ipmipackets.
-
+.TP
+\fBlibipmiconsole\-context\-sol\-payload\-instance\fR \fINUM\fR
+Specify default SOL payload instance.  Has range of 1 to 15.
 .SH "FILES"
 @LIBIPMICONSOLE_CONFIG_FILE_DEFAULT@
 
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH COPYRIGHT
-Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
 .br
 Copyright (C) 2006-2007 The Regents of the University of California.
 #include <@top_srcdir@/man/manpage-common-gpl-freeipmi-text.man>

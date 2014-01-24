@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,203 +50,10 @@
 #include "ipmi-oem-fujitsu.h"
 
 #include "tool-oem-common.h"
+#include "tool-util-common.h"
 
 #include "freeipmi-portability.h"
 #include "pstdout.h"
-
-/*
- * All of the below are from
- *
- * http://manuals.ts.fujitsu.com/file/4390/irmc_s2-en.pdf
- */
-
-/* With IPMI_CMD_OEM_FUJITSU_POWER */
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_GET_POWER_ON_SOURCE    0x15
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_GET_POWER_OFF_SOURCE   0x16
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_SET_POWER_OFF_INHIBIT  0x1C
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_GET_POWER_OFF_INHIBIT  0x1D
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_SET_NEXT_POWER_ON_TIME 0x20
-
-/* With IPMI_CMD_OEM_FUJITSU_COMMUNICATION */
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_SYSTEM_OS_SHUTDOWN_REQUEST           0x05
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_SYSTEM_OS_SHUTDOWN_REQUEST_AND_RESET 0x06
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_AGENT_CONNECT_STATUS                 0x08
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_SHUTDOWN_REQUEST_CANCELLED           0x09
-
-/* With IPMI_CMD_OEM_FUJITSU_FAN_TEST */
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_WRITE_TO_SYSTEM_DISPLAY 0x02
-
-/* With IPMI_CMD_OEM_FUJITSU_BIOS */
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_GET_BIOS_POST_STATE 0x09
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_GET_CPU_INFO        0x15
-
-/* With IPMI_CMD_OEM_FUJITSU_SYSTEM */
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_GET_SYSTEM_STATUS                          0x10
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_GET_EEPROM_VERSION_INFO                    0x12
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_GET_SEL_ENTRY_LONG_TEXT                    0x43
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_GET_SEL_ENTRY_TEXT                         0x45
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_SET_IDENTIFY_LED                           0xB0
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_GET_IDENTIFY_LED                           0xB1
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_GET_ERROR_LED                              0xB3
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_RESET_NONVOLATILE_CFG_VARIABLES_TO_DEFAULT 0xDF
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_RESET_CONFIGSPACE_VARIABLES_TO_DEFAULT     0xE0
-
-/* IPMI_CMD_OEM_FUJITSU_GET_REMOTE_STORAGE_CONNECTION_OR_STATUS */
-/* achu: making up names, not listed in documents */
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_REMOTE_STORAGE_CONNECTED 0x01
-#define IPMI_OEM_FUJITSU_COMMAND_SPECIFIER_REMOTE_STORAGE_STATUS    0x02
-
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_SOFTWARE_OR_COMMAND                                   0x00
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_POWER_SWITCH                                          0x01
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_AUTOMATIC_RESTART_AFTER_POWER_FAILURE                 0x02
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_CLOCK_OR_TIMER                                        0x03
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_AUTOMATIC_RESTART_AFTER_FAN_FAILURE_SHUTDOWN          0x04
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_AUTOMATIC_RESTART_AFTER_CRITICAL_TEMPERATURE_SHUTDOWN 0x05
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_AFTER_WATCHDOG_TIMEOUT                         0x08
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REMOTE_ON                                             0x09
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_AFTER_A_CPU_ERROR                              0x0C
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_BY_HARDWARE_RESET                              0x15
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_AFTER_WARM_START                               0x16
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_POWERED_ON_BY_A_PCI_BUS_POWER_MANAGEMENT_EVENT        0x1A
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_POWERED_ON_BY_REMOTE_CONTROL_VIA_REMOTE_MANAGER       0x1D
-#define IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_RESET_BY_REMOTE_CONTROL_VIA_REMOTE_MANAGER     0x1E
-
-#define IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_SOFTWARE                                         0x00
-#define IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_POWER_SWITCH                                     0x01
-#define IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_AC_POWER_FAIL                                    0x02
-#define IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_CLOCK_OR_TIMER                                   0x03
-#define IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_FAN_FAILURE                                      0x04
-#define IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_CRITICAL_TEMPERATURE                             0x05
-#define IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_FINAL_POWER_OFF_AFTER_REPEATED_WATCHDOG_TIMEOUTS 0x08
-#define IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_FINAL_POWER_OFF_AFTER_REPEATED_CPU_ERRORS        0x0C
-#define IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_POWERED_OFF_BY_REMOTE_CONTROL_VIA_REMOTE_MANAGER 0x1D
-
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_CONNECTION_MIN 0
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_CONNECTION_MAX 1
-
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_CONNECTED     0x01
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_NOT_CONNECTED 0x00
-
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_INVALID_UNKNOWN                              0x00
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_IDLE                                         0x01
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTION_ATTEMPT_PENDING                   0x02
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTED                                    0x03
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTION_ATTEMPTS_RETRIES_EXHAUSTED_FAILED 0x04
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTION_LOST                              0x05
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_DISCONNECT_PENDING                           0x06
-
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_INVALID_UNKNOWN     0x00
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_STORAGE_SERVER_IPMI 0x01
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_APPLET              0x02
-#define IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_NONE_NOT_CONNECTED  0x03
-
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_SYSTEM_POWER_BITMASK 0x80
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_SYSTEM_POWER_SHIFT   7
-
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_SEL_ENTRIES_AVAILABLE_BITMASK  0x10
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_SEL_ENTRIES_AVAILABLE_SHIFT    4
-
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_WATCHDOG_ACTIVE_BITMASK 0x04
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_WATCHDOG_ACTIVE_SHIFT   2
-
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_AGENT_CONNECTED_BITMASK 0x02
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_AGENT_CONNECTED_SHIFT   1
-
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_POST_STATE_BITMASK 0x01
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_POST_STATE_SHIFT   0
-
-/* rename from "localize" */
-/* Bit 7 */
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_SIGNALING_LOCAL_LED_BITMASK 0x80
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_SIGNALING_LOCAL_LED_SHIFT   7
-/* Bit 6..4 currently undefined */
-
-/* Bit 3..2 */
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_SIGNALING_CSS_LED_BITMASK 0x0C
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_SIGNALING_CSS_LED_SHIFT   2
-
-/* Bit 1..0 */
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_SIGNALING_GLOBAL_ERROR_LED_BITMASK 0x03
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_SIGNALING_GLOBAL_ERROR_LED_SHIFT   0
-
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_SEL_MODIFIED_NEW_SEL_ENTRY_BITMASK 0x80
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_SEL_MODIFIED_NEW_SEL_ENTRY_SHIFT   7
-
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_SEL_MODIFIED_SEL_CLEARED_BITMASK 0x40
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_SEL_MODIFIED_SEL_CLEARED_SHIFT   6
-
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_SDR_MODIFIED_BITMASK  0x20
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_SDR_MODIFIED_SHIFT    5
-
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_NONVOLATILE_IPMI_VARIABLE_MODIFIED_BITMASK 0x10
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_NONVOLATILE_IPMI_VARIABLE_MODIFIED_SHIFT   4
-
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_CONFIGSPACE_MODIFIED_BITMASK 0x08
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_CONFIGSPACE_MODIFIED_SHIFT   3
-
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_NEW_OUTPUT_ON_LOCALVIEW_DISPLAY_BITMASK 0x01
-#define IPMI_OEM_FUJITSU_SYSTEM_STATUS_NOTIFICATIONS_NEW_OUTPUT_ON_LOCALVIEW_DISPLAY_SHIFT   0
-
-/* achu: not defined in Fujitsu docs.  "off" is confirmed to be
- * correct, but "on" and "blink" are being gussed based on ordering of
- * error leds in LED sections.
- */
-#define IPMI_OEM_FUJITSU_CSS_LED_OFF   0x0
-#define IPMI_OEM_FUJITSU_CSS_LED_ON    0x1
-#define IPMI_OEM_FUJITSU_CSS_LED_BLINK 0x2
-
-/* achu: not defined in Fujitsu docs.  "off" is confirmed to be
- * correct, but "on" and "blink" are being gussed based on ordering of
- * error leds in LED sections.
- */
-#define IPMI_OEM_FUJITSU_GLOBAL_ERROR_LED_OFF   0x0
-#define IPMI_OEM_FUJITSU_GLOBAL_ERROR_LED_ON    0x1
-#define IPMI_OEM_FUJITSU_GLOBAL_ERROR_LED_BLINK 0x2
-
-#define IPMI_OEM_FUJITSU_EEPROM_NUMBER_MIN 0
-#define IPMI_OEM_FUJITSU_EEPROM_NUMBER_MAX 1
-
-#define IPMI_OEM_FUJITSU_EEPROM_CHECKSUM_OK    0x01
-#define IPMI_OEM_FUJITSU_EEPROM_CHECKSUM_ERROR 0x00
-
-#define IPMI_OEM_FUJITSU_IDENTIFY_LED_ON  0x1
-#define IPMI_OEM_FUJITSU_IDENTIFY_LED_OFF 0x0
-
-#define IPMI_OEM_FUJITSU_IDENTIFY_LED_BITMASK 0x01
-#define IPMI_OEM_FUJITSU_IDENTIFY_LED_SHIFT      0 
-
-#define IPMI_OEM_FUJITSU_ERROR_LED_CSS_OFF_GEL_OFF     0
-#define IPMI_OEM_FUJITSU_ERROR_LED_CSS_OFF_GEL_ON      1
-#define IPMI_OEM_FUJITSU_ERROR_LED_CSS_OFF_GEL_BLINK   2
-#define IPMI_OEM_FUJITSU_ERROR_LED_CSS_ON_GEL_OFF      3
-#define IPMI_OEM_FUJITSU_ERROR_LED_CSS_ON_GEL_ON       4
-#define IPMI_OEM_FUJITSU_ERROR_LED_CSS_ON_GEL_BLINK    5
-#define IPMI_OEM_FUJITSU_ERROR_LED_CSS_BLINK_GEL_OFF   6
-#define IPMI_OEM_FUJITSU_ERROR_LED_CSS_BLINK_GEL_ON    7
-#define IPMI_OEM_FUJITSU_ERROR_LED_CSS_BLINK_GEL_BLINK 8
-
-#define IPMI_OEM_FUJITSU_SEL_ENTRY_LONG_TEXT_IRMC_S1_MAX_READ_LENGTH 32
-#define IPMI_OEM_FUJITSU_SEL_ENTRY_LONG_TEXT_IRMC_S2_MAX_READ_LENGTH 100
-
-#define IPMI_OEM_FUJITSU_SEL_ENTRY_LONG_TEXT_IRMC_S1_MAX_DATA_LENGTH 80
-#define IPMI_OEM_FUJITSU_SEL_ENTRY_LONG_TEXT_IRMC_S2_MAX_DATA_LENGTH 100
-
-#define IPMI_OEM_FUJITSU_SEL_ENTRY_LONG_TEXT_MAX_READ_LENGTH 100
-#define IPMI_OEM_FUJITSU_SEL_ENTRY_LONG_TEXT_MAX_DATA_LENGTH 100
-
-#define IPMI_OEM_FUJITSU_CSS_BITMASK      0x80
-#define IPMI_OEM_FUJITSU_CSS_SHIFT        7
-
-#define IPMI_OEM_FUJITSU_SEVERITY_BITMASK 0x70
-#define IPMI_OEM_FUJITSU_SEVERITY_SHIFT   4
-
-#define IPMI_OEM_FUJITSU_CSS_COMPONENT    1
-#define IPMI_OEM_FUJITSU_NO_CSS_COMPONENT 0
-
-#define IPMI_OEM_FUJITSU_SEVERITY_INFORMATIONAL 0
-#define IPMI_OEM_FUJITSU_SEVERITY_MINOR         1
-#define IPMI_OEM_FUJITSU_SEVERITY_MAJOR         2
-#define IPMI_OEM_FUJITSU_SEVERITY_CRITICAL      3
 
 static int
 _ipmi_oem_get_power_source (ipmi_oem_state_data_t *state_data,
@@ -341,38 +148,55 @@ ipmi_oem_fujitsu_get_power_on_source (ipmi_oem_state_data_t *state_data)
 
   memset (str, '\0', IPMI_OEM_STR_BUFLEN);
 
-  if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_SOFTWARE_OR_COMMAND)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Software or command");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_POWER_SWITCH)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Power switch");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_AUTOMATIC_RESTART_AFTER_POWER_FAILURE)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Automatic restart after power failure");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_CLOCK_OR_TIMER)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Clock or timer");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_AUTOMATIC_RESTART_AFTER_FAN_FAILURE_SHUTDOWN)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Automatic restart after fan failure shutdown");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_AUTOMATIC_RESTART_AFTER_CRITICAL_TEMPERATURE_SHUTDOWN)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Automatic restart after critical temperature shutdown");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_AFTER_WATCHDOG_TIMEOUT)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Reboot after watchdog timeout");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REMOTE_ON)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Remote on");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_AFTER_A_CPU_ERROR)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Reboot after a CPU error");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_BY_HARDWARE_RESET)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Reboot by hardware reset");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_AFTER_WARM_START)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Reboot after warm start");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_POWERED_ON_BY_A_PCI_BUS_POWER_MANAGEMENT_EVENT)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Powered on by a PCI Bus Power Management Event");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_POWERED_ON_BY_REMOTE_CONTROL_VIA_REMOTE_MANAGER)
-    /* HLiebig: capitalized "remote manager" from doc */
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Powered on by remote control via Remote Manager");
-  else if (source == IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_RESET_BY_REMOTE_CONTROL_VIA_REMOTE_MANAGER)
-    /* HLiebig: capitalized "remote manager" from doc */
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Reboot/reset by remote control via Remote Manager");
-  else
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Unrecognized source: %02Xh", source);
+  switch (source)
+    {
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_SOFTWARE_OR_COMMAND:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Software or command");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_POWER_SWITCH:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Power switch");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_AUTOMATIC_RESTART_AFTER_POWER_FAILURE:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Automatic restart after power failure");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_CLOCK_OR_TIMER:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Clock or timer");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_AUTOMATIC_RESTART_AFTER_FAN_FAILURE_SHUTDOWN:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Automatic restart after fan failure shutdown");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_AUTOMATIC_RESTART_AFTER_CRITICAL_TEMPERATURE_SHUTDOWN:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Automatic restart after critical temperature shutdown");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_AFTER_WATCHDOG_TIMEOUT:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Reboot after watchdog timeout");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REMOTE_ON:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Remote on");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_AFTER_A_CPU_ERROR:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Reboot after a CPU error");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_BY_HARDWARE_RESET:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Reboot by hardware reset");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_AFTER_WARM_START:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Reboot after warm start");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_POWERED_ON_BY_A_PCI_BUS_POWER_MANAGEMENT_EVENT:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Powered on by a PCI Bus Power Management Event");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_POWERED_ON_BY_REMOTE_CONTROL_VIA_REMOTE_MANAGER:
+      /* HLiebig: capitalized "remote manager" from doc */
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Powered on by remote control via Remote Manager");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_ON_SOURCE_REBOOT_RESET_BY_REMOTE_CONTROL_VIA_REMOTE_MANAGER:
+      /* HLiebig: capitalized "remote manager" from doc */
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Reboot/reset by remote control via Remote Manager");
+      break;
+    default:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Unrecognized source: %02Xh", source);
+    }
   
   pstdout_printf (state_data->pstate,
                   "%s\n",
@@ -400,27 +224,39 @@ ipmi_oem_fujitsu_get_power_off_source (ipmi_oem_state_data_t *state_data)
 
   memset (str, '\0', IPMI_OEM_STR_BUFLEN);
 
-  if (source == IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_SOFTWARE)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Software or command");
-  else if (source == IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_POWER_SWITCH)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Power switch");
-  else if (source == IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_AC_POWER_FAIL)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "AC power fail");
-  else if (source == IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_CLOCK_OR_TIMER)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Clock or timer");
-  else if (source == IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_FAN_FAILURE)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Fan failure");
-  else if (source == IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_CRITICAL_TEMPERATURE)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Critical temperature");
-  else if (source == IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_FINAL_POWER_OFF_AFTER_REPEATED_WATCHDOG_TIMEOUTS)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Final power-off after repeated watchdog timeouts");
-  else if (source == IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_FINAL_POWER_OFF_AFTER_REPEATED_CPU_ERRORS)
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Final power-off after repeated CPU errors");
-  else if (source == IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_POWERED_OFF_BY_REMOTE_CONTROL_VIA_REMOTE_MANAGER)
-    /* HLiebig: capitalized "remote manager" from doc */
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Powered off by remote control via Remote Manager");
-  else
-    snprintf (str, IPMI_OEM_STR_BUFLEN, "Unrecognized source: %02Xh", source);
+  switch (source)
+    {
+    case IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_SOFTWARE:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Software or command");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_POWER_SWITCH:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Power switch");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_AC_POWER_FAIL:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "AC power fail");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_CLOCK_OR_TIMER:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Clock or timer");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_FAN_FAILURE:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Fan failure");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_CRITICAL_TEMPERATURE:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Critical temperature");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_FINAL_POWER_OFF_AFTER_REPEATED_WATCHDOG_TIMEOUTS:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Final power-off after repeated watchdog timeouts");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_FINAL_POWER_OFF_AFTER_REPEATED_CPU_ERRORS:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Final power-off after repeated CPU errors");
+      break;
+    case IPMI_OEM_FUJITSU_POWER_OFF_SOURCE_POWERED_OFF_BY_REMOTE_CONTROL_VIA_REMOTE_MANAGER:
+      /* HLiebig: capitalized "remote manager" from doc */
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Powered off by remote control via Remote Manager");
+      break;
+    default:
+      snprintf (str, IPMI_OEM_STR_BUFLEN, "Unrecognized source: %02Xh", source);
+    }
   
   pstdout_printf (state_data->pstate,
                   "%s\n",
@@ -559,37 +395,54 @@ ipmi_oem_fujitsu_get_remote_storage_status (ipmi_oem_state_data_t *state_data)
   storage_status = bytes_rs[4];
   storage_type = bytes_rs[5];
 
-  if (storage_status == IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_INVALID_UNKNOWN)
-    storage_status_str = "Invalid / unknown";
-  else if (storage_status == IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_IDLE)
-    storage_status_str = "idle";
-  else if (storage_status == IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTION_ATTEMPT_PENDING)
-    storage_status_str = "Connection Attempt pending";
-  else if (storage_status == IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTED)
-    storage_status_str = "Connected";
-  else if (storage_status == IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTION_ATTEMPTS_RETRIES_EXHAUSTED_FAILED)
-    storage_status_str = "Connection Attempts retries exhausted / failed";
-  else if (storage_status == IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTION_LOST)
-    storage_status_str = "Connection lost";
-  else if (storage_status == IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_DISCONNECT_PENDING)
-    storage_status_str = "Disconnect pending";
-  else
-    storage_status_str = "Unknown Storage Status";
+  switch (storage_status)
+    {
+    case IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_INVALID_UNKNOWN:
+      storage_status_str = "Invalid / unknown";
+      break;
+    case IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_IDLE:
+      storage_status_str = "idle";
+      break;
+    case IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTION_ATTEMPT_PENDING:
+      storage_status_str = "Connection Attempt pending";
+      break;
+    case IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTED:
+      storage_status_str = "Connected";
+      break;
+    case IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTION_ATTEMPTS_RETRIES_EXHAUSTED_FAILED:
+      storage_status_str = "Connection Attempts retries exhausted / failed";
+      break;
+    case IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_CONNECTION_LOST:
+      storage_status_str = "Connection lost";
+      break;
+    case IPMI_OEM_FUJITSU_REMOTE_STORAGE_STATUS_DISCONNECT_PENDING:
+      storage_status_str = "Disconnect pending";
+      break;
+    default:
+      storage_status_str = "Unknown Storage Status";
+    }
 
   pstdout_printf (state_data->pstate,
                   "Storage Status : %s\n",
                   storage_status_str);
 
-  if (storage_type == IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_INVALID_UNKNOWN)
-    storage_type_str = "Invalid / unknown";
-  else if (storage_type == IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_STORAGE_SERVER_IPMI)
-    storage_type_str = "Storage Server / IPMI";
-  else if (storage_type == IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_APPLET)
-    storage_type_str = "Applet";
-  else if (storage_type == IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_NONE_NOT_CONNECTED)
-    storage_type_str = "None / Not connected";
-  else
-    storage_type_str = "Unknown Storage Type";
+  switch (storage_type)
+    {
+    case IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_INVALID_UNKNOWN:
+      storage_type_str = "Invalid / unknown";
+      break;
+    case IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_STORAGE_SERVER_IPMI:
+      storage_type_str = "Storage Server / IPMI";
+      break;
+    case IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_APPLET:
+      storage_type_str = "Applet";
+      break;
+    case IPMI_OEM_FUJITSU_REMOTE_STORAGE_TYPE_NONE_NOT_CONNECTED:
+      storage_type_str = "None / Not connected";
+      break;
+    default:
+      storage_type_str = "Unknown Storage Type";
+    }
   
   pstdout_printf (state_data->pstate,
                   "Storage Type   : %s\n",
@@ -780,27 +633,39 @@ ipmi_oem_fujitsu_get_system_status (ipmi_oem_state_data_t *state_data)
                   "Identify LED             : %s\n",
                   identify_led ? "On" : "Off");
 
-  if (css_led == IPMI_OEM_FUJITSU_CSS_LED_OFF)
-    css_led_str = "Off";
-  else if (css_led == IPMI_OEM_FUJITSU_CSS_LED_ON)
-    css_led_str = "On";
-  else if (css_led == IPMI_OEM_FUJITSU_CSS_LED_BLINK)
-    css_led_str = "Blink";
-  else
-    css_led_str = "Unknown LED State";
+  switch (css_led)
+    {
+    case IPMI_OEM_FUJITSU_CSS_LED_OFF:
+      css_led_str = "Off";
+      break;
+    case IPMI_OEM_FUJITSU_CSS_LED_ON:
+      css_led_str = "On";
+      break;
+    case IPMI_OEM_FUJITSU_CSS_LED_BLINK:
+      css_led_str = "Blink";
+      break;
+    default:
+      css_led_str = "Unknown LED State";
+    }
 
   pstdout_printf (state_data->pstate,
                   "CSS LED                  : %s\n",
                   css_led_str);
   
-  if (global_error_led == IPMI_OEM_FUJITSU_GLOBAL_ERROR_LED_OFF)
-    global_error_led_str = "Off";
-  else if (global_error_led == IPMI_OEM_FUJITSU_GLOBAL_ERROR_LED_ON)
-    global_error_led_str = "On";
-  else if (global_error_led == IPMI_OEM_FUJITSU_GLOBAL_ERROR_LED_BLINK)
-    global_error_led_str = "Blink";
-  else
-    global_error_led_str = "Unknown LED State";
+  switch (global_error_led)
+    {
+    case IPMI_OEM_FUJITSU_GLOBAL_ERROR_LED_OFF:
+      global_error_led_str = "Off";
+      break;
+    case IPMI_OEM_FUJITSU_GLOBAL_ERROR_LED_ON:
+      global_error_led_str = "On";
+      break;
+    case IPMI_OEM_FUJITSU_GLOBAL_ERROR_LED_BLINK:
+      global_error_led_str = "Blink";
+      break;
+    default:
+      global_error_led_str = "Unknown LED State";
+    }
 
   pstdout_printf (state_data->pstate,
                   "Global Error LED         : %s\n",
@@ -1334,8 +1199,6 @@ ipmi_oem_fujitsu_get_sel_entry_long_text (ipmi_oem_state_data_t *state_data)
   uint32_t timestamp = 0;
   uint8_t css = 0;
   uint8_t severity = 0;
-  time_t timetmp;
-  struct tm time_tm;
   char time_buf[IPMI_OEM_TIME_BUFLEN + 1];
   char data_buf[IPMI_OEM_FUJITSU_SEL_ENTRY_LONG_TEXT_MAX_DATA_LENGTH + 1];
   uint8_t data_length;
@@ -1544,27 +1407,40 @@ ipmi_oem_fujitsu_get_sel_entry_long_text (ipmi_oem_state_data_t *state_data)
   if (css == IPMI_OEM_FUJITSU_CSS_COMPONENT)
     css_str = "CSS Component";
 
-  if (severity == IPMI_OEM_FUJITSU_SEVERITY_INFORMATIONAL)
-    severity_str = "INFORMATIONAL";
-  else if (severity == IPMI_OEM_FUJITSU_SEVERITY_MINOR)
-    severity_str = "MINOR";
-  else if (severity == IPMI_OEM_FUJITSU_SEVERITY_MAJOR)
-    severity_str = "MAJOR";
-  else if (severity == IPMI_OEM_FUJITSU_SEVERITY_CRITICAL)
-    severity_str = "CRITICAL";
-  else
-    severity_str = "Unknown Severity";
+  switch (severity)
+    {
+    case IPMI_OEM_FUJITSU_SEVERITY_INFORMATIONAL:
+      severity_str = "INFORMATIONAL";
+      break;
+    case IPMI_OEM_FUJITSU_SEVERITY_MINOR:
+      severity_str = "MINOR";
+      break;
+    case IPMI_OEM_FUJITSU_SEVERITY_MAJOR:
+      severity_str = "MAJOR";
+      break;
+    case IPMI_OEM_FUJITSU_SEVERITY_CRITICAL:
+      severity_str = "CRITICAL";
+      break;
+    default:
+      severity_str = "Unknown Severity";
+    }
 
-  /* Posix says individual calls need not clear/set all portions of
-   * 'struct tm', thus passing 'struct tm' between functions could
-   * have issues.  So we need to memset.
-   */
-  memset (&time_tm, '\0', sizeof(struct tm));
-
-  timetmp = timestamp;
-  localtime_r (&timetmp, &time_tm);
   memset (time_buf, '\0', IPMI_OEM_TIME_BUFLEN + 1);
-  strftime (time_buf, IPMI_OEM_TIME_BUFLEN, "%b-%d-%Y | %H:%M:%S", &time_tm);
+  
+  if (ipmi_timestamp_string (timestamp,
+			     state_data->prog_data->args->common_args.utc_offset,
+			     get_timestamp_flags (&(state_data->prog_data->args->common_args),
+						  IPMI_TIMESTAMP_FLAG_DEFAULT), 
+			     "%b-%d-%Y | %H:%M:%S",
+			     time_buf,
+			     IPMI_OEM_TIME_BUFLEN) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "ipmi_timestamp_string: %s\n",
+		       strerror (errno));
+      goto cleanup;
+    }
 
   if (css_str)
     pstdout_printf (state_data->pstate,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SDR_RECORD_FORMAT_H
-#define _IPMI_SDR_RECORD_FORMAT_H
+#ifndef IPMI_SDR_RECORD_FORMAT_H
+#define IPMI_SDR_RECORD_FORMAT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -199,6 +199,9 @@ extern "C" {
 #define IPMI_SDR_ACPI_SYSTEM_POWER_STATE_NOTIFICATION_REQUIRED     0x0
 #define IPMI_SDR_NO_ACPI_SYSTEM_POWER_STATE_NOTIFICATION_REQUIRED  0x1
 
+#define IPMI_SDR_MAX_ID_STRING_LENGTH        16
+#define IPMI_SDR_MAX_DEVICE_ID_STRING_LENGTH 16
+
 /* 
  * see freeipmi/templates/ for template definitions 
  */
@@ -225,4 +228,4 @@ extern fiid_template_t tmpl_sdr_oem_record;
 }
 #endif
 
-#endif
+#endif /* IPMI_SDR_RECORD_FORMAT_H */

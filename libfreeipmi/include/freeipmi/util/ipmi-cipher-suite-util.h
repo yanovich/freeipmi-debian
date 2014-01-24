@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_CIPHER_SUITE_UTIL_H
-#define _IPMI_CIPHER_SUITE_UTIL_H
+#ifndef IPMI_CIPHER_SUITE_UTIL_H
+#define IPMI_CIPHER_SUITE_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,11 +61,21 @@ extern "C" {
                 || (__c) == IPMI_CONFIDENTIALITY_ALGORITHM_XRC4_128    \
                 || (__c) == IPMI_CONFIDENTIALITY_ALGORITHM_XRC4_40)))  \
     /* XXX: Errata 4 defines SHA256 but not cipher suite IDs */        \
+    /* achu: Intel support says Cipher Suite 15-19 maps to 1-5 using   \
+     * SHA256 instead of SHA1 and SHA256-128 instead of SHA1-96.       \
+     */                                                                \
     /* Cipher Suite 17 confirmed via DCMI 1.1 specification */         \
-    /* Cipher Suite 15-19 */                                           \
+    /* Cipher Suite 15 */                                              \
+    || ((__a) == IPMI_AUTHENTICATION_ALGORITHM_RAKP_HMAC_SHA256        \
+        && ((__i) == IPMI_INTEGRITY_ALGORITHM_NONE                     \
+            && (__c) == IPMI_CONFIDENTIALITY_ALGORITHM_NONE))          \
+    /* Cipher Suite 16-19 */                                           \
     || ((__a) == IPMI_AUTHENTICATION_ALGORITHM_RAKP_HMAC_SHA256        \
         && ((__i) == IPMI_INTEGRITY_ALGORITHM_HMAC_SHA256_128          \
-            && ((__c) == IPMI_CONFIDENTIALITY_ALGORITHM_AES_CBC_128))) ) ? 1 : 0)
+            && ((__c) == IPMI_CONFIDENTIALITY_ALGORITHM_NONE           \
+                || (__c) == IPMI_CONFIDENTIALITY_ALGORITHM_AES_CBC_128 \
+                || (__c) == IPMI_CONFIDENTIALITY_ALGORITHM_XRC4_128    \
+                || (__c) == IPMI_CONFIDENTIALITY_ALGORITHM_XRC4_40))) ) ? 1 : 0)
 
 #define IPMI_CIPHER_SUITE_COMBINATION_SUPPORTED(__a, __i, __c)            \
   /* Cipher Suite 0 */                                                    \
@@ -96,21 +106,33 @@ extern "C" {
             && ((__c) == IPMI_CONFIDENTIALITY_ALGORITHM_NONE              \
                 || (__c) == IPMI_CONFIDENTIALITY_ALGORITHM_AES_CBC_128))) \
     /* XXX: Errata 4 defines SHA256 but not cipher suite IDs */           \
+    /* achu: Intel support says Cipher Suite 15-19 maps to 1-5 using      \
+     * SHA256 instead of SHA1 and SHA256-128 instead of SHA1-96.          \
+     */                                                                   \
     /* Cipher Suite 17 confirmed via DCMI 1.1 specification */            \
-    /* Cipher Suite 17 */                                                 \
+    /* Cipher Suite 15 */                                                 \
+    || ((__a) == IPMI_AUTHENTICATION_ALGORITHM_RAKP_HMAC_SHA256           \
+        && ((__i) == IPMI_INTEGRITY_ALGORITHM_NONE                        \
+            && (__c) == IPMI_CONFIDENTIALITY_ALGORITHM_NONE))             \
+    /* Cipher Suite 16-17 */                                              \
     || ((__a) == IPMI_AUTHENTICATION_ALGORITHM_RAKP_HMAC_SHA256           \
         && ((__i) == IPMI_INTEGRITY_ALGORITHM_HMAC_SHA256_128             \
-            && ((__c) == IPMI_CONFIDENTIALITY_ALGORITHM_AES_CBC_128)))) ? 1 : 0)
+            && ((__c) == IPMI_CONFIDENTIALITY_ALGORITHM_NONE              \
+                || (__c) == IPMI_CONFIDENTIALITY_ALGORITHM_AES_CBC_128))) ) ? 1 : 0)
 
 /* XXX: Errata 4 defines SHA256 but not cipher suite IDs */
+/* achu: Intel support says Cipher Suite 15-19 maps to 1-5 using
+ * SHA256 instead of SHA1 and SHA256-128 instead of SHA1-96.
+ */
 /* Cipher Suite 17 confirmed via DCMI 1.1 specification */
+
 /* To avoid gcc warnings, add +1 in comparison */
 /* achu: no macros here, cipher suite ids are numbers */
 #define IPMI_CIPHER_SUITE_ID_SUPPORTED(__id) \
   ((((__id + 1) >= (0 + 1) && (__id) <= 3)   \
     || ((__id) >= 6 && (__id) <= 8)          \
     || ((__id) >= 11 && (__id) <= 12)        \
-    || ((__id) == 17)) ? 1 : 0)
+    || ((__id) >= 15 && (__id) <= 17)) ? 1 : 0)
 
 int ipmi_cipher_suite_id_to_algorithms (uint8_t cipher_suite_id,
                                         uint8_t *authentication_algorithm,
@@ -126,4 +148,4 @@ int ipmi_algorithms_to_cipher_suite_id (uint8_t authentication_algorithm,
 }
 #endif
 
-#endif /* ipmi-cipher_suite-util.h */
+#endif /* IPMI_CIPHER_SUITE_UTIL_H */

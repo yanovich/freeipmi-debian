@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SENSOR_AND_EVENT_CODE_TABLES_UTIL_H
-#define _IPMI_SENSOR_AND_EVENT_CODE_TABLES_UTIL_H
+#ifndef IPMI_SENSOR_AND_EVENT_CODE_TABLES_UTIL_H
+#define IPMI_SENSOR_AND_EVENT_CODE_TABLES_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -179,4 +179,4 @@ int ipmi_get_event_messages (uint8_t event_reading_type_code,
 }
 #endif
 
-#endif
+#endif /* IPMI_SENSOR_AND_EVENT_CODE_TABLES_UTIL_H */

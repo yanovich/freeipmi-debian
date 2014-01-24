@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_RMCPPLUS_SUPPORT_AND_PAYLOAD_CMDS_H
-#define _IPMI_RMCPPLUS_SUPPORT_AND_PAYLOAD_CMDS_H
+#ifndef IPMI_RMCPPLUS_SUPPORT_AND_PAYLOAD_CMDS_H
+#define IPMI_RMCPPLUS_SUPPORT_AND_PAYLOAD_CMDS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +25,18 @@ extern "C" {
 
 #include <stdint.h>
 #include <freeipmi/fiid/fiid.h>
+
+/* achu: 4 bit field is 1 based
+ *
+ * note that Get Payload Activation Status returns instance status for
+ * 16 instances, which is not possible.
+ */
+#define IPMI_PAYLOAD_INSTANCE_MIN 1
+#define IPMI_PAYLOAD_INSTANCE_MAX 15
+
+#define IPMI_PAYLOAD_INSTANCE_VALID(__val) \
+  (((__val) >= IPMI_PAYLOAD_INSTANCE_MIN   \
+    || (__val) <= IPMI_PAYLOAD_INSTANCE_MAX) ? 1 : 0)
 
 #define IPMI_SOL_STARTUP_HANDSHAKE_CTS_AND_DCD_SDR_ASSERTED   0x0
 #define IPMI_SOL_STARTUP_HANDSHAKE_CTS_AND_DCD_SDR_DEASSERTED 0x1
@@ -195,4 +207,4 @@ int fill_cmd_get_channel_oem_payload_info (uint8_t channel_number,
 }
 #endif
 
-#endif
+#endif /* IPMI_RMCPPLUS_SUPPORT_AND_PAYLOAD_CMDS_H */

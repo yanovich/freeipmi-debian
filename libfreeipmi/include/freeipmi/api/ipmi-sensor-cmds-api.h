@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SENSOR_CMDS_API_H
-#define _IPMI_SENSOR_CMDS_API_H
+#ifndef IPMI_SENSOR_CMDS_API_H
+#define IPMI_SENSOR_CMDS_API_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -188,8 +188,22 @@ int ipmi_cmd_get_sensor_reading_discrete (ipmi_ctx_t ctx,
                                           uint8_t sensor_number,
                                           fiid_obj_t obj_cmd_rs);
 
+int ipmi_cmd_set_sensor_reading_and_event_status (ipmi_ctx_t ctx,
+						  uint8_t sensor_number,
+						  uint8_t sensor_reading_operation,
+						  uint8_t deassertion_bits_operation,
+						  uint8_t assertion_bits_operation,
+						  uint8_t event_data_bytes_operation,
+						  uint8_t sensor_reading,
+						  uint16_t assertion_event_bitmask,
+						  uint16_t deassertion_event_bitmask,
+						  uint8_t event_data1,
+						  uint8_t event_data2,
+						  uint8_t event_data3,
+						  fiid_obj_t obj_cmd_rs);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* ipmi-sensor-cmds-api.h */
+#endif /* IPMI_SENSOR_CMDS_API_H */

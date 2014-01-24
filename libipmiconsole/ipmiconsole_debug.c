@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiconsole_debug.c,v 1.21 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -78,13 +78,19 @@ ipmiconsole_debug_setup (uint32_t debug_flags)
   if (console_debug_flags & IPMICONSOLE_DEBUG_FILE)
     {
       char filename[MAXPATHLEN];
+      pid_t pid;
+
+      pid = getpid();
+
       snprintf (filename,
                 MAXPATHLEN,
-                "%s/%s",
-                IPMICONSOLE_DEBUG_DIRECTORY,
-                IPMICONSOLE_DEBUG_FILENAME);
+                "%s.%d",
+                IPMICONSOLE_DEBUG_FILENAME,
+		pid);
 
-      if ((console_debug_fd = open (filename, O_CREAT | O_APPEND | O_WRONLY, 0600)) < 0)
+      if ((console_debug_fd = open (filename,
+				    O_CREAT | O_APPEND | O_WRONLY | O_EXCL,
+				    0600)) < 0)
         {
           console_debug_flags &= ~IPMICONSOLE_DEBUG_FILE;
           IPMICONSOLE_DEBUG (("open: %s", strerror (errno)));

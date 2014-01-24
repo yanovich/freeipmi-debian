@@ -20,6 +20,7 @@ libfreeipmi_la_CPPFLAGS = \
 	-I$(top_srcdir)/common/debugutil \
 	-I$(top_srcdir)/common/miscutil \
 	-I$(top_srcdir)/common/portability \
+	-I$(top_builddir)/libfreeipmi/include \
 	-I$(top_srcdir)/libfreeipmi/include \
 	-I$(top_srcdir)/libfreeipmi \
 	-DIPMI_IPCKEY=\"$(localstatedir)/lib/$(PACKAGE_NAME)/ipckey\" \
@@ -107,17 +108,19 @@ libfreeipmi_la_SOURCES = \
 	driver/ipmi-sunbmc-driver.c \
 	driver/ipmi-ssif-driver.c \
 	fiid/fiid.c \
-	fru-parse/ipmi-fru-parse.c \
-	fru-parse/ipmi-fru-parse-common.c \
-	fru-parse/ipmi-fru-parse-common.h \
-	fru-parse/ipmi-fru-parse-data.c \
-	fru-parse/ipmi-fru-parse-defs.h \
-	fru-parse/ipmi-fru-parse-trace.h \
-	fru-parse/ipmi-fru-parse-util.c \
-	fru-parse/ipmi-fru-parse-util.h \
+	fru/ipmi-fru.c \
+	fru/ipmi-fru-common.c \
+	fru/ipmi-fru-common.h \
+	fru/ipmi-fru-data.c \
+	fru/ipmi-fru-defs.h \
+	fru/ipmi-fru-trace.h \
+	fru/ipmi-fru-util.c \
+	fru/ipmi-fru-util.h \
 	interface/ipmi-ipmb-interface.c \
 	interface/ipmi-kcs-interface.c \
 	interface/ipmi-lan-interface.c \
+	interface/ipmi-network.c \
+	interface/ipmi-network.h \
 	interface/ipmi-rmcpplus-interface.c \
 	interface/rmcp-interface.c \
 	interpret/ipmi-interpret.c \
@@ -155,50 +158,52 @@ libfreeipmi_la_SOURCES = \
 	locate/ipmi-locate-util.h \
 	payload/ipmi-sol-payload.c \
 	record-format/ipmi-cipher-suite-record-format.c \
+	record-format/ipmi-fru-dimmspd-record-format.c \
 	record-format/ipmi-fru-information-record-format.c \
 	record-format/ipmi-sdr-record-format.c \
 	record-format/ipmi-sdr-oem-record-format.c \
 	record-format/ipmi-sel-record-format.c \
-	sdr-cache/ipmi-sdr-cache.c \
-	sdr-cache/ipmi-sdr-cache-common.c \
-	sdr-cache/ipmi-sdr-cache-common.h \
-	sdr-cache/ipmi-sdr-cache-create.c \
-	sdr-cache/ipmi-sdr-cache-defs.h \
-	sdr-cache/ipmi-sdr-cache-delete.c \
-	sdr-cache/ipmi-sdr-cache-read.c \
-	sdr-cache/ipmi-sdr-cache-trace.h \
-	sdr-cache/ipmi-sdr-cache-util.c \
-	sdr-cache/ipmi-sdr-cache-util.h \
-	sdr-parse/ipmi-sdr-parse.c \
-	sdr-parse/ipmi-sdr-parse-defs.h \
-	sdr-parse/ipmi-sdr-parse-trace.h \
-	sdr-parse/ipmi-sdr-parse-util.c \
-	sdr-parse/ipmi-sdr-parse-util.h \
-	sel-parse/ipmi-sel-parse.c \
-	sel-parse/ipmi-sel-parse-common.c \
-	sel-parse/ipmi-sel-parse-common.h \
-	sel-parse/ipmi-sel-parse-defs.h \
-	sel-parse/ipmi-sel-parse-string.c \
-	sel-parse/ipmi-sel-parse-string.h \
-	sel-parse/ipmi-sel-parse-string-dell.c \
-	sel-parse/ipmi-sel-parse-string-dell.h \
-	sel-parse/ipmi-sel-parse-string-fujitsu.c \
-	sel-parse/ipmi-sel-parse-string-fujitsu.h \
-	sel-parse/ipmi-sel-parse-string-intel.c \
-	sel-parse/ipmi-sel-parse-string-intel.h \
-	sel-parse/ipmi-sel-parse-string-intel-node-manager.c \
-	sel-parse/ipmi-sel-parse-string-intel-node-manager.h \
-	sel-parse/ipmi-sel-parse-string-inventec.c \
-	sel-parse/ipmi-sel-parse-string-inventec.h \
-	sel-parse/ipmi-sel-parse-string-quanta.c \
-	sel-parse/ipmi-sel-parse-string-quanta.h \
-	sel-parse/ipmi-sel-parse-string-sun.c \
-	sel-parse/ipmi-sel-parse-string-sun.h \
-	sel-parse/ipmi-sel-parse-string-supermicro.c \
-	sel-parse/ipmi-sel-parse-string-supermicro.h \
-	sel-parse/ipmi-sel-parse-trace.h \
-	sel-parse/ipmi-sel-parse-util.c \
-	sel-parse/ipmi-sel-parse-util.h \
+	sdr/ipmi-sdr.c \
+	sdr/ipmi-sdr-common.c \
+	sdr/ipmi-sdr-common.h \
+	sdr/ipmi-sdr-cache-create.c \
+	sdr/ipmi-sdr-defs.h \
+	sdr/ipmi-sdr-cache-delete.c \
+	sdr/ipmi-sdr-cache-read.c \
+	sdr/ipmi-sdr-oem.c \
+	sdr/ipmi-sdr-parse.c \
+	sdr/ipmi-sdr-parse-util.c \
+	sdr/ipmi-sdr-stats.c \
+	sdr/ipmi-sdr-trace.h \
+	sdr/ipmi-sdr-util.c \
+	sdr/ipmi-sdr-util.h \
+	sel/ipmi-sel.c \
+	sel/ipmi-sel-common.c \
+	sel/ipmi-sel-common.h \
+	sel/ipmi-sel-defs.h \
+	sel/ipmi-sel-string.c \
+	sel/ipmi-sel-string.h \
+	sel/ipmi-sel-string-dell.c \
+	sel/ipmi-sel-string-dell.h \
+	sel/ipmi-sel-string-fujitsu.c \
+	sel/ipmi-sel-string-fujitsu.h \
+	sel/ipmi-sel-string-intel.c \
+	sel/ipmi-sel-string-intel.h \
+	sel/ipmi-sel-string-intel-node-manager.c \
+	sel/ipmi-sel-string-intel-node-manager.h \
+	sel/ipmi-sel-string-inventec.c \
+	sel/ipmi-sel-string-inventec.h \
+	sel/ipmi-sel-string-quanta.c \
+	sel/ipmi-sel-string-quanta.h \
+	sel/ipmi-sel-string-sun.c \
+	sel/ipmi-sel-string-sun.h \
+	sel/ipmi-sel-string-supermicro.c \
+	sel/ipmi-sel-string-supermicro.h \
+	sel/ipmi-sel-string-wistron.c \
+	sel/ipmi-sel-string-wistron.h \
+	sel/ipmi-sel-trace.h \
+	sel/ipmi-sel-util.c \
+	sel/ipmi-sel-util.h \
 	sensor-read/ipmi-sensor-read.c \
 	sensor-read/ipmi-sensor-read-defs.h \
 	sensor-read/ipmi-sensor-read-trace.h \
@@ -209,6 +214,7 @@ libfreeipmi_la_SOURCES = \
 	spec/ipmi-fru-chassis-types-spec.c \
 	spec/ipmi-fru-language-codes-spec.c \
 	spec/ipmi-iana-enterprise-numbers-spec.c \
+	spec/ipmi-jedec-manufacturer-identification-code-spec.c \
 	spec/ipmi-sensor-and-event-code-tables-spec.c \
 	spec/ipmi-sensor-and-event-code-tables-oem-spec.c \
 	spec/ipmi-sensor-types-spec.c \
@@ -222,12 +228,13 @@ libfreeipmi_la_SOURCES = \
 	util/ipmi-error-util.c \
 	util/ipmi-iana-enterprise-numbers-util.c \
 	util/ipmi-ipmb-util.c \
+	util/ipmi-jedec-manufacturer-identification-code-util.c \
 	util/ipmi-lan-util.c \
 	util/ipmi-outofband-util.c \
 	util/ipmi-rmcpplus-util.c \
 	util/ipmi-sensor-and-event-code-tables-util.c \
-	util/ipmi-sensor-units-util.c \
 	util/ipmi-sensor-util.c \
+	util/ipmi-timestamp-util.c \
 	util/ipmi-util.c \
 	util/rmcp-util.c
 

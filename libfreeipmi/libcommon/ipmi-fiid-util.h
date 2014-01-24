@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_FIID_UTIL_H
-#define _IPMI_FIID_UTIL_H
+#ifndef IPMI_FIID_UTIL_H
+#define IPMI_FIID_UTIL_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -36,5 +36,4 @@ void set_errno_by_fiid_object (fiid_obj_t obj);
 
 void set_errno_by_fiid_iterator (fiid_iterator_t iter);
 
-#endif /* ipmi-fiid-util.h */
-
+#endif /* IPMI_FIID_UTIL_H */

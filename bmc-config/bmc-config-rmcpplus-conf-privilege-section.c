@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ _rmcpplus_cipher_suite_id_privilege_setup (bmc_config_state_data_t *state_data,
                                                                                                    IPMI_LAN_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                                                    obj_cmd_count_rs) < 0)
         {
-          if (state_data->prog_data->args->config_args.common.debug)
+          if (state_data->prog_data->args->config_args.common_args.debug)
             pstdout_fprintf (state_data->pstate,
                              stderr,
                              "ipmi_cmd_get_lan_configuration_parameters_rmcpplus_messaging_cipher_suite_entry_support: %s\n",
@@ -145,7 +145,7 @@ _rmcpplus_cipher_suite_id_privilege_setup (bmc_config_state_data_t *state_data,
                                                                                              IPMI_LAN_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                                              obj_cmd_id_rs) < 0)
         {
-          if (state_data->prog_data->args->config_args.common.debug)
+          if (state_data->prog_data->args->config_args.common_args.debug)
             pstdout_fprintf (state_data->pstate,
                              stderr,
                              "ipmi_cmd_get_lan_configuration_parameters_rmcpplus_messaging_cipher_suite_entries: %s\n",
@@ -232,7 +232,7 @@ _rmcpplus_cipher_suite_id_privilege_setup (bmc_config_state_data_t *state_data,
                                                                                                       IPMI_LAN_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                                                       obj_cmd_priv_rs) < 0)
         {
-          if (state_data->prog_data->args->config_args.common.debug)
+          if (state_data->prog_data->args->config_args.common_args.debug)
             pstdout_fprintf (state_data->pstate,
                              stderr,
                              "ipmi_cmd_get_lan_configuration_parameters_rmcpplus_messaging_cipher_suite_privilege_level: %s\n",
@@ -346,6 +346,10 @@ id_checkout (const char *section_name,
     {
       if (state_data->cipher_suite_id_supported[i] == id)
         {
+	  /* achu: NOT A BUG.
+	   *
+	   * IPMI spec is_supported does not map to privileges array, you want to index at [id] not [i]
+	   */
           privilege = state_data->cipher_suite_priv[id];
           id_found++;
           break;
@@ -426,6 +430,10 @@ id_commit (const char *section_name,
 
   memset (privs, '\0', CIPHER_SUITE_LEN);
   memcpy (privs, state_data->cipher_suite_priv, CIPHER_SUITE_LEN);
+  /* achu: NOT A BUG.
+   *
+   * IPMI spec is_supported does not map to privileges array, you want to index at [id] not a searched [i]
+   */
   privs[id] = privilege;
   
   /* IPMI Workaround (achu)
@@ -484,7 +492,7 @@ id_commit (const char *section_name,
               /* This is a fatal error, we're already in this section,
                * it should be findable
                */
-              if (state_data->prog_data->args->config_args.common.debug)
+              if (state_data->prog_data->args->config_args.common_args.debug)
                 pstdout_fprintf (state_data->pstate,
                                  stderr,
                                  "Cannot find section '%s'\n",
@@ -515,7 +523,7 @@ id_commit (const char *section_name,
                                                                                                   privs[15],
                                                                                                   obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_set_lan_configuration_parameters_rmcpplus_messaging_cipher_suite_privilege_levels: %s\n",
@@ -529,6 +537,10 @@ id_commit (const char *section_name,
       goto cleanup;
     }
 
+  /* achu: NOT A BUG.
+   *
+   * IPMI spec is_supported does not map to privileges array, you want to index at [id] not [i]
+   */
   state_data->cipher_suite_priv[id] = privilege;
   rv = CONFIG_ERR_SUCCESS;
 
@@ -735,6 +747,61 @@ bmc_config_rmcpplus_conf_privilege_section_get (bmc_config_state_data_t *state_d
                               id_commit_cb,
                               rmcpplus_priv_number_validate) < 0)
     goto cleanup;
+
+  if (config_section_add_key (state_data->pstate,
+                              section,
+                              "Maximum_Privilege_Cipher_Suite_Id_15",
+                              "Possible values: Unused/User/Operator/Administrator/OEM_Proprietary",
+                              CONFIG_CHECKOUT_KEY_COMMENTED_OUT_IF_VALUE_EMPTY,
+                              id_checkout_cb,
+                              id_commit_cb,
+                              rmcpplus_priv_number_validate) < 0)
+    goto cleanup;
+
+#if 0
+
+  /* achu: Can't support this config until IPMI spec is updated.  Yeah, it sucks */
+
+  if (config_section_add_key (state_data->pstate,
+                              section,
+                              "Maximum_Privilege_Cipher_Suite_Id_16",
+                              "Possible values: Unused/User/Operator/Administrator/OEM_Proprietary",
+                              CONFIG_CHECKOUT_KEY_COMMENTED_OUT_IF_VALUE_EMPTY,
+                              id_checkout_cb,
+                              id_commit_cb,
+                              rmcpplus_priv_number_validate) < 0)
+    goto cleanup;
+
+  if (config_section_add_key (state_data->pstate,
+                              section,
+                              "Maximum_Privilege_Cipher_Suite_Id_17",
+                              "Possible values: Unused/User/Operator/Administrator/OEM_Proprietary",
+                              CONFIG_CHECKOUT_KEY_COMMENTED_OUT_IF_VALUE_EMPTY,
+                              id_checkout_cb,
+                              id_commit_cb,
+                              rmcpplus_priv_number_validate) < 0)
+    goto cleanup;
+
+  if (config_section_add_key (state_data->pstate,
+                              section,
+                              "Maximum_Privilege_Cipher_Suite_Id_18",
+                              "Possible values: Unused/User/Operator/Administrator/OEM_Proprietary",
+                              CONFIG_CHECKOUT_KEY_COMMENTED_OUT_IF_VALUE_EMPTY,
+                              id_checkout_cb,
+                              id_commit_cb,
+                              rmcpplus_priv_number_validate) < 0)
+    goto cleanup;
+
+  if (config_section_add_key (state_data->pstate,
+                              section,
+                              "Maximum_Privilege_Cipher_Suite_Id_19",
+                              "Possible values: Unused/User/Operator/Administrator/OEM_Proprietary",
+                              CONFIG_CHECKOUT_KEY_COMMENTED_OUT_IF_VALUE_EMPTY,
+                              id_checkout_cb,
+                              id_commit_cb,
+                              rmcpplus_priv_number_validate) < 0)
+    goto cleanup;
+#endif
 
   return (section);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
   release it. --Anand Babu
 */
 
-#ifndef _IPMI_SEMAPHORES_H
-#define _IPMI_SEMAPHORES_H      1
+#ifndef IPMI_SEMAPHORES_H
+#define IPMI_SEMAPHORES_H
 
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -43,12 +43,12 @@ union semun {
 };
 #endif
 
-int ipmi_mutex_init (void);
+int driver_mutex_init (void);
 
-int ipmi_mutex_lock (int semid);
+int driver_mutex_lock (int semid);
 
-int ipmi_mutex_lock_interruptible (int semid);
+int driver_mutex_lock_interruptible (int semid);
 
-int ipmi_mutex_unlock (int semid);
+int driver_mutex_unlock (int semid);
 
-#endif /* ipmi-semaphores.h */
+#endif /* IPMI_SEMAPHORES_H */

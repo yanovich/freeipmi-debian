@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiconsole_util.h,v 1.10 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,11 +24,11 @@
  *  with Ipmiconsole.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMICONSOLE_UTIL_H
-#define _IPMICONSOLE_UTIL_H
+#ifndef IPMICONSOLE_UTIL_H
+#define IPMICONSOLE_UTIL_H
 
 #include "ipmiconsole.h"
 
 int ipmiconsole_set_closeonexec (ipmiconsole_ctx_t c, int fd);
 
-#endif /* _IPMICONSOLE_UTIL_H */
+#endif /* IPMICONSOLE_UTIL_H */

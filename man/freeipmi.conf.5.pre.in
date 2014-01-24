@@ -79,6 +79,12 @@ Specify the default in-band driver device path to use.
 \fBregister\-spacing\fR \fIREGISTER\-SPACING\fR
 Specify the default in-band driver register spacing to use.
 .TP
+\fBtarget\-channel\-number\fR \fICHANNEL\-NUMBER\FR
+Specify the default in-band driver target channel number.
+.TP
+\fBtarget\-slave\-address\fR \fISLAVE\-ADDRESS\FR
+Specify the default in-band driver target slave address.
+.TP
 \fBusername\fR \fIUSERNAME\fR
 Specify the default username to use.
 .TP
@@ -114,9 +120,10 @@ Specify default workaround flags to use.  Multiple workarounds can be
 specified separated by whitespace.  Please see tool manpages for
 details about available workarounds for each tool.  The following
 workarounds are supported: assumeio, spinpoll, idzero, forcepermsg,
-unexpectedauth, endianseq, authcap, intel20, supermicro20, sun20,
-opensesspriv, integritycheckvalue, solpayloadsize, solport, solstatus,
-skipchecks, assumesystemevent, discretereading,
+unexpectedauth, endianseq, noauthcodecheck, authcap, nochecksumcheck,
+intel20, supermicro20, sun20, opensesspriv, integritycheckvalue,
+assumemaxsdrrecordcount, solpayloadsize, solport, solstatus,
+solchannelsupport, skipchecks, assumesystemevent, discretereading,
 ignorescanningdisabled, assumebmcowner, ignoreauthcode, slowcommit,
 veryslowcommit, solchannelassumelanchannel, ignorestateflag,
 malformedack.
@@ -130,6 +137,19 @@ Specify if cache creation/deletion information should not be output by default.
 .TP
 \fBsdr\-cache\-directory\fR \fIDIRECTORY\fR
 Specify the default sdr cache directory to use.
+
+.SH "TIME OPTIONS"
+The following options are specific to tools that may output time
+values.  They will be ignored by all other tools.
+.TP
+\fButc\-to\-localtime\fR \fIENABLE|DISABLE\fR 
+Specify if time should be converted from assumed UTC to localtime by default.
+.TP
+\fBlocaltime\-to\-utc\fR \fIENABLE|DISABLE\fR 
+Specify if time should be converted from localtime to UTC by default.
+.TP
+\fButc\-offset\-fR \fISECONDS\fR
+Specify a default UTC offset to be added to timestamps.
 
 .SH "HOSTRANGED OPTIONS"
 The following options are specific to tools that support hostranged
@@ -354,8 +374,8 @@ Please see
 .B bmc-watchdog(8) 
 manpage for available workarounds.
 .TP
-\fBbmc\-watchdog\-logfile\fR \fIFILE\fR
-Specify the default logfile.
+\fBbmc\-watchdog\-verbose\-logging\fR \fIENABLE|DISABLE\fR
+Specify if logging will be verbose by default.
 .TP
 \fBbmc\-watchdog\-no\-logging\fR \fIENABLE|DISABLE\fR
 Specify if logging will be disabled by default.
@@ -612,9 +632,15 @@ manpage for available workarounds.
 \fBipmi\-fru\-verbose\-count\fR \fICOUNT\fR
 Specify default verbose count to use for
 .B ipmi-fru(8).
+.if 0 \{
 .TP
 \fBipmi\-fru\-skip\-checks\fR \fIENABLE|DISABLE\fR
 Specify if checksum checks will be skipped by default.
+\}
+.TP
+\fBipmi\-fru\-bridge\-fru\fR \fIENABLE|DISABLE\fR
+Specify if FRU entries on other controllers should be read by default
+or not.
 .TP
 \fBipmi\-fru\-interpret\-oem\-data\fR \fIENABLE|DISABLE\fR
 Specify if
@@ -973,6 +999,21 @@ manpage for available workarounds.
 Specify default verbose count to use for
 .B ipmi-sel(8).
 .TP
+\fBipmi\-sel\-types\fR \fITYPE-LIST\fR
+Specify default types to show SEL events for.  Multiple types can
+be specified separated by whitespace.  Users may specify sensor types
+by string or by number (decimal or hex).  Please see 
+.B ipmi-sel(8)
+\fI\-\-list\-types\fR option to see possible string input types.
+.TP
+\fBipmi\-sel\-exclude\-types\fR \fSENSOR-TYPES-LIST\fR Specify
+default sensor types to not show SEL events for.  Multiple sensor
+types can be specified separated by whitespace.  Users may specify
+sensor types by string or by number.  Please see
+.B ipmi-sel(8)
+\fI\-\-list\-types\fR option to see possible string
+input types.
+.TP
 \fBipmi\-sel\-system\-event\-only\fR \fIENABLE|DISABLE\fR
 Specify if output should only include system event records.
 .TP
@@ -990,10 +1031,12 @@ should output the event state state by default.
 .TP
 \fBipmi\-sel\-event\-state\-config\-file\fR \fIFILE\fR
 Specify the default event state configuration file.
+.if 0 \{
 .TP
 \fBipmi\-sel\-assume\-system\-event\-records\fR \fIENABLE|DISABLE\fR
 Specify if system event records should be assumed when there are
 invalid record types.
+\}
 .TP
 \fBipmi\-sel\-interpret\-oem\-data\fR \fIENABLE|DISABLE\fR
 Specify if
@@ -1105,14 +1148,14 @@ record ids can be specified separated by whitespace.
 Specify default types to show sensor outputs for.  Multiple types can
 be specified separated by whitespace.  Users may specify sensor types
 by string or by number (decimal or hex).  Please see 
-.Bipmi-sensors(8)'s
+.B ipmi-sensors(8)
 \fI\-\-list\-types\fR option to see possible string input types.
 .TP
 \fBipmi\-sensors\-exclude\-types\fR \fSENSOR-TYPES-LIST\fR Specify
 default sensor types to not show sensor outputs for.  Multiple sensor
 types can be specified separated by whitespace.  Users may specify
 sensor types by string or by number.  Please see
-.B ipmi-sensors(8)'s
+.B ipmi-sensors(8)
 \fI\-\-list\-types\fR option to see possible string
 input types.
 .TP
@@ -1154,6 +1197,11 @@ Specify the default sensor state configuration file.
 \fBipmi\-sensors\-entity\-sensor\-names\fR \fIENABLE|DISABLE\fR
 Specify if output of sensor names should include entity ids and
 instances by default or not.
+.TP
+\fBipmi\-sensors\-output\-sensor\-thresholds\fR \fIENABLE|DISABLE\fR
+Specify if
+.B ipmi-sensors
+should output sensor thresholds by default.
 .TP
 \fBipmi\-sensors\-no\-sensor\-type\-output\fR \fIENABLE|DISABLE\fR
 Specify if output of the sensor type should be output by default or
@@ -1312,6 +1360,12 @@ Specify if serial keepalive should be enabled by default.
 \fBipmiconsole\-serial\-keepalive\-empty\fR \fIENABLE|DISABLE\fR
 Specify if serial keepalive empty should be enabled by default.
 .TP
+\fBipmiconsole\-sol\-payload\-instance\fR \fINUM\fR
+Specify the default SOL payload instance.
+.TP
+\fBipmiconsole\-deactivate\-all\-instances\fR \fIENABLE|DISABLE\fR
+Specify if SOL deactivate should deactivate all instances by default.
+.TP
 \fBipmiconsole\-lock\-memory\fR \fIENABLE|DISABLE\fR
 Specify if memory should be locked by default.
 
@@ -1384,6 +1438,9 @@ Specify if wait-until-on functionality is enabled or disabled by default.
 \fBipmipower\-wait\-until\-off\fR \fIENABLE|DISABLE\fR
 Specify if wait-until-off functionality is enabled or disabled by default.
 .TP
+\fBipmipower\-oem\-power\-type\fR \fIOEM\-POWER\-TYPE\fR
+Specify OEM power type to be used.
+.TP
 \fBipmipower\-retransmission\-wait\-timeout\fR \fIMILLISECONDS\fR
 Specify the default retransmission wait timeout length to use in
 milliseconds.
@@ -1412,12 +1469,12 @@ Specify the default ping consecutive count value to use.
 
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright \(co 2003-2012 FreeIPMI Core Team.  
+Copyright \(co 2003-2013 FreeIPMI Core Team.  
 #include <@top_srcdir@/man/manpage-common-gpl-freeipmi-text.man>
 
 .SH "SEE ALSO"
 freeipmi(7), bmc-config(8), bmc-device(8), bmc-info(8),
-bmc-watchdog(8), ipmi-chassis(8), ipmi-fru(8), ipmi-oem(8),
-ipmi-pef-config(8), ipmi-raw(8), ipmi-sel(8), ipmi-sensors(8),
-ipmi-sensors-config(8), ipmiconsole(8), ipmipower(8)
+bmc-watchdog(8), ipmi-chassis(8), ipmi-chassis-config(8), ipmi-fru(8),
+ipmi-oem(8), ipmi-pef-config(8), ipmi-raw(8), ipmi-sel(8),
+ipmi-sensors(8), ipmi-sensors-config(8), ipmiconsole(8), ipmipower(8)
 #include <@top_srcdir@/man/manpage-common-homepage.man>

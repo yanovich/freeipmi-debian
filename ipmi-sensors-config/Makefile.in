@@ -38,8 +38,7 @@ sbin_PROGRAMS = ipmi-sensors-config$(EXEEXT)
 subdir = ipmi-sensors-config
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
-	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
@@ -49,6 +48,8 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_cache_dir.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_config_file.m4 \
 	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
@@ -72,8 +73,6 @@ ipmi_sensors_config_OBJECTS = $(am_ipmi_sensors_config_OBJECTS)
 ipmi_sensors_config_DEPENDENCIES =  \
 	$(top_builddir)/common/configtool/libconfigtool.la \
 	$(top_builddir)/common/toolcommon/libtoolcommon.la \
-	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
-	$(top_builddir)/common/toolsdr/libtoolsdr.la \
 	$(top_builddir)/common/miscutil/libmiscutil.la \
 	$(top_builddir)/common/parsecommon/libparsecommon.la \
 	$(top_builddir)/common/portability/libportability.la \
@@ -105,7 +104,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BMC_WATCHDOG_LOGFILE_DEFAULT = @BMC_WATCHDOG_LOGFILE_DEFAULT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -133,8 +131,6 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
 INSTALL_IPMISDRCACHEDIR = @INSTALL_IPMISDRCACHEDIR@
-INSTALL_LOGDIR = @INSTALL_LOGDIR@
-INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -144,6 +140,8 @@ IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
 IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
+IPMISELD_CACHE_DIRECTORY = @IPMISELD_CACHE_DIRECTORY@
+IPMISELD_CONFIG_FILE_DEFAULT = @IPMISELD_CONFIG_FILE_DEFAULT@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
 IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
@@ -254,11 +252,10 @@ top_srcdir = @top_srcdir@
 ipmi_sensors_config_CPPFLAGS = \
 	-I$(top_srcdir)/common/configtool \
 	-I$(top_srcdir)/common/toolcommon \
-	-I$(top_srcdir)/common/toolhostrange \
-	-I$(top_srcdir)/common/toolsdr \
 	-I$(top_srcdir)/common/miscutil \
 	-I$(top_srcdir)/common/parsecommon \
 	-I$(top_srcdir)/common/portability \
+	-I$(top_builddir)/libfreeipmi/include \
 	-I$(top_srcdir)/libfreeipmi/include \
 	-D_GNU_SOURCE \
 	-D_REENTRANT
@@ -266,8 +263,6 @@ ipmi_sensors_config_CPPFLAGS = \
 ipmi_sensors_config_LDADD = \
 	$(top_builddir)/common/configtool/libconfigtool.la \
 	$(top_builddir)/common/toolcommon/libtoolcommon.la \
-	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
-	$(top_builddir)/common/toolsdr/libtoolsdr.la \
 	$(top_builddir)/common/miscutil/libmiscutil.la \
 	$(top_builddir)/common/parsecommon/libparsecommon.la \
 	$(top_builddir)/common/portability/libportability.la \
@@ -719,12 +714,6 @@ $(top_builddir)/common/configtool/libconfigtool.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/common/toolcommon/libtoolcommon.la : force-dependency-check
-	@cd `dirname $@` && $(MAKE) `basename $@`
-
-$(top_builddir)/common/toolhostrange/libtoolhostrange.la : force-dependency-check
-	@cd `dirname $@` && $(MAKE) `basename $@`
-
-$(top_builddir)/common/toolsdr/libtoolsdr.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/common/miscutil/libmiscutil.la : force-dependency-check

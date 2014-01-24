@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,8 @@
  * 
  */
 
-
-#ifndef _BMC_CONFIG_H_
-#define _BMC_CONFIG_H_
+#ifndef BMC_CONFIG_H
+#define BMC_CONFIG_H
 
 #include <stdint.h>
 #include <freeipmi/freeipmi.h>
@@ -38,8 +37,6 @@
 #include "config-tool-validate.h"
 
 #define CIPHER_SUITE_LEN 16
-
-#define CHANNEL_NUMBERS_MAX 16
 
 struct bmc_config_arguments
 {
@@ -101,20 +98,20 @@ typedef struct bmc_config_state_data
   unsigned int sol_channel_config_flags;
 
   /* For channel reading */
-  uint8_t lan_channel_numbers[CHANNEL_NUMBERS_MAX];
+  uint8_t lan_channel_numbers[IPMI_CHANNEL_NUMBERS_MAX];
   unsigned int lan_channel_numbers_count;
   unsigned int lan_channel_numbers_loaded;
-  uint8_t serial_channel_numbers[CHANNEL_NUMBERS_MAX];
+  uint8_t serial_channel_numbers[IPMI_CHANNEL_NUMBERS_MAX];
   unsigned int serial_channel_numbers_count;
   unsigned int serial_channel_numbers_loaded;
   
   /* cache for multi-channel */
-  uint8_t sol_channel_numbers_lan_channel[CHANNEL_NUMBERS_MAX];
-  uint8_t sol_channel_numbers_sol_channel[CHANNEL_NUMBERS_MAX];
+  uint8_t sol_channel_numbers_lan_channel[IPMI_CHANNEL_NUMBERS_MAX];
+  uint8_t sol_channel_numbers_sol_channel[IPMI_CHANNEL_NUMBERS_MAX];
   unsigned int sol_channel_numbers_count;
-  uint8_t sol_channel_numbers_unique[CHANNEL_NUMBERS_MAX];
+  uint8_t sol_channel_numbers_unique[IPMI_CHANNEL_NUMBERS_MAX];
   unsigned int sol_channel_numbers_unique_count;
   unsigned int sol_channel_numbers_loaded;
 } bmc_config_state_data_t;
 
-#endif /* _BMC_CONFIG_H_ */
+#endif /* BMC_CONFIG_H */

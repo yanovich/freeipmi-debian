@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_MESSAGING_SUPPORT_CMDS_H
-#define _IPMI_MESSAGING_SUPPORT_CMDS_H
+#ifndef IPMI_MESSAGING_SUPPORT_CMDS_H
+#define IPMI_MESSAGING_SUPPORT_CMDS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -603,6 +603,4 @@ int fill_cmd_set_user_password (uint8_t user_id,
 }
 #endif
 
-#endif /* ipmi-messaging-support-cmds.h */
-
-
+#endif /* IPMI_MESSAGING_SUPPORT_CMDS_H */

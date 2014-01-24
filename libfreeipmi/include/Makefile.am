@@ -2,8 +2,10 @@
 ## $Id: Makefile.am,v 1.63 2010-07-29 20:20:49 chu11 Exp $
 ##*****************************************************************************
 
+nobase_nodist_include_HEADERS = \
+	freeipmi/freeipmi.h
+
 nobase_include_HEADERS = \
-	freeipmi/freeipmi.h \
 	freeipmi/api/ipmi-api.h \
 	freeipmi/api/ipmi-chassis-cmds-api.h \
 	freeipmi/api/ipmi-dcmi-cmds-api.h \
@@ -46,7 +48,7 @@ nobase_include_HEADERS = \
 	freeipmi/driver/ipmi-sunbmc-driver.h \
 	freeipmi/driver/ipmi-ssif-driver.h \
 	freeipmi/fiid/fiid.h \
-	freeipmi/fru-parse/ipmi-fru-parse.h \
+	freeipmi/fru/ipmi-fru.h \
 	freeipmi/interface/ipmi-interface.h \
 	freeipmi/interface/rmcp-interface.h \
 	freeipmi/interface/ipmi-ipmb-interface.h \
@@ -57,14 +59,16 @@ nobase_include_HEADERS = \
 	freeipmi/locate/ipmi-locate.h \
 	freeipmi/payload/ipmi-sol-payload.h \
 	freeipmi/record-format/ipmi-cipher-suite-record-format.h \
+	freeipmi/record-format/ipmi-fru-dimmspd-record-format.h \
 	freeipmi/record-format/ipmi-fru-information-record-format.h \
+	freeipmi/record-format/ipmi-fru-oem-record-format.h \
 	freeipmi/record-format/ipmi-platform-event-trap-record-format.h \
 	freeipmi/record-format/ipmi-sdr-record-format.h \
 	freeipmi/record-format/ipmi-sdr-oem-record-format.h \
 	freeipmi/record-format/ipmi-sel-record-format.h \
-	freeipmi/sdr-cache/ipmi-sdr-cache.h \
-	freeipmi/sdr-parse/ipmi-sdr-parse.h \
-	freeipmi/sel-parse/ipmi-sel-parse.h \
+	freeipmi/sdr/ipmi-sdr.h \
+	freeipmi/sdr/ipmi-sdr-oem.h \
+	freeipmi/sel/ipmi-sel.h \
 	freeipmi/sensor-read/ipmi-sensor-read.h \
 	freeipmi/spec/ipmi-authentication-type-spec.h \
 	freeipmi/spec/ipmi-channel-spec.h \
@@ -83,10 +87,12 @@ nobase_include_HEADERS = \
 	freeipmi/spec/ipmi-fru-language-codes-spec.h \
 	freeipmi/spec/ipmi-iana-enterprise-numbers-spec.h \
 	freeipmi/spec/ipmi-ipmb-lun-spec.h \
+	freeipmi/spec/ipmi-jedec-manufacturer-identification-code-spec.h \
 	freeipmi/spec/ipmi-lan-configuration-parameters-spec.h \
 	freeipmi/spec/ipmi-lan-configuration-parameters-oem-spec.h \
 	freeipmi/spec/ipmi-netfn-spec.h \
 	freeipmi/spec/ipmi-netfn-oem-spec.h \
+	freeipmi/spec/ipmi-oem-spec.h \
 	freeipmi/spec/ipmi-pef-configuration-parameters-spec.h \
 	freeipmi/spec/ipmi-pef-configuration-parameters-oem-spec.h \
 	freeipmi/spec/ipmi-privilege-level-spec.h \
@@ -109,12 +115,14 @@ nobase_include_HEADERS = \
 	freeipmi/spec/ipmi-system-info-parameters-spec.h \
 	freeipmi/spec/ipmi-system-info-parameters-oem-spec.h \
 	freeipmi/spec/ipmi-system-software-id-spec.h \
+	freeipmi/spec/ipmi-timestamp-spec.h \
 	freeipmi/templates/ipmi-bmc-watchdog-timer-cmds-templates.h \
 	freeipmi/templates/ipmi-chassis-cmds-templates.h \
 	freeipmi/templates/ipmi-dcmi-cmds-templates.h \
 	freeipmi/templates/ipmi-device-global-cmds-templates.h \
 	freeipmi/templates/ipmi-event-cmds-templates.h \
 	freeipmi/templates/ipmi-firmware-firewall-command-discovery-cmds-templates.h \
+	freeipmi/templates/ipmi-fru-dimmspd-record-format-templates.h \
 	freeipmi/templates/ipmi-fru-inventory-device-cmds-templates.h \
 	freeipmi/templates/ipmi-lan-cmds-templates.h \
 	freeipmi/templates/ipmi-messaging-support-cmds-templates.h \
@@ -146,12 +154,13 @@ nobase_include_HEADERS = \
 	freeipmi/util/ipmi-error-dcmi-util.h \
 	freeipmi/util/ipmi-iana-enterprise-numbers-util.h \
 	freeipmi/util/ipmi-ipmb-util.h \
+	freeipmi/util/ipmi-jedec-manufacturer-identification-code-util.h \
 	freeipmi/util/ipmi-lan-util.h \
 	freeipmi/util/ipmi-outofband-util.h \
 	freeipmi/util/ipmi-rmcpplus-util.h \
 	freeipmi/util/ipmi-sensor-and-event-code-tables-util.h \
 	freeipmi/util/ipmi-sensor-util.h \
-	freeipmi/util/ipmi-sensor-units-util.h \
+	freeipmi/util/ipmi-timestamp-util.h \
 	freeipmi/util/ipmi-util.h \
 	freeipmi/util/ipmi-dcmi-util.h \
 	freeipmi/util/rmcp-util.h

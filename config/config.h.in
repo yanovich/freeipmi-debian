@@ -3,9 +3,6 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
-/* Define default bmc-watchdog logfile. */
-#undef BMC_WATCHDOG_LOGFILE_DEFAULT
-
 /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
    systems. This function is required for `alloca.c' support on those systems.
    */
@@ -268,6 +265,12 @@
 
 /* Define legacy ipmipower config file. */
 #undef IPMIPOWER_CONFIG_FILE_LEGACY
+
+/* Define default ipmiseld cache dir. */
+#undef IPMISELD_CACHE_DIRECTORY
+
+/* Define default ipmiseld config file. */
+#undef IPMISELD_CONFIG_FILE_DEFAULT
 
 /* Define to 1 to not check for root */
 #undef IPMI_DONT_CHECK_FOR_ROOT

@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmi-dcmi-argp.h,v 1.4 2010-05-17 17:42:45 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2009-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2009-2013 Lawrence Livermore National Security, LLC.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
  *  LLNL-CODE-413270
@@ -24,11 +24,11 @@
  *  with Ipmi-Dcmi.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMI_DCMI_ARGP_H
-#define _IPMI_DCMI_ARGP_H
+#ifndef IPMI_DCMI_ARGP_H
+#define IPMI_DCMI_ARGP_H
 
 #include "ipmi-dcmi.h"
 
 void ipmi_dcmi_argp_parse (int argc, char **argv, struct ipmi_dcmi_arguments *cmd_args);
 
-#endif
+#endif /* IPMI_DCMI_ARGP_H */

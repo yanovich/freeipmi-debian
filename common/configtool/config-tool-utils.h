@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,12 @@
  * 
  */
 
-#ifndef _CONFIG_TOOL_UTIL_H_
-#define _CONFIG_TOOL_UTIL_H_
+#ifndef CONFIG_TOOL_UTIL_H
+#define CONFIG_TOOL_UTIL_H
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 #include "config-tool-common.h"
 #include "pstdout.h"
@@ -79,4 +80,6 @@ int config_is_config_param_non_fatal_error (ipmi_ctx_t ipmi_ctx,
                                             fiid_obj_t obj_cmd_rs,
                                             config_err_t *non_fatal_err);
 
-#endif /* _CONFIG_TOOL_UTIL_H_ */
+int config_pstdout_fprintf (pstdout_state_t pstate, FILE *stream, const char *format, ...);
+
+#endif /* CONFIG_TOOL_UTIL_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_OEM_QUANTA_H
-#define _IPMI_OEM_QUANTA_H
+#ifndef IPMI_OEM_QUANTA_H
+#define IPMI_OEM_QUANTA_H
 
 #include "ipmi-oem.h"
 
@@ -51,4 +51,4 @@ int ipmi_oem_quanta_get_processor_information (ipmi_oem_state_data_t *state_data
 int ipmi_oem_quanta_read_mac_address (ipmi_oem_state_data_t *state_data);
 int ipmi_oem_quanta_write_mac_address (ipmi_oem_state_data_t *state_data);
 
-#endif
+#endif /* IPMI_OEM_QUANTA_H */

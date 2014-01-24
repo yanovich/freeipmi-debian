@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 FreeIPMI Core Team
+ * Copyright (C) 2007-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_PEF_CONFIG_H
-#define _IPMI_PEF_CONFIG_H
+#ifndef IPMI_PEF_CONFIG_H
+#define IPMI_PEF_CONFIG_H
 
 #include <stdint.h>
 #include <freeipmi/freeipmi.h>
@@ -40,8 +40,6 @@ enum ipmi_pef_config_argp_option_keys
   {
     INFO_KEY = 'i',
   };
-
-#define CHANNEL_NUMBERS_MAX 16
 
 struct ipmi_pef_config_arguments
 {
@@ -72,9 +70,9 @@ typedef struct ipmi_pef_config_state_data
   unsigned int lan_channel_config_flags;
 
   /* For channel reading */
-  uint8_t lan_channel_numbers[CHANNEL_NUMBERS_MAX];
+  uint8_t lan_channel_numbers[IPMI_CHANNEL_NUMBERS_MAX];
   unsigned int lan_channel_numbers_count;
   unsigned int lan_channel_numbers_loaded;
 } ipmi_pef_config_state_data_t;
 
-#endif
+#endif /* IPMI_PEF_CONFIG_H */

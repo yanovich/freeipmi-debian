@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _BMC_DEVICE_H
-#define _BMC_DEVICE_H
+#ifndef BMC_DEVICE_H
+#define BMC_DEVICE_H
 
 #include <freeipmi/freeipmi.h>
 
@@ -38,17 +38,20 @@ enum bmc_device_argp_option_keys
     SET_SDR_REPOSITORY_TIME_KEY = 169,
     GET_SEL_TIME_KEY = 170,
     SET_SEL_TIME_KEY = 171,
-    PLATFORM_EVENT_KEY = 172,
-    GET_MCA_AUXILIARY_LOG_STATUS_KEY = 173,
-    GET_SSIF_INTERFACE_CAPABILITIES_KEY = 174,
-    GET_KCS_INTERFACE_CAPABILITIES_KEY = 175,
-    GET_BT_INTERFACE_CAPABILITIES_KEY = 176,
-    GET_BMC_GLOBAL_ENABLES_KEY = 177,
-    SET_SYSTEM_FIRMWARE_VERSION_KEY=178,
-    SET_SYSTEM_NAME_KEY=179,
-    SET_PRIMARY_OPERATING_SYSTEM_NAME_KEY=180,
-    SET_OPERATING_SYSTEM_NAME_KEY=181,
-    VERBOSE_KEY = 182,
+    GET_SEL_TIME_UTC_OFFSET_KEY = 172,
+    SET_SEL_TIME_UTC_OFFSET_KEY = 173,
+    PLATFORM_EVENT_KEY = 174,
+    SET_SENSOR_READING_AND_EVENT_STATUS_KEY = 175,
+    GET_MCA_AUXILIARY_LOG_STATUS_KEY = 176,
+    GET_SSIF_INTERFACE_CAPABILITIES_KEY = 177,
+    GET_KCS_INTERFACE_CAPABILITIES_KEY = 178,
+    GET_BT_INTERFACE_CAPABILITIES_KEY = 179,
+    GET_BMC_GLOBAL_ENABLES_KEY = 180,
+    SET_SYSTEM_FIRMWARE_VERSION_KEY = 181,
+    SET_SYSTEM_NAME_KEY = 182, 
+    SET_PRIMARY_OPERATING_SYSTEM_NAME_KEY = 183,
+    SET_OPERATING_SYSTEM_NAME_KEY = 184,
+    VERBOSE_KEY = 185,
   };
 
 enum bmc_device_set_acpi_power_state_options
@@ -67,9 +70,7 @@ struct bmc_device_set_acpi_power_state
 
 struct bmc_device_arguments
 {
-  struct common_cmd_args common;
-  struct sdr_cmd_args sdr;
-  struct hostrange_cmd_args hostrange;
+  struct common_cmd_args common_args;
   int cold_reset;
   int warm_reset;
   int get_self_test_results;
@@ -86,8 +87,13 @@ struct bmc_device_arguments
   int get_sel_time;
   int set_sel_time;
   char *set_sel_time_arg;
+  int get_sel_time_utc_offset;
+  int set_sel_time_utc_offset;
+  char *set_sel_time_utc_offset_arg;
   int platform_event;
   char *platform_event_arg;
+  int set_sensor_reading_and_event_status;
+  char *set_sensor_reading_and_event_status_arg;
   int get_mca_auxiliary_log_status;
   int get_ssif_interface_capabilities;
   int get_kcs_interface_capabilities;
@@ -116,8 +122,7 @@ typedef struct bmc_device_state_data
   ipmi_ctx_t ipmi_ctx;
   pstdout_state_t pstate;
   char *hostname;
-  ipmi_sdr_cache_ctx_t sdr_cache_ctx;
-  ipmi_sdr_parse_ctx_t sdr_parse_ctx;
+  ipmi_sdr_ctx_t sdr_ctx;
 } bmc_device_state_data_t;
 
-#endif
+#endif /* BMC_DEVICE_H */

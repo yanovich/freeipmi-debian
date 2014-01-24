@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiconsole_ctx.c,v 1.57 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -138,14 +138,19 @@ ipmiconsole_ctx_list_cleanup (ipmiconsole_ctx_t c)
 int
 ipmiconsole_ctx_config_setup (ipmiconsole_ctx_t c,
                               const char *hostname,
+			      uint16_t port,
                               struct ipmiconsole_ipmi_config *ipmi_config,
                               struct ipmiconsole_protocol_config *protocol_config,
                               struct ipmiconsole_engine_config *engine_config)
 {
   assert (c);
   assert (c->magic == IPMICONSOLE_CTX_MAGIC);
+  assert (hostname);
+  assert (port);
 
   strcpy (c->config.hostname, hostname);
+
+  c->config.port = port;
 
   if (ipmi_config->username)
     strcpy (c->config.username, ipmi_config->username);
@@ -271,6 +276,8 @@ ipmiconsole_ctx_config_setup (ipmiconsole_ctx_t c,
   else
     c->config.debug_flags = default_config.debug_flags;
 
+  c->config.sol_payload_instance = default_config.sol_payload_instance;
+
   /* Data based on Configuration Parameters */
 
   if (ipmi_cipher_suite_id_to_algorithms (c->config.cipher_suite_id,
@@ -343,15 +350,19 @@ ipmiconsole_ctx_debug_setup (ipmiconsole_ctx_t c)
   if (c->config.debug_flags & IPMICONSOLE_DEBUG_FILE)
     {
       char filename[MAXPATHLEN];
+      pid_t pid;
+
+      pid = getpid();
+
       snprintf (filename,
                 MAXPATHLEN,
-                "%s/%s.%s",
-                IPMICONSOLE_DEBUG_DIRECTORY,
+                "%s.%s.%d",
                 IPMICONSOLE_DEBUG_FILENAME,
-                c->config.hostname);
+                c->config.hostname,
+		pid);
 
       if ((c->debug.debug_fd = open (filename,
-                                     O_CREAT | O_APPEND | O_WRONLY,
+                                     O_CREAT | O_APPEND | O_WRONLY | O_EXCL,
                                      0600)) < 0)
         {
           c->config.debug_flags &= ~IPMICONSOLE_DEBUG_FILE;
@@ -1102,7 +1113,7 @@ ipmiconsole_ctx_session_setup (ipmiconsole_ctx_t c)
   assert (c);
   assert (c->magic == IPMICONSOLE_CTX_MAGIC);
 
-  c->session.console_port = RMCP_PRIMARY_RMCP_PORT;
+  c->session.console_port = c->config.port;
 
   memset (&(c->session.addr), '\0', sizeof (struct sockaddr_in));
   c->session.addr.sin_family = AF_INET;
@@ -1193,6 +1204,7 @@ ipmiconsole_ctx_session_setup (ipmiconsole_ctx_t c)
   c->session.protocol_state = IPMICONSOLE_PROTOCOL_STATE_START;
   c->session.close_session_flag = 0;
   c->session.try_new_port_flag = 0;
+  c->session.deactivate_payload_instances = 0;
   c->session.deactivate_payload_instances_and_try_again_flag = 0;
   c->session.close_timeout_flag = 0;
   c->session.deactivate_only_succeeded_flag = 0;
@@ -1262,8 +1274,6 @@ ipmiconsole_ctx_session_setup (ipmiconsole_ctx_t c)
   memset (c->session.confidentiality_key, '\0', IPMI_MAX_CONFIDENTIALITY_KEY_LENGTH);
   c->session.confidentiality_key_ptr = c->session.confidentiality_key;
   c->session.confidentiality_key_len = IPMI_MAX_CONFIDENTIALITY_KEY_LENGTH;
-
-  c->session.sol_payload_instance = IPMI_PAYLOAD_INSTANCE_DEFAULT;
 
   /* Following 3 will be calculated during session setup.  We only
    * memset/clear it here

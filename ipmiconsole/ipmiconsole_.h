@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmiconsole_.h,v 1.7 2010-02-08 22:02:30 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -32,8 +32,8 @@
  */
 
 /* file is "ipmiconsole_.h", so double underscore */
-#ifndef _IPMICONSOLE__H
-#define _IPMICONSOLE__H
+#ifndef IPMICONSOLE__H
+#define IPMICONSOLE__H
 
 #include <freeipmi/freeipmi.h>
 
@@ -45,21 +45,25 @@ enum ipmiconsole_argp_option_keys
     DEACTIVATE_KEY = 161,
     SERIAL_KEEPALIVE_KEY = 162,
     SERIAL_KEEPALIVE_EMPTY_KEY = 163,
-    LOCK_MEMORY_KEY = 164,
+    SOL_PAYLOAD_INSTANCE_KEY = 164,
+    DEACTIVATE_ALL_INSTANCES_KEY = 165,
+    LOCK_MEMORY_KEY = 166,
     ESCAPE_CHAR_KEY = 'e',
-    DEBUG_KEY = 165,
-    DEBUGFILE_KEY = 166,
-    NORAW_KEY = 167,
+    DEBUG_KEY = 167,
+    DEBUGFILE_KEY = 168,
+    NORAW_KEY = 169,
   };
 
 struct ipmiconsole_arguments
 {
-  struct common_cmd_args common;
+  struct common_cmd_args common_args;
   char escape_char;
   int dont_steal;
   int deactivate;
   int serial_keepalive;
   int serial_keepalive_empty;
+  unsigned int sol_payload_instance;
+  int deactivate_all_instances;
   int lock_memory;
 #ifndef NDEBUG
   int debugfile;
@@ -67,4 +71,4 @@ struct ipmiconsole_arguments
 #endif /* NDEBUG */
 };
 
-#endif /* _IPMICONSOLE__H */
+#endif /* IPMICONSOLE__H */

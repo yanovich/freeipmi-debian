@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 FreeIPMI Core Team
+ * Copyright (C) 2007-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_CHASSIS_H
-#define _IPMI_CHASSIS_H
+#ifndef IPMI_CHASSIS_H
+#define IPMI_CHASSIS_H
 
 #include <freeipmi/freeipmi.h>
 
@@ -82,8 +82,7 @@ struct cmd_chassis_identify
 
 struct ipmi_chassis_arguments
 {
-  struct common_cmd_args common;
-  struct hostrange_cmd_args hostrange;
+  struct common_cmd_args common_args;
   int get_chassis_capabilities;
   int get_chassis_status;
   int chassis_control;
@@ -114,4 +113,4 @@ typedef struct ipmi_chassis_state_data
   pstdout_state_t pstate;
 } ipmi_chassis_state_data_t;
 
-#endif
+#endif /* IPMI_CHASSIS_H */

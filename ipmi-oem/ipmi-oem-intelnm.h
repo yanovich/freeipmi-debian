@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_OEM_INTELNM_H
-#define _IPMI_OEM_INTELNM_H
+#ifndef IPMI_OEM_INTELNM_H
+#define IPMI_OEM_INTELNM_H
 
 #include "ipmi-oem.h"
 
@@ -25,6 +25,25 @@ int ipmi_oem_intelnm_get_node_manager_statistics (ipmi_oem_state_data_t *state_d
 
 int ipmi_oem_intelnm_reset_node_manager_statistics (ipmi_oem_state_data_t *state_data);
 
+int ipmi_oem_intelnm_get_node_manager_capabilities (ipmi_oem_state_data_t *state_data);
+
+int ipmi_oem_intelnm_node_manager_policy_control (ipmi_oem_state_data_t *state_data);
+
+int ipmi_oem_intelnm_get_node_manager_policy (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_intelnm_set_node_manager_policy (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_intelnm_remove_node_manager_policy (ipmi_oem_state_data_t *state_data);
+
+int ipmi_oem_intelnm_get_node_manager_alert_thresholds (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_intelnm_set_node_manager_alert_thresholds (ipmi_oem_state_data_t *state_data);
+
+int ipmi_oem_intelnm_get_node_manager_policy_suspend_periods (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_intelnm_set_node_manager_policy_suspend_periods (ipmi_oem_state_data_t *state_data);
+
+int ipmi_oem_intelnm_set_node_manager_power_draw_range (ipmi_oem_state_data_t *state_data);
+
+int ipmi_oem_intelnm_get_node_manager_alert_destination (ipmi_oem_state_data_t *state_data);
+int ipmi_oem_intelnm_set_node_manager_alert_destination (ipmi_oem_state_data_t *state_data);
+
 int ipmi_oem_intelnm_get_node_manager_version (ipmi_oem_state_data_t *state_data);
 
-#endif
+#endif /* IPMI_OEM_INTELNM_H */

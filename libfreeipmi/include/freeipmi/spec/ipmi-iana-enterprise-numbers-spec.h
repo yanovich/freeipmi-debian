@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_IANA_ENTERPRISE_NUMBERS_SPEC_H
-#define _IPMI_IANA_ENTERPRISE_NUMBERS_SPEC_H
+#ifndef IPMI_IANA_ENTERPRISE_NUMBERS_SPEC_H
+#define IPMI_IANA_ENTERPRISE_NUMBERS_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +25,7 @@ extern "C" {
 
 /* Convenience macros, will be added as needed in code */
 #define IPMI_IANA_ENTERPRISE_ID_IBM                       2
+#define IPMI_IANA_ENTERPRISE_ID_HP                       11
 #define IPMI_IANA_ENTERPRISE_ID_SUN_MICROSYSTEMS         42
 #define IPMI_IANA_ENTERPRISE_ID_INTEL                   343
 #define IPMI_IANA_ENTERPRISE_ID_DELL                    674
@@ -33,6 +34,7 @@ extern "C" {
 #define IPMI_IANA_ENTERPRISE_ID_FUJITSU               10368
 #define IPMI_IANA_ENTERPRISE_ID_PEPPERCON             10437
 #define IPMI_IANA_ENTERPRISE_ID_SUPERMICRO            10876
+#define IPMI_IANA_ENTERPRISE_ID_WISTRON               11161
 #define IPMI_IANA_ENTERPRISE_ID_INVENTEC              20569
 
 /* Workarounds for motherboards with invalid enterprise IDs */
@@ -59,4 +61,4 @@ extern const char *const ipmi_iana_enterprise_numbers[];
 }
 #endif
 
-#endif
+#endif /* IPMI_IANA_ENTERPRISE_NUMBERS_SPEC_H */

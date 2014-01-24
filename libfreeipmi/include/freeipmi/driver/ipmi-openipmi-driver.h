@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_OPENIPMI_DRIVER_H
-#define _IPMI_OPENIPMI_DRIVER_H 1
+#ifndef IPMI_OPENIPMI_DRIVER_H
+#define IPMI_OPENIPMI_DRIVER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,5 +78,4 @@ int ipmi_openipmi_cmd_ipmb (ipmi_openipmi_ctx_t ctx,
 }
 #endif
 
-#endif /* ipmi-openipmi-driver.h */
-
+#endif /* IPMI_OPENIPMI_DRIVER_H */

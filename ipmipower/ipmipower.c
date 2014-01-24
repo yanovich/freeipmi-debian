@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower.c,v 1.94 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -51,6 +51,7 @@
 #include <sys/stat.h>
 #include <sys/resource.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif /* HAVE_FCNTL_H */
@@ -61,6 +62,7 @@
 #include "ipmipower_argp.h"
 #include "ipmipower_connection.h"
 #include "ipmipower_error.h"
+#include "ipmipower_oem.h"
 #include "ipmipower_powercmd.h"
 #include "ipmipower_prompt.h"
 #include "ipmipower_ping.h"
@@ -70,6 +72,7 @@
 #include "cbuf.h"
 #include "hostlist.h"
 #include "tool-common.h"
+#include "tool-util-common.h"
 
 cbuf_t ttyin;
 cbuf_t ttyout;
@@ -83,7 +86,10 @@ unsigned int ics_len = 0;
 
 /* Array of hostlists for short output */
 int output_hostrange_flag = 0;
-hostlist_t output_hostrange[MSG_TYPE_NUM_ENTRIES];
+hostlist_t output_hostrange[IPMIPOWER_MSG_TYPE_NUM_ENTRIES];
+
+/* Array of outputs for determining exit value */
+unsigned int output_counts[IPMIPOWER_MSG_TYPE_NUM_ENTRIES];
 
 static void
 _ipmipower_setup (void)
@@ -107,32 +113,34 @@ _ipmipower_setup (void)
         IPMIPOWER_ERROR (("ipmi_rmcpplus_init: incompatible crypto library"));
       else
         IPMIPOWER_ERROR (("ipmi_rmcpplus_init: %s", strerror (errno)));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   /* Create TTY bufs */
   if (!(ttyin  = cbuf_create (IPMIPOWER_MIN_TTY_BUF, IPMIPOWER_MAX_TTY_BUF)))
     {
       IPMIPOWER_ERROR (("cbuf_create: %s", strerror (errno)));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
   cbuf_opt_set (ttyin, CBUF_OPT_OVERWRITE, CBUF_WRAP_MANY);
 
   if (!(ttyout = cbuf_create (IPMIPOWER_MIN_TTY_BUF, IPMIPOWER_MAX_TTY_BUF)))
     {
       IPMIPOWER_ERROR (("cbuf_create: %s", strerror (errno)));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
   cbuf_opt_set (ttyout, CBUF_OPT_OVERWRITE, CBUF_WRAP_MANY);
 
-  for (i = 0; i < MSG_TYPE_NUM_ENTRIES; i++)
+  for (i = 0; i < IPMIPOWER_MSG_TYPE_NUM_ENTRIES; i++)
     {
       if (!(output_hostrange[i] = hostlist_create (NULL)))
         {
           IPMIPOWER_ERROR (("hostlist_create: %s", strerror (errno)));
-          exit (1);
+          exit (EXIT_FAILURE);
         }
     }
+
+  memset (output_counts, '\0', sizeof (output_counts));
 }
 
 static void
@@ -148,14 +156,14 @@ _ipmipower_cleanup (void)
 
   ipmipower_connection_array_destroy (ics, ics_len);
 
-  for (i = 0; i < MSG_TYPE_NUM_ENTRIES; i++)
+  for (i = 0; i < IPMIPOWER_MSG_TYPE_NUM_ENTRIES; i++)
     hostlist_destroy (output_hostrange[i]);
 }
 
 static void
 _eliminate_nodes (void)
 {
-  if (cmd_args.hostrange.eliminate)
+  if (cmd_args.common_args.eliminate)
     {
       ipmidetect_t id = NULL;
       int i;
@@ -163,7 +171,7 @@ _eliminate_nodes (void)
       if (!(id = ipmidetect_handle_create ()))
         {
           IPMIPOWER_ERROR (("ipmidetect_handle_create: %s", strerror (errno)));
-          exit (1);
+          exit (EXIT_FAILURE);
         }
 
       if (ipmidetect_load_data (id,
@@ -176,7 +184,7 @@ _eliminate_nodes (void)
             IPMIPOWER_ERROR (("Error connecting to ipmidetect daemon"));
           else
             IPMIPOWER_ERROR (("ipmidetect_load_data: %s", ipmidetect_errormsg (id)));
-          exit (1);
+          exit (EXIT_FAILURE);
         }
 
       for (i = 0; i < ics_len; i++)
@@ -189,7 +197,7 @@ _eliminate_nodes (void)
                 IPMIPOWER_ERROR (("Node '%s' unrecognized by ipmidetect", ics[i].hostname));
               else
                 IPMIPOWER_ERROR (("ipmidetect_is_node_detected: %s", ipmidetect_errormsg (id)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           if (!ret)
@@ -209,36 +217,54 @@ _sendto (cbuf_t cbuf, int fd, struct sockaddr_in *destaddr)
   if ((n = cbuf_read (cbuf, buf, IPMIPOWER_PACKET_BUFLEN)) < 0)
     {
       IPMIPOWER_ERROR (("cbuf_read: %s", fd, strerror (errno)));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   if (n == IPMIPOWER_PACKET_BUFLEN)
     {
       IPMIPOWER_ERROR (("cbuf_read: buffer full"));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   do 
     {
-      rv = ipmi_lan_sendto (fd,
-                            buf,
-                            n,
-                            0,
-                            (struct sockaddr *)destaddr,
-                            sizeof (struct sockaddr_in));
+      if (cmd_args.common_args.driver_type == IPMI_DEVICE_LAN)
+	rv = ipmi_lan_sendto (fd,
+			      buf,
+			      n,
+			      0,
+			      (struct sockaddr *)destaddr,
+			      sizeof (struct sockaddr_in));
+      else
+	{
+	  if (ipmi_is_ipmi_1_5_packet (buf, n))
+	    rv = ipmi_lan_sendto (fd,
+				  buf,
+				  n,
+				  0,
+				  (struct sockaddr *)destaddr,
+				  sizeof (struct sockaddr_in));
+	  else
+	    rv = ipmi_rmcpplus_sendto (fd,
+				       buf,
+				       n,
+				       0,
+				       (struct sockaddr *)destaddr,
+				       sizeof (struct sockaddr_in));
+	}
     } while (rv < 0 && errno == EINTR);
 
   if (rv < 0)
     {
-      IPMIPOWER_ERROR (("ipmi_lan_sendto: %s", strerror (errno)));
-      exit (1);
+      IPMIPOWER_ERROR (("ipmi_lan/rmcpplus_sendto: %s", strerror (errno)));
+      exit (EXIT_FAILURE);
     }
 
   /* cbuf should be empty now */
   if (!cbuf_is_empty (cbuf))
     {
       IPMIPOWER_ERROR (("cbuf not empty"));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 }
 
@@ -252,6 +278,14 @@ _recvfrom (cbuf_t cbuf, int fd, struct sockaddr_in *srcaddr)
 
   do
     {
+      /* For receive side, ipmi_lan_recvfrom and
+       * ipmi_rmcpplus_recvfrom are identical.  So we just use
+       * ipmi_lan_recvfrom for both.
+       *
+       * In event of future change, should use util functions
+       * ipmi_is_ipmi_1_5_packet or ipmi_is_ipmi_2_0_packet
+       * appropriately.
+       */
       rv = ipmi_lan_recvfrom (fd,
                               buf,
                               IPMIPOWER_PACKET_BUFLEN,
@@ -300,13 +334,13 @@ _recvfrom (cbuf_t cbuf, int fd, struct sockaddr_in *srcaddr)
   if (rv < 0)
     {
       IPMIPOWER_ERROR (("ipmi_lan_recvfrom: %s", strerror (errno)));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   if (!rv)
     {
       IPMIPOWER_ERROR (("ipmi_lan_recvfrom: EOF"));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   /* Don't store if this packet is strange for some reason */
@@ -325,7 +359,7 @@ _recvfrom (cbuf_t cbuf, int fd, struct sockaddr_in *srcaddr)
           if (cbuf_read (cbuf, tempbuf, IPMIPOWER_PACKET_BUFLEN) < 0)
             {
               IPMIPOWER_ERROR (("cbuf_read: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
         } while(!cbuf_is_empty (cbuf));
     }
@@ -333,13 +367,13 @@ _recvfrom (cbuf_t cbuf, int fd, struct sockaddr_in *srcaddr)
   if ((n = cbuf_write (cbuf, buf, rv, &dropped)) < 0)
     {
       IPMIPOWER_ERROR (("cbuf_write: %s", strerror (errno)));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   if (n != rv)
     {
       IPMIPOWER_ERROR (("cbuf_write: rv=%d n=%d", rv, n));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   if (dropped)
@@ -415,7 +449,7 @@ _poll_loop (int non_interactive)
           if (!(pfds = (struct pollfd *)malloc (nfds * sizeof (struct pollfd))))
             {
               IPMIPOWER_ERROR (("malloc: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
         }
 
@@ -495,7 +529,7 @@ _poll_loop (int non_interactive)
           if ((n = cbuf_write_from_fd (ttyin, STDIN_FILENO, -1, &dropped)) < 0)
             {
               IPMIPOWER_ERROR (("cbuf_write_from_fd: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           /* achu: If you are running ipmipower in co-process mode
@@ -509,7 +543,7 @@ _poll_loop (int non_interactive)
            * error message.
            */
           if (!n)
-            exit (1);
+            exit (EXIT_FAILURE);
           
           if (dropped)
             IPMIPOWER_DEBUG (("cbuf_write_from_fd: read dropped %d bytes", dropped));
@@ -520,7 +554,7 @@ _poll_loop (int non_interactive)
           if (cbuf_read_to_fd (ttyout, STDOUT_FILENO, -1) < 0)
             {
               IPMIPOWER_ERROR (("cbuf_read_to_fd: %s", strerror (errno)));
-              exit (1);
+              exit (EXIT_FAILURE);
             }
         }
     }
@@ -531,6 +565,8 @@ _poll_loop (int non_interactive)
 int
 main (int argc, char *argv[])
 {
+  int i;
+
   ipmi_disable_coredump ();
 
   ipmipower_argp_parse (argc, argv, &cmd_args);
@@ -538,7 +574,7 @@ main (int argc, char *argv[])
   /* after ipmipower_argp_parse - IPMIPOWER_ERROR/IPMIPOWER_DEBUG
    * macros used 
    */
-  if (cmd_args.powercmd == POWER_CMD_NONE)
+  if (cmd_args.powercmd == IPMIPOWER_POWER_CMD_NONE)
     ipmipower_error_setup (IPMIPOWER_ERROR_STDERR | IPMIPOWER_ERROR_SYSLOG);
   else
     ipmipower_error_setup (IPMIPOWER_ERROR_STDERR);
@@ -547,15 +583,15 @@ main (int argc, char *argv[])
 
   ipmipower_powercmd_setup ();
 
-  if (cmd_args.common.hostname)
+  if (cmd_args.common_args.hostname)
     {
       unsigned int len = 0;
 
-      if (!(ics = ipmipower_connection_array_create (cmd_args.common.hostname, &len)))
+      if (!(ics = ipmipower_connection_array_create (cmd_args.common_args.hostname, &len)))
         {
           /* dump error outputs here, most notably invalid hostname output */
           cbuf_read_to_fd (ttyout, STDOUT_FILENO, -1);
-          exit (1);
+          exit (EXIT_FAILURE);
         }
 
       ics_len = len;
@@ -565,37 +601,108 @@ main (int argc, char *argv[])
    * command line, put the power control commands in the pending
    * queue.
    */
-  if (cmd_args.powercmd != POWER_CMD_NONE)
+  if (cmd_args.powercmd != IPMIPOWER_POWER_CMD_NONE)
     {
-      int i;
+      struct ipmipower_connection_extra_arg *eanode;
+      char errbuf[IPMIPOWER_OUTPUT_BUFLEN + 1];
+
+      /* must be checked in args parsing */
+      assert (cmd_args.common_args.hostname);
 
       cmd_args.ping_interval = 0;
 
-      /* Check for appropriate privilege first */
-      if (cmd_args.common.privilege_level == IPMI_PRIVILEGE_LEVEL_USER
-          && POWER_CMD_REQUIRES_OPERATOR_PRIVILEGE_LEVEL (cmd_args.powercmd))
-        {
-          IPMIPOWER_ERROR (("power operation requires atleast operator privilege"));
-          exit (1);
-        }
+      memset (errbuf, '\0', IPMIPOWER_OUTPUT_BUFLEN + 1);
+      if (cmd_args.oem_power_type == IPMIPOWER_OEM_POWER_TYPE_NONE)
+	{
+	  if (ipmipower_power_cmd_check_privilege (cmd_args.powercmd,
+						   errbuf,
+						   IPMIPOWER_OUTPUT_BUFLEN) <= 0)
+	    {
+	      IPMIPOWER_ERROR (("%s", errbuf));
+	      exit (EXIT_FAILURE);
+	    }
+	}
+      else
+	{
+	  if (ipmipower_oem_power_cmd_check_support_and_privilege (cmd_args.powercmd,
+								   errbuf,
+								   IPMIPOWER_OUTPUT_BUFLEN) <= 0)
+	    {
+	      IPMIPOWER_ERROR (("%s", errbuf));
+	      exit (EXIT_FAILURE);
+	    }
+	}
 
       _eliminate_nodes ();
+      
+      /* Because can input multiple hosts, check all args before doing
+       * powercmd queue so we don't do any if any single argument is
+       * invalid
+       */
+      if (cmd_args.oem_power_type != IPMIPOWER_OEM_POWER_TYPE_NONE)
+	{
+	  for (i = 0; i < ics_len; i++)
+	    {
+	      assert (ics[i].extra_args);
+
+	      if (ics[i].skip)
+		continue;
+	      
+	      eanode = ics[i].extra_args;
+	      while (eanode)
+		{
+		  memset (errbuf, '\0', IPMIPOWER_OUTPUT_BUFLEN + 1);
+		  
+		  if (ipmipower_oem_power_cmd_check_extra_arg (eanode->extra_arg,
+							       errbuf,
+							       IPMIPOWER_OUTPUT_BUFLEN) <= 0)
+		    {
+		      IPMIPOWER_ERROR (("%s", errbuf));
+		      exit (EXIT_FAILURE);
+		    }
+		  
+		  eanode = eanode->next;
+		}
+	    }
+	}
 
       for (i = 0; i < ics_len; i++)
         {
           if (ics[i].skip)
             continue;
 
-          ipmipower_powercmd_queue (cmd_args.powercmd, &ics[i]);
+	  if (cmd_args.oem_power_type != IPMIPOWER_OEM_POWER_TYPE_NONE)
+	    {
+	      assert (ics[i].extra_args);
+
+	      eanode = ics[i].extra_args;
+	      while (eanode)
+		{
+		  ipmipower_powercmd_queue (cmd_args.powercmd, &ics[i], eanode->extra_arg);
+		  eanode = eanode->next;
+		}
+	    }
+	  else
+	    ipmipower_powercmd_queue (cmd_args.powercmd, &ics[i], NULL);
         }
     }
 
   /* immediately send out discovery messages upon startup */
   ipmipower_ping_force_discovery_sweep ();
 
-  _poll_loop ((cmd_args.powercmd != POWER_CMD_NONE) ? 1 : 0);
+  _poll_loop ((cmd_args.powercmd != IPMIPOWER_POWER_CMD_NONE) ? 1 : 0);
 
   ipmipower_powercmd_cleanup ();
   _ipmipower_cleanup ();
-  exit (0);
+
+  /* If any error messages other than "on", "off", or "ok", then an
+   * error occurred
+   */
+  for (i = IPMIPOWER_MSG_TYPE_ERROR_MIN; i < IPMIPOWER_MSG_TYPE_ERROR_MAX; i++)
+    {
+      if (output_counts[i])
+	return (EXIT_FAILURE);
+    }
+
+  return (EXIT_SUCCESS);
 }

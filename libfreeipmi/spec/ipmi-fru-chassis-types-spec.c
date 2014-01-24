@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmi-fru-chassis-types-spec.c,v 1.10 2010-02-08 22:09:40 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -62,5 +62,11 @@ const char *const ipmi_fru_chassis_types[] =
     "Peripheral Chassis",
     "RAID Chassis",
     "Rack Mount Chassis",
+    "Sealed-case PC",
+    "Multi-system chassis",
+    "Compact PCI",
+    "Advanced TCA",
+    "Blade",
+    "Blade Enclosure",
     NULL
   };

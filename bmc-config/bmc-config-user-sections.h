@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,12 @@
  * 
  */
 
-
-#ifndef _BMC_CONFIG_USER_SECTIONS_H_
-#define _BMC_CONFIG_USER_SECTIONS_H_
+#ifndef BMC_CONFIG_USER_SECTIONS_H
+#define BMC_CONFIG_USER_SECTIONS_H
 
 #include "bmc-config.h"
 #include "bmc-config-sections.h"
 
 struct config_section * bmc_config_user_section_get (bmc_config_state_data_t *state_data, unsigned int userid);
 
-#endif /* _BMC_CONFIG_USER_SECTIONS_H_ */
+#endif /* BMC_CONFIG_USER_SECTIONS_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_CHASSIS_CMDS_H
-#define _IPMI_CHASSIS_CMDS_H
+#ifndef IPMI_CHASSIS_CMDS_H
+#define IPMI_CHASSIS_CMDS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +30,9 @@ extern "C" {
 #define IPMI_POWER_RESTORE_POLICY_POWER_RESTORED_TO_STATE                   0x01
 #define IPMI_POWER_RESTORE_POLICY_POWERS_UP_AFTER_AC_RETURNS                0x02
 #define IPMI_POWER_RESTORE_POLICY_UNKNOWN                                   0x03
+
+#define IPMI_SYSTEM_POWER_IS_ON  1
+#define IPMI_SYSTEM_POWER_IS_OFF 0
 
 #define IPMI_LAST_POWER_EVENT_AC_FAILED                                     0x00
 #define IPMI_LAST_POWER_EVENT_POWER_DOWN_POWER_OVERLOAD                     0x01
@@ -403,4 +406,5 @@ int fill_cmd_get_power_on_hours_counter (fiid_obj_t obj_cmd_rq);
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif /* IPMI_CHASSIS_CMDS_H */

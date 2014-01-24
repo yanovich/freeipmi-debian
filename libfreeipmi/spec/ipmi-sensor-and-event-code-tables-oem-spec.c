@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,12 @@
  * Dell
  */
 
+/*
+ * Dell Poweredge R610
+ * Dell Poweredge R710
+ * Dell Poweredge R720
+ */
+
 const char * const ipmi_generic_event_reading_type_code_oem_dell_status[] =
   {
     "Absent",
@@ -60,6 +66,20 @@ const char * const ipmi_generic_event_reading_type_code_oem_dell_status[] =
   };
 unsigned int ipmi_generic_event_reading_type_code_oem_dell_status_max_index = 0x08;
 
+/*
+ * Dell Poweredge R720
+ */
+
+const char * const ipmi_generic_event_reading_type_code_oem_dell_failure[] =
+  {
+    "undocumented",		/* not known yet */
+    "undocumented",		/* not known yet */
+    "undocumented",		/* not known yet */
+    "Memory failed to transition to Online",
+    NULL
+  };
+unsigned int ipmi_generic_event_reading_type_code_oem_dell_failure_max_index = 0x03;
+
 /*****************************
  * Sensor Type Strings (OEM) *
  *****************************/
@@ -71,6 +91,7 @@ unsigned int ipmi_generic_event_reading_type_code_oem_dell_status_max_index = 0x
 /*
  * Dell Poweredge R610
  * Dell Poweredge R710
+ * Dell Poweredge R720
  */
 /* achu:
  *
@@ -106,9 +127,10 @@ unsigned int ipmi_sensor_type_oem_dell_link_tuning_max_index = 0x03;
 const char * const ipmi_sensor_type_oem_dell_non_fatal_error[] =
   {
     "PCIe error",
-    NULL
+    "undocumented",		/* not known yet */
+    "QPI Link Degrade",
   };
-unsigned int ipmi_sensor_type_oem_dell_non_fatal_error_max_index = 0x00;
+unsigned int ipmi_sensor_type_oem_dell_non_fatal_error_max_index = 0x02;
 
 const char * const ipmi_sensor_type_oem_dell_fatal_io_error[] =
   {
@@ -312,6 +334,30 @@ unsigned int ipmi_sensor_type_oem_fujitsu_config_backup_max_index = 0x0F;
  * OEM Specific              *
  *****************************/
 
+/*******************************************
+ * HP                                      *
+ *******************************************/
+
+/*
+ * HP Proliant DL160 G8
+ */
+
+const char * const ipmi_oem_hp_uid_light[] =
+  {
+    "on",
+    "off",
+    "blinking",
+  };
+unsigned int ipmi_oem_hp_uid_light_max_index = 0x02;
+
+const char * const ipmi_oem_hp_health_led[] =
+  {
+    "green",
+    "amber",
+    "red",
+  };
+unsigned int ipmi_oem_hp_health_led_max_index = 0x02;
+
 /*
  * Intel
  */
@@ -480,6 +526,10 @@ const char * const ipmi_oem_intel_s2600jf_specific_opi_fatal_error[] =
   };
 unsigned int ipmi_oem_intel_s2600jf_specific_opi_fatal_error_max_index = 0x0E;
 
+#if 0
+/* achu: Intel informed me there was an error in their documentation and the following was not correct.
+ * I'll leave this here for legacy documentation
+ */ 
 const char * const ipmi_oem_intel_s2600jf_specific_opi_fatal_error_2[] =
   {
     "Illegal inbound request",
@@ -492,6 +542,19 @@ const char * const ipmi_oem_intel_s2600jf_specific_opi_fatal_error_2[] =
     NULL
   };
 unsigned int ipmi_oem_intel_s2600jf_specific_opi_fatal_error_2_max_index = 0x06;
+#else  /* !0 */
+const char * const ipmi_oem_intel_s2600jf_specific_opi_fatal_error_2[] =
+  {
+    "Illegal inbound request",
+    "IIO Write Cache Uncorrectable Data ECC Error",
+    "IIO CSR crossing 32-bit boundary Error",
+    "IIO Received XPF physical/logical redirect interrupt inbound",
+    "IIO Illegal SAD or Illegal or non-existent address or memory",
+    "IIO Write Cache Coherency Violation",
+    NULL
+  };
+unsigned int ipmi_oem_intel_s2600jf_specific_opi_fatal_error_2_max_index = 0x05;
+#endif	/* !0 */
 
 const char * const ipmi_oem_intel_s2600jf_specific_qpi_link_width_reduced[] =
   {
@@ -501,3 +564,29 @@ const char * const ipmi_oem_intel_s2600jf_specific_qpi_link_width_reduced[] =
     NULL
   };
 unsigned int ipmi_oem_intel_s2600jf_specific_qpi_link_width_reduced_max_index = 0x02;
+
+/******************************************* 
+ * Wistron                                 *
+ *******************************************/
+
+/*
+ * Wistron / Dell Poweredge C6220
+ */
+
+const char * const ipmi_sensor_type_oem_wistron_ioh_core_error[] =
+  {
+    "reserved",
+    "reserved",
+    "reserved",
+    "reserved",
+    "reserved",
+    "reserved",
+    "reserved",
+    "core",
+    "non-fatal",
+    "reserved",
+    "fatal",
+    NULL
+  };
+unsigned int ipmi_sensor_type_oem_wistron_ioh_core_error_max_index = 0x0A;
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 FreeIPMI Core Team
+ * Copyright (C) 2005-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_RAW_H
-#define _IPMI_RAW_H
+#ifndef IPMI_RAW_H
+#define IPMI_RAW_H
 
 #include <freeipmi/freeipmi.h>
 
@@ -29,19 +29,14 @@
 
 enum ipmi_raw_argp_option_keys
   {
-    CHANNEL_NUMBER_KEY = 160,
-    SLAVE_ADDRESS_KEY = 161,
+    CHANNEL_NUMBER_KEY = 160,	/* legacy */
+    SLAVE_ADDRESS_KEY = 161,	/* legacy */
     CMD_FILE_KEY = 162,
   };
 
 struct ipmi_raw_arguments
 {
-  struct common_cmd_args common;
-  struct hostrange_cmd_args hostrange;
-  int channel_number;
-  uint8_t channel_number_arg;
-  int slave_address;
-  uint8_t slave_address_arg;
+  struct common_cmd_args common_args;
   char *cmd_file;
   uint8_t cmd[IPMI_RAW_MAX_ARGS];
   unsigned int cmd_length;
@@ -60,4 +55,4 @@ typedef struct ipmi_raw_state_data
   pstdout_state_t pstate;
 } ipmi_raw_state_data_t;
 
-#endif
+#endif /* IPMI_RAW_H */

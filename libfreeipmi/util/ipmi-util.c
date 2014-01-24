@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,11 +65,11 @@
 #define IPMI_SEQUENCE_NUMBER_WINDOW_MAX             32
 #define IPMI_SEQUENCE_NUMBER_WINDOW_MIN              1
 
-uint8_t
-ipmi_checksum (const void *buf, unsigned int buflen)
+static uint8_t
+_checksum (const void *buf, unsigned int buflen, uint8_t checksum_initial)
 {
   register unsigned int i = 0;
-  register int8_t checksum = 0;
+  register int8_t checksum = checksum_initial;
 
   if (buf == NULL || buflen == 0)
     return (checksum);
@@ -77,6 +77,32 @@ ipmi_checksum (const void *buf, unsigned int buflen)
   for (; i < buflen; i++)
     checksum = (checksum + ((uint8_t *)buf)[i]) % 256;
 
+  return (checksum);
+}
+
+uint8_t
+ipmi_checksum (const void *buf, unsigned int buflen)
+{
+  uint8_t checksum;
+  checksum = _checksum (buf, buflen, 0);
+  return (-checksum);
+}
+
+uint8_t
+ipmi_checksum_incremental (const void *buf, unsigned int buflen, uint8_t checksum_initial)
+{
+  return (_checksum (buf, buflen, checksum_initial));
+}
+
+uint8_t
+ipmi_checksum_final (const void *buf, unsigned int buflen, uint8_t checksum_initial)
+{
+  uint8_t checksum;
+
+  if (!buf || !buflen)
+    return (-checksum_initial);
+
+  checksum = _checksum (buf, buflen, checksum_initial);
   return (-checksum);
 }
 
@@ -168,7 +194,10 @@ ipmi_get_random (void *buf, unsigned int buflen)
 #endif /* !HAVE_DEVURANDOM */
 
   if ((rv = read (fd, buf, buflen)) < buflen)
-    goto gcrypt_rand;
+    {
+      close (fd);
+      goto gcrypt_rand;
+    }
 
   /* ignore potential error, cleanup path */
   close (fd);

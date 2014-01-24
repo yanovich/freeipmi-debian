@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,15 @@
  * 
  */
 
-
-#ifndef _IPMI_SENSOR_UTIL_H
-#define _IPMI_SENSOR_UTIL_H
+#ifndef IPMI_SENSOR_UTIL_H
+#define IPMI_SENSOR_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <stdint.h>
+#include <freeipmi/sdr/ipmi-sdr.h>
 
 /* return length of string written into buffer on success, -1 on error */
 int ipmi_get_threshold_message (uint8_t offset, char *buf, unsigned int buflen);
@@ -35,6 +35,16 @@ const char *ipmi_get_oem_sensor_type_string (uint8_t sensor_type,
                                              uint8_t event_reading_code,
                                              uint32_t manufacturer_id,
                                              uint16_t product_id);
+
+/* returns length written into buffer on success, -1 on error */
+int ipmi_sensor_units_string (uint8_t sensor_units_percentage,
+                              uint8_t sensor_units_modifier,
+                              uint8_t sensor_units_rate,
+                              uint8_t sensor_base_unit_type,
+                              uint8_t sensor_modifier_unit_type,
+                              char *buf,
+                              unsigned int buflen,
+                              unsigned int abbreviated_units_flag);
 
 /* b_exponent - sometimes documented as k1 */
 /* r_exponent - sometimes documented as k2 */
@@ -79,4 +89,4 @@ int ipmi_sensor_decode_resolution (int8_t r_exponent,
 }
 #endif
 
-#endif /* _IPMI_SENSOR_UTIL_H */
+#endif /* IPMI_SENSOR_UTIL_H */

@@ -1,3 +1,60 @@
+man3_MANS = \
+	libipmiconsole.3 \
+	libipmidetect.3 \
+	libfreeipmi.3 \
+	libipmimonitoring.3
+
+man5_MANS = \
+	bmc-config.conf.5 \
+	freeipmi.conf.5 \
+	freeipmi_interpret_sel.conf.5 \
+	freeipmi_interpret_sensor.conf.5 \
+	ipmiconsole.conf.5 \
+	ipmidetect.conf.5 \
+	ipmidetectd.conf.5 \
+	ipmipower.conf.5 \
+	ipmimonitoring_sensors.conf.5 \
+	ipmimonitoring.conf.5 \
+	ipmiseld.conf.5 \
+	ipmi_monitoring_sensors.conf.5 \
+	libipmiconsole.conf.5 \
+	libipmimonitoring.conf.5
+
+man7_MANS = \
+	freeipmi.7
+
+man8_MANS = \
+	bmc-config.8 \
+	bmc-device.8 \
+	bmc-info.8 \
+	bmc-watchdog.8 \
+	ipmi-chassis.8 \
+	ipmi-chassis-config.8 \
+	ipmi-dcmi.8 \
+	ipmi-fru.8 \
+	ipmi-locate.8 \
+	ipmi-oem.8 \
+	ipmi-pef-config.8 \
+	ipmi-pet.8 \
+	ipmi-raw.8 \
+	ipmi-sel.8 \
+	ipmi-sensors.8 \
+	ipmi-sensors-config.8 \
+	ipmiconsole.8 \
+	ipmidetect.8 \
+	ipmidetectd.8 \
+	ipmiping.8 \
+	ipmipower.8 \
+	ipmiseld.8 \
+	rmcpping.8 \
+	ipmi-console.8 \
+	ipmi-detect.8 \
+	ipmi-ping.8 \
+	ipmi-power.8 \
+	ipmimonitoring.8 \
+	pef-config.8 \
+	rmcp-ping.8
+
 MANS_CPP = \
 	bmc-config.8 \
 	bmc-config.conf.5 \
@@ -23,6 +80,8 @@ MANS_CPP = \
 	ipmidetectd.conf.5 \
 	ipmiping.8 \
 	ipmipower.8 \
+	ipmiseld.8 \
+	ipmiseld.conf.5 \
 	freeipmi.7 \
 	freeipmi.conf.5 \
 	freeipmi_interpret_sel.conf.5 \
@@ -76,6 +135,7 @@ MANS_COMMON = \
 	manpage-common-workaround-outofband-common-text.man \
 	manpage-common-workaround-outofband-15-text.man \
 	manpage-common-workaround-outofband-20-text.man \
+	manpage-common-workaround-sdr-text.man \
 	manpage-common-workaround-config-tool.man \
 	manpage-common-debug.man \
 	manpage-common-misc.man \
@@ -89,8 +149,13 @@ MANS_COMMON = \
 	manpage-common-hostranged-text-options.man \
 	manpage-common-hostranged-text-localhost.man \
 	manpage-common-hostranged-text-threads.man \
-	manpage-common-sdr-options.man \
-	manpage-common-ignore-sdr-cache.man \
+	manpage-common-time-options-heading.man \
+	manpage-common-time-options.man \
+	manpage-common-sdr-cache-options-heading.man \
+	manpage-common-sdr-cache-options.man \
+	manpage-common-sdr-cache-file-directory.man \
+	manpage-common-sdr-cache-ignore.man \
+	manpage-common-config-diagnostics.man \
 	manpage-common-config-tool-options.man \
 	manpage-common-config-tool-options-verbose.man \
 	manpage-common-config-tool-options-very-verbose.man \
@@ -104,6 +169,10 @@ MANS_COMMON = \
 	manpage-common-troubleshooting-heading-start.man \
 	manpage-common-troubleshooting-inband.man \
 	manpage-common-troubleshooting-outofband.man \
+	manpage-common-troubleshooting-inband-outofband.man \
+	manpage-common-troubleshooting-sel.man \
+	manpage-common-diagnostics.man \
+	manpage-common-diagnostics-hostranged-text.man \
 	manpage-common-known-issues.man \
 	manpage-common-known-issues-ping.man \
 	manpage-common-reporting-bugs.man \
@@ -125,10 +194,6 @@ MANS_COMMON = \
 
 $(MANS_CPP): $(MANS_CPP:%=%.pre)
 	$(CPP) -w -C -P -I$(top_srcdir)/man $@.pre  $@
-
-dist_man_MANS = \
-	$(MANS_CPP) \
-	$(MANS_NOCPP)
 
 CLEANFILES = $(MANS_CPP) *~
 DISTCLEANFILES = $(MANS_CPP) $(MANS_CPP:%=%.pre) .deps/*.P

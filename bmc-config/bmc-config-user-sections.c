@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -156,7 +156,7 @@ _get_user_access (bmc_config_state_data_t *state_data,
                                     userid,
                                     obj_cmd_rs) < 0)
         {
-          if (state_data->prog_data->args->config_args.common.debug)
+          if (state_data->prog_data->args->config_args.common_args.debug)
             pstdout_fprintf (state_data->pstate,
                              stderr,
                              "ipmi_cmd_get_user_access: %s\n",
@@ -183,7 +183,7 @@ _get_user_access (bmc_config_state_data_t *state_data,
            * to assume it's possible on some other motherboards.
            */
           
-          if (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
+          if (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED
               && (ipmi_check_completion_code (obj_cmd_rs,
                                               IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST) == 1))
             (*username_not_set_yet) = 1;
@@ -346,7 +346,7 @@ _set_user_access (bmc_config_state_data_t *state_data,
       /* This is a fatal error, we're already in this section,
        * it should be findable
        */
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "Cannot find section '%s'\n",
@@ -366,14 +366,13 @@ _set_user_access (bmc_config_state_data_t *state_data,
                                 ua->session_limit,
                                 obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_set_user_access: %s\n",
                          ipmi_ctx_errormsg (state_data->ipmi_ctx));
 
-      if (comp_code
-          && ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE)
+      if (comp_code)
         {
           (*comp_code) = 0;
           if (FIID_OBJ_GET (obj_cmd_rs, "comp_code", &val) < 0)
@@ -439,7 +438,7 @@ username_checkout (const char *section_name,
     {
       config_err_t ret;
 
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_get_user_name: %s\n",
@@ -457,7 +456,7 @@ username_checkout (const char *section_name,
        * previously.
        */
 
-      if (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
+      if (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED
           && (ipmi_check_completion_code (obj_cmd_rs,
                                           IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST) == 1))
         {
@@ -563,7 +562,7 @@ username_commit (const char *section_name,
     {
       config_err_t ret;
 
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_set_user_name: %s\n",
@@ -580,7 +579,7 @@ username_commit (const char *section_name,
        * If configured username identical to inputted one, don't
        * output error.
        */
-      if (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
+      if (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED
           && (ipmi_check_completion_code (obj_cmd_rs,
                                           IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST) == 1))
         {
@@ -601,7 +600,7 @@ username_commit (const char *section_name,
 				      userid,
 				      obj_get_user_name_cmd_rs) < 0)
 	    {
-	      if (state_data->prog_data->args->config_args.common.debug)
+	      if (state_data->prog_data->args->config_args.common_args.debug)
 		pstdout_fprintf (state_data->pstate,
 				 stderr,
 				 "ipmi_cmd_get_user_name: %s\n",
@@ -725,7 +724,7 @@ _check_bmc_user_password (bmc_config_state_data_t *state_data,
         {
           config_err_t ret;
 
-          if (state_data->prog_data->args->config_args.common.debug)
+          if (state_data->prog_data->args->config_args.common_args.debug)
             pstdout_fprintf (state_data->pstate,
                              stderr,
                              "ipmi_cmd_set_user_password: %s\n",
@@ -850,7 +849,7 @@ password_commit (const char *section_name,
         {
           config_err_t ret;
 
-          if (state_data->prog_data->args->config_args.common.debug)
+          if (state_data->prog_data->args->config_args.common_args.debug)
             pstdout_fprintf (state_data->pstate,
                              stderr,
                              "ipmi_cmd_set_user_password: %s\n",
@@ -874,7 +873,7 @@ password_commit (const char *section_name,
                                       strlen (kv->value_input),
                                       obj_cmd_rs) < 0)
         {
-          if (state_data->prog_data->args->config_args.common.debug)
+          if (state_data->prog_data->args->config_args.common_args.debug)
             pstdout_fprintf (state_data->pstate,
                              stderr,
                              "ipmi_cmd_set_user_password: %s\n",
@@ -1069,7 +1068,7 @@ password20_commit (const char *section_name,
     {
       config_err_t ret;
 
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_set_user_password: %s\n",
@@ -1230,7 +1229,7 @@ enable_user_commit (const char *section_name,
                                       0,
                                       obj_cmd_rs) < 0)
         {
-          if (state_data->prog_data->args->config_args.common.debug)
+          if (state_data->prog_data->args->config_args.common_args.debug)
             pstdout_fprintf (state_data->pstate,
                              stderr,
                              "ipmi_cmd_set_user_password: %s\n",
@@ -1256,11 +1255,11 @@ enable_user_commit (const char *section_name,
            * ignored)
            */
           
-          if (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
+          if (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED
               && (ipmi_check_completion_code (obj_cmd_rs,
                                               IPMI_COMP_CODE_REQUEST_DATA_LENGTH_INVALID) == 1))
             {
-              if (state_data->prog_data->args->config_args.common.debug)
+              if (state_data->prog_data->args->config_args.common_args.debug)
                 pstdout_fprintf (state_data->pstate,
                                  stderr,
                                  "ipmi_cmd_set_user_password: attempting workaround\n");
@@ -1301,7 +1300,7 @@ enable_user_commit (const char *section_name,
                             obj_cmd_rq,
                             obj_cmd_rs) < 0)
                 {
-                  if (state_data->prog_data->args->config_args.common.debug)
+                  if (state_data->prog_data->args->config_args.common_args.debug)
                     pstdout_fprintf (state_data->pstate,
                                      stderr,
                                      "ipmi_cmd: %s\n",
@@ -1790,7 +1789,7 @@ sol_payload_access_checkout (const char *section_name,
                                         userid,
                                         obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_get_user_payload_access: %s\n",
@@ -1911,7 +1910,7 @@ sol_payload_access_commit (const char *section_name,
                                         0,
                                         obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_set_user_payload_access: %s\n",
@@ -2297,7 +2296,7 @@ serial_session_limit_commit (const char *section_name,
   /* IPMI_COMP_CODE_REQUEST_INVALID_DATA_FIELD is special case for
    * this field, see IPMI spec.  "Return CCh 'invalid data field'
    * error completion code if an attempt is made to set this bit, but
-   * hte option is not supported."
+   * the option is not supported."
    */
   if ((ret = _set_user_access (state_data,
                                section_name,

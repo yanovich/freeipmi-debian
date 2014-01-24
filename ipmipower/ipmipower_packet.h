@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_packet.h,v 1.24 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,21 +24,16 @@
  *  with Ipmipower.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMIPOWER_PACKETS_H
-#define _IPMIPOWER_PACKETS_H
+#ifndef IPMIPOWER_PACKETS_H
+#define IPMIPOWER_PACKETS_H
 
 #include "ipmipower.h"
 
-/* ipmipower_packet_cmd_template
- * - retrieve template of the appropriate packet type
- */
-fiid_field_t *
-ipmipower_packet_cmd_template (ipmipower_powercmd_t ip, packet_type_t pkt);
+fiid_field_t *ipmipower_packet_cmd_template (ipmipower_powercmd_t ip,
+					     ipmipower_packet_type_t pkt);
 
-/* ipmipower_packet_cmd_obj
- * - retrieve object pointer of the appropriate packet type
- */
-fiid_obj_t ipmipower_packet_cmd_obj (ipmipower_powercmd_t ip, packet_type_t pkt);
+fiid_obj_t ipmipower_packet_cmd_obj (ipmipower_powercmd_t ip,
+				     ipmipower_packet_type_t pkt);
 
 /* ipmipower_packet_store
  * - Store pkt into ipmipower_powercmd_t structure
@@ -47,15 +42,12 @@ fiid_obj_t ipmipower_packet_cmd_obj (ipmipower_powercmd_t ip, packet_type_t pkt)
  * - Returns 1 if packet unparsed properly, 0 if not
  */
 int ipmipower_packet_store (ipmipower_powercmd_t ip,
-                            packet_type_t pkt,
+                            ipmipower_packet_type_t pkt,
                             const void *buf,
                             unsigned int buflen);
 
-/* ipmipower_packet_dump
- * - Dump contents of ipmi packet
- */
 void ipmipower_packet_dump (ipmipower_powercmd_t ip,
-                            packet_type_t pkt,
+                            ipmipower_packet_type_t pkt,
                             const void *buf,
                             unsigned int buflen);
 
@@ -65,7 +57,7 @@ void ipmipower_packet_dump (ipmipower_powercmd_t ip,
  * - Returns length of packet stored in buf
  */
 int ipmipower_packet_create (ipmipower_powercmd_t ip,
-                             packet_type_t pkt,
+                             ipmipower_packet_type_t pkt,
                              void *buf,
                              unsigned int buflen);
 
@@ -74,6 +66,7 @@ int ipmipower_packet_create (ipmipower_powercmd_t ip,
  * - Only works with response packet types
  * Returns message error code for appropriate error message
  */
-msg_type_t ipmipower_packet_errmsg (ipmipower_powercmd_t ip, packet_type_t pkt);
+ipmipower_msg_type_t ipmipower_packet_errmsg (ipmipower_powercmd_t ip,
+					      ipmipower_packet_type_t pkt);
 
-#endif /* _IPMIPOWER_PACKETS_H */
+#endif /* IPMIPOWER_PACKETS_H */

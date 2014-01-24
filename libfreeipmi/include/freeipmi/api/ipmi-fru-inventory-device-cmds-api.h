@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * 
  */
 /*****************************************************************************\
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -40,8 +40,8 @@
  *  with Ipmi-fru.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMI_FRU_INVENTORY_DEVICE_CMDS_API_H
-#define _IPMI_FRU_INVENTORY_DEVICE_CMDS_API_H
+#ifndef IPMI_FRU_INVENTORY_DEVICE_CMDS_API_H
+#define IPMI_FRU_INVENTORY_DEVICE_CMDS_API_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,4 +72,4 @@ int ipmi_cmd_read_fru_data (ipmi_ctx_t ctx,
 }
 #endif
 
-#endif /* _IPMI_FRU_INVENTORY_DEVICE_CMDS_API_H */
+#endif /* IPMI_FRU_INVENTORY_DEVICE_CMDS_API_H */

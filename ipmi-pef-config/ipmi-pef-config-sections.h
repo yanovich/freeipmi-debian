@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 FreeIPMI Core Team
+ * Copyright (C) 2007-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,11 @@
  * 
  */
 
-#ifndef _IPMI_PEF_CONFIG_SECTIONS
-#define _IPMI_PEF_CONFIG_SECTIONS
+#ifndef IPMI_PEF_CONFIG_SECTIONS
+#define IPMI_PEF_CONFIG_SECTIONS
 
 #include "ipmi-pef-config.h"
 
 struct config_section *ipmi_pef_config_sections_create (ipmi_pef_config_state_data_t *state_data);
 
-#endif /* _IPMI_PEF_CONFIG_SECTIONS */
+#endif /* IPMI_PEF_CONFIG_SECTIONS */

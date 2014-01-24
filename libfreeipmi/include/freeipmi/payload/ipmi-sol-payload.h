@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SOL_PAYLOAD_H
-#define _IPMI_SOL_PAYLOAD_H
+#ifndef IPMI_SOL_PAYLOAD_H
+#define IPMI_SOL_PAYLOAD_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -132,4 +132,4 @@ int fill_sol_payload_data_remote_console_to_bmc (uint8_t packet_sequence_number,
 }
 #endif
 
-#endif
+#endif /* IPMI_SOL_PAYLOAD_H */

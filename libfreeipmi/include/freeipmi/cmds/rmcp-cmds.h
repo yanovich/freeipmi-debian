@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  */
 
 
-#ifndef _RMCP_CMDS_H
-#define _RMCP_CMDS_H    1
+#ifndef RMCP_CMDS_H
+#define RMCP_CMDS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,4 +50,4 @@ int fill_cmd_asf_presence_ping (uint8_t message_tag, fiid_obj_t obj_cmd);
 }
 #endif
 
-#endif /* rmcp-cmds.h */
+#endif /* RMCP_CMDS_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,11 @@
  * 
  */
 
-#ifndef _BMC_DEVICE_ARGP_H
-#define _BMC_DEVICE_ARGP_H
+#ifndef BMC_DEVICE_ARGP_H
+#define BMC_DEVICE_ARGP_H
 
 #include "bmc-device.h"
 
 void bmc_device_argp_parse (int argc, char **argv, struct bmc_device_arguments *cmd_args);
 
-#endif
+#endif /* BMC_DEVICE_ARGP_H */

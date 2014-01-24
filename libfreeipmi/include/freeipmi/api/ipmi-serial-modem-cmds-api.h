@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SERIAL_MODEM_CMDS_API_H
-#define _IPMI_SERIAL_MODEM_CMDS_API_H
+#ifndef IPMI_SERIAL_MODEM_CMDS_API_H
+#define IPMI_SERIAL_MODEM_CMDS_API_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -120,4 +120,4 @@ int ipmi_cmd_get_serial_modem_configuration_call_retry_interval (ipmi_ctx_t ctx,
 }
 #endif
 
-#endif
+#endif /* IPMI_SERIAL_MODEM_CMDS_API_H */

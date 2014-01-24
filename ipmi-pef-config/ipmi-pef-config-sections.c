@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 FreeIPMI Core Team
+ * Copyright (C) 2007-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ _get_number_of_lan_alert_destinations (struct ipmi_pef_config_state_data *state_
                                                                         IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                         obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_get_lan_configuration_parameters_number_of_destinations: %s\n",
@@ -132,7 +132,7 @@ _get_number_of_alert_strings (struct ipmi_pef_config_state_data *state_data, uin
                                                                          IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                          obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_get_pef_configuration_parameters_number_of_alert_strings: %s\n",
@@ -187,7 +187,7 @@ _get_number_of_alert_policy_entries (struct ipmi_pef_config_state_data *state_da
                                                                                 IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                                 obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_get_pef_configuration_parameters_number_of_alert_policy_entries: %s\n",
@@ -242,7 +242,7 @@ _get_number_of_event_filters (struct ipmi_pef_config_state_data *state_data, uin
                                                                          IPMI_PEF_CONFIGURATION_PARAMETERS_NO_BLOCK_SELECTOR,
                                                                          obj_cmd_rs) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_get_pef_configuration_parameters_number_of_event_filters: %s\n",
@@ -367,10 +367,11 @@ ipmi_pef_config_sections_create (ipmi_pef_config_state_data_t *state_data)
 
   /* Lan_Alert_Destination Section(s) */
 
-  for (i = 0; i < number_of_lan_alert_destinations; i++)
+
+  for (i = 0; i <= number_of_lan_alert_destinations; i++)
     {
       if (!(section = ipmi_pef_config_lan_alert_destination_section_get (state_data,
-									 i + 1,
+									 i,
 									 state_data->lan_base_config_flags,
 									 -1)))
         goto cleanup;
@@ -397,9 +398,9 @@ ipmi_pef_config_sections_create (ipmi_pef_config_state_data_t *state_data)
 
   /* Alert_String Section(s) */
 
-  for (i = 0; i < number_of_alert_strings; i++)
+  for (i = 0; i <= number_of_alert_strings; i++)
     {
-      if (!(section = ipmi_pef_config_alert_string_section_get (state_data, i + 1)))
+      if (!(section = ipmi_pef_config_alert_string_section_get (state_data, i)))
         goto cleanup;
       if (config_section_append (&sections, section) < 0)
         goto cleanup;

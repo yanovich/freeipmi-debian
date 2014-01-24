@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_util.h,v 1.23 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,14 +24,25 @@
  *  with Ipmipower.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMIPOWER_UTIL_H
-#define _IPMIPOWER_UTIL_H
+#ifndef IPMIPOWER_UTIL_H
+#define IPMIPOWER_UTIL_H
 
 #include <sys/poll.h>
 
 #include "ipmipower.h"
 
 #include "cbuf.h"
+
+char *ipmipower_power_cmd_to_string (ipmipower_power_cmd_t cmd);
+
+/* ipmipower_power_cmd_check_privilege
+ * - check if privilege level ok for power cmd
+ * - returns 1 if ok, 0 if not, -1 on error
+ * - if returns 0 or -1, error message in buf 
+ */
+int ipmipower_power_cmd_check_privilege (ipmipower_power_cmd_t cmd,
+					 char *errbuf,
+					 unsigned int errbuflen);
 
 /* ipmipower_poll
  * - safe poll()
@@ -51,4 +62,4 @@ void ipmipower_cbuf_printf(cbuf_t cbuf, const char *fmt, ...);
  */
 int ipmipower_cbuf_peek_and_drop (cbuf_t buf, void *buffer, int len);
 
-#endif /* _IPMIPOWER_UTIL_H */
+#endif /* IPMIPOWER_UTIL_H */

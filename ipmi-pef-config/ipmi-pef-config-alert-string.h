@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 FreeIPMI Core Team
+ * Copyright (C) 2007-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,13 @@
  * 
  */
 
-#ifndef _IPMI_PEF_CONFIG_ALERT_STRING_H_
-#define _IPMI_PEF_CONFIG_ALERT_STRING_H_
+#ifndef IPMI_PEF_CONFIG_ALERT_STRING_H
+#define IPMI_PEF_CONFIG_ALERT_STRING_H
 
 #include "ipmi-pef-config.h"
 #include "ipmi-pef-config-sections.h"
 
-struct config_section * ipmi_pef_config_alert_string_section_get (ipmi_pef_config_state_data_t *state_data, int num);
+struct config_section * ipmi_pef_config_alert_string_section_get (ipmi_pef_config_state_data_t *state_data,
+								  unsigned int num);
 
-#endif /* _IPMI_PEF_CONFIG_ALERT_STRING_H_ */
+#endif /* IPMI_PEF_CONFIG_ALERT_STRING_H */

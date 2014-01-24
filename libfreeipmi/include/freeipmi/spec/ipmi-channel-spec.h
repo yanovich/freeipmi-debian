@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,19 +16,23 @@
  * 
  */
 
-#ifndef _IPMI_CHANNEL_SPEC_H
-#define _IPMI_CHANNEL_SPEC_H
+#ifndef IPMI_CHANNEL_SPEC_H
+#define IPMI_CHANNEL_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define IPMI_CHANNEL_NUMBER_PRIMARY_IPMB      0x0
-#define IPMI_CHANNEL_NUMBER_RESERVED_MIN      0x0C /* 0x0C to 0x0D */
-#define IPMI_CHANNEL_NUMBER_RESERVED_MAX      0x0D /* 0x0C to 0x0D */
-#define IPMI_CHANNEL_NUMBER_PRESENT_IF        0xE
-#define IPMI_CHANNEL_NUMBER_CURRENT_CHANNEL   IPMI_CHANNEL_NUMBER_PRESENT_IF
-#define IPMI_CHANNEL_NUMBER_SYSTEM_INTERFACE  0xF
+#define IPMI_CHANNEL_NUMBER_PRIMARY_IPMB                0x0
+#define IPMI_CHANNEL_NUMBER_IMPLEMENTATION_SPECIFIC_MIN 0x01 /* 0x01 to 0x07 */
+#define IPMI_CHANNEL_NUMBER_IMPLEMENTATION_SPECIFIC_MAX 0x07 /* 0x01 to 0x07 */
+#define IPMI_CHANNEL_NUMBER_RESERVED_MIN                0x0C /* 0x0C to 0x0D */
+#define IPMI_CHANNEL_NUMBER_RESERVED_MAX                0x0D /* 0x0C to 0x0D */
+#define IPMI_CHANNEL_NUMBER_PRESENT_IF                  0xE
+#define IPMI_CHANNEL_NUMBER_CURRENT_CHANNEL             IPMI_CHANNEL_NUMBER_PRESENT_IF
+#define IPMI_CHANNEL_NUMBER_SYSTEM_INTERFACE            0xF
+
+#define IPMI_CHANNEL_NUMBERS_MAX                        16
 
 /* To avoid gcc warnings, add +1 in comparison */
 #define IPMI_CHANNEL_NUMBER_VALID(__channel_number)                   \
@@ -94,6 +98,4 @@ extern "C" {
 }
 #endif
 
-#endif /* ipmi-channel-spec.h */
-
-
+#endif /* IPMI_CHANNEL_SPEC_H */

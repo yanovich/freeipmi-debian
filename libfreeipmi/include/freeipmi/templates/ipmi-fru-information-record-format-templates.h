@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_FRU_INFORMATION_RECORD_FORMAT_TEMPLATES_H
-#define _IPMI_FRU_INFORMATION_RECORD_FORMAT_TEMPLATES_H
+#ifndef IPMI_FRU_INFORMATION_RECORD_FORMAT_TEMPLATES_H
+#define IPMI_FRU_INFORMATION_RECORD_FORMAT_TEMPLATES_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -198,4 +198,4 @@ FIID Template: tmpl_fru_oem_record
 }
 #endif
 
-#endif  /* _IPMI_FRU_INFORMATION_RECORD_FORMAT_TEMPLATES_H */
+#endif /* IPMI_FRU_INFORMATION_RECORD_FORMAT_TEMPLATES_H */

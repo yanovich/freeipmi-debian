@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmi-dcmi.h,v 1.5 2010-05-17 17:42:45 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2009-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2009-2013 Lawrence Livermore National Security, LLC.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
  *  LLNL-CODE-413270
@@ -24,9 +24,8 @@
  *  with Ipmi-Dcmi.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-/* double underscore, libfreeipmi ipmi-dcmi.h also exists */
-#ifndef __IPMI_DCMI_H
-#define __IPMI_DCMI_H
+#ifndef IPMI_DCMI_H
+#define IPMI_DCMI_H
 
 #include <freeipmi/freeipmi.h>
 
@@ -56,8 +55,7 @@ enum ipmi_dcmi_argp_option_keys
 
 struct ipmi_dcmi_arguments
 {
-  struct common_cmd_args common;
-  struct hostrange_cmd_args hostrange;
+  struct common_cmd_args common_args;
   int get_dcmi_capability_info;
   int get_asset_tag;
   int set_asset_tag;
@@ -97,4 +95,4 @@ typedef struct ipmi_dcmi_state_data
   struct ipmi_oem_data oem_data;
 } ipmi_dcmi_state_data_t;
 
-#endif
+#endif /* IPMI_DCMI_H */

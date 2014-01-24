@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SLAVE_ADDRESS_OEM_SPEC_H
-#define _IPMI_SLAVE_ADDRESS_OEM_SPEC_H
+#ifndef IPMI_SLAVE_ADDRESS_OEM_SPEC_H
+#define IPMI_SLAVE_ADDRESS_OEM_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,8 +69,21 @@ extern "C" {
 /* achu: not official names, named based on use context */
 #define IPMI_GENERATOR_ID_OEM_QUANTA_ERROR           0x01
 
+/******************************************* 
+ * Wistron                                 *
+ *******************************************/
+
+/*
+ * Wistron / Dell Poweredge C6220
+ */
+
+/* achu: not official names, named based on use context */
+#define IPMI_GENERATOR_ID_OEM_WISTRON_BIOS            0x01
+#define IPMI_GENERATOR_ID_OEM_WISTRON_SMI             0x21
+#define IPMI_GENERATOR_ID_OEM_WISTRON_ME              0x2C
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* ipmi-slave-address-spec.h */
+#endif /* IPMI_SLAVE_ADDRESS_OEM_SPEC_H */

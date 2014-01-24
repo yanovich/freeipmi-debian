@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_INTERPRET_DEFS_H
-#define _IPMI_INTERPRET_DEFS_H
+#ifndef IPMI_INTERPRET_DEFS_H
+#define IPMI_INTERPRET_DEFS_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -26,7 +26,7 @@
 #include <stdint.h>
 
 #include "freeipmi/interpret/ipmi-interpret.h"
-#include "freeipmi/sel-parse/ipmi-sel-parse.h"
+#include "freeipmi/sel/ipmi-sel.h"
 
 #include "hash.h"
 
@@ -155,31 +155,44 @@ struct ipmi_interpret_sel {
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_power_unit_redundancy_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_cooling_device_redundancy_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_memory_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_memory_state_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_memory_transition_severity_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_memory_redundancy_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_drive_slot_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_drive_slot_state_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_drive_slot_predictive_failure_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_drive_slot_device_present_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_post_memory_resize_state_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_system_firmware_progress_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_system_firmware_progress_transition_severity_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_event_logging_disabled_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_system_event_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_system_event_transition_state_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_system_event_state_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_critical_interrupt_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_button_switch_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_button_switch_state_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_button_switch_transition_severity_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_module_board_state_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_module_board_device_present_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_chassis_transition_severity_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_chip_set_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_chip_set_transition_severity_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_cable_interconnect_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_cable_interconnect_transition_severity_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_system_boot_initiated_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_boot_error_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_boot_error_state_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_boot_error_transition_severity_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_os_boot_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_os_critical_stop_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_os_critical_stop_state_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_slot_connector_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_slot_connector_transition_severity_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_system_acpi_power_state_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_watchdog2_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_platform_alert_config;
+  struct ipmi_interpret_sel_config **ipmi_interpret_sel_platform_alert_state_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_entity_presence_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_entity_presence_device_present_config;
   struct ipmi_interpret_sel_config **ipmi_interpret_sel_lan_config;
@@ -237,31 +250,46 @@ struct ipmi_interpret_sensor {
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_power_unit_redundancy_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_cooling_device_redundancy_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_memory_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_memory_state_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_memory_transition_severity_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_memory_redundancy_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_drive_slot_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_drive_slot_state_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_drive_slot_predictive_failure_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_drive_slot_device_present_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_post_memory_resize_state_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_system_firmware_progress_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_system_firmware_progress_transition_severity_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_event_logging_disabled_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_system_event_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_system_event_transition_state_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_system_event_state_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_critical_interrupt_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_button_switch_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_button_switch_state_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_button_switch_transition_severity_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_module_board_state_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_module_board_device_present_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_chassis_transition_severity_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_chip_set_transition_severity_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_cable_interconnect_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_cable_interconnect_transition_severity_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_boot_error_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_boot_error_state_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_boot_error_transition_severity_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_os_boot_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_os_critical_stop_state_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_slot_connector_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_slot_connector_transition_severity_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_system_acpi_power_state_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_watchdog2_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_platform_alert_state_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_entity_presence_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_entity_presence_device_present_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_management_subsystem_health_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_battery_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_session_audit_config;
+  struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_version_change_config;
   struct ipmi_interpret_sensor_config **ipmi_interpret_sensor_fru_state_config;
 
   hash_t sensor_oem_config;
@@ -274,10 +302,10 @@ struct ipmi_interpret_ctx {
   uint32_t manufacturer_id;
   uint16_t product_id;
 
-  ipmi_sel_parse_ctx_t sel_parse_ctx;
+  ipmi_sel_ctx_t sel_ctx;
 
   struct ipmi_interpret_sel interpret_sel;
   struct ipmi_interpret_sensor interpret_sensor;
 };
 
-#endif /* _IPMI_INTERPRET_DEFS_H */
+#endif /* IPMI_INTERPRET_DEFS_H */

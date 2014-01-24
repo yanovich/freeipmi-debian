@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _TOOL_CONFIG_FILE_COMMON_H
-#define _TOOL_CONFIG_FILE_COMMON_H
+#ifndef TOOL_CONFIG_FILE_COMMON_H
+#define TOOL_CONFIG_FILE_COMMON_H
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -30,7 +30,8 @@
 #define CONFIG_FILE_INBAND      0x01
 #define CONFIG_FILE_OUTOFBAND   0x02
 #define CONFIG_FILE_SDR         0x04
-#define CONFIG_FILE_HOSTRANGE   0x08
+#define CONFIG_FILE_TIME        0x08
+#define CONFIG_FILE_HOSTRANGE   0x10
 
 #define CONFIG_FILE_TOOL_NONE                0x00000000
 #define CONFIG_FILE_TOOL_BMC_CONFIG          0x00000001
@@ -50,6 +51,7 @@
 #define CONFIG_FILE_TOOL_IPMI_SENSORS_CONFIG 0x00004000
 #define CONFIG_FILE_TOOL_IPMICONSOLE         0x00008000
 #define CONFIG_FILE_TOOL_IPMIPOWER           0x00010000
+#define CONFIG_FILE_TOOL_IPMISELD            0x00020000
 
 /* achu:
  *
@@ -72,7 +74,7 @@
 
 struct config_file_data_bmc_config
 {
-  int verbose_count;
+  unsigned int verbose_count;
   int verbose_count_count;
 };
 
@@ -84,15 +86,17 @@ struct config_file_data_bmc_info
 
 struct config_file_data_bmc_watchdog
 {
-  char *logfile;
-  int logfile_count;
+  char *logfile;		/* deprecated */
+  int logfile_count;		/* deprecated */
+  int verbose_logging;
+  int verbose_logging_count;
   int no_logging;
   int no_logging_count;
 };
 
 struct config_file_data_ipmi_chassis_config
 {
-  int verbose_count;
+  unsigned int verbose_count;
   int verbose_count_count;
 };
 
@@ -104,29 +108,31 @@ struct config_file_data_ipmi_dcmi
 
 struct config_file_data_ipmi_fru
 {
-  int verbose_count;
+  unsigned int verbose_count;
   int verbose_count_count;
-  int skip_checks;
-  int skip_checks_count;
+  int skip_checks;		/* legacy - parse for backwards compatability */
+  int skip_checks_count;	/* legacy - parse for backwards compatability */
+  int bridge_fru;
+  int bridge_fru_count;
   int interpret_oem_data;
   int interpret_oem_data_count;
 };
 
 struct config_file_data_ipmi_oem
 {
-  int verbose_count;
+  unsigned int verbose_count;
   int verbose_count_count;
 };
 
 struct config_file_data_ipmi_pef_config
 {
-  int verbose_count;
+  unsigned int verbose_count;
   int verbose_count_count;
 };
 
 struct config_file_data_ipmi_pet
 {
-  int verbose_count;
+  unsigned int verbose_count;
   int verbose_count_count;
   int output_event_severity;
   int output_event_severity_count;
@@ -150,7 +156,7 @@ struct config_file_data_ipmi_pet
 
 struct config_file_data_ipmi_sel
 {
-  int verbose_count;
+  unsigned int verbose_count;
   int verbose_count_count;
   char sensor_types[CONFIG_FILE_MAX_SENSOR_TYPES][CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH+1];
   unsigned int sensor_types_length;
@@ -168,8 +174,8 @@ struct config_file_data_ipmi_sel
   int output_event_state_count;
   char *event_state_config_file;
   int event_state_config_file_count;
-  int assume_system_event_records;
-  int assume_system_event_records_count;
+  int assume_system_event_records; /* legacy - parse for backwards compatability */
+  int assume_system_event_records_count; /* legacy - parse for backwards compatability */
   int interpret_oem_data;
   int interpret_oem_data_count;
   int output_oem_event_strings;
@@ -190,7 +196,7 @@ struct config_file_data_ipmi_sel
 
 struct config_file_data_ipmi_sensors
 {
-  int verbose_count;
+  unsigned int verbose_count;
   int verbose_count_count;
   int quiet_readings;
   int quiet_readings_count;
@@ -224,6 +230,8 @@ struct config_file_data_ipmi_sensors
   int output_sensor_state_count;
   char *sensor_state_config_file;
   int sensor_state_config_file_count;
+  int output_sensor_thresholds;
+  int output_sensor_thresholds_count;
   int no_sensor_type_output;
   int no_sensor_type_output_count;
   int comma_separated_output_count;
@@ -240,7 +248,7 @@ struct config_file_data_ipmi_sensors
 
 struct config_file_data_ipmi_sensors_config
 {
-  int verbose_count;
+  unsigned int verbose_count;
   int verbose_count_count;
 };
 
@@ -254,6 +262,10 @@ struct config_file_data_ipmiconsole
   int serial_keepalive_count;
   int serial_keepalive_empty;
   int serial_keepalive_empty_count;
+  int sol_payload_instance;
+  int sol_payload_instance_count;
+  int deactivate_all_instances;
+  int deactivate_all_instances_count;
   int lock_memory;
   int lock_memory_count;
 };
@@ -266,6 +278,9 @@ struct config_file_data_ipmipower
   int wait_until_on_count;
   int wait_until_off;
   int wait_until_off_count;
+  /* Parse string and let ipmipower determine if it is valid */
+  char *oem_power_type_str;
+  int oem_power_type_str_count;
 
   unsigned int retransmission_wait_timeout;
   int retransmission_wait_timeout_count;
@@ -283,13 +298,67 @@ struct config_file_data_ipmipower
   int ping_consec_count_count;
 };
 
+struct config_file_data_ipmiseld
+{
+  char *hostname;
+  int hostname_count;
+  unsigned int verbose_count;
+  int verbose_count_count;
+  char sensor_types[CONFIG_FILE_MAX_SENSOR_TYPES][CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH+1];
+  unsigned int sensor_types_length;
+  int sensor_types_count;
+  char exclude_sensor_types[CONFIG_FILE_MAX_SENSOR_TYPES][CONFIG_FILE_MAX_SENSOR_TYPES_STRING_LENGTH+1];
+  unsigned int exclude_sensor_types_length;
+  int exclude_sensor_types_count;
+  int system_event_only;
+  int system_event_only_count;
+  int oem_event_only;
+  int oem_event_only_count;
+  char *event_state_config_file;
+  int event_state_config_file_count;
+  int interpret_oem_data;
+  int interpret_oem_data_count;
+  int output_oem_event_strings;
+  int output_oem_event_strings_count;
+  int entity_sensor_names;
+  int entity_sensor_names_count;
+  int non_abbreviated_units;
+  int non_abbreviated_units_count;
+  char *event_state_filter_str;
+  int event_state_filter_str_count;
+  unsigned int warning_threshold;
+  int warning_threshold_count;
+  unsigned int clear_threshold;
+  int clear_threshold_count;
+  char *system_event_format_str;
+  int system_event_format_str_count;
+  char *oem_timestamped_event_format_str;
+  int oem_timestamped_event_format_str_count;
+  char *oem_non_timestamped_event_format_str;
+  int oem_non_timestamped_event_format_str_count;
+  unsigned int poll_interval;
+  int poll_interval_count;
+  char *log_facility_str;
+  int log_facility_str_count;
+  char *log_priority_str;
+  int log_priority_str_count;
+  char *cache_directory;
+  int cache_directory_count;
+  int ignore_sdr;
+  int ignore_sdr_count;
+  int re_download_sdr;
+  int re_download_sdr_count;
+  int clear_sel;
+  int clear_sel_count;
+  unsigned int threadpool_count;
+  int threadpool_count_count;
+};
+
 int config_file_parse (const char *filename,
                        int no_error_if_not_found,
-                       struct common_cmd_args *cmd_args,
-                       struct sdr_cmd_args *sdr_args,
-                       struct hostrange_cmd_args *hostrange_args,
+                       struct common_cmd_args *common_args,
                        unsigned int support,
                        unsigned int tool_support,
                        void *tool_data);
 
-#endif
+#endif /* TOOL_CONFIG_FILE_COMMON_H */

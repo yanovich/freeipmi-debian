@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_PRIVILEGE_LEVEL_SPEC_H
-#define _IPMI_PRIVILEGE_LEVEL_SPEC_H
+#ifndef IPMI_PRIVILEGE_LEVEL_SPEC_H
+#define IPMI_PRIVILEGE_LEVEL_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,6 +51,4 @@ extern "C" {
 }
 #endif
 
-#endif /* ipmi-privilege-level-spec.h */
-
-
+#endif /* IPMI_PRIVILEGE_LEVEL_SPEC_H */

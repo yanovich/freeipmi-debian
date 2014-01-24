@@ -34,8 +34,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = man
-DIST_COMMON = $(dist_man_MANS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/bmc-config.8.pre.in \
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/bmc-config.8.pre.in \
 	$(srcdir)/bmc-config.conf.5.pre.in \
 	$(srcdir)/bmc-device.8.pre.in $(srcdir)/bmc-info.8.pre.in \
 	$(srcdir)/bmc-watchdog.8.pre.in $(srcdir)/freeipmi.7.pre.in \
@@ -55,6 +55,7 @@ DIST_COMMON = $(dist_man_MANS) $(srcdir)/Makefile.am \
 	$(srcdir)/ipmidetectd.8.pre.in \
 	$(srcdir)/ipmidetectd.conf.5.pre.in \
 	$(srcdir)/ipmiping.8.pre.in $(srcdir)/ipmipower.8.pre.in \
+	$(srcdir)/ipmiseld.8.pre.in $(srcdir)/ipmiseld.conf.5.pre.in \
 	$(srcdir)/libfreeipmi.3.pre.in \
 	$(srcdir)/libipmiconsole.3.pre.in \
 	$(srcdir)/libipmiconsole.conf.5.pre.in \
@@ -62,8 +63,7 @@ DIST_COMMON = $(dist_man_MANS) $(srcdir)/Makefile.am \
 	$(srcdir)/libipmimonitoring.3.pre.in \
 	$(srcdir)/rmcpping.8.pre.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
-	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
@@ -73,6 +73,8 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_cache_dir.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_config_file.m4 \
 	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
@@ -89,7 +91,8 @@ CONFIG_CLEAN_FILES = bmc-config.8.pre bmc-config.conf.5.pre \
 	ipmi-sensors.8.pre ipmi-sensors-config.8.pre ipmiconsole.8.pre \
 	ipmidetect.8.pre ipmidetect.conf.5.pre ipmidetectd.8.pre \
 	ipmidetectd.conf.5.pre ipmiping.8.pre ipmipower.8.pre \
-	libfreeipmi.3.pre freeipmi_interpret_sensor.conf.5.pre \
+	ipmiseld.8.pre ipmiseld.conf.5.pre libfreeipmi.3.pre \
+	freeipmi_interpret_sensor.conf.5.pre \
 	freeipmi_interpret_sel.conf.5.pre libipmiconsole.3.pre \
 	libipmiconsole.conf.5.pre libipmidetect.3.pre \
 	libipmimonitoring.3.pre rmcpping.8.pre
@@ -124,7 +127,7 @@ man5dir = $(mandir)/man5
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 NROFF = nroff
-MANS = $(dist_man_MANS)
+MANS = $(man3_MANS) $(man5_MANS) $(man7_MANS) $(man8_MANS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
@@ -134,7 +137,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BMC_WATCHDOG_LOGFILE_DEFAULT = @BMC_WATCHDOG_LOGFILE_DEFAULT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -162,8 +164,6 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
 INSTALL_IPMISDRCACHEDIR = @INSTALL_IPMISDRCACHEDIR@
-INSTALL_LOGDIR = @INSTALL_LOGDIR@
-INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -173,6 +173,8 @@ IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
 IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
+IPMISELD_CACHE_DIRECTORY = @IPMISELD_CACHE_DIRECTORY@
+IPMISELD_CONFIG_FILE_DEFAULT = @IPMISELD_CONFIG_FILE_DEFAULT@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
 IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
@@ -280,6 +282,63 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+man3_MANS = \
+	libipmiconsole.3 \
+	libipmidetect.3 \
+	libfreeipmi.3 \
+	libipmimonitoring.3
+
+man5_MANS = \
+	bmc-config.conf.5 \
+	freeipmi.conf.5 \
+	freeipmi_interpret_sel.conf.5 \
+	freeipmi_interpret_sensor.conf.5 \
+	ipmiconsole.conf.5 \
+	ipmidetect.conf.5 \
+	ipmidetectd.conf.5 \
+	ipmipower.conf.5 \
+	ipmimonitoring_sensors.conf.5 \
+	ipmimonitoring.conf.5 \
+	ipmiseld.conf.5 \
+	ipmi_monitoring_sensors.conf.5 \
+	libipmiconsole.conf.5 \
+	libipmimonitoring.conf.5
+
+man7_MANS = \
+	freeipmi.7
+
+man8_MANS = \
+	bmc-config.8 \
+	bmc-device.8 \
+	bmc-info.8 \
+	bmc-watchdog.8 \
+	ipmi-chassis.8 \
+	ipmi-chassis-config.8 \
+	ipmi-dcmi.8 \
+	ipmi-fru.8 \
+	ipmi-locate.8 \
+	ipmi-oem.8 \
+	ipmi-pef-config.8 \
+	ipmi-pet.8 \
+	ipmi-raw.8 \
+	ipmi-sel.8 \
+	ipmi-sensors.8 \
+	ipmi-sensors-config.8 \
+	ipmiconsole.8 \
+	ipmidetect.8 \
+	ipmidetectd.8 \
+	ipmiping.8 \
+	ipmipower.8 \
+	ipmiseld.8 \
+	rmcpping.8 \
+	ipmi-console.8 \
+	ipmi-detect.8 \
+	ipmi-ping.8 \
+	ipmi-power.8 \
+	ipmimonitoring.8 \
+	pef-config.8 \
+	rmcp-ping.8
+
 MANS_CPP = \
 	bmc-config.8 \
 	bmc-config.conf.5 \
@@ -305,6 +364,8 @@ MANS_CPP = \
 	ipmidetectd.conf.5 \
 	ipmiping.8 \
 	ipmipower.8 \
+	ipmiseld.8 \
+	ipmiseld.conf.5 \
 	freeipmi.7 \
 	freeipmi.conf.5 \
 	freeipmi_interpret_sel.conf.5 \
@@ -358,6 +419,7 @@ MANS_COMMON = \
 	manpage-common-workaround-outofband-common-text.man \
 	manpage-common-workaround-outofband-15-text.man \
 	manpage-common-workaround-outofband-20-text.man \
+	manpage-common-workaround-sdr-text.man \
 	manpage-common-workaround-config-tool.man \
 	manpage-common-debug.man \
 	manpage-common-misc.man \
@@ -371,8 +433,13 @@ MANS_COMMON = \
 	manpage-common-hostranged-text-options.man \
 	manpage-common-hostranged-text-localhost.man \
 	manpage-common-hostranged-text-threads.man \
-	manpage-common-sdr-options.man \
-	manpage-common-ignore-sdr-cache.man \
+	manpage-common-time-options-heading.man \
+	manpage-common-time-options.man \
+	manpage-common-sdr-cache-options-heading.man \
+	manpage-common-sdr-cache-options.man \
+	manpage-common-sdr-cache-file-directory.man \
+	manpage-common-sdr-cache-ignore.man \
+	manpage-common-config-diagnostics.man \
 	manpage-common-config-tool-options.man \
 	manpage-common-config-tool-options-verbose.man \
 	manpage-common-config-tool-options-very-verbose.man \
@@ -386,6 +453,10 @@ MANS_COMMON = \
 	manpage-common-troubleshooting-heading-start.man \
 	manpage-common-troubleshooting-inband.man \
 	manpage-common-troubleshooting-outofband.man \
+	manpage-common-troubleshooting-inband-outofband.man \
+	manpage-common-troubleshooting-sel.man \
+	manpage-common-diagnostics.man \
+	manpage-common-diagnostics-hostranged-text.man \
 	manpage-common-known-issues.man \
 	manpage-common-known-issues-ping.man \
 	manpage-common-reporting-bugs.man \
@@ -404,10 +475,6 @@ MANS_COMMON = \
 	manpage-common-no-header-output.man \
 	manpage-common-non-abbreviated-units.man \
 	manpage-common-legacy-output.man
-
-dist_man_MANS = \
-	$(MANS_CPP) \
-	$(MANS_NOCPP)
 
 CLEANFILES = $(MANS_CPP) *~
 DISTCLEANFILES = $(MANS_CPP) $(MANS_CPP:%=%.pre) .deps/*.P
@@ -500,6 +567,10 @@ ipmiping.8.pre: $(top_builddir)/config.status $(srcdir)/ipmiping.8.pre.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 ipmipower.8.pre: $(top_builddir)/config.status $(srcdir)/ipmipower.8.pre.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+ipmiseld.8.pre: $(top_builddir)/config.status $(srcdir)/ipmiseld.8.pre.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+ipmiseld.conf.5.pre: $(top_builddir)/config.status $(srcdir)/ipmiseld.conf.5.pre.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 libfreeipmi.3.pre: $(top_builddir)/config.status $(srcdir)/libfreeipmi.3.pre.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 freeipmi_interpret_sensor.conf.5.pre: $(top_builddir)/config.status $(srcdir)/freeipmi_interpret_sensor.conf.5.pre.in
@@ -522,13 +593,11 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-man3: $(dist_man_MANS)
+install-man3: $(man3_MANS)
 	@$(NORMAL_INSTALL)
 	test -z "$(man3dir)" || $(MKDIR_P) "$(DESTDIR)$(man3dir)"
-	@list=''; test -n "$(man3dir)" || exit 0; \
+	@list='$(man3_MANS)'; test -n "$(man3dir)" || exit 0; \
 	{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.3[a-z]*$$/p'; \
 	} | while read p; do \
 	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; echo "$$p"; \
@@ -551,22 +620,18 @@ install-man3: $(dist_man_MANS)
 
 uninstall-man3:
 	@$(NORMAL_UNINSTALL)
-	@list=''; test -n "$(man3dir)" || exit 0; \
+	@list='$(man3_MANS)'; test -n "$(man3dir)" || exit 0; \
 	files=`{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.3[a-z]*$$/p'; \
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^3][0-9a-z]*$$,3,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
 	test -z "$$files" || { \
 	  echo " ( cd '$(DESTDIR)$(man3dir)' && rm -f" $$files ")"; \
 	  cd "$(DESTDIR)$(man3dir)" && rm -f $$files; }
-install-man5: $(dist_man_MANS)
+install-man5: $(man5_MANS)
 	@$(NORMAL_INSTALL)
 	test -z "$(man5dir)" || $(MKDIR_P) "$(DESTDIR)$(man5dir)"
-	@list=''; test -n "$(man5dir)" || exit 0; \
+	@list='$(man5_MANS)'; test -n "$(man5dir)" || exit 0; \
 	{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.5[a-z]*$$/p'; \
 	} | while read p; do \
 	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; echo "$$p"; \
@@ -589,22 +654,18 @@ install-man5: $(dist_man_MANS)
 
 uninstall-man5:
 	@$(NORMAL_UNINSTALL)
-	@list=''; test -n "$(man5dir)" || exit 0; \
+	@list='$(man5_MANS)'; test -n "$(man5dir)" || exit 0; \
 	files=`{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.5[a-z]*$$/p'; \
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^5][0-9a-z]*$$,5,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
 	test -z "$$files" || { \
 	  echo " ( cd '$(DESTDIR)$(man5dir)' && rm -f" $$files ")"; \
 	  cd "$(DESTDIR)$(man5dir)" && rm -f $$files; }
-install-man7: $(dist_man_MANS)
+install-man7: $(man7_MANS)
 	@$(NORMAL_INSTALL)
 	test -z "$(man7dir)" || $(MKDIR_P) "$(DESTDIR)$(man7dir)"
-	@list=''; test -n "$(man7dir)" || exit 0; \
+	@list='$(man7_MANS)'; test -n "$(man7dir)" || exit 0; \
 	{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.7[a-z]*$$/p'; \
 	} | while read p; do \
 	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; echo "$$p"; \
@@ -627,22 +688,18 @@ install-man7: $(dist_man_MANS)
 
 uninstall-man7:
 	@$(NORMAL_UNINSTALL)
-	@list=''; test -n "$(man7dir)" || exit 0; \
+	@list='$(man7_MANS)'; test -n "$(man7dir)" || exit 0; \
 	files=`{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.7[a-z]*$$/p'; \
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^7][0-9a-z]*$$,7,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
 	test -z "$$files" || { \
 	  echo " ( cd '$(DESTDIR)$(man7dir)' && rm -f" $$files ")"; \
 	  cd "$(DESTDIR)$(man7dir)" && rm -f $$files; }
-install-man8: $(dist_man_MANS)
+install-man8: $(man8_MANS)
 	@$(NORMAL_INSTALL)
 	test -z "$(man8dir)" || $(MKDIR_P) "$(DESTDIR)$(man8dir)"
-	@list=''; test -n "$(man8dir)" || exit 0; \
+	@list='$(man8_MANS)'; test -n "$(man8dir)" || exit 0; \
 	{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.8[a-z]*$$/p'; \
 	} | while read p; do \
 	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; echo "$$p"; \
@@ -665,10 +722,8 @@ install-man8: $(dist_man_MANS)
 
 uninstall-man8:
 	@$(NORMAL_UNINSTALL)
-	@list=''; test -n "$(man8dir)" || exit 0; \
+	@list='$(man8_MANS)'; test -n "$(man8dir)" || exit 0; \
 	files=`{ for i in $$list; do echo "$$i"; done; \
-	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.8[a-z]*$$/p'; \
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^8][0-9a-z]*$$,8,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
 	test -z "$$files" || { \

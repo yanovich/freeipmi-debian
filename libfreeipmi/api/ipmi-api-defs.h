@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_API_DEFS_H
-#define _IPMI_API_DEFS_H
+#ifndef IPMI_API_DEFS_H
+#define IPMI_API_DEFS_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -64,21 +64,28 @@
 #define MAXHOSTNAMELEN 64
 #endif
 
+struct ipmi_ctx_target
+{
+  uint8_t channel_number;	/* for ipmb */
+  int channel_number_is_set;	/* for ipmb */
+  uint8_t rs_addr;		/* for ipmb */
+  int rs_addr_is_set;		/* for ipmb */
+  uint8_t lun;
+  uint8_t net_fn;
+};
+
 struct ipmi_ctx
 {
   uint32_t magic;
-
+  
   ipmi_driver_type_t type;
   unsigned int workaround_flags_outofband;
   unsigned int workaround_flags_outofband_2_0;
   unsigned int workaround_flags_inband;
   unsigned int flags;
-
-  uint8_t channel_number;       /* for ipmb */
-  uint8_t rs_addr;              /* for ipmb */
-  uint8_t lun;
-  uint8_t net_fn;
-
+  
+  struct ipmi_ctx_target target;
+  
   fiid_field_t      *tmpl_ipmb_cmd_rq;
   fiid_field_t      *tmpl_ipmb_cmd_rs;
 
@@ -187,4 +194,4 @@ struct ipmi_ctx
   } io;
 };
 
-#endif /* _IPMI_API_DEFS_H */
+#endif /* IPMI_API_DEFS_H */

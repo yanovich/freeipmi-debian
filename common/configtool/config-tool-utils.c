@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -327,13 +327,13 @@ config_ipv4_address_string2int (pstdout_state_t pstate,
                      &b3,
                      &b4)) < 0)
     {
-      PSTDOUT_PERROR (pstate, "sscanf");
+      pstdout_perror (pstate, "sscanf");
       return (-1);
     }
 
   if (ret != 4)
     {
-      PSTDOUT_FPRINTF (pstate,
+      pstdout_fprintf (pstate,
                        stderr,
                        "config_ipv4_address_string2int: Invalid src input: %s\n",
                        src);
@@ -370,13 +370,13 @@ config_mac_address_string2int (pstdout_state_t pstate,
                      &b5,
                      &b6)) < 0)
     {
-      PSTDOUT_PERROR (pstate, "sscanf");
+      pstdout_perror (pstate, "sscanf");
       return (-1);
     }
 
   if (ret != 6)
     {
-      PSTDOUT_FPRINTF (pstate,
+      pstdout_fprintf (pstate,
                        stderr,
                        "config_mac_address_string2int: Invalid src input: %s\n",
                        src);
@@ -467,11 +467,12 @@ config_is_non_fatal_error (ipmi_ctx_t ipmi_ctx,
 
   if (!IPMI_ERRNUM_IS_FATAL_ERROR (ipmi_ctx))
     {
-      if (ipmi_ctx_errnum (ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
-          && (ipmi_check_completion_code (obj_cmd_rs,
-                                          IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST) == 1
-              || ipmi_check_completion_code (obj_cmd_rs,
-                                             IPMI_COMP_CODE_REQUEST_PARAMETER_NOT_SUPPORTED) == 1))
+      if ((ipmi_ctx_errnum (ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
+	   && ipmi_check_completion_code (obj_cmd_rs,
+					  IPMI_COMP_CODE_REQUEST_PARAMETER_NOT_SUPPORTED) == 1)
+	  || (ipmi_ctx_errnum (ipmi_ctx) == IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED
+	      && ipmi_check_completion_code (obj_cmd_rs,
+					     IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST) == 1))
         (*non_fatal_err) = CONFIG_ERR_NON_FATAL_ERROR_INVALID_UNSUPPORTED_CONFIG;
       else
         (*non_fatal_err) = CONFIG_ERR_NON_FATAL_ERROR;
@@ -511,11 +512,12 @@ config_is_config_param_non_fatal_error (ipmi_ctx_t ipmi_ctx,
                && ipmi_check_completion_code (obj_cmd_rs,
                                               IPMI_COMP_CODE_SET_LAN_CONFIGURATION_PARAMETERS_PARAMETER_NOT_SUPPORTED) == 1)
         (*non_fatal_err) = CONFIG_ERR_NON_FATAL_ERROR_NOT_SUPPORTED;
-      else if (ipmi_ctx_errnum (ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
-               && (ipmi_check_completion_code (obj_cmd_rs,
-                                               IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST) == 1
-                   || ipmi_check_completion_code (obj_cmd_rs,
-                                                  IPMI_COMP_CODE_REQUEST_PARAMETER_NOT_SUPPORTED) == 1))
+      else if ((ipmi_ctx_errnum (ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
+		&& ipmi_check_completion_code (obj_cmd_rs,
+					       IPMI_COMP_CODE_REQUEST_PARAMETER_NOT_SUPPORTED) == 1)
+	       || (ipmi_ctx_errnum (ipmi_ctx) == IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED
+		   && ipmi_check_completion_code (obj_cmd_rs,
+						  IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST) == 1))
         (*non_fatal_err) = CONFIG_ERR_NON_FATAL_ERROR_INVALID_UNSUPPORTED_CONFIG;
       else
         (*non_fatal_err) = CONFIG_ERR_NON_FATAL_ERROR;
@@ -523,4 +525,26 @@ config_is_config_param_non_fatal_error (ipmi_ctx_t ipmi_ctx,
     }
 
   return (0);
+}
+
+int
+config_pstdout_fprintf (pstdout_state_t pstate, FILE *stream, const char *format, ...)
+{
+  va_list ap;
+  int rv; 
+
+  /* special case b/c pstdout doesn't handle non-stdout/non-stderr
+   * assume proper checks in tools if stream != stdout || != stderr
+   */
+
+  va_start (ap, format);
+
+  if (stream == stdout || stream == stderr)
+    rv = pstdout_vfprintf (pstate, stream, format, ap);
+  else
+    rv = vfprintf (stream, format, ap);
+
+  va_end (ap);
+
+  return rv;
 }

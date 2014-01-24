@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,32 +16,31 @@
  * 
  */
 
-#ifndef _IPMI_OPENIPMI_DRIVER_API_H
-#define _IPMI_OPENIPMI_DRIVER_API_H 1
+#ifndef IPMI_OPENIPMI_DRIVER_API_H
+#define IPMI_OPENIPMI_DRIVER_API_H
 
 #include <stdint.h>
 #include <freeipmi/api/ipmi-api.h>
 #include <freeipmi/fiid/fiid.h>
 
-int ipmi_openipmi_cmd_api (ipmi_ctx_t ctx,
-                           fiid_obj_t obj_cmd_rq,
-                           fiid_obj_t obj_cmd_rs);
+int api_openipmi_cmd (ipmi_ctx_t ctx,
+		      fiid_obj_t obj_cmd_rq,
+		      fiid_obj_t obj_cmd_rs);
 
-int ipmi_openipmi_cmd_api_ipmb (ipmi_ctx_t ctx,
-                                fiid_obj_t obj_cmd_rq,
-                                fiid_obj_t obj_cmd_rs);
+int api_openipmi_cmd_ipmb (ipmi_ctx_t ctx,
+			   fiid_obj_t obj_cmd_rq,
+			   fiid_obj_t obj_cmd_rs);
 
-int ipmi_openipmi_cmd_raw_api (ipmi_ctx_t ctx,
-                               const void *buf_rq,
-                               unsigned int buf_rq_len,
-                               void *buf_rs,
-                               unsigned int buf_rs_len);
+int api_openipmi_cmd_raw (ipmi_ctx_t ctx,
+			  const void *buf_rq,
+			  unsigned int buf_rq_len,
+			  void *buf_rs,
+			  unsigned int buf_rs_len);
 
-int ipmi_openipmi_cmd_raw_api_ipmb (ipmi_ctx_t ctx,
-				    const void *buf_rq,
-				    unsigned int buf_rq_len,
-				    void *buf_rs,
-				    unsigned int buf_rs_len);
+int api_openipmi_cmd_raw_ipmb (ipmi_ctx_t ctx,
+			       const void *buf_rq,
+			       unsigned int buf_rq_len,
+			       void *buf_rs,
+			       unsigned int buf_rs_len);
 
-#endif /* ipmi-openipmi-driver-api.h */
-
+#endif /* IPMI_OPENIPMI_DRIVER_API_H */

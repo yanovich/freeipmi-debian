@@ -4,6 +4,7 @@ by
 
 Albert Chu
 chu11@llnl.gov
+Last Updated: June 17, 2013
 
 The following are some short descriptions of the issues I've found
 while developing FreeIPMI on various motherboards.  The descriptions
@@ -248,7 +249,8 @@ LAN Authentication Issue #15: [COMPLIANCE]
   Disabling a specific cipher suite ID does not prohibit a user from
   continuing to use that cipher suite ID.
 
-  Seen on: Supermicro X8DTG, Supermicro X8DTU, MSI MS-91D2
+  Seen on: Supermicro X8DTG, Supermicro X8DTU, MSI MS-91D2, Quanta
+  Winterfell
 
   Resolution: None
 
@@ -333,6 +335,60 @@ LAN Authentication Issue #22: [COMPLIANCE]
 
   Notes: Confirmed fixed in newer firmware.
 
+LAN Authentication Issue #23: [COMPLIANCE]
+
+  The motherboard allows IPMI 1.5 authentication when > 16 byte
+  passwords are configured.  It appears the motherboard allows users
+  to authenticate using the 16 byte equivalent truncated password.
+  This violates the text in Table 22-35, which states "A password that
+  has been stored as a 20-byte password cannot be used for
+  establishing an IPMI v1.5 session."
+
+  Seen on: Supermicro X8DTG-D 
+
+LAN Authentication Issue #24: [COMPLIANCE]
+
+  When activating a session, the remote system requires that the
+  "maximum privilege requested" specified in the request be identical
+  to the maximum set for a user.  It cannot be less than it.  When
+  this occurs, an error of 0xD4 ("Cannot execute command due to
+  insufficient privilege level") is unexpectedly returned.
+
+  Seen on: Xyratex HB-F8-SRAY
+
+  Resolution: Specify specific privilege level to workaround this
+  issue.
+
+LAN Authentication Issue #24: [COMPLIANCE]
+
+  When authenticating with the 'straight password key' authentication
+  type, all responses from a session contain an empty authentication
+  code.
+
+  Seen on: Xyratex HB-F8-SRAY
+
+  Resolution: Workaround added to ignore these invalid authentication
+  codes.
+
+LAN Authentication Issue #25: [COMPLIANCE]
+
+  Cannot authenticate with a user without assigning privilege limit of
+  Administrator.
+
+  Seen on: Xyratex HB-F8-SRAY
+
+  Resolution: None
+
+LAN Authentication Issue #26: [COMPLIANCE]
+
+  Cannot authenticate with IPMI 1.5, authentication code generated
+  incorrectly.
+
+  Seen on: Quanta Winterfell
+
+  Resolution: Workaround added to ignore these invalid authentication
+  codes.
+
 ----------------------------------------------------------------------
 
 ----------------------
@@ -415,12 +471,12 @@ LAN Session Issue #6: [COMPLIANCE]
 
 LAN Session Issue #7: [COMPLIANCE]
 
-  IPMI 1.5 sessions are not supported, only IPMI 2.0 sessions are
-  supported despite IPMI 1.5 being required for IPMI 2.0 systems.
+  LAN session headers contain invalid checksums.
 
-  Seen on: HP Proliant DL 145 server
+  Seen on: Supermicro X9SCM-iiF, Supermicro X9DRi-F, Supermicro X9DRFR
 
-  Resolution: None
+  Resolution: Workaround option added to inform software to ignore bad
+  checksums.
 
 ----------------------------------------------------------------------
 
@@ -436,7 +492,7 @@ SDR Issue #1: [COMPLIANCE]
   not consistent to the number of records that exist on the
   motherboard.
 
-  Seen on: Fujitsu RX 100
+  Seen on: Fujitsu RX 100, Fujitsu RX300/200-S8
 
   Resolution: Workaround added to recognize situation and adjust count.
 
@@ -461,6 +517,29 @@ SDR Issue #3: [COMPLIANCE]
 
   Resolution: Workaround added to adjust and handle the correct length
   of the record.
+
+SDR Issue #4: [COMPLIANCE]
+
+  When reading SDR records, the SDR last record id record is not
+  implemented, leading to errors when reading the SDR.
+
+  Seen on: Unspecified Inspur motherboard
+
+  Resolution: Workaround added to stop reading records after
+  recognized max.
+
+SDR Issue #5: [COMPLIANCE]
+
+  When reading an entire SDR record (with
+  IPMI_SDR_READ_ENTIRE_RECORD_BYTES_TO_READ) the response returns
+  fewer bytes than the actual length of the record.  This leads to
+  issues later during SDR caching.  When reading SDR records with
+  partial reads, things work correctly.
+
+  Seen on: Xyratex HB-F8-SRAY
+
+  Resolution: Workaround added to detect issue and do parital reads
+  instead.
 
 ----------------------------------------------------------------------
 
@@ -510,7 +589,7 @@ Serial-Over-LAN Issue #4: [COMPLIANCE]
 
   The Get Channel Payload Support command is not supported.
 
-  Seen on: Sun Fire 4100 with ILOM
+  Seen on: Sun Fire 4100 with ILOM, Quanta Winterfell
 
   Resolution: Workaround option added to inform software to skip this
   point in the SOL state machine.
@@ -549,7 +628,7 @@ Serial-Over-LAN Issue #6: [COMPLIANCE]
   5441/Dell Xanadu II, Inventec 5442/Dell Xanadu III, Dell Poweredge
   R610, Dell Poweredge R710, Quanta S99Q/Dell FS12-TY, Supermicro
   X8DTG, Supermicro X8DTU, Intel S2600JF/Appro 512X, Quanta
-  QSSC-S4R/Appro GB812X-CN
+  QSSC-S4R/Appro GB812X-CN, Wistron / Dell Poweredge C6220. 
  
   Resolution: None
 
@@ -696,6 +775,29 @@ Serial-Over-LAN Issue #17: [COMPLIANCE] or [IMPLEMENTATION]
   is allowed in IPMI (see Table 15-2 [2]), I am not sure if it is
   required.  So I'm listing this as [COMPLIANCE] or [IMPLEMENTATION].
   This is similar to issue #5 above.
+
+Serial-Over-LAN Issue #18: [COMPLIANCE]
+
+  SOL is always reported to have an active session in progress, so no
+  SOL session can be created.  This includes after a deactivate
+  payload completes successfully.
+
+  It is possible this motherboard does not support SOL.  However, it
+  should indicate that early in the session setup (perhaps via the Get
+  Channel Payload Support request).
+
+  Seen on: Xyratex HB-F8-SRAY
+
+  Resolution: None
+
+Serial-Over-LAN Issue #19: [COMPLIANCE]
+
+  SOL payload instances are not completely independent of each other.
+  Deactivate of SOL payload instance #X may deactivate a different SOL
+  payload instance #Y.
+
+  Seen on: Supermicro X8DTG-D, Inventec 5442/Dell Xanadu III
+  Resolution: None 
 
 ----------------------------------------------------------------------
 
@@ -886,7 +988,8 @@ BMC/IPMI Configuration Issue #16: [IMPLEMENTATION]
   User cannot be enabled/disabled until after a non-null password has
   been configured.
 
-  Seen on: Dell Poweredge R610, Dell Poweredge R710
+  Seen on: Dell Poweredge R610, Dell Poweredge R710, Wistron / Dell
+  Poweredge C6220.
 
   Resolution: Workaround added to re-try enable/disable user after
   password set.
@@ -1040,6 +1143,52 @@ BMC/IPMI Configuration Issue #30: [COMPLIANCE]
 
   Notes: Confirmed fixed in newer firmware.
 
+BMC/IPMI Configuration Issue #31: [IMPLEMENTATION]
+
+  Some new IPMI configuration are not accepted by the BMC until after
+  a system reboot is done.  
+
+  Seen on: Dell Poweredge R610, Dell Poweredge R710, Inventec
+  5441/Dell Xanadu II
+
+  Resolution: None
+
+  Notes: A cold reset of the BMC is sufficient to resolve this issue
+  on Inventec 5441/Dell Xanadu II without rebooting the machine.
+
+BMC/IPMI Configuration Issue #32: [COMPLIANCE]
+
+  Motherboard errors out with unspecified password when trying to set
+  a new user password (completion code 0x8F).
+
+  Seen on: Wistron / Dell Poweredge C6220 
+
+  Resolution: None
+
+  Notes: Motherboard has internal password requirements leading to
+  error.
+
+BMC/IPMI Configuration Issue #33: [COMPLIANCE]
+
+  When retrieving boot flags via Get System Boot Options, the response
+  payload under IPMI 2.0 contains an extra 12 bytes of
+  unknown/unspecified data.
+
+  Seen on: HP DL380 G5
+
+  Resolution: None 
+
+BMC/IPMI Configuration Issue #34: [COMPLIANCE]
+
+  Many configuration options return "Parameter Not Supported" (0x80)
+  when attempting to set a value, but do not when the parameter is
+  being read.  It is likely the firmware writers meant that the
+  parameter was read only (0x82).
+
+  Seen on: Xyratex HB-F8-SRAY
+
+  Resolution: None
+
 ----------------------------------------------------------------------
 
 -------------------------------------------------------
@@ -1113,7 +1262,7 @@ Sensors Issue #2: [COMPLIANCE]
   sensor state of 0x40 is returned, but 0x1 through 0x20 are the only
   legal ones.
 
-  Seen on: Dell 2950
+  Seen on: Dell 2950, SuperMicro X9DRI-LN4F+
 
   Resolution: Workaround added to ignore invalid sensor states.
 
@@ -1319,6 +1468,26 @@ Sensors Issue #19: [COMPLIANCE] [SENSORS-1]
 
   Resolution: Workaround added to assume sensor not available.
 
+Sensors Issue #20: [IMPLEMENTATION]
+
+  Some sensors are given a unit modifier (i.e. A / B, or A * B) but a
+  modifier unit of unspecified.  This leads to sensors with units
+  like: "C / unspecified".
+
+  Seen on: Wistron / Dell Poweredge C6220
+
+  Resolution: Workaround added to handle corner case.
+
+Sensors Issue #21: [IMPLEMENTATION]
+
+  Some SDR entries report RPM thresholds that are inconsistent
+  and illogical.  For example, a upper critical threshold will be
+  reported that is below the nominal reading.
+
+  Seen on: HP DL140 G3 and HP ML160 G6
+
+  Resolution: None
+
 ----------------------------------------------------------------------
 
 ---------------------------------
@@ -1365,7 +1534,7 @@ System Event Log Issue #4: [COMPLIANCE]
 
 System Event Log Issue #5: [COMPLIANCE]
 
-  Some SEL records report illegal report types.
+  Some SEL records report illegal record types.
 
   Seen on: HP DL 380 G5, Intel S2600JF/Appro 512X
 
@@ -1435,6 +1604,15 @@ BMC Watchdog Timer Issue #1: [COMPLIANCE]
   Notes: Confirmed fixed in newer firmware for Sun x4100, Sun x4200,
   Sun x4500.
 
+BMC Watchdog Timer Issue #2: [???]
+
+  A reply from a Get Watchdog Timer command returns a packet without
+  valid data.
+
+  Seen on: Unspecified Supermicro
+
+  Resolution: Handle special case and retry command.
+
 ----------------------------------------------------------------------
 
 ---------------
@@ -1465,8 +1643,8 @@ DCMI Issue #2: [INTERPRETATION]
   "set" a verb or part of a proper noun referencing the DCMI command).
   Confounding this issue is the fact that the example implementation
   in Intel's DCMItool implements the former, while the DCMI
-  Conformance test suite implements the later.  In addition to this,
-  with the later interpretation, it need not be an indication of an
+  Conformance test suite implements the latter.  In addition to this,
+  with the latter interpretation, it need not be an indication of an
   error, but rather a flag.  So the rest of the packet can be
   completely full of legitimate data.  
 
@@ -1549,7 +1727,7 @@ Misc IPMI Issue #2: [COMPLIANCE]
   The Get System Info Parameters command returns insufficient
   privilege level (0xD4) even when the privilege level is sufficient.
 
-  Seen on: Supermicro X8DTL-3F
+  Seen on: Supermicro X8DTL-3F, Supermicro X9DRFR
 
   Resolution: None, user should attempt to authenticate at a higher
   privilege level.
@@ -1563,6 +1741,18 @@ Misc IPMI Issue #3: [COMPLIANCE]
 
   Resolution: Workaround added to recognize special case IANA number
   as belonging to a specific manufacturer.
+
+Misc IPMI Issue #4: [INTERPRETATION]
+
+  When retrieving the operating system name via Get System Info
+  Parameters, the 'set_selector', 'encoding', or 'string_length'
+  fields in the response is not set.  It is not clear if this is an
+  error in their packet for indicating an unsupported field or an
+  empty field.
+
+  Seen on: Bull 510 Blade.
+
+  Resolution: Workaround added to bmc-info to handle special case.
 
 ----------------------------------------------------------------------
 

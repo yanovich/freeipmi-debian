@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,7 +124,7 @@ assemble_rmcp_pkt (fiid_obj_t obj_rmcp_hdr,
 
   if ((obj_rmcp_hdr_len = fiid_obj_len_bytes (obj_rmcp_hdr)) < 0)
     {
-      FIID_OBJECT_ERROR_TO_ERRNO (obj_cmd);
+      FIID_OBJECT_ERROR_TO_ERRNO (obj_rmcp_hdr);
       return (-1);
     }
   if ((obj_cmd_len = fiid_obj_len_bytes (obj_cmd)) < 0)

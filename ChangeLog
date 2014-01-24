@@ -1,26 +1,1425 @@
-2012-05-17  Albert Chu <chu11@llnl.gov>
+2013-12-12  Albert Chu <chu11@llnl.gov>
 
 	* NEWS, configure.ac: Update for release.
 
-	* Tagged Release-1_1_5.
+	* Tagged Release-1_3_4
 
+2013-12-11  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sensors-config/ipmi-sensors-config-threshold-section.c,
+	ipmi-sensors-config/ipmi-sensors-config-utils.c: Force some error
+	messages to output on fatal errors.
+	
+2013-12-11  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/util/ipmi-sensor-util.c (ipmi_sensor_decode_raw_value):
+	Fix error in input checks.
+	
+2013-12-11  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-config/ipmi-config-category-sensors-threshold-section.c:
+	Fix error message cut & paste typo.
+	
+2013-12-05  Albert Chu <chu11@llnl.gov>
+
+	* ipmiseld/ipmiseld.c: Fix error message typo.
+	
+2013-12-02  Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-faq.txi: Update with new information on OS issues.
+
+2013-12-02  Albert Chu <chu11@llnl.gov>
+
+	* bmc-watchdog/bmc-watchdog.c (_fiid_obj_get_safe): New function. 
+
+	* bmc-watchdog/bmc-watchdog.c (_get_watchdog_timer_cmd): Use
+	_fiid_obj_get_safe and do not exit on data not available errors.
+	
+2013-11-26  Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-faq.txi: Update with new information.
+	
+2013-11-14  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/sdr/ipmi-sdr-cache-create.c (ipmi_sdr_cache_create):
+	Fix bug w/ Fujitsu SDR count workaround.
+	
+2013-11-14  Albert Chu <chu11@llnl.gov>
+
+	* ipmiconsole/, libipmiconsole/: Support solchannelsupport
+	workaround option /
+	IPMICONSOLE_WORKAROUND_SKIP_CHANNEL_PAYLOAD_SUPPORT workaround
+	flag.
+	
+2013-11-13  Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-bugs-issues-and-workarounds.txt,
+	man/manpage-common-workaround-outofband-15-text.man: Document
+	workaround for Quanta Winterfell.
+	
+2013-10-30  Denys Vlasenko <dvlasenk@redhat.com>
+
+	* libfreeipmi/util/ipmi-rmcpplus-util.c (ipmi_rmcpplus_check_rakp_4_integrity_check_value):
+	Fix incorrect secure memset call.
+	
+2013-10-29  Albert Chu <chu11@llnl.gov>
+
+	* NEWS, configure.ac: Update for release.
+
+	* Tagged Release-1_3_3
+
+2013-10-23  Denys Vlasenko <dvlasenk@redhat.com>
+
+	* libfreeipmi/util/ipmi-rmcpplus-util.c (ipmi_calculate_sik): Fix
+	big endian bug.
+	
+2013-09-24  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-sel.8.pre.in: Add note about very verbose output.
+	
+2013-09-23  Albert Chu <chu11@llnl.gov>
+	
+	* libfreeipmi/sel/ipmi-sel-string.c (_output_oem_record_data):
+	Output record type under verbose mode.
+	(Feature recommended by Rob Swindell - swindell at broadcom dot
+	com).
+
+2013-09-13  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-cmd-oem-spec.h: Fix
+	invalid hex for
+	IPMI_CMD_OEM_INTEL_NODE_MANAGER_SET_NODE_MANAGER_ALERT_DESTINATION
+	and
+	IPMI_CMD_OEM_INTEL_NODE_MANAGER_GET_NODE_MANAGER_ALERT_DESTINATION.
+
+	* ipmi-oem/: Enable support of IntelNM
+	get-node-manager-alert-destination and
+	set-node-manager-alert-destination.
+	
+2013-09-10  Albert Chu <chu11@llnl.gov>
+
+	* NEWS, configure.ac: Update for release.
+
+	* Tagged Release-1_3_2
+	
+2013-08-28  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/api/ipmi-api.h: Document mapping of
+	IPMI completion codes and RMCPPlus codes to API error codes.
+
+	* Update freeipmi libraries/tools to check/use API error codes
+	correctly.
+	
+2013-08-27  Albert Chu <chu11@llnl.gov>
+
+	Merge branch configcollapse.
+
+	* ipmi-config/: New tool.
+
+	* bmc-config/, ipmi-pef-config/, ipmi-sensors-config/,
+	ipmi-chassis-config/: Remove tools.
+
+	* common/configtool/: Remove common files. 
+
+	* common/toolcommon/: Update config file parsing to recognize
+	ipmi-config and legacy options.
+
+	* doc/, man/: Update documentation appropriately for change.
+	
+	* Tagged Release-1_3_1.
+	
+2013-08-22  Albert Chu <chu11@llnl.gov>
+
+	* configure.ac, NEWS: Update for release.
+
+2013-08-13  Albert Chu <chu11@llnl.gov>
+
+	* man/bmc-config.conf.5.pre.in: Fix section typos.
+
+	* man/libfreeipmi.3.pre.in, man/freeipmi.7.pre.in,
+	man/freeipmi.conf.5.pre.in: Add missing tool.
+	
+2013-08-09  Albert Chu <chu11@llnl.gov>
+
+	* doc/: Update all docs w/ dates.
+	
+2013-08-02  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/sdr/ipmi-sdr-parse-util.c (ipmi_sdr_parse_entity_sensor_name):
+	Handle special corner case w/ double printed name.
+
+2013-07-03  John Gilmore <gnu@toad.com>
+
+	* Fix compiler issues w/ gcc-2.96.
+
+2013-07-03  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sensors/ipmi-sensors-output-common.c (ipmi_sensors_get_thresholds):
+	When thresholds access reported by SDR is fixed/unreadable, the
+	prior interpretation was that thresholds were not available.  The
+	apparent correct interpretation is that thresholds are only
+	unreadable via the get threshold command, but thresholds can still
+	be read in the SDR.  Code has been altered to meet this
+	assumption.  Issue discovered and proper interpretation determined
+	by Holger Liebig <holger.liebig@ts.fujitsu.com>.
+
+2013-06-26  Mario Jungwirth <mario.jungwirth@ocilion.com>
+
+	* libipmimonitoring/ipmi_monitoring.h.in: Remove invalid declaration. 
+	
+2013-06-25  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/api/ipmi-api-util.c (api_set_api_errnum_by_bad_response),
+	libfreeipmi/api/ipmi-api.c. libfreeipmi/include/freeipmi/api/ipmi-api.h:
+	Support new IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED error code.
+	
+2013-06-17  Albert Chu <chu11@llnl.gov>
+
+	* bmc-info/bmc-info.c (display_system_info_common): Workaround
+	issue on Bull 510 systems.
+	
+2013-06-17  Albert Chu <chu11@llnl.gov>
+
+	* man/manpage-common-troubleshooting-inband-outofband.man: New
+	common manpage.
+
+	* man/: Add inband & outofband common troubleshooting to most
+	FreeIPMI tool manpages.
+	
+2013-05-30  Ales Ledvinka <aledvink@redhat.com>
+
+	* common/toolcommon/pstdout.c (pstdout_vprintf): Fix portability
+	bug, va_list is not a pointer type.
+	
+2013-05-29  Albert Chu <chu11@llnl.gov>
+
+	* man/manpage-common-time-options.man: Fix typo.
+
+	* configure.ac, NEWS: Update for release.
+	
+2013-05-16  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/util/ipmi-sensor-and-event-code-tables-util.c (ipmi_get_event_messages):
+	Fix sensor event message corner case w/ OEM sensors.
+	
+2013-05-16  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/util/ipmi-util.h,
+	libfreeipmi/util/ipmi-util.c (ipmi_checksum_incremental, ipmi_checksum_final): New
+	function.
+
+	* libfreeipmi/util/ipmi-util.c (_checksum): New common function. 
+
+	* libfreeipmi/util/ipmi-util.c (ipmi_checksum): Use _checksum
+	common function.
+
+	* libfreeipmi/sdr/: Support checksums in SDR cache files to detect corruption.
+	
+2013-05-09  Albert Chu <chu11@llnl.gov>
+
+	* bmc-device/bmc-device.c (get_sel_time_utc_offset): Fix output
+	string error.
+	
+2013-05-08  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/interface/ipmi-network.h,
+	libfreeipmi/interface/ipmi-network.c (ipmi_network_sendto): New
+	function.
+
+	* libfreeipmi/interface/ipmi-rmcpplus-interface.c (ipmi_rmcpplus_sendto):
+	Call ipmi_network_sendto common function.
+
+	* libfreeipmi/interface/ipmi-lan-interface.c (ipmi_lan_sendto):
+	Call ipmi_network_sendto common function, do not pad legacy byte.
+	
+2013-05-08  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/record-format/ipmi-fru-dimmspd-record-format.c,
+	libfreeipmi/include/freeipmi/templates/ipmi-fru-dimmspd-record-format-templates.h:
+	Fix mistakes in tmpl_fru_dimm_spd_ddr3_record template.
+
+	* ipmi-fru/ipmi-fru-output.h, ipmi-fru/ipmi-fru-output.c: Fix area
+	length from uint8_t to unsigned int globally.
+
+	* ipmi-fru/ipmi-fru-output.c (ipmi_fru_output_dimm): Fix object
+	creation corner case.
+
+	* libfreeipmi/util/ipmi-jedec-manufacturer-identification-code-util.c (ipmi_jedec_manufacturer_id_search):
+	Fix parameter check corner case.
+	
+2013-05-08  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/util/ipmi-timestamp-util.h,
+	libfreeipmi/util/ipmi-timestamp-util.c (ipmi_timestamp_string):
+	Support specific UTC offset being specified.
+
+	* ipmi-fru/, bmc-device/, ipmi-sel/, ipmi-sensors/, ipmi-dcmi/,
+	ipmi-oem/: Support new --utc-offset option.
+
+	* common/toolcommon/: Support new options and config file options
+	appropriately.
+
+	* man/: Update for new option.
+
+2013-05-07  Albert Chu <chu11@llnl.gov>
+
+	Merge branch 'utcoffsetcmd'
+
+	* libfreeipmi/util/ipmi-timestamp-util.c (ipmi_timestamp_string):
+	Make default output unconverted.
+
+	* libfreeipmi/util/ipmi-timestamp-util.c (ipmi_timestamp_string):
+	Support UTC_TO_LOCALTIME and LOCALTIME_TO_UTC flag to allow user
+	to specify if time is actually UTC.
+
+	* ipmi-fru/, bmc-device/, ipmi-sel/, ipmi-sensors/, ipmi-dcmi/,
+	ipmi-oem/: Support new --utc-to-localtime and --localtime-to-utc
+	options.
+	
+	* common/toolcommon/: Support new options and config file options
+	appropriately.
+
+	* man/: Update for new options.
+
+2013-05-06  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/: Get SEL Time UTC Offset and Set SEL Time UTC
+	Offset payloads.
+
+	* bmc-device/: Support --get-sel-time-utc-offset and
+	-set-sel-time-utc-offset.
+
+2013-05-06 Peter Volkov <pva@gentoo.org>
+
+	* configure.ac: Update for autoconf 1.14. 
+	
+2013-05-03  Albert Chu <chu11@llnl.gov>
+
+	Merge 9651:9663 branch 'ddr3'
+	
+	Add support to interpret DDR3 SDRAM memory modules
+
+	* libfreeipmi/include/freeipmi/record-format/ipmi-fru-dimmspd-record-format.h,
+	libfreeipmi/record-format/ipmi-fru-dimmspd-record-format.c,
+	libfreeipmi/include/freeipmi/templates/ipmi-fru-dimmspd-record-format-templates.h:
+	New files.
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-jedec-manufacturer-identifcation-code-spec.h,
+	libfreeipmi/spec/ipmi-jedec-manufacturer-identifcation-code-spec.c,
+	libfreeipmi/include/freeipmi/util/ipmi-jedec-manufacturer-identifcation-code-util.h,
+	libfreeipmi/util/ipmi-jedec-manufacturer-identifcation-code-util.c:
+	New files.
+
+	* libfreeipmi/include/freeipmi/fru/ipmi-fru.h,
+	libfreeipmi/fru/ipmi-fru.c, libfreeipmi/fru/ipmi-fru-defs.h:
+	Support IPMI_FRU_FLAGS_READ_RAW flag and
+	IPMI_FRU_AREA_TYPE_RAW_DATA.
+
+	* ipmi-fru/ipmi-fru.c (_print_except_default_fru_cb): Add
+	additional bridging case.
+
+	* ipmi-fru/: Support FRU output of DDR3 SDRAM dimms. 
+
+2013-05-02  Albert Chu <chu11@llnl.gov>
+	
+	* libfreeipmi/sel/ipmi-sel-string.c (_output_date): Fix memory
+	buffer overrun (Bug location found by Rob Swindell - swindell at
+	broadcom dot com).
+
+2013-04-30  Albert Chu <chu11@llnl.gov>
+
+	Merge branch 'timestampspecial'
+
+	Handle special case timestamps such as 0xFFFFFFFF and timestamps <
+	0x2000000, per chapter 37 of IPMI specification.
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-timestamp-spec.h: New file.
+
+	* libfreeipmi/include/freeipmi/util/ipmi-timestamp-util.h,
+	libfreeipmi/util/ipmi-timestamp-util.c: New timestamp utility files.
+
+	* ipmi-fru/, bmc-device/, ipmi-sel/, ipmi-sensors/, ipmi-dcmi/,
+	ipmi-oem/, libfreeipmi/sel/: Use new timestamp utility function.
+
+2013-04-29  Albert Chu <chu11@llnl.gov>
+
+	Merge branch 'fru12'
+
+	Update for FRU Storage Definition Revision 1.2.
+
+	* libfreeipmi/include/freeipmi/record-format/ipmi-fru-information-record-format.h:
+	Define new macro IPMI_FRU_MFG_DATE_TIME_UNSPECIFIED and IPMI_FRU_PEAK_CAPACITY_UNSPECIFIED.
+
+	* ipmi-fru/ipmi-fru-output.c (ipmi_fru_output_board_info_area):
+	Output manufacturing time as unspecified as appropriate.
+
+	* ipmi-fru/ipmi-fru-output.c (ipmi_fru_output_power_supply_information):
+	Output peak capacity as unspecified as appropriate.
+	
+	* libfreeipmi/include/freeipmi/spec/ipmi-fru-chassis-types-spec.h,
+	libfreeipmi/spec/ipmi-fru-chassis-types-spec.c: Add new chassis
+	types.
+
+	* libfreeipmi/include/freeipmi/fru/ipmi-fru.h,
+	libfreeipmi/include/freeipmi/record-format/ipmi-fru-information-record-format.h,
+	libfreeipmi/fru/ipmi-fru.c (_read_multirecord_area_data): Update
+
+	* libfreeipmi/include/freeipmi/fru/ipmi-fru.h,
+	libfreeipmi/fru/ipmi-fru-data.c (ipmi_fru_multirecord_power_supply_information):
+	Return low/high end input voltage ranges as signed integers.
+
+	* ipmi-fru/: Output low/high end voltage ranges as signed integers.
+
+	* libfreeipmi/include/freeipmi/record-format/ipmi-fru-information-record-format.h,
+	libfreeipmi/record-format/ipmi-fru-information-record-format.c:
+	Support tmpl_fru_extended_dc_output and tmpl_fru_extended_dc_load
+	templates.
+
+	* libfreeipmi/include/freeipmi/fru/ipmi-fru.h,
+	libfreeipmi/fru/ipmi-fru-data.c (ipmi_fru_multirecord_extended_dc_output,
+	ipmi_fru_multirecord_extended_dc_load): New functions.
+
+	* ipmi-fru/: Support output of extended DC output and extended dc load.
+
+2013-04-26  Albert Chu <chu11@llnl.gov>
+
+	Merge branch 'sendto'
+
+	Modify architecture to send IPMI 1.5 network packets via one
+	function and IPMI 2.0 network packets via another function.  IPMI
+	1.5 packets must be padded for legacy reasons, however IPMI 2.0
+	packets should not be padded.
+	(Issue discovered by Rob Swindell - swindell at broadcom dot com).
+	
+	* libfreeipmi/include/freeipmi/interface/ipmi-rmcpplus-interface.h,
+	libfreeipmi/interface/ipmi-rmcpplus-interface.c (ipmi_rmcpplus_sendto,
+	ipmi_rmcpplus_recvfrom): New functions to handle non-legacy pad in
+	IPMI 2.0.
+
+	* libfreeipmi/interface/ipmi-network.h,
+	libfreeipmi/interface/ipmi-network.c: New files.
+
+	* libfreeipmi/interface/ipmi-lan-interface.c (ipmi_lan_recvfrom):
+	Adjust to use new common function.
+
+	* libfreeipmi/api/ipmi-lan-session-common.c (_api_lan_2_0_cmd_send):
+	Use new ipmi_rmcpplus_sendto.
+
+	* ipmipower/, libipmiconsole/ : Support sending packets via
+	ipmi_lan_sendto or ipmi_rmcpplus_sendto.
+
+2013-04-26  Albert Chu <chu11@llnl.gov>
+
+	* Globally fix copyright years from ending in 2012 to ending in
+	2013.
+	
+2013-04-25  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/interface/ipmi-rmcpplus-interface.c (_construct_payload_confidentiality_aes_cbc_128):
+	Fix confidentiality trailer pad calculation corner case.  (Bug
+	location found by Rob Swindell - swindell at broadcom dot com).
+
+2013-04-25  Albert Chu <chu11@llnl.gov>
+
+	* Support HP Proliant DL160 G8 OEM sensors.
+	
+2013-04-24  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-dcmi/ipmi-dcmi.c (_sensor_info_output): Fix output
+	calculation errors.  (Bug location found by Michael Winiarski -
+	michael dot winiarski at hp dot com).
+	
+2013-04-24  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/cmds/ipmi-dcmi-cmds.c: Fix null terminator on
+	tmpl_dcmi_rolling_average_time_period (Recommended fix by Michael
+	Winiarski - michael dot winiarski at hp dot com).
+	
+2013-04-18  Albert Chu <chu11@llnl.gov>
+
+	* libipmiconsole/ipmiconsole_processing.c (_process_protocol_state_activate_payload_sent):
+	Change "BMC Error" to "SOL Inuse" error message.
+	
+2013-04-03  Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-faq.texi: Note kernel driver issue.
+	
+2013-03-25  Peter Volkov <pva@gentoo.org>
+
+	* Fix out of trunk source build.
+
+2013-03-11  Holger Liebig <holger.liebig@ts.fujitsu.com>
+
+	* ipmi-dcmi/: Output temperature sampling period appropriately.
+
+	* libfreeipmi/cmds/ipmi-dcmi-cmds.c: Update
+	tmpl_cmd_dcmi_get_dcmi_capability_info_mandatory_platform_attributes_rs
+	with newer optional fields.
+
+2013-03-08  Albert Chu <chu11@llnl.gov>
+
+	* Add support for Supermicro X9SCM-iiF OEM sensors/events.
+	
+2013-03-08  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-sensors.8.pre.in: Fix typo (Found by Werner Fischer).
+	
+2013-02-28  Anonymous <anonymous@anonymous.com>
+
+	* libfreeipmi/sel/ipmi-sel-string-intel.c (sel_string_output_intel_event_data2_event_data3):
+	Fix string overflow.
+	
+2013-02-21  Albert Chu <chu11@llnl.gov>
+
+	* Add support for Supermicro X9SPU-F-0 OEM sensors/events.
+
+	* Add support for Supermicro X9DRI-LN4F+ OEM
+	interpretations (forgotten earlier).
+	
+2013-01-22  Albert Chu <chu11@llnl.gov>
+
+	* bmc-config/bmc-config.c (_bmc_config),
+	ipmi-pef-config/ipmi-pef-config.c (_ipmi_pef_config),
+	ipmi-chassis-config/ipmi-chassis-config.c (_ipmi_chassis_config),
+	ipmi-sensors-config/ipmi-sensors-config.c (_ipmi_sensors_config):
+	If only non-fatal errors occurred during operation, exit with
+	status 1.  Exit with status 2 on fatal errors.
+
+	* man/manpage-common-config-diagnostics.man: New file.
+
+	* man/bmc-config.8.pre.in, man/ipmi-sensors-config.8.pre.in,
+	man/ipmi-chassis-config.8.pre.in, man/ipmi-pef-config.8.pre.in:
+	Update for changes in exit value behavior.
+	
+2013-01-22  Albert Chu <chu11@llnl.gov>
+
+	* man/manpage-common-config-tool-options.man: Add clarification
+	about use w/ hostranges and hostrange options.
+	
+2013-01-22  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/pstdout.h,
+	common/toolcommon/pstdout.c (pstdout_vprintf, pstdout_vfprintf):
+	New functions.
+
+	* common/configtool/config-tool-utils.h,
+	common/configtool/config-tool-utils.c (config_pstdout_fprintf):
+	New function.
+
+	* common/configtool/config-tool-checkout.c,
+	common/configtool/config-tool-comment.c: Call
+	config_pstdout_fprintf instead of pstdout_fprintf to deal with
+	corner case when user specifys filename with --filename option in
+	config tools.
+	
+2013-01-09  Albert Chu <chu11@llnl.gov>
+
+	Fix bugs found by static code analysis done by Redhat/Fedora.
+
+	* ipmidetect/ipmidetect-argp.c (_read_nodes_from_stdin): Fix
+	potential NUL termination corner case.
+
+	* libfreeipmi/sel/ipmi-sel-string-intel.c (sel_string_output_intel_event_data3_discrete_oem)
+	(sel_string_output_intel_event_data2_event_data3): Fix potential
+	initialization bug.
+
+	* libfreeipmi/interface/rmcp-interface.c (assemble_rmcp_pkt): Fix
+	copy and paste error output.
+
+	* libfreeipmi/api/ipmi-pef-and-alerting-cmds-api.c (ipmi_cmd_alert_immediate):
+	Fix cut and paste bug.
+
+	* libfreeipmi/api/ipmi-api.c (ipmi_ctx_destroy): Fix memset size
+	bug.
+
+	* libfreeipmi/api/ipmi-lan-session-common.c (api_lan_2_0_cmd_wrapper):
+	Add assert to protect against potential API mis-call and
+	subsequent segfault.
+
+	* libfreeipmi/util/ipmi-util.c (ipmi_get_random): Fix potential fd leak.
+
+	* bmc-info/bmc-info.c (display_channel_info): Add missing break.
+
+	* ipmi-pet/ipmi-pet.c (_ipmi_pet_form_sel_record): Fix unsigned vs
+	signed int mis-assignment.
+
+	* ipmiseld/ipmiseld.c (_alloc_host_data): Fix error case mem-leak.
+
+	* bmc-watchdog/bmc-watchdog-argp.c (cmdline_parse): Add missing break;
+
+	* ipmi-oem/ipmi-oem-intel.c (ipmi_oem_intel_set_power_restore_delay):
+	Fix invalid shift.
+
+2012-01-09  Albert Chu <chu11@llnl.gov>
+
+	* common/miscutil/heap.c (heap_insert, heap_pop): Fix mutex unlock
+	corner case on error cases.
+
+	* common/miscutil/heap.c: Remove unused legacy code.
+	
+2012-12-05  Albert Chu <chu11@llnl.gov>
+
+	* Add support for Supermicro X9DRI-LN4F+ OEM sensors/events.
+	
+2012-10-29  Albert Chu <chu11@llnl.gov>
+
+	* man/: Fix typos.
+	
+2012-10-10  Albert Chu <chu11@llnl.gov>
+
+	* libipmiconsole/: IPMICONSOLE_DEBUG_FILE now dumps to current
+	working directory instead of /var/log.  This is a debug feature
+	and not a logging feature.
+	
+2012-10-09  Dave Walker <DaveWalker@ubuntu.com>,
+
+	* common/toolcommon/tool-daemon-common.c (daemonize_common): Check
+	read and write for errors.
+	
+2012-10-05  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/, libipmiconsole/, libipmimonitoring/,
+	common/parsecommon/, man/: Support new
+	NO_CHECKSUM_CHECK/nochecksumcheck workaround to deal with
+	Supermicro motherboards that incorrectly calculate packet
+	checksums.
+	
+2012-10-04  Albert Chu <chu11@llnl.gov>
+
+	Add OEM extension support for Dell Poweredge R720
+
+	* ipmi-oem/: Support Dell get-nic-selection-failover,
+	set-nic-selection-failover, power-monitoring-over-interval,
+	power-monitoring-interval-range, get-blade-slot-info,
+	get-last-post-code.  Support new version of active-lom-status for
+	R720.  Support Dell specific OEM completion codes.
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-oem-spec.h,
+	libfreeipmi/include/freeipmi/spec/ipmi-sensor-and-event-code-tables-oem-spec.h:
+	Add updates based on Dell documentation.
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-product-id-spec.h: Update
+	for new R720.
+
+	* libfreeipmi/util/ipmi-sensor-and-event-code-tables-util.c (ipmi_get_oem_sensor_type_message):
+	Support Dell R720.
+
+	* libfreeipmi/sel/ipmi-sel-string-dell.c: Update for new SEL
+	events in Dell R720.  Handle a few additional R610/R710 cases that
+	were missed in earlier changes.
+
+2012-09-27  Albert Chu <chu11@llnl.gov>
+
+	* man/manpage-common-workaround-extra-text.man: Fix typo.
+	
+2012-09-21  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/debug/ipmi-debug.c (ipmi_obj_dump): Always output
+	SDR and SEL record data in byte array format.
+
+	* libfreeipmi/fiid/fiid.c (fiid_obj_get): Fix value retrieval
+	corner case, most notably coming up in debug output.
+	
+2012-09-20  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/cmds/ipmi-rmcpplus-support-and-payload-cmds.h:
+	Create payload instance macros.
+
+	* libfreeipmi/cmds/ipmi-rmcpplus-support-and-payload-cmds.c (fill_cmd_activate_payload)
+	(fill_cmd_activate_payload_sol, fill_cmd_deactivate_payload)
+	(fill_cmd_suspend_resume_payload_encryption)
+	(fill_cmd_get_payload_instance_info): Add payload instance
+	parameter check.
+
+	* libipmiconsole/ (ipmiconsole_ctx_set_config)
+	(ipmiconsole_ctx_get_config): New functions.
+
+	* libipmiconsole/: Support
+	IPMICONSOLE_CTX_CONFIG_OPTION_SOL_PAYLOAD_INSTANCE configuration
+	option.  Support IPMICONSOLE_BEHAVIOR_DEACTIVATE_ALL_INSTANCES
+	behavior flag.
+
+	* libipmiconsole/: Report BMC_BUSY if SOL activation limit
+	reached.
+
+	* ipmiconsole/: Add --sol-payload-instance and
+	--deactivate-all-instances options.
+
+	* doc/freeipmi-testing.txt,
+	doc/freeipmi-bugs-issues-and-workarounds.txt: Update with SOL
+	instance discoveries.
+	
+2012-09-11  Albert Chu <chu11@llnl.gov>
+
+	* libipmiconsole/ipmiconsole.h.in: Fix comment English.
+
+2012-09-07  Claudio Cesar Sanchez Tejeda <demonccc@gmail.com>
+
+	* ipmiseld/ipmiseld-common.c: Fix "format not a string literal and
+	no format arguments" issue.
+	
+2012-08-15  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/sdr/ipmi-sdr-cache-create.c (_sdr_cache_get_record):
+	Add workaround for Xyratex motherboard issue.
+
+	* libfreeipmi/interpret/: Add sensor/sel interpretations for OS
+	boot, System Event Transition State, Platform Alert State, Boot
+	Error State, and OS Critical Stop State.
+
+	* Globally support "noauthcodecheck" workaround to deal with
+	issues on Xyratex HB-F8-SRAY.
+
+	* Globally handle
+	IPMIPOWER_MSG_TYPE_PRIVILEGE_LEVEL_CANNOT_BE_OBTAINED error when
+	returned from activate session to deal with issues on Xyratex
+	HB-F8-SRAY.
+
+2012-08-09  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-oem.8.pre.in: Clarify configuration in IntelNM.
+	
+2012-08-08  Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-faq.texi: Add section on common differences.
+	
+2012-08-07  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/: For consistency to other changes, rename
+	'fru-parse' sub-library in libfreeipmi to 'fru' library.  All
+	appropriately function names, macros, etc. updated appropriately.
+
+	* ipmi-pet/, ipmi-fru/: Update appropriately.
+
+	* libfreeipmi/fru/ipmi-fru.c,
+	libfreeipmi/include/freeipmi/fru/ipmi-fru.h (ipmi_fru_read_multirecord_record_type_id):
+	New function.  Rename from
+	ipmi_fru_read_multirecord_record_type.
+	
+2012-08-06  Albert Chu <chu11@llnl.gov>
+
+	* Merge intelnm15 branch.
+
+	* ipmi-oem/: Add IntelNM get-node-manager-capabilities,
+	node-manager-policy-control, get-node-manager-policy,
+	set-node-manager-policy, remove-node-manager-policy,
+	get-node-manager-alert-thresholds,
+	set-node-manager-alert-thresholds,
+ 	get-node-manager-policy-suspend-periods,
+ 	set-node-manager-policy-suspend-periods,
+	set-node-manager-power-draw-range,
+	get-node-manager-alert-destination,
+	set-node-manager-alert-destination.
+
+	* libfreeipmi/: Fix Intel NM bugs.
+
+	* ipmi-pef-config/: Support volatile alert string 0 and lan alert
+	destination 0.
+	
+2012-08-03  Albert Chu <chu11@llnl.gov>
+
+	* doc/freeipmi-faq.texi: Add Wistron to OEM list.
+	
+2012-07-31  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-oem-spec.h, ipmi-oem/:
+	Fix macro naming.
+
+	* ipmi-oem/: Support Wistron read/write/clear-proprietary-string.
+
+	* ipmi-fru/: Support Wistron OEM FRU record. 
+
+	* libfreeipmi/fru-parse/ipmi-fru-parse.c,
+	libfreeipmi/include/freeipmi/fru-parse/ipmi-fru-parse.h (ipmi_fru_parse_read_multirecord_record_type):
+	New function.
+
+	* libfreeipmi/include/freeipmi/record-format/ipmi-fru-oem-record-format.h: New file.
+	
+2012-07-30  Albert Chu <chu11@llnl.gov>
+
+	* configure.ac: Prep for beta release.
+
+	* README, man/freeipmi.7.pre.in: Update with ipmiseld information.
+
+	* libfreeipmi/include/Makefile.am: Add missing files.
+	
+2012-07-27  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-sensors/: Support --output-sensor-thresholds.
+	
+2012-07-26  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-oem.8.pre.in: Add motherboard support information.
+	
+2012-07-24  Albert Chu <chu11@llnl.gov>
+
+	* Fix error output message after confirmation from vendor on text.
+	
+2012-07-23  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/ipmi-oem-intelnm.c: Use
+	_ipmi_oem_intelnm_bad_completion_code in additional situation.
+
+2012-07-19  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/: Add intelnm get-node-manager-capabilities.
+
+	* libfreeipmi/: Adjust some intel NM fields/macro names for
+	correctness based on Intel NM spec.  Fix several bugs in Intel NM
+	implementation.
+	
+2012-07-19  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/: Fix and support Wistron set-password-policy.
+	
+2012-07-18  Albert Chu <chu11@llnl.gov>
+	
+	* ipmi-oem/: Remove Wistron get-password-policy.
+	
+2012-07-16  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/ipmi-oem-intelnm.c (_ipmi_oem_intelnm_bad_completion_code):
+	Handle bad completion code commonly for all Intel NM.
+
+	* ipmi-oem/: Support Wistron get/set-password-policy.
+	
+2012-07-13  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/sdr/ipmi-sdr-oem.h,
+	libfreeipmi/sdr/ipmi-sdr-oem.c: New files.
+
+	* ipmi-sensors/ipmi-sensors.c,
+	ipmi-sensors/ipmi-sensors-oem-intel-node-manager.c,
+	ipmi-oem/ipmi-oem-intelnm.c,
+	libfreeipmi/sel/ipmi-sel-string-intel-node-manager.c: Use new
+	ipmi_sdr_oem_parse_intel_node_manager.
+
+	* libfreeipmi/api/: Increase default ipmb timeout.
+	
+2012-07-10  Albert Chu <chu11@llnl.gov>
+
+	Add new tool ipmiseld.
+
+	* ipmiseld/: New tool.
+
+	* common/, etc/, man/: Add new manpage entries, init scripts,
+	config files, as needed.
+
+	* man/manpage-common-troubleshooting-sel.man: Create new common
+	SEL troubleshooting common manpage.
+
+	* config/ac_ipmiseld_cache_dir.m4,
+	config/ac_ipmiseld_config_file.m4: New files.
+
+	* man/, freeipmi.spec.in, configure.ac: Update appropriately for
+	new tool.
+
+	* libfreeipmi/include/freeipmi/api/ipmi-api.h,
+	libfreeipmi/api/ipmi-api.c: Move some internal macros to
+	ipmi-api.h so apps know default values.
+	
+2012-07-10  Albert Chu <chu11@llnl.gov>
+
+	Support OEM extensions for Wistron / Dell Poweredge C6220.
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-oem-spec.h: Rename
+	several macros for use clarity.
+
+	* ipmi-oem/: Add Wistron OEM extension commands.
+
+	* ipmi-oem/ipmi-oem-thirdparty.h,
+	ipmi-oem/ipmi-oem-thirdparty.c (ipmi_oem_thirdparty_get_system_info_block_pstring):
+	New function.
+
+	* ipmi-oem/ipmi-oem-dell.c (_get_dell_system_info_long_string):
+	Use new common function
+	ipmi_oem_thirdparty_get_system_info_block_pstring.
+
+	* ipmi-sensors/: Support OEM SDR record output details.
+	
+2012-07-10  Albert Chu <chu11@llnl.gov>
+
+	* Fix up 'make dist' to not distribute files generated by
+	configure.
+	
+2012-07-09  Albert Chu <chu11@llnl.gov>
+
+	* freeipmi.spec.in: Update w/ recent changes.
+	
+2012-07-06  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/util/ipmi-sensor-util.c (ipmi_sensor_units_string):
+	Fix units output corner case.
+
+	* bmc-info/bmc-info.c (display_system_info_common): Fix
+	not-supported completion code detection.
+	
+2012-07-05  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/: Tweak logic of Ipmi_oem_comp_code_strerror callback.
+	
+2012-07-05  Albert Chu <chu11@llnl.gov>
+
+	* Add support for assume max record sdr record count.
+	
+2012-07-03  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-oem.h: Add additional
+	Poweredge details.
+	
+2012-06-28  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/ipmi-oem-dell.c (ipmi_oem_dell_get_system_info): Fix
+	error output corner case.
+	
+2012-06-26  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-oem.8.pre.in: Fix vendor specific documentation error.
+	
+2012-06-25  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-oem/: Move more macros to ipmi-oem-spec.h.  General code
+	cleanup.
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-channel-spec.h: Add
+	additional macros.
+
+	* bmc-info/, bmc-config/, ipmi-pef-config/: Use new macros
+	appropriately.
+	
+2012-06-21  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/tool-config-file-common.c: Fix casting bug w/
+	signed vs unsigned ints.
+
+	* Make all verbose_count variables in tools unsigned ints.
+	
+2012-06-18  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-oem-spec.h: New file.
+
+	* ipmi-oem/: Migrate various information into new ipmi-oem-spec.h
+	file and
+	libfreeipmi/include/spec/ipmi-system-info-parameters-oem-spec.h.
+
+	* ipmipower/, libfreeipmi/sel/: Use new macros in ipmi-oem-spec.h.
+
+	* ipmi-oem/ipmi-oem-thirdparty.h, ipmi-oem/ipmi-oem-thirdparty.c:
+	New files.
+
+	* ipmi-oem/ipmi-oem-inventec.c, ipmi-oem/ipmi-oem-quanta.c:
+	Migrate some commmon functions to ipmi-oem-thirdparty.c and
+	ipmi-oem-thirdparty.h.
+	
+2012-06-15  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/interpret/: Support new interpretations based on
+	sensors found on IBM X3850 X5: Version Change, System Firmware
+	Progress Transition Severity, Button/Switch Transition Severity,
+	Chassis Transition Severity, POST Memory Resize State,
+	Cable/Interconnect Transition Severity, Boot Error Transition
+	Severity, Slot Connector Transition Severity, Memory State, and
+	Memory Transition Severity.
+
+	* etc/freeipmi_interpret_sel.conf,
+	etc/freeipmi_interpret_sensor.conf, man/: Update appropriately for
+	changes.
+
+	* etc/, man/: Add missing documentation.
+	
+2012-06-07  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/sdr/ipmi-sdr-cache-create.c (ipmi_sdr_cache_create):
+	Fix slight logic bug with cache_create_flags.
+	
+2012-06-06  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/Makefile.am: Fix build bug.
+	
+2012-06-05  Albert Chu <chu11@llnl.gov>
+
+	* common/miscutil/conffile.c,
+	libfreeipmi/util/ipmi-sensor-and-event-code-tables-util.c,
+	libfreeipmi/util/ipmi-sensor-util.c,
+	libfreeipmi/util/ipmi-device-types-util.c, : Fix -Wformat-security
+	warnings.
+
+2012-06-04  Yaroslav Halchenko <debian@onerussian.com>
+
+	* man/ipmi-oem.8.pre.in: Minor tune ups.
+	
+2012-06-01  Albert Chu <chu11@llnl.gov>
+
+	Merge branch intels2600jfrevision
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-sensor-and-event-code-tables-oem-spec.h,
+	libfreeipmi/spec/ipmi-sensor-and-event-code-tables-oem-spec.c:
+	Update event messages for Intel S2600JF based on documentation
+	changes from Intel.
+
+2012-06-01  Albert Chu <chu11@llnl.gov>
+
+	* Add support for Supermicro X9DRi-F OEM sensors/events.
+
+2012-05-31  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/tool-daemon-common.h,
+	common/toolcommon/tool-daemon-common.c (daemon_sleep): New
+	function.
+
+	* bmc-watchdog/: Use new common functions.
+
+	* ipmidetectd/ipmidetectd.c: Shutdown cleanly on signals.
+
+2012-05-30  Albert Chu <chu11@llnl.gov>
+
+	* man/, etc/: Add forgotten config entries.
+	
+2012-05-29  Albert Chu <chu11@llnl.gov>
+
+	* man/ipmi-sel.8.pre.in: Fix typo.
+
+	* common/toolcommon/tool-config-file-common.c: Fix parsing for
+	target-slave-address.
+	
+2012-05-29  Albert Chu <chu11@llnl.gov>
+
+	* common/parsecommon/parse-common.h,
+	common/parsecommon/parse-common.c (parse_get_freeipmi_outofband_flags,
+	parse_get_freeipmi_outofband_2_0_flags,
+	parse_get_freeipmi_inband_flags): New functions.
+
+	* bmc-watchdog/, common/toolcommon/: Use new convenience functions
+	appropriately.
+	
+2012-05-26  Albert Chu <chu11@llnl.gov>
+
+	* man/manpage-common-troubleshooting-sel.man: New file.
+
+	* man/ipmi-sel.8.pre.in: Update for new common file.
+	
+2012-05-26  Albert Chu <chu11@llnl.gov>
+
+	* bmc-config/, ipmi-pef-config/, ipmi-sensors-config/,
+	ipmi-chassis-config/: Fix bug in which cipher suite ID input was
+	not allowed.
+
+	* man/manpage-common-sdr-options.man: Add extra info for
+	sdr-cache-file option.
+
+	* common/toolcommon/, man/: Undo split of SDR option
+	"sdr-cache-directory" into separate macro/man option.
+
+	* common/toolcommon/, man/: Split SDR option "sdr-cache-file" and
+	"sdr-cache-directory" into separate macros/man files.
+
+	* man/manpage-common-sdr-options-heading.man,
+	man/manpage-common-sdr-options-file-directory.man: New files.
+	Split off from man/manpage-common-sdr-options.man.
+
+	* man/manpage-common-sdr-cache-options-heading.man,
+	man/manpage-common-sdr-cache-file-directory.man,
+	man/manpage-common-sdr-cache-ignore.man: New renamed files.
+
+	* man/: Update manpages appropriately for new files.
+
+2012-05-26  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-pet/ipmi-pet-argp.c: Fix argp output, ipmi-pet does not
+	take hostranged arguments.
+
+	* common/toolcommon/tool-cmdline-common.h: Code cleanup.
+
+2012-05-25  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/tool-sensor-common.h,
+	common/toolcommon/tool-sensor-common.c (valid_sensor_types):
+	Remove unused parameters.
+
+	* ipmi-sensors/, ipmi-sel/: Update for changes.
+
+	* ipmi-pet/ipmi-pet.c (_ipmi_pet): Destroy interpret_ctx during
+	cleanup.
+	
+2012-05-24  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/tool-sensor-common.h,
+	common/toolcommon/tool-sensor-common.c (parse_sensor_types): New
+	common function.
+
+	* ipmi-sensors/, ipmi-sel/: Use common function appropriately.
+
+	* common/toolcommon/tool-event-common.h,
+	common/toolcommon/tool-event-common.c (event_data_info): Remove
+	function.
+
+	* ipmi-sel/: Update for changes.
+	
+2012-05-24  Albert Chu <chu11@llnl.gov>
+
+	* libipmimonitoring/: Support entity sensor names flags.
+
+	* contrib/libipmimonitoring/: Update with new flags options.
+
+	* libfreeipmi/sdr/: Support stack of saving offsets when calls to
+	ipmi_sdr_cache_iterate are made.
+
+2012-05-24  Albert Chu <chu11@llnl.gov>
+
+	* libipmimonitoring/ipmi_monitoring.h.in: Fix bug in
+	ASSUME_BMC_OWNER bitmask.
+	
+2012-05-24  Albert Chu <chu11@llnl.gov>
+
+	* Deprecate use of --skip-checks in ipmi-fru in favor of
+	"skipchecks" workaround flag.
+
+	* Deprecate use of --assume-system-event-records in ipmi-sel in
+	favor of "assumesystemevent" workaround flag.
+
+2012-05-23  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/sel/ipmi-sel.h,
+	libfreeipmi/sel/ipmi-sel.c (ipmi_sel_ctx_set_parameter,
+	ipmi_sel_ctx_get_parameter): New functions.
+
+	* libfreeipmi/include/freeipmi/sel/ipmi-sel.h,
+	libfreeipmi/sel/ipmi-sel.c (ipmi_sel_ctx_set_interpret): Removed
+	function.
+
+	* ipmi-sel/, ipmi-pet/: Adjust for lib changes.
+
+	* common/toolcommon/, ipmi-sensors/, libfreeipmi/sel/,
+	libipmimonitoring/: Use ipmi_sdr_parse_sensor_name as needed.
+	
+2012-05-22  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/interpret/: Support Supermicro OEM SEL event
+	interpretations.
+
+	* libfreeipmi/interpret/ipmi-interpret-config-sel.c,
+	etc/freeipmi_interpret_sel.conf: Fix comment typos.
+
+	* libfreeipmi/include/freeipmi/sdr/ipmi-sdr.h,
+	libfreeipmi/sdr/ipmi-sdr-parse-util.c (ipmi_sdr_parse_sensor_name):
+	New function.
+	
+2012-05-22  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/sel/ipmi-sel.h, libfreeipmi/sel/:
+	Support interpretation of event in sel library.  Support %I string
+	output.
+	
+	* common/toolcommon/tool-event-common.h,
+	common/toolcommon/tool-event-common.c (event_load_event_state_config_file):
+	New function.
+	
+	* Globally update tools as necessary for changes.
+
+2012-05-22  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/tool-sdr-cache-common.h,
+	common/toolcommon/tool-sdr-cache-common.c (sdr_cache_setup_debug):
+	Remove function.  Fold into sdr_cache_create_and_load.
+
+	* Globally update tools as necessary for changes.
+	
+2012-05-21  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/sel/ipmi-sel.c, libfreeipmi/sel/:
+	Support IPMI_SEL_STRING_FLAGS_ENTITY_SENSOR_NAMES flag.
+	
+	* Adjust tools and common/toolcommon for new option.
+	
+2012-05-21  Albert Chu <chu11@llnl.gov>
+
+	Merge branch entitysensornamesredo.
+
+	* libfreeipmi/include/freeipmi/sdr/, libfreeipmi/sdr/: Support new
+	stats functions to compile useful info from the SDR.
+
+	* common/toolcommon/tool-sensor-common.h,
+	common/toolcommon/tool-sensor-common.c: Update for new SDR stats
+	functions.
+
+	* Globally update tools as necessary for changes. 
+
+	* libfreeipmi/include/freeipmi/util/ipmi-sensor-units-util.h,
+	libfreeipmi/include/freeipmi/util/ipmi-sensor-units-util.c: Remove
+	files.  Collapse code into ipmi-sensor-util.h and
+	ipmi-sensor-util.c.
+
+	* libfreeipmi/include/freeipmi/sdr/ipmi-sdr.h (ipmi_sdr_parse_entity_sensor_name):
+	New function.
+
+	* libfreeipmi/sdr/ipmi-sdr-parse-util.c: New
+	file.
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-entity-ids-spec.h:
+	Support system and device relative entity instance number macros.
+
+	* libfreeipmi/sel/ipmi-sel.c (ipmi_sel_ctx_create): Use
+	ipmi_sdr_cache_sdr_version instead of ipmi_sdr_cache_first to
+	check for open SDR for reading.
+
+	* Globally update tools as necessary for new functions.
+
+	* libfreeipmi/sdr/ipmi-sdr-common.h,
+	libfreeipmi/sdr/ipmi-sdr-common.c (sdr_set_current_offset): New
+	common function.
+
+	* libfreeipmi/sdr/ipmi-sdr-cache-read.c: Adjust for new common function.
+
+	* libfreeipmi/sdr/ipmi-sdr-defs.h,
+	libfreeipmi/sdr/ipmi-sdr-common.h,
+	libfreeipmi/sdr/ipmi-sdr-common.c (sdr_save_current_offset,
+	sdr_reset_current_offset): New common functions.
+
+	* libfreeipmi/sdr/ipmi-sdr-cache-read.c (ipmi_sdr_cache_iterate):
+	Preserve current offset/iterator point when function was called.
+	
+2012-05-17  Albert Chu <chu11@llnl.gov>
+
+	Merge from branch toolcleanup2
+
+	* Globally cleanup variables and consistency of variables.
+	Whenever referring to the common_cmd_args use common_args.  When
+	referring to command specific structs use cmd_args.
+	
+2012-05-17  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/: Consolidate hostrange and sdr common options
+	into the main common_cmd_args struct.
+
+	* Globally update tools for changes.
+
+	* common/toolcommon/tool-common.c (ipmi_open): Fix output corner
+	case.
+
+	* common/toolcommon/tool-sensor-common.h: Pick more reasonable
+	maxes for the MAX_SENSOR_RECORD_IDS and MAX_SENSOR_TYPES macros.
+	
 2012-05-16  Albert Chu <chu11@llnl.gov>
 
-	* ipmi-sensors-config/ipmi-sensors-config.c (_ipmi_sensors_config):
-	Fix several parallel output corner cases.
+	* common/toolcommon/tool-common-sensor.h,
+	common/toolcommon/tool-sensor-common.c (list_sensor_types): Redo
+	to not take pstate parameter.
 
-	* ipmi-oem/ipmi-oem.c (main), bmc-device/bmc-device.c (main): Turn
-	on quiet caching if doing communication to multiple hosts.
+	* ipmi-sensors/, ipmi-sel/: Code cleanup with use of
+	list_sensor_type.  Call before launching threads in tools since it
+	is identical in all outputs.
 
 	* ipmi-sensors/ipmi-sensors.c (_ipmi_sensors): Fix bug in which
 	multiple workaround flags and workaround flags with bridging could
 	not be specified.
+	
+2012-05-16  Albert Chu <chu11@llnl.gov>
 
+	* ipmi-oem/ipmi-oem.c (main), bmc-device/bmc-device.c (main): Turn
+	on quiet caching if doing communication to multiple hosts.
+
+2012-05-16  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/tool-sdr-cache-common.h,
+	common/toolcommon/tool-sdr-cache-common.c (sdr_cache_flush_cache):
+	Do not require ipmi_sdr_ctx_t parameter, create it inside
+	function.
+
+	* Globally in tools, call sdr_cache_flush_cache() before opening
+	ipmi_open.
+
+	* Globally cleanup usage of exit codes using EXIT_FAILURE and
+	EXIT_SUCCESS appropriately.  Globally in tools cleanup general
+	exit code.
+
+2012-05-15  Albert Chu <chu11@llnl.gov>
+
+	* ipmi-pet/: Fix bugs associated with new library checks for sdr
+	open for reading.
+	
+2012-05-15  Albert Chu <chu11@llnl.gov>
+
+	Merge branch toolcleanup
+
+	* common/toolsdr/tool-sdr-cache-common.h,
+	common/toolsdr/tool-sdr-cache-common.c: Take struct sdr_cmd_args
+	pointer as argument instead of each desired parameter.
+
+	* common/toolcommon/tool-common.h,
+	common/toolcommon/tool-common.c (ipmi_open): Take pstdout_state_t
+	parameter and output errors instead of returning error string in
+	buffer.
+
+	* common/toolhostrange/tool-hostrange-common.h,
+	common/toolhostrange/tool-hostrange-common.c (pstdout_setup): Take
+	struct hostrange_cmd_args pointer as argument instead of each
+	desired parameter.
+
+	* common/toolhostrange/tool-util-common.h,
+	common/toolhostrange/tool-util-common.c: New files, functions
+	split off from common/toolcommon/tool-common.h and
+	common/toolcommon/tool-common.c.
+
+	* common/daemonutil/, common/tooloem/, common/toolsdr/,
+	common/toolevent/, common/toolsensor/, common/toolhostrange/:
+	Merge into common/toolcommon/ library.
+
+	* Update tools appropriately for changes.
+	
+2012-05-15  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/: Rename a large number of internal functions with
+	'ipmi' prefixes so they are not exported by libfreeipmi.
+	
+2012-05-15  Albert Chu <chu11@llnl.gov>
+
+	Merge movetolib branch
+	
+       * libfreeipmi/include/freeipmi/sel/ipmi-sel.h,
+       libfreeipmi/sel/ipmi-sel-string.c (_output_event_data1_event_data2_event_data3),
+       libfreeipmi/sel/ipmi-sel-string.c (sel_parse_format_record_string):
+       Support new '%E' for sel string outputs.
+	
+       * common/toolevent/tool-event-common.c (event_output_event): Use
+       new '%E' appropriately.
+
+2012-05-15  Albert Chu <chu11@llnl.gov>
+
+	* libipmimonitoring/ipmimonitoring.map/: Explicitly list functions
+	to avoid errant functions being made global.
+	
+2012-05-14  Albert Chu <chu11@llnl.gov>
+
+	Cleanup sel-parse sub-library
+
+	* Support IPMI_SEL_PARSE_ERR_SEL_ENTRIES_NOT_LOADED error code.
+
+	* Properly trace all errors when debug tracing is enabled.
+
+	* Condense both sets of record parsing functions into one set.
+
+	* libfreeipmi/sel-parse/ipmi-sel-parse-common.h,
+	libfreeipmi/sel-parse/ipmi-sel-parse-common.c (sel_parse_get_previous_state_or_severity):
+	Change to _get_previous_state_or_severity and put in
+	libfreeipmi/sel-parse/ipmi-sel-parse-string.c.
+
+	* libfreeipmi/interpret/, common/toolevent/, ipmi-sel/, ipmi-pet/:
+	Update appropriately for changes.
+
+	* Convert the 'sel-parse' library to 'sel'.
+
+	* ipmi-sel/ipmi-sel.h: Rename to ipmi-sel_.h to avoid naming
+	conflict.
+	
+2012-05-14  Albert Chu <chu11@llnl.gov>
+
+	* Various code cleanup when calling ipmi_sdr_cache_iterate
+	callbacks.
+	
+2012-05-13  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/api/ipmi-api.h,
+	libfreeipmi/api/ipmi-api.c (ipmi_ctx_get_target): New function.
+
+	* libfreeipmi/sel-parse/ipmi-sel-parse.c (ipmi_sel_parse_ctx_create):
+	Check that sdr is open for reading and ipmi_ctx open.
+
+	* libfreeipmi/fru-parse/ipmi-fru-parse.c (ipmi_fru_parse_ctx_create):
+	Check that ipmi_ctx is open.
+
+	* libfreeipmi/sensor_read/ipmi-sensor_read.c (ipmi_sensor_read_ctx_create):
+	Check that ipmi_ctx is open.
+
+	* ipmi-sel/: Update for API changes.
+	
+2012-05-12  Albert Chu <chu11@llnl.gov>
+
+	Merge sdrrearch branch. 
+
+	* libfreeipmi/include/freeipmi/sdr/ipmi-sdr.h, libfreeipmi/sdr:
+	Turn sdr-cache libfreeipmi sub-library into sdr sub-library.
+
+	* libfreeipmi/include/freeipmi/sdr-parse/ipmi-sdr-parse.h,
+	libfreeipmi/sdr-parse: Remove sub-library. Fold into sdr
+	sub-library.  Support ability to call parsing functions w/o
+	passing in sdr buffer and using internal buffer during iteration.
+
+	* libfreeipmi/include/sdr/ipmi-sdr.h,
+	libfreeipmi/sdr/ipmi-sdr-cache-read.c (ipmi_sdr_cache_iterate):
+	New function.
+
+	* common/toolsdr/tool-sdr-cache-common.h,
+	common/toolsdr/tool-sdr-cache-common.c (sdr_cache_setup_debug):
+	New common function for many tools.
+	
+	* Globally adjust tools and libraries for changes.
+	
+2012-05-11  Albert Chu <chu11@llnl.gov>
+
+	* Support --target-channel-number and --target-slave-address
+	options for all inband activities.
+	
+2012-05-10  Albert Chu <chu11@llnl.gov>
+
+	Merge branch frubrudge  
+
+	* ipmi-fru/: If builtin FRU device has SDR entry, output SDR entry
+	name instead of fixed string.
+
+	* libfreeipmi/include/freeipmi/sdr-parse/ipmi-sdr-parse.h,
+	libfreeipmi/sdr-parse/ipmi-sdr-parse.c (ipmi_sdr_parse_management_controller_device_locator_parameters):
+	Support ability to parse all fields from a managemnet controller
+	deivce locator record.
+
+	* ipmi-sensors/ipmi-sensors-detailed-output.c (_detailed_output_management_controller_device_locator_record):
+	Output more information about Management Controller Device
+	Records.
+
+	* ipmi-fru/: Support --bridge-fru option.
+
+	* libfreeipmi/fru-parse/ipmi-fru-parse.c (_read_fru_data): Handle
+	message timeout errors when bridging.
+
+	* libfreeipmi/fru-parse/ipmi-fru-parse.c: Check ipmi ctx errnum
+	before checking for bad completion codes.
+	
+	* common/toolcommon/, man/, etc/: Update with new option support
+	appropriately.
+
+	* libfreeipmi/api/ipmi-kcs-driver-api.c (ipmi_kcs_cmd_api_ipmb):
+	Sleep a little bit between re-reads to limit spinning.
+	
 2012-05-10  Albert Chu <chu11@llnl.gov>
 
 	* libfreeipmi/fru-parse/ipmi-fru-parse.c (_read_fru_data): Handle
 	additional device busy errors.
 	
+2012-05-10  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/api/ipmi-api.c: End bridging when closing ipmi
+	session.  Do not support setting bridging targets when session not
+	open.  Do not require setting both channel and rs_addr, pick
+	appropriate default when only one is set.  Do not turn on bridging
+	if user configures defaults.
+
+	* libfreeipmi/include/freeipmi/api/ipmi-api.h: Update comments.
+	
+2012-05-09  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/api/ipmi-api.h,
+	libfreeipmi/api/ipmi-api.c (ipmi_ctx_set_target): New function.
+
+	* libfreeipmi/api/: Support ability to run bridged IPMI commands
+	without having to call _ipmb equivalent functions.
+
+	* libfreeipmi/api/: Various code cleanup.
+	
+2012-05-08  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/templates/ipmi-oem-intel-node-manager-cmds-templates.h,
+	libfreeipmi/cmds/ipmi-oem-intel-node-manager-cmds.c: Fix field
+	name typo (Found by Werner Fischer).
+
 2012-05-08  Thomas Renninger <trenn@suse.de>
 
 	* etc/ipmidetectd.init: Fix start run levels.
@@ -30,6 +1429,14 @@
 	* libfreeipmi/sdr-cache/ipmi-sdr-cache-create.c (ipmi_sdr_cache_create):
 	Fix error code return value.
 
+2012-05-07  Albert Chu <chu11@llnl.gov>
+
+	* common/toolevent/tool-event-common.c (event_output_event):
+	Remove dead code.
+
+	* sel-parse/ipmi-sel-parse-string.c (_output_event_data2_event_data3):
+	Remove dead code.
+	
 2012-05-06  Albert Chu <chu11@llnl.gov>
 
 	* Add Supermicro H8DGU-F support for ipmi-sel and interpret
@@ -41,21 +1448,91 @@
 
 	* Add support for Supermicro H8DGU-F to ipmi-sensors.
 
+2012-05-06  Albert Chu <chu11@llnl.gov>
+
+	* ipmidetect/ipmidetect_.h, common/daemonutil/daemon-util.c:
+	Remove unnecessary includes.  (Found by Diego Elio Pettenò)
+	
 2012-05-05  Albert Chu <chu11@llnl.gov>
 
 	* ipmiconsole/ipmiconsole-argp.c (ipmiconsole_argp_parse): Fix
 	password length check bug.  (Found by Diego Elio Pettenò)
+	
+2012-05-04  Albert Chu <chu11@llnl.gov>
+
+	* common/toolcommon/, man/: Split SDR option "sdr-cache-directory"
+	into separate macro/man option.
+
+	* ipmidetectd/: Rename files for consistency to other parts of
+	FreeIPMI.
+
+	* toolevent/tool-event-common.c: Allow NULL for column_width input
+	as long as output will be comma separated.  Allow NULL for
+	entity_id_counts if entity_sensor_names not desired.
 	
 2012-05-03  Albert Chu <chu11@llnl.gov>
 
 	* ipmidetectd/ipmidetectd_config.c (_usage): Fix cut and paste
 	typo.
 	
+2012-05-03  Albert Chu <chu11@llnl.gov>
+
+	* common/daemonutil/daemon-util.h, common/daemonutil/daemonutil.c:
+	New files and convenience library.
+
+	* bmc-watchdog/, ipmidetectd/: Utilize new common library.
+	Various code cleanup as needed.
+
+	* ipmidetectd/ipmidetectd_loop.h, ipmidetectd/ipmidetectd_loop.c:
+	Remove files.  Collapse code in ipmidetectd.c.
+
+	* ipmidetectd/ipmidetectd_argp.h, ipmidetectd/ipmidetectd_argp.c:
+	New files.
+
+	* ipmidetectd/: Various code re-org for consistency to rest of
+	FreeIPMI.
+
+	* ipmidetect/ipmidetect_.h, ipmidetect/ipmidetect-argp.h,
+	ipmidetect/ipmidetect-argp.c: New files.
+
+	* ipmidetect/: Various code re-org for consistency to rest of
+	FreeIPMI.
+	
 2012-05-02  Albert Chu <chu11@llnl.gov>
 
 	* man/ipmidetectd.8.pre.in: Document that errors are logged to
 	syslog.
+
+	* ipmidetectd/: Use miscutil error libraries instead of internal
+	debug functions.
+
+	* ipmidetectd/ipmidetectd_debug.h,
+	ipmidetectd/ipmidetectd_debug.c: Remove files.
 	
+2012-05-02  Albert Chu <chu11@llnl.gov>
+
+	Merge branch bmcwatchdogrearch.  Rearch bmc-watchdog to use all
+	new libraries available to it, make it more consistent to other
+	daemons, and properly reflect features/options.
+
+	* libfreeipmi/api/: Support new IPMI_ERR_DRIVER_BUSY error code to
+	return when a driver is busy.
+
+	* common/toolcommon/, bmc-watchdog/: Use miscutil common error
+	handling functions and properly syslog some initialize errors when
+	running as daemon.  Utilize libfreeipmi api when appropriate
+	instead of bmc-watchdog specific functions.  Remove support for
+	--logfile, all logs go to syslog now.  Support --verbose-logging.
+	Various code cleanup for consistency to rest of FreeIPMI and other
+	changes.
+
+	* etc/bmc-watchdog.logrotate, config/ac_bmc_watchdog_logfile.m4:
+	Remove files.
+
+	* freeipmi.spec.in, configure.ac, etc/Makefile.am,
+	etc/freeipmi.conf, man/bmc-watchdog.8.pre.in,
+	man/freeipmi.conf.5.pre.in: Update appropriately for changes.
+
 2012-05-02  Albert Chu <chu11@llnl.gov>
 
 	* man/freeipmi.conf.5.pre.in: Add ipmi-pet to list of supported
@@ -68,10 +1545,44 @@
 	
 2012-04-30  Albert Chu <chu11@llnl.gov>
 
-	* NEWS, configure.ac: Update for release.
+	* bmc-watchdog/bmc-watchdog.c (_bmclog_write): Call fsync to sync
+	log errors to disk.
 
-	* Tagged Release-1_1_4.
+	* ipmiconsole/: Remove use of "error.h" convenience function.
+	Convenience functions were virtually unused.
+	
+2012-04-21  Albert Chu <chu11@llnl.gov>
 
+	* bmc-watchdog/bmc-watchdog.c: Handle SIGQUIT in addition to
+	SIGTERM and SIGINT.  Properly set umask before writing pidfile.
+	Properly unlink/delete pidfile when necessary. Code cleanup.
+
+	* ipmidetectd/ipmidetectd.c: Create pidfile on daemon startup.
+	Support debugging in production build.  Fix segfault corner case.
+	Handle signals SIGINT, SIGTERM, and SIGQUIT.  Code cleanup.
+	
+2012-04-19  Albert Chu <chu11@llnl.gov>
+
+	Merge branch seld
+
+	Create new ipmiseld daemon.
+
+	* ipmiseld/: New files.
+
+	* man/ipmiseld.8.pre.in, man/ipmiseld.conf.5.pre.in: New files.
+
+	* etc/ipmiseld.conf, etc/ipmiseld.init: New files.
+
+	* config/ac_ipmiseld_config_file.m4: New file.
+
+	* configure.ac, Makefile.am, etc/Makefile.am, man/Makefile.am,
+	freeipmi.spec.in: Update appropriately for new files and
+	directories.
+
+	* common/daemonutil: New common files for daemon common functions.
+
+	* ipmidetectd/: Use new daemonutil functions when appropriate.
+	
 2012-04-19  Albert Chu <chu11@llnl.gov>
 
 	Merge branch intels2600jf
@@ -92,6 +1603,25 @@
 
 	* man/: Update documentation for Intel S2600JF/Appro 512x support.
 	
+2012-04-16  Albert Chu <chu11@llnl.gov>
+
+	Merge reservedmacros branch.
+
+	Fix bug #36177: reserved identifier violation.
+
+	See https://www.securecoding.cert.org/confluence/display/seccode/DCL37-C.+Do+not+declare+or+define+a+reserved+identifier
+
+	* Rename many header guards for compliance.
+
+	* Fix inconsistencies with header guards #defines and #endif
+	comments.
+
+	* Rename many macros for safety.
+	
+	* Fix file scope object naming issues.
+
+	* Make some variables static that should be file local. 
+
 2012-03-20  Albert Chu <chu11@llnl.gov>
 
 	Merge intels5000pal branch.
@@ -113,15 +1643,53 @@
 	
 2012-03-06  Albert Chu <chu11@llnl.gov>
 
-	* NEWS, configure.ac: Update for release.
+ 	* libfreeipmi/api/, libfreeipmi/cmds/: Support set sensor reading
+	and event status command functions.
 
-	* Tagged Release-1_1_3.
+	* bmc-device/: Support --set-sensor-reading-and-event-status.
 
 2012-03-06  Thomas Renninger <trenn@suse.de>
 
 	* contrib/Makefile.am, Makefile.am, doc/Makefile.am: Fix docdir
 	usage for newer autotools.
 	
+2012-03-06  Albert Chu <chu11@llnl.gov>
+
+ 	* Support set sensor reading and event status command.
+
+2012-03-05  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/include/freeipmi/spec/ipmi-comp-code-spec.h: Add
+	macros for completion code ranges.
+
+	* libfreeipmi/util/ipmi-error-util.c
+	(ipmi_completion_code_strerror_r): Use new macros.
+	
+2012-03-01  Albert Chu <chu11@llnl.gov>
+
+	* ipmipower/ipmipower_connection.c (_connection_setup): Support
+	ability to specify alternate port in hostname argument.
+	
+2012-03-01  Albert Chu <chu11@llnl.gov>
+
+	Merge altport branch. 
+
+	* libfreeipmi/api/ipmi-api.c (_setup_hostname),
+	libipmiconsole/ipmiconsole_defs.h, libipmiconsole/ipmiconsole.c
+	(ipmiconsole_ctx_create), libipmiconsole/ipmiconsole_ctx.h
+	(ipmiconsole_ctx_config_setup), libipmiconsole/ipmiconsole_ctx.c
+	(ipmiconsole_ctx_config_setup), ipmidetectd/ipmidetectd_loop.c
+	(_nodes_setup): Support ability to specify alternate port in
+	hostname argument or host config.
+
+	* libipmimonitoring/ipmi_monitoring_ipmi_communication.c
+	(_ipmi_1_5_init, _ipmi_2_0_init, _outofband_init): Let various
+	error checking fall through to lower level APIs.
+	
+	* man/manpage-common-outofband-hostname.man,
+	man/manpage-common-outofband-hostname-hostranged.man,
+	man/ipmidetectd.conf.5.pre.in: Update manpages appropriately.
+
 2012-03-01  Albert Chu <chu11@llnl.gov>
 	
 	* libipmimonitoring/ipmi_monitoring_ipmi_communication.c
@@ -130,9 +1698,52 @@
 
 	* man/ipmidetectd.conf.5.pre.in: Fix some English.
 	
+2012-03-01  Albert Chu <chu11@llnl.gov>
+
+	* libipmimonitoring/, libipmiconsole/: Support Cipher Suite 15,
+	16, and 17.
+
 2012-02-26  Yaroslav Halchenko <debian@onerussian.com>
 
 	* man/ipmi-chassis.8.pre.in: Fix typos.
+	
+2012-02-24  Albert Chu <chu11@llnl.gov>
+
+	Merge selreservation branch
+
+	* libfreeipmi/: Support new functions
+	ipmi_sel_parse_ctx_register_reservation_id() and
+	ipmi_sel_parse_ctx_clear_reservation_id() in the sel-parse library
+	as well as a new error return of
+	IPMI_SEL_PARSE_ERR_RESERVATION_CANCELED.
+
+	* ipmi-sel/: Support --post-clear option. 
+
+2012-02-24  Albert Chu <chu11@llnl.gov>
+
+	* common/miscutil/error.h, common/miscutil/error.c
+	(err_init_exit_value): New function.
+
+	* ipmidetect/ipmidetect.c (main): Exit with value 2 on errors.
+
+	* ipmipower/: Properly exit with 1 when an error occurs on IPMI
+	errors instead of just system errors.
+
+	* man/: Add exit value diagnostics information to most manpages.
+
+	* ipmipower/: Code cleanup for consistency to libipmiconsole code.
+	
+2012-02-23  Albert Chu <chu11@llnl.gov>
+
+	Merge sha256 branch.
+
+	* Support Cipher Suite 15 and 16 globally.
+
+	* Add details of Cipher Suite 18 and 19 globally.
+
+	* bmc-config/bmc-config-rmcpplus-conf-privilege-section.c
+	(bmc_config_rmcpplus_conf_privilege_section_get): Add
+	configuration for Maximum_Privilege_Cipher_Suite_Id_15.
 	
 2012-02-22  Albert Chu <chu11@llnl.gov>
 
@@ -160,13 +1771,47 @@
 	man/ipmi-sensors.8.pre.in: Update information concerning
 	'discretereading' workaround.
 
+	* ipmi-sensors/: Code cleanup, rename 'reading' to
+	'sensor_reading' for consistency.
+
 	* libfreeipmi/cmds/ipmi-lan-cmds.c: Fix packet layout for
 	tmpl_cmd_get_lan_configuration_parameters_rmcpplus_messaging_cipher_suite_entry_support_rs.
 	
+	* doc/freeipmi-faq.texi: Add Powerman configuration notes for
+	C410x.  Fix various parts.
+	
 2012-02-17  Albert Chu <chu11@llnl.gov>
+
+	* ipmipower/: Various code cleanup.  Change "DIAG_INTR" to
+	"DIAGNOSTIC_INTERRUPT" in code for readability.  Make code
+	consistent to other codein FreeIPMI.  Add asserts as needed.
+
+	* Globally: Various code cleanup.  Use switch statements where it
+	would be more appropriate for performance improvements.
+	
+2012-02-17  Albert Chu <chu11@llnl.gov>
+
+	Merge dellc410x
+
+	* ipmipower/: Add --oem-power-type option and support C410x OEM
+	power type.  Support ability to input power control to same host
+	multiple times under OEM conditions.  Serialize power control
+	operations to same host.
+
+	* ipmipower/ipmipower_oem.h, ipmipower/ipmipower_oem.c: New files.
+
+	* ipmipower/: Various code cleanup given re-architecture.
+
+	* common/miscutil/hostlist.c: Remove fprintf debug error messages
+	from tool.
 
 	* ipmi-oem/ipmi-oem-dell.c: Fix C410X corner case.
 
+2012-02-10  Albert Chu <chu11@llnl.gov>
+
+	* libfreeipmi/api/ipmi-api.c (ipmi_ctx_open_inband): Add comment
+	about openipmi driver.
+	
 2012-02-08  Albert Chu <chu11@llnl.gov>
 
 	* doc/freeipmi-coding.txt, README.build: Add configure notes.
@@ -175,12 +1820,6 @@
 
 	* libfreeipmi/sel-parse/: Support Supermicro SEL CPU Temp events.
 	
-2012-02-06  Albert Chu <chu11@llnl.gov>
-
-	* NEWS, configure.ac: Update for release.
-
-	* Tagged Release-1_1_2.
-
 2012-02-06  Albert Chu <chu11@llnl.gov>
 
 	* man/ipmi-sel.8.pre.in: Fix option typo.
@@ -204,6 +1843,16 @@
 
 	* man/ipmi-sel.8.pre.in: Clarify usefulness of event direction.
 	
+2012-01-17  Albert Chu <chu11@llnl.gov>
+
+	* ipmipower/ipmipower.h: Redo packet validation macros.
+
+	* libfreeipmi/include/freeipmi/cmds/ipmi-chassis-cmds.h: Define
+	macros for on vs off power.
+	
+	* ipmipower/ipmipower_powercmd.c (_process_ipmi_packets): Use new
+	macros.
+	
 2012-01-16  Albert Chu <chu11@llnl.gov>
 
 	* man/manpage-common-inband.man: Clarify argument input.
@@ -221,6 +1870,14 @@
 	Workaround bug in Dell Poweredge M605, Dell Poweredge M610, and
 	Dell Poweredge M915 where instance count of SOL is returned as 0.
 
+2012-01-13  Albert Chu <chu11@llnl.gov>
+
+	* Audit and add asserts appropriately to large number of functions.
+
+	* common/configtool/: All config tools support hostranges, so
+	replace PSTDOUT_PRINTF with pstdout_printf, PSTDOUT_FPRINTF with
+	pstdout_fprintf, and PSTDOUT_PERROR with pstdout_perror.
+	
 2012-01-13  Albert Chu <chu11@llnl.gov>
 
 	* doc/solstatediagram.dot: SOL State Diagram documentation.
@@ -351,12 +2008,6 @@
 
 	* ipmi-oem/: Support Dell C410x OEM extension slot-power-toggle,
 	slot-power-control, get-port-map, and set-port-map.
-	
-2012-01-03  Albert Chu <chu11@llnl.gov>
-
-	* NEWS, configure.ac: Update for release.
-
-	* Tagged Release-1_1_1.
 	
 2011-12-22  Albert Chu <chu11@llnl.gov>
 

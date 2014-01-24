@@ -1,7 +1,7 @@
 .\"#############################################################################
 .\"$Id: bmc-watchdog.8.pre.in,v 1.30 2010-06-30 21:56:36 chu11 Exp $
 .\"#############################################################################
-.\"  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+.\"  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
 .\"  Copyright (C) 2004-2007 The Regents of the University of California.
 .\"  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
 .\"  Written by Albert Chu <chu11@llnl.gov>
@@ -121,11 +121,10 @@ The currently available inband drivers are KCS, SSIF, OPENIPMI, and
 SUNBMC.
 #include <@top_srcdir@/man/manpage-common-inband.man>
 .TP
-\fB\-f\fR \fIFILE\fR, \fB\-\-logfile\fR=\fIFILE\fR
-Specify an alternate logfile from the default of
-/var/log/freeipmi/bmc-watchdog.log.
+\fB\-v\fR, \fB\-\-verbose\-logging\fR
+Increase verbosity of logging.
 .TP
-\fB\-n\fR, \fB\-\-no-logging\fR
+\fB\-n\fR, \fB\-\-no\-logging\fR
 Turns off all logging done by 
 .B bmc-watchdog.  
 #include <@top_srcdir@/man/manpage-common-config-file.man>
@@ -275,7 +274,7 @@ ARP responses will not be suspended.
 Time interval to wait before resetting timer.  The default is 60
 seconds.
 .SH "ERRORS"
-Errors are logged to the bmc-watchdog log.
+Errors are logged to syslog.
 #include <@top_srcdir@/man/manpage-common-workaround-heading-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-inband-text.man>
 .LP
@@ -298,6 +297,7 @@ Setup a bmc-watchdog daemon that resets the machine after 15 minutes
 script /etc/init.d/bmc-watchdog for a more complete example):
         bmc-watchdog -d -u 4 -p 0 -a 1 -i 900
 
+#include <@top_srcdir@/man/manpage-common-diagnostics.man>
 .SH "KNOWN ISSUES"
 .B Bmc-watchdog
 may fail to reset the watchdog timer if it is not scheduled properly.
@@ -310,7 +310,7 @@ processor after a watchdog timer timeout if the timer use is set to
 something other than SMS/OS.
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH COPYRIGHT
-Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
 .br
 Copyright (C) 2004-2007 The Regents of the University of California.
 #include <@top_srcdir@/man/manpage-common-gpl-program-text.man>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_LAN_INTERFACE_H
-#define _IPMI_LAN_INTERFACE_H   1
+#ifndef IPMI_LAN_INTERFACE_H
+#define IPMI_LAN_INTERFACE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,9 +81,7 @@ int unassemble_ipmi_lan_pkt (const void *pkt,
 			     unsigned int flags);
 
 /* returns length sent on success, -1 on error */
-/* Compared to system sendto(), handles several IPMI padding issues,
- * should be used in favor for system sendto().
- */
+/* A few extra error checks, but nearly identical to system sendto() */
 ssize_t ipmi_lan_sendto (int s,
                          const void *buf,
                          size_t len,
@@ -104,6 +102,4 @@ ssize_t ipmi_lan_recvfrom (int s,
 }
 #endif
 
-#endif /* ipmi-lan-interface.h */
-
-
+#endif /* IPMI_LAN_INTERFACE_H */

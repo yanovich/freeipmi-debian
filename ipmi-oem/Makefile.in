@@ -38,8 +38,7 @@ sbin_PROGRAMS = ipmi-oem$(EXEEXT)
 subdir = ipmi-oem
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
-	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
@@ -49,6 +48,8 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_cache_dir.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_config_file.m4 \
 	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
@@ -71,14 +72,12 @@ am_ipmi_oem_OBJECTS = ipmi_oem-ipmi-oem.$(OBJEXT) \
 	ipmi_oem-ipmi-oem-inventec.$(OBJEXT) \
 	ipmi_oem-ipmi-oem-quanta.$(OBJEXT) \
 	ipmi_oem-ipmi-oem-sun.$(OBJEXT) \
-	ipmi_oem-ipmi-oem-supermicro.$(OBJEXT)
+	ipmi_oem-ipmi-oem-supermicro.$(OBJEXT) \
+	ipmi_oem-ipmi-oem-thirdparty.$(OBJEXT) \
+	ipmi_oem-ipmi-oem-wistron.$(OBJEXT)
 ipmi_oem_OBJECTS = $(am_ipmi_oem_OBJECTS)
 ipmi_oem_DEPENDENCIES =  \
 	$(top_builddir)/common/toolcommon/libtoolcommon.la \
-	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
-	$(top_builddir)/common/tooloem/libtooloem.la \
-	$(top_builddir)/common/toolsdr/libtoolsdr.la \
-	$(top_builddir)/common/toolsensor/libtoolsensor.la \
 	$(top_builddir)/common/miscutil/libmiscutil.la \
 	$(top_builddir)/common/parsecommon/libparsecommon.la \
 	$(top_builddir)/common/portability/libportability.la \
@@ -110,7 +109,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BMC_WATCHDOG_LOGFILE_DEFAULT = @BMC_WATCHDOG_LOGFILE_DEFAULT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -138,8 +136,6 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
 INSTALL_IPMISDRCACHEDIR = @INSTALL_IPMISDRCACHEDIR@
-INSTALL_LOGDIR = @INSTALL_LOGDIR@
-INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -149,6 +145,8 @@ IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
 IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
+IPMISELD_CACHE_DIRECTORY = @IPMISELD_CACHE_DIRECTORY@
+IPMISELD_CONFIG_FILE_DEFAULT = @IPMISELD_CONFIG_FILE_DEFAULT@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
 IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
@@ -258,23 +256,16 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ipmi_oem_CPPFLAGS = \
 	-I$(top_srcdir)/common/toolcommon \
-	-I$(top_srcdir)/common/toolhostrange \
-	-I$(top_srcdir)/common/tooloem \
-	-I$(top_srcdir)/common/toolsdr \
-	-I$(top_srcdir)/common/toolsensor \
 	-I$(top_srcdir)/common/miscutil \
 	-I$(top_srcdir)/common/parsecommon \
 	-I$(top_srcdir)/common/portability \
+	-I$(top_builddir)/libfreeipmi/include \
 	-I$(top_srcdir)/libfreeipmi/include \
 	-D_GNU_SOURCE \
 	-D_REENTRANT 
 
 ipmi_oem_LDADD = \
 	$(top_builddir)/common/toolcommon/libtoolcommon.la \
-	$(top_builddir)/common/toolhostrange/libtoolhostrange.la \
-	$(top_builddir)/common/tooloem/libtooloem.la \
-	$(top_builddir)/common/toolsdr/libtoolsdr.la \
-	$(top_builddir)/common/toolsensor/libtoolsensor.la \
 	$(top_builddir)/common/miscutil/libmiscutil.la \
 	$(top_builddir)/common/parsecommon/libparsecommon.la \
 	$(top_builddir)/common/portability/libportability.la \
@@ -305,7 +296,11 @@ ipmi_oem_SOURCES = \
 	ipmi-oem-sun.c \
 	ipmi-oem-sun.h \
 	ipmi-oem-supermicro.c \
-	ipmi-oem-supermicro.h
+	ipmi-oem-supermicro.h \
+	ipmi-oem-thirdparty.c \
+	ipmi-oem-thirdparty.h \
+	ipmi-oem-wistron.c \
+	ipmi-oem-wistron.h
 
 all: all-am
 
@@ -405,6 +400,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_oem-ipmi-oem-quanta.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_oem-ipmi-oem-sun.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_oem-ipmi-oem-supermicro.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_oem-ipmi-oem-thirdparty.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_oem-ipmi-oem-wistron.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmi_oem-ipmi-oem.Po@am__quote@
 
 .c.o:
@@ -598,6 +595,34 @@ ipmi_oem-ipmi-oem-supermicro.obj: ipmi-oem-supermicro.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-oem-supermicro.c' object='ipmi_oem-ipmi-oem-supermicro.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_oem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_oem-ipmi-oem-supermicro.obj `if test -f 'ipmi-oem-supermicro.c'; then $(CYGPATH_W) 'ipmi-oem-supermicro.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-oem-supermicro.c'; fi`
+
+ipmi_oem-ipmi-oem-thirdparty.o: ipmi-oem-thirdparty.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_oem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_oem-ipmi-oem-thirdparty.o -MD -MP -MF $(DEPDIR)/ipmi_oem-ipmi-oem-thirdparty.Tpo -c -o ipmi_oem-ipmi-oem-thirdparty.o `test -f 'ipmi-oem-thirdparty.c' || echo '$(srcdir)/'`ipmi-oem-thirdparty.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_oem-ipmi-oem-thirdparty.Tpo $(DEPDIR)/ipmi_oem-ipmi-oem-thirdparty.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-oem-thirdparty.c' object='ipmi_oem-ipmi-oem-thirdparty.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_oem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_oem-ipmi-oem-thirdparty.o `test -f 'ipmi-oem-thirdparty.c' || echo '$(srcdir)/'`ipmi-oem-thirdparty.c
+
+ipmi_oem-ipmi-oem-thirdparty.obj: ipmi-oem-thirdparty.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_oem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_oem-ipmi-oem-thirdparty.obj -MD -MP -MF $(DEPDIR)/ipmi_oem-ipmi-oem-thirdparty.Tpo -c -o ipmi_oem-ipmi-oem-thirdparty.obj `if test -f 'ipmi-oem-thirdparty.c'; then $(CYGPATH_W) 'ipmi-oem-thirdparty.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-oem-thirdparty.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_oem-ipmi-oem-thirdparty.Tpo $(DEPDIR)/ipmi_oem-ipmi-oem-thirdparty.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-oem-thirdparty.c' object='ipmi_oem-ipmi-oem-thirdparty.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_oem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_oem-ipmi-oem-thirdparty.obj `if test -f 'ipmi-oem-thirdparty.c'; then $(CYGPATH_W) 'ipmi-oem-thirdparty.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-oem-thirdparty.c'; fi`
+
+ipmi_oem-ipmi-oem-wistron.o: ipmi-oem-wistron.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_oem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_oem-ipmi-oem-wistron.o -MD -MP -MF $(DEPDIR)/ipmi_oem-ipmi-oem-wistron.Tpo -c -o ipmi_oem-ipmi-oem-wistron.o `test -f 'ipmi-oem-wistron.c' || echo '$(srcdir)/'`ipmi-oem-wistron.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_oem-ipmi-oem-wistron.Tpo $(DEPDIR)/ipmi_oem-ipmi-oem-wistron.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-oem-wistron.c' object='ipmi_oem-ipmi-oem-wistron.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_oem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_oem-ipmi-oem-wistron.o `test -f 'ipmi-oem-wistron.c' || echo '$(srcdir)/'`ipmi-oem-wistron.c
+
+ipmi_oem-ipmi-oem-wistron.obj: ipmi-oem-wistron.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_oem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmi_oem-ipmi-oem-wistron.obj -MD -MP -MF $(DEPDIR)/ipmi_oem-ipmi-oem-wistron.Tpo -c -o ipmi_oem-ipmi-oem-wistron.obj `if test -f 'ipmi-oem-wistron.c'; then $(CYGPATH_W) 'ipmi-oem-wistron.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-oem-wistron.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmi_oem-ipmi-oem-wistron.Tpo $(DEPDIR)/ipmi_oem-ipmi-oem-wistron.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmi-oem-wistron.c' object='ipmi_oem-ipmi-oem-wistron.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmi_oem_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmi_oem-ipmi-oem-wistron.obj `if test -f 'ipmi-oem-wistron.c'; then $(CYGPATH_W) 'ipmi-oem-wistron.c'; else $(CYGPATH_W) '$(srcdir)/ipmi-oem-wistron.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -808,18 +833,6 @@ uninstall-am: uninstall-sbinPROGRAMS
 
 
 $(top_builddir)/common/toolcommon/libtoolcommon.la : force-dependency-check
-	@cd `dirname $@` && $(MAKE) `basename $@`
-
-$(top_builddir)/common/toolhostrange/libtoolhostrange.la : force-dependency-check
-	@cd `dirname $@` && $(MAKE) `basename $@`
-
-$(top_builddir)/common/tooloem/libtooloem.la : force-dependency-check
-	@cd `dirname $@` && $(MAKE) `basename $@`
-
-$(top_builddir)/common/toolsdr/libtoolsdr.la : force-dependency-check
-	@cd `dirname $@` && $(MAKE) `basename $@`
-
-$(top_builddir)/common/toolsensor/libtoolsensor.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/common/miscutil/libmiscutil.la : force-dependency-check

@@ -1,7 +1,7 @@
 .\"#############################################################################
 .\"$Id: ipmiconsole.8.pre.in,v 1.52 2010-06-30 21:56:36 chu11 Exp $
 .\"#############################################################################
-.\"  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+.\"  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
 .\"  Copyright (C) 2006-2007 The Regents of the University of California.
 .\"  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
 .\"  Written by Albert Chu <chu11@llnl.gov>
@@ -102,7 +102,7 @@ This default behavior exists for several reasons, most notably that
 earlier SOL sessions may have not been able to be deactivate properly.
 .TP
 \fB\-\-deactivate\fR
-Deactivate a SOL session if one is detected as being in use and exit.
+Deactivate SOL session if one is detected as being in use and exit.
 .TP
 \fB\-\-serial\-keepalive\fR
 Occasionally send NUL characters to detect inactive serial
@@ -125,9 +125,19 @@ what data it may or may not be expecting.
 This option is identical to \fB\-\-serial\-keepalive\fR except that
 SOL packets will contain no NUL character data.  On some motherboards,
 this may be sufficient to deal with a hanging IPMI session without the
-risk regularly sending a NUL character byte may have.  However, some
-systems may not ACK a SOL packet without character data in it, meaning
-these keepalive packets do nothing. 
+risk of regularly sending a NUL character byte may have.  However,
+some systems may not ACK a SOL packet without character data in it,
+meaning these keepalive packets do nothing.
+.TP
+\fB\-\-sol\-payload\-instance\fR=\fINUM\fR
+Specify the SOL payload instance number.  The default value is 1,
+valid values range from 1 to 15.  Most systems only support a single
+instance, however a few allow users to access multiple.
+.TP
+\fB\-\-deactivate\-all\-instances\fR
+When used along with the \fB\-\-deactivate\fR option, will deactivate
+all active SOL instances instead of just the currently configured
+payload instance.
 .TP
 \fB\-\-lock-memory\fR
 Lock sensitive information (such as usernames and passwords) in
@@ -141,7 +151,6 @@ Output debugging to the debugfile rather than to standard output.
 Don't enter terminal raw mode.
 \}
 .LP
-
 .SH "ESCAPE CHARACTERS"
 The following escape sequences are supported.  The default supported
 escape character is '&', but can be changed with the 
@@ -167,6 +176,7 @@ Send a single escape character.
 #include <@top_srcdir@/man/manpage-common-troubleshooting-heading-outofband.man>
 #include <@top_srcdir@/man/manpage-common-troubleshooting-heading-end.man>
 #include <@top_srcdir@/man/manpage-common-troubleshooting-outofband.man>
+#include <@top_srcdir@/man/manpage-common-troubleshooting-inband-outofband.man>
 .SH "IPMICONSOLE TROUBLESHOOTING"
 The following are common issues for error messages in
 .B ipmiconsole.
@@ -182,7 +192,8 @@ specify the
 .I --dont-steal
 option, 
 .B ipmiconsole
-will attempt to steal the SOL session away from the other session.
+will attempt to steal the SOL session away from the other session.  Not
+all BMCs support the ability to steal away a SOL session.
 .LP
 "SOL session stolen" - Your SOL session has been stolen by another
 session.  You may wish to try and steal the session back by reconnecting.
@@ -245,6 +256,11 @@ activation status of SOL during the protocol setup.  It works around
 remote systems that do not properly support this command.  Those
 hitting this issue may see "BMC Error" errors.  Issue observed on
 Supermicro X8SIL-F.
+.LP
+\fIsolchannelsupport\fR - This workaround flag will not check if SOL
+is supported on the current channel.  It works around remote systems
+that do not properly support this command.  Those hitting this issue
+may see "BMC Error" errors.  Issue observed on Quanta Winterfell.
 #include <@top_srcdir@/man/manpage-common-known-issues.man>
 .LP
 Some motherboards define an OEM SOL inactivity timeout for SOL
@@ -288,7 +304,7 @@ that the program be compiled with debugging turned off.
 \}
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH COPYRIGHT
-Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
 .br
 Copyright (C) 2006-2007 The Regents of the University of California.
 #include <@top_srcdir@/man/manpage-common-gpl-program-text.man>

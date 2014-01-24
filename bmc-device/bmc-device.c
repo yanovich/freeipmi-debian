@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@
 #include "tool-cmdline-common.h"
 #include "tool-hostrange-common.h"
 #include "tool-sdr-cache-common.h"
+#include "tool-util-common.h"
 
 typedef int (*Bmc_device_system_info_first_set)(ipmi_ctx_t ctx,
 						uint8_t set_selector,
@@ -70,21 +71,9 @@ typedef int (*Bmc_device_system_info)(ipmi_ctx_t ctx,
 
 #define BMC_DEVICE_MAX_PLATFORM_EVENT_ARGS 9
 
-static int
-_flush_cache (bmc_device_state_data_t *state_data)
-{
-  assert (state_data);
-  
-  if (sdr_cache_flush_cache (state_data->sdr_cache_ctx,
-                             state_data->pstate,
-                             state_data->prog_data->args->sdr.quiet_cache,
-                             state_data->hostname,
-                             state_data->prog_data->args->sdr.sdr_cache_directory,
-                             state_data->prog_data->args->sdr.sdr_cache_file) < 0)
-    return (-1);
-  
-  return (0);
-}
+#define BMC_DEVICE_SET_SENSOR_READING_AND_EVENT_STATUS_ARGS 11
+
+#define BMC_DEVICE_TIME_BUFLEN 512
 
 static int
 cold_reset (bmc_device_state_data_t *state_data)
@@ -801,13 +790,49 @@ clear_lan_statistics (bmc_device_state_data_t *state_data)
 }
 
 static int
+parse_check_hex (bmc_device_state_data_t *state_data,
+		 char *from,
+		 char *str,
+		 unsigned int max_len_bytes)
+{
+  unsigned int i;
+
+  assert (state_data);
+  assert (from);
+  assert (str);
+  assert (max_len_bytes);
+
+  for (i = 0; from[i] != '\0'; i++)
+    {
+      if (i >= (max_len_bytes * 2))
+	{
+	  pstdout_fprintf (state_data->pstate,
+			   stderr,
+			   "invalid hex length for %s\n",
+			   str);
+	  return (-1);
+	}
+
+      if (!isxdigit (from[i]))
+	{
+	  pstdout_fprintf (state_data->pstate,
+			   stderr,
+			   "invalid hex byte argument for %s\n",
+			   str);
+	  return (-1);
+	}
+    }
+
+  return (0);
+}
+
+static int
 parse_uint16 (bmc_device_state_data_t *state_data,
 	      char *from,
 	      uint16_t *to,
 	      char *str)
 {
   char *endptr;
-  int i;
 
   assert (state_data);
   assert (from);
@@ -818,17 +843,8 @@ parse_uint16 (bmc_device_state_data_t *state_data,
     {
       if (!strncmp (from, "0x", 2))
 	{
-	  for (i = 2; from[i] != '\0'; i++)
-	    {
-	      if (!isxdigit (from[i]))
-		{
-		  pstdout_fprintf (state_data->pstate,
-				   stderr,
-				   "invalid hex byte argument for %s\n",
-				   str);
-		  return (-1);
-		}
-	    }
+	  if (parse_check_hex (state_data, from + 2, str, 2) < 0)
+	    return (-1);
 	}
     }
 
@@ -854,7 +870,6 @@ parse_hex_uint16 (bmc_device_state_data_t *state_data,
 		  char *str)
 {
   char *endptr;
-  int i;
 
   assert (state_data);
   assert (from);
@@ -876,17 +891,8 @@ parse_hex_uint16 (bmc_device_state_data_t *state_data,
       return (-1);
     }
   
-  for (i = 0; from[i] != '\0'; i++)
-    {
-      if (!isxdigit (from[i]))
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "invalid hex byte argument for %s\n",
-                           str);
-          return (-1);
-        }
-    }
+  if (parse_check_hex (state_data, from, str, 2) < 0)
+    return (-1);
   
   errno = 0;
   (*to) = strtol (from, &endptr, 16);
@@ -896,6 +902,43 @@ parse_hex_uint16 (bmc_device_state_data_t *state_data,
       pstdout_fprintf (state_data->pstate,
 		       stderr,
 		       "invalid hex byte argument for %s\n",
+		       str);
+      return (-1);
+    }
+
+  return (0);
+}
+
+static int
+parse_int16 (bmc_device_state_data_t *state_data,
+	     char *from,
+	     int16_t *to,
+	     char *str)
+{
+  char *endptr;
+
+  assert (state_data);
+  assert (from);
+  assert (to);
+  assert (str);
+
+  if (strlen (from) >= 2)
+    {
+      if (!strncmp (from, "0x", 2))
+	{
+	  if (parse_check_hex (state_data, from + 2, str, 2) < 0)
+	    return (-1);
+	}
+    }
+
+  errno = 0;
+  (*to) = strtol (from, &endptr, 0);
+  if (errno
+      || endptr[0] != '\0')
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "invalid argument for %s\n",
 		       str);
       return (-1);
     }
@@ -919,8 +962,6 @@ rearm_sensor (bmc_device_state_data_t *state_data)
   uint16_t *assertion_bitmask_ptr;
   uint16_t *deassertion_bitmask_ptr;
   uint8_t re_arm_all_event_status_from_this_sensor;
-  uint8_t sdr_record[IPMI_SDR_CACHE_MAX_SDR_RECORD_LENGTH];
-  int sdr_record_len = 0;
   uint8_t record_type;
   uint8_t sensor_number;
   uint8_t sensor_owner_id_type = 0;
@@ -989,47 +1030,33 @@ rearm_sensor (bmc_device_state_data_t *state_data)
       deassertion_bitmask_ptr = NULL;
     }
 
-  if (sdr_cache_create_and_load (state_data->sdr_cache_ctx,
+  if (sdr_cache_create_and_load (state_data->sdr_ctx,
                                  state_data->pstate,
                                  state_data->ipmi_ctx,
-                                 state_data->prog_data->args->sdr.quiet_cache,
-                                 state_data->prog_data->args->sdr.sdr_cache_recreate,
                                  state_data->hostname,
-                                 state_data->prog_data->args->sdr.sdr_cache_directory,
-                                 state_data->prog_data->args->sdr.sdr_cache_file) < 0)
+				 &state_data->prog_data->args->common_args) < 0)
     goto cleanup;
   
-  if (ipmi_sdr_cache_search_record_id (state_data->sdr_cache_ctx,
+  if (ipmi_sdr_cache_search_record_id (state_data->sdr_ctx,
                                        record_id) < 0)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_sdr_cache_search_record_id: %s\n",
-                       ipmi_sdr_cache_ctx_errormsg (state_data->sdr_cache_ctx));
+                       ipmi_sdr_ctx_errormsg (state_data->sdr_ctx));
       goto cleanup;
     }
   
-  if ((sdr_record_len = ipmi_sdr_cache_record_read (state_data->sdr_cache_ctx,
-                                                    sdr_record,
-                                                    IPMI_SDR_CACHE_MAX_SDR_RECORD_LENGTH)) < 0)
-    {
-      pstdout_fprintf (state_data->pstate,
-                       stderr,
-                       "ipmi_sdr_cache_record_read: %s\n",
-                       ipmi_sdr_cache_ctx_errormsg (state_data->sdr_cache_ctx));
-      goto cleanup;
-    }
-
-  if (ipmi_sdr_parse_record_id_and_type (state_data->sdr_parse_ctx,
-                                         sdr_record,
-                                         sdr_record_len,
+  if (ipmi_sdr_parse_record_id_and_type (state_data->sdr_ctx,
+					 NULL,
+					 0,
                                          NULL,
                                          &record_type) < 0)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_sdr_parse_record_id_and_type: %s\n",
-                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+                       ipmi_sdr_ctx_errormsg (state_data->sdr_ctx));
       goto cleanup;
     }
 
@@ -1044,41 +1071,41 @@ rearm_sensor (bmc_device_state_data_t *state_data)
       goto cleanup;
     }
   
-  if (ipmi_sdr_parse_sensor_number (state_data->sdr_parse_ctx,
-                                    sdr_record,
-                                    sdr_record_len,
+  if (ipmi_sdr_parse_sensor_number (state_data->sdr_ctx,
+				    NULL,
+				    0,
                                     &sensor_number) < 0)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_sdr_parse_sensor_number: %s\n",
-                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+                       ipmi_sdr_ctx_errormsg (state_data->sdr_ctx));
       goto cleanup;
     }
 
-  if (ipmi_sdr_parse_sensor_owner_id (state_data->sdr_parse_ctx,
-                                      sdr_record,
-                                      sdr_record_len,
+  if (ipmi_sdr_parse_sensor_owner_id (state_data->sdr_ctx,
+				      NULL,
+				      0,
                                       &sensor_owner_id_type,
                                       &sensor_owner_id) < 0)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_sdr_parse_sensor_owner_id: %s\n",
-                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+                       ipmi_sdr_ctx_errormsg (state_data->sdr_ctx));
       goto cleanup;
     }
 
-  if (ipmi_sdr_parse_sensor_owner_lun (state_data->sdr_parse_ctx,
-                                       sdr_record,
-                                       sdr_record_len,
+  if (ipmi_sdr_parse_sensor_owner_lun (state_data->sdr_ctx,
+				       NULL,
+				       0,
                                        &sensor_owner_lun,
                                        &channel_number) < 0)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
                        "ipmi_sdr_parse_sensor_owner_lun: %s\n",
-                       ipmi_sdr_parse_ctx_errormsg (state_data->sdr_parse_ctx));
+                       ipmi_sdr_ctx_errormsg (state_data->sdr_ctx));
       goto cleanup;
     }
 
@@ -1141,10 +1168,8 @@ get_sdr_repository_time (bmc_device_state_data_t *state_data)
 {
   fiid_obj_t obj_cmd_rs = NULL;
   uint64_t val;
-  char timestr[512];
+  char timestr[BMC_DEVICE_TIME_BUFLEN + 1];
   int rv = -1;
-  time_t t;
-  struct tm tm;
 
   assert (state_data);
 
@@ -1175,15 +1200,23 @@ get_sdr_repository_time (bmc_device_state_data_t *state_data)
       goto cleanup;
     }
 
-  /* Posix says individual calls need not clear/set all portions of
-   * 'struct tm', thus passing 'struct tm' between functions could
-   * have issues.  So we need to memset.
-   */
-  memset (&tm, '\0', sizeof(struct tm));
+  memset (timestr, '\0', BMC_DEVICE_TIME_BUFLEN + 1);
 
-  t = val;
-  localtime_r (&t, &tm);
-  strftime (timestr, sizeof (timestr), "%m/%d/%Y - %H:%M:%S", &tm);
+  if (ipmi_timestamp_string ((uint32_t)val,
+			     state_data->prog_data->args->common_args.utc_offset,
+			     get_timestamp_flags (&(state_data->prog_data->args->common_args),
+						  IPMI_TIMESTAMP_FLAG_DEFAULT), 
+			     "%m/%d/%Y - %H:%M:%S",
+			     timestr,
+			     BMC_DEVICE_TIME_BUFLEN) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_timestamp_string: %s\n",
+		       strerror (errno));
+      goto cleanup;
+    }
+			     
   pstdout_printf (state_data->pstate,
                   "SDR Repository Time : %s\n",
                   timestr);
@@ -1269,10 +1302,8 @@ get_sel_time (bmc_device_state_data_t *state_data)
 {
   fiid_obj_t obj_cmd_rs = NULL;
   uint64_t val;
-  char timestr[512];
+  char timestr[BMC_DEVICE_TIME_BUFLEN + 1];
   int rv = -1;
-  time_t t;
-  struct tm tm;
 
   assert (state_data);
 
@@ -1303,15 +1334,23 @@ get_sel_time (bmc_device_state_data_t *state_data)
       goto cleanup;
     }
 
-  /* Posix says individual calls need not clear/set all portions of
-   * 'struct tm', thus passing 'struct tm' between functions could
-   * have issues.  So we need to memset.
-   */
-  memset (&tm, '\0', sizeof(struct tm));
+  memset (timestr, '\0', BMC_DEVICE_TIME_BUFLEN + 1);
 
-  t = val;
-  localtime_r (&t, &tm);
-  strftime (timestr, sizeof (timestr), "%m/%d/%Y - %H:%M:%S", &tm);
+  if (ipmi_timestamp_string ((uint32_t)val,
+			     state_data->prog_data->args->common_args.utc_offset,
+			     get_timestamp_flags (&(state_data->prog_data->args->common_args),
+						  IPMI_TIMESTAMP_FLAG_DEFAULT), 
+			     "%m/%d/%Y - %H:%M:%S",
+			     timestr,
+			     BMC_DEVICE_TIME_BUFLEN) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_timestamp_string: %s\n",
+		       strerror (errno));
+      goto cleanup;
+    }
+
   pstdout_printf (state_data->pstate,
                   "SEL Time : %s\n",
                   timestr);
@@ -1393,13 +1432,111 @@ set_sel_time (bmc_device_state_data_t *state_data)
 }
 
 static int
+get_sel_time_utc_offset (bmc_device_state_data_t *state_data)
+{
+  fiid_obj_t obj_cmd_rs = NULL;
+  int16_t offset;
+  uint64_t val;
+  int rv = -1;
+
+  assert (state_data);
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_get_sel_time_utc_offset_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
+
+  if (ipmi_cmd_get_sel_time_utc_offset (state_data->ipmi_ctx, obj_cmd_rs) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_cmd_get_sel_time_utc_offset: %s\n",
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
+      goto cleanup;
+    }
+
+  if (FIID_OBJ_GET (obj_cmd_rs, "offset", &val) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_get: 'offset': %s\n",
+                       fiid_obj_errormsg (obj_cmd_rs));
+      goto cleanup;
+    }
+  offset = (int16_t)val;
+
+  if (offset == IPMI_SEL_TIME_UTC_OFFSET_UNSPECIFIED)
+    pstdout_printf (state_data->pstate,
+		    "SEL UTC Offset : Unspecified\n",
+		    offset);
+  else
+    pstdout_printf (state_data->pstate,
+		    "SEL UTC Offset : %d minutes\n",
+		    offset);
+  rv = 0;
+ cleanup:
+  fiid_obj_destroy (obj_cmd_rs);
+  return (rv);
+}
+
+static int
+set_sel_time_utc_offset (bmc_device_state_data_t *state_data)
+{
+  struct bmc_device_arguments *args;
+  fiid_obj_t obj_cmd_rs = NULL;
+  int16_t offset;
+  int rv = -1;
+
+  assert (state_data);
+
+  args = state_data->prog_data->args;
+
+  if (!strcasecmp (args->set_sel_time_utc_offset_arg, "none"))
+    offset = IPMI_SEL_TIME_UTC_OFFSET_UNSPECIFIED;
+  else
+    {
+      if (parse_int16 (state_data,
+		       args->set_sel_time_utc_offset_arg,
+		       &offset,
+		       "offset") < 0)
+	goto cleanup;
+    }
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_sel_time_utc_offset_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
+
+  if (ipmi_cmd_set_sel_time_utc_offset (state_data->ipmi_ctx, offset, obj_cmd_rs) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_cmd_set_sel_time_utc_offset: %s\n",
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
+      goto cleanup;
+    }
+
+  rv = 0;
+ cleanup:
+  fiid_obj_destroy (obj_cmd_rs);
+  return (rv);
+}
+
+static int
 parse_hex_byte (bmc_device_state_data_t *state_data,
                 char *from,
                 uint8_t *to,
                 char *str)
 {
   char *endptr;
-  int i;
 
   assert (state_data);
   assert (from);
@@ -1421,26 +1558,8 @@ parse_hex_byte (bmc_device_state_data_t *state_data,
       return (-1);
     }
   
-  for (i = 0; from[i] != '\0'; i++)
-    {
-      if (i >= 2)
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "invalid hex byte argument for %s\n",
-                           str);
-          return (-1);
-        }
-      
-      if (!isxdigit (from[i]))
-        {
-          pstdout_fprintf (state_data->pstate,
-                           stderr,
-                           "invalid hex byte argument for %s\n",
-                           str);
-          return (-1);
-        }
-    }
+  if (parse_check_hex (state_data, from, str, 1) < 0)
+    return (-1);
 
   errno = 0;
   (*to) = strtol (from, &endptr, 16);
@@ -1672,13 +1791,212 @@ platform_event (bmc_device_state_data_t *state_data)
 }
 
 static int
+set_sensor_reading_and_event_status (bmc_device_state_data_t *state_data)
+{
+  struct bmc_device_arguments *args;
+  fiid_obj_t obj_cmd_rs = NULL;
+  char *set_sensor_reading_and_event_status_arg_cpy = NULL;
+  char *str_args[BMC_DEVICE_SET_SENSOR_READING_AND_EVENT_STATUS_ARGS];
+  unsigned int num_str_args = 0;
+  char *str_ptr;
+  char *lasts;
+  unsigned int str_args_index = 0;
+  uint8_t sensor_number;
+  uint8_t sensor_reading;
+  uint8_t sensor_reading_operation;
+  uint16_t assertion_bitmask;
+  uint8_t assertion_bitmask_operation;
+  uint16_t deassertion_bitmask;
+  uint8_t deassertion_bitmask_operation;
+  uint8_t event_data1;
+  uint8_t event_data2;
+  uint8_t event_data3;
+  uint8_t event_data_operation;
+  int rv = -1;
+
+  assert (state_data);
+
+  args = state_data->prog_data->args;
+
+  if (!(set_sensor_reading_and_event_status_arg_cpy = strdup(args->set_sensor_reading_and_event_status_arg)))
+    {
+      pstdout_perror (state_data->pstate, "strdup");
+      goto cleanup;
+    }
+
+  str_ptr = strtok_r (set_sensor_reading_and_event_status_arg_cpy, " \t\0", &lasts);
+  while (str_ptr && num_str_args < BMC_DEVICE_SET_SENSOR_READING_AND_EVENT_STATUS_ARGS)
+    {
+      str_args[num_str_args] = str_ptr;
+      num_str_args++;
+
+      str_ptr = strtok_r (NULL, " \t\0", &lasts);
+    }
+
+  if (num_str_args != BMC_DEVICE_SET_SENSOR_READING_AND_EVENT_STATUS_ARGS)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "Invalid number of arguments specified\n");
+      goto cleanup;
+    }
+
+  if (parse_hex_byte (state_data,
+		      str_args[str_args_index],
+		      &sensor_number,
+		      "sensor number") < 0)
+    goto cleanup;
+  str_args_index++;
+  
+  if (parse_hex_byte (state_data,
+		      str_args[str_args_index],
+		      &sensor_reading,
+		      "sensor reading") < 0)
+    goto cleanup;
+  str_args_index++;
+
+  if (!strcasecmp (str_args[str_args_index], "write"))
+    sensor_reading_operation = IPMI_SENSOR_READING_OPERATION_WRITE_GIVEN_VALUE_TO_SENSOR_READING_BYTE;
+  else if (!strcasecmp (str_args[str_args_index], "nochange"))
+    sensor_reading_operation = IPMI_SENSOR_READING_OPERATION_DONT_CHANGE_SENSOR_READING_BYTE;
+  else
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "Invalid sensor reading operation specified\n"); 
+      goto cleanup;
+    }
+  str_args_index++;
+
+  if (parse_uint16 (state_data,
+		    str_args[str_args_index],
+		    &assertion_bitmask,
+		    "assertion bitmask") < 0)
+    goto cleanup;
+  str_args_index++;
+
+  if (!strcasecmp (str_args[str_args_index], "clear0bits"))
+    assertion_bitmask_operation = IPMI_ASSERTION_DEASSERTION_EVENT_STATUS_BITS_OPERATION_CLEAR_EVENT_STATUS_BITS;
+  else if (!strcasecmp (str_args[str_args_index], "set1bits"))
+    assertion_bitmask_operation = IPMI_ASSERTION_DEASSERTION_EVENT_STATUS_BITS_OPERATION_SET_EVENT_STATUS_BITS;
+  else if (!strcasecmp (str_args[str_args_index], "write"))
+    assertion_bitmask_operation = IPMI_ASSERTION_DEASSERTION_EVENT_STATUS_BITS_OPERATION_WRITE_EVENT_STATUS_BITS;
+  else if (!strcasecmp (str_args[str_args_index], "nochange"))
+    assertion_bitmask_operation = IPMI_ASSERTION_DEASSERTION_EVENT_STATUS_BITS_OPERATION_DONT_CHANGE_EVENT_STATUS_BITS;
+  else
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "Invalid assertion bitmask operation specified\n"); 
+      goto cleanup;
+    }
+  str_args_index++;
+
+  if (parse_uint16 (state_data,
+		    str_args[str_args_index],
+		    &deassertion_bitmask,
+		    "deassertion bitmask") < 0)
+    goto cleanup;
+  str_args_index++;
+
+  if (!strcasecmp (str_args[str_args_index], "clear0bits"))
+    deassertion_bitmask_operation = IPMI_ASSERTION_DEASSERTION_EVENT_STATUS_BITS_OPERATION_CLEAR_EVENT_STATUS_BITS;
+  else if (!strcasecmp (str_args[str_args_index], "set1bits"))
+    deassertion_bitmask_operation = IPMI_ASSERTION_DEASSERTION_EVENT_STATUS_BITS_OPERATION_SET_EVENT_STATUS_BITS;
+  else if (!strcasecmp (str_args[str_args_index], "write"))
+    deassertion_bitmask_operation = IPMI_ASSERTION_DEASSERTION_EVENT_STATUS_BITS_OPERATION_WRITE_EVENT_STATUS_BITS;
+  else if (!strcasecmp (str_args[str_args_index], "nochange"))
+    deassertion_bitmask_operation = IPMI_ASSERTION_DEASSERTION_EVENT_STATUS_BITS_OPERATION_DONT_CHANGE_EVENT_STATUS_BITS;
+  else
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "Invalid deassertion bitmask operation specified\n"); 
+      goto cleanup;
+    }
+  str_args_index++;
+
+  if (parse_hex_byte (state_data,
+                      str_args[str_args_index],
+                      &event_data1,
+                      "event data1") < 0)
+    goto cleanup;
+  str_args_index++;
+
+  if (parse_hex_byte (state_data,
+                      str_args[str_args_index],
+                      &event_data2,
+                      "event data2") < 0)
+    goto cleanup;
+  str_args_index++;
+
+  if (parse_hex_byte (state_data,
+                      str_args[str_args_index],
+                      &event_data3,
+                      "event data3") < 0)
+    goto cleanup;
+  str_args_index++;
+    
+  if (!strcasecmp (str_args[str_args_index], "write"))
+    event_data_operation = IPMI_EVENT_DATA_BYTES_OPERATION_WRITE_EVENT_DATA_BYTES_INCLUDING_EVENT_OFFSET;
+  else if (!strcasecmp (str_args[str_args_index], "nooffsetwrite"))
+    event_data_operation = IPMI_EVENT_DATA_BYTES_OPERATION_WRITE_EVENT_DATA_BYTES_EXCLUDING_EVENT_OFFSET;
+  else if (!strcasecmp (str_args[str_args_index], "nochange"))
+    event_data_operation = IPMI_EVENT_DATA_BYTES_OPERATION_DONT_WRITE_EVENT_DATA_BYTES;
+  else
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "Invalid event data operation specified\n"); 
+      goto cleanup;
+    }
+  str_args_index++;
+
+  if (!(obj_cmd_rs = fiid_obj_create (tmpl_cmd_set_sensor_reading_and_event_status_rs)))
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "fiid_obj_create: %s\n",
+                       strerror (errno));
+      goto cleanup;
+    }
+
+  if (ipmi_cmd_set_sensor_reading_and_event_status (state_data->ipmi_ctx,
+						    sensor_number,
+						    sensor_reading_operation,
+						    deassertion_bitmask_operation,
+						    assertion_bitmask_operation,
+						    event_data_operation,
+						    sensor_reading,
+						    assertion_bitmask,
+						    deassertion_bitmask,
+						    event_data1,
+						    event_data2,
+						    event_data3,
+						    obj_cmd_rs) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_cmd_set_sensor_reading_and_event_status: %s\n",
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
+      goto cleanup;
+    }
+
+  rv = 0;
+ cleanup:
+  free (set_sensor_reading_and_event_status_arg_cpy);
+  fiid_obj_destroy (obj_cmd_rs);
+  return (rv);
+}
+
+static int
 get_mca_auxiliary_log_status (bmc_device_state_data_t *state_data)
 {
   fiid_obj_t obj_cmd_rs = NULL;
   fiid_obj_t mca_obj_cmd_rs = NULL;
   uint32_t mca_log_entry_count;
   uint64_t val;
-  char timestr[512];
+  char timestr[BMC_DEVICE_TIME_BUFLEN + 1];
   int rv = -1;
   time_t t;
   struct tm tm;
@@ -1724,6 +2042,8 @@ get_mca_auxiliary_log_status (bmc_device_state_data_t *state_data)
                        fiid_obj_errormsg (obj_cmd_rs));
       goto cleanup;
     }
+
+  memset (timestr, '\0', BMC_DEVICE_TIME_BUFLEN + 1);
 
   /* Posix says individual calls need not clear/set all portions of
    * 'struct tm', thus passing 'struct tm' between functions could
@@ -2372,8 +2692,7 @@ run_cmd_args (bmc_device_state_data_t *state_data)
 
   args = state_data->prog_data->args;
 
-  if (args->sdr.flush_cache)
-    return (_flush_cache (state_data));
+  assert (!args->common_args.flush_cache);
 
   if (args->cold_reset)
     return (cold_reset (state_data));
@@ -2411,8 +2730,17 @@ run_cmd_args (bmc_device_state_data_t *state_data)
   if (args->set_sel_time)
     return (set_sel_time (state_data));
 
+  if (args->get_sel_time_utc_offset)
+    return (get_sel_time_utc_offset (state_data));
+
+  if (args->set_sel_time_utc_offset)
+    return (set_sel_time_utc_offset (state_data));
+
   if (args->platform_event)
     return (platform_event (state_data));
+
+  if (args->set_sensor_reading_and_event_status)
+    return (set_sensor_reading_and_event_status (state_data));
 
   if (args->get_mca_auxiliary_log_status)
     return (get_mca_auxiliary_log_status (state_data));
@@ -2452,79 +2780,45 @@ _bmc_device (pstdout_state_t pstate,
 {
   bmc_device_state_data_t state_data;
   bmc_device_prog_data_t *prog_data;
-  char errmsg[IPMI_OPEN_ERRMSGLEN];
-  int exit_code = -1;
+  int exit_code = EXIT_FAILURE;
+
+  assert (pstate);
+  assert (arg);
 
   prog_data = (bmc_device_prog_data_t *)arg;
-  memset (&state_data, '\0', sizeof (bmc_device_state_data_t));
 
+  if (prog_data->args->common_args.flush_cache)
+    {
+      if (sdr_cache_flush_cache (pstate,
+				 hostname,
+				 &prog_data->args->common_args) < 0)
+	return (EXIT_FAILURE);
+      return (EXIT_SUCCESS);
+    }
+  
+  memset (&state_data, '\0', sizeof (bmc_device_state_data_t));
   state_data.prog_data = prog_data;
   state_data.pstate = pstate;
   state_data.hostname = (char *)hostname;
 
-  /* Special case, just flush, don't do an IPMI connection */
-  if (!prog_data->args->sdr.flush_cache)
-    {
-      if (!(state_data.ipmi_ctx = ipmi_open (prog_data->progname,
-					     hostname,
-					     &(prog_data->args->common),
-					     errmsg,
-					     IPMI_OPEN_ERRMSGLEN)))
-	{
-	  pstdout_fprintf (pstate,
-			   stderr,
-			   "%s\n",
-			   errmsg);
-	  exit_code = EXIT_FAILURE;
-	  goto cleanup;
-	}
-    }
+  if (!(state_data.ipmi_ctx = ipmi_open (prog_data->progname,
+					 hostname,
+					 &(prog_data->args->common_args),
+					 state_data.pstate)))
+    goto cleanup;
 
-  if (!(state_data.sdr_cache_ctx = ipmi_sdr_cache_ctx_create ()))
+  if (!(state_data.sdr_ctx = ipmi_sdr_ctx_create ()))
     {
-      pstdout_perror (pstate, "ipmi_sdr_cache_ctx_create()");
-      exit_code = EXIT_FAILURE;
+      pstdout_perror (pstate, "ipmi_sdr_ctx_create()");
       goto cleanup;
     }
   
-  if (state_data.prog_data->args->common.debug)
-    {
-      /* Don't error out, if this fails we can still continue */
-      if (ipmi_sdr_cache_ctx_set_flags (state_data.sdr_cache_ctx,
-                                        IPMI_SDR_CACHE_FLAGS_DEBUG_DUMP) < 0)
-        pstdout_fprintf (pstate,
-                         stderr,
-                         "ipmi_sdr_cache_ctx_set_flags: %s\n",
-                         ipmi_sdr_cache_ctx_strerror (ipmi_sdr_cache_ctx_errnum (state_data.sdr_cache_ctx)));
-      
-      if (hostname)
-        {
-          if (ipmi_sdr_cache_ctx_set_debug_prefix (state_data.sdr_cache_ctx,
-                                                   hostname) < 0)
-            pstdout_fprintf (pstate,
-                             stderr,
-                             "ipmi_sdr_cache_ctx_set_debug_prefix: %s\n",
-                             ipmi_sdr_cache_ctx_strerror (ipmi_sdr_cache_ctx_errnum (state_data.sdr_cache_ctx)));
-        }
-    }
-  
-  if (!(state_data.sdr_parse_ctx = ipmi_sdr_parse_ctx_create ()))
-    {
-      pstdout_perror (pstate, "ipmi_sdr_parse_ctx_create()");
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
-
   if (run_cmd_args (&state_data) < 0)
-    {
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
+    goto cleanup;
 
-  exit_code = 0;
+  exit_code = EXIT_SUCCESS;
  cleanup:
-  ipmi_sdr_cache_ctx_destroy (state_data.sdr_cache_ctx);
-  ipmi_sdr_parse_ctx_destroy (state_data.sdr_parse_ctx);
+  ipmi_sdr_ctx_destroy (state_data.sdr_ctx);
   ipmi_ctx_close (state_data.ipmi_ctx);
   ipmi_ctx_destroy (state_data.ipmi_ctx);
   return (exit_code);
@@ -2535,7 +2829,6 @@ main (int argc, char **argv)
 {
   bmc_device_prog_data_t prog_data;
   struct bmc_device_arguments cmd_args;
-  int exit_code;
   int hosts_count;
   int rv;
 
@@ -2546,39 +2839,26 @@ main (int argc, char **argv)
   bmc_device_argp_parse (argc, argv, &cmd_args);
   prog_data.args = &cmd_args;
 
-  if ((hosts_count = pstdout_setup (&(prog_data.args->common.hostname),
-                                    prog_data.args->hostrange.buffer_output,
-                                    prog_data.args->hostrange.consolidate_output,
-                                    prog_data.args->hostrange.fanout,
-                                    prog_data.args->hostrange.eliminate,
-                                    prog_data.args->hostrange.always_prefix)) < 0)
-    {
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
+  if ((hosts_count = pstdout_setup (&(prog_data.args->common_args.hostname),
+				    &(prog_data.args->common_args))) < 0)
+    return (EXIT_FAILURE);
 
   if (!hosts_count)
-    {
-      exit_code = EXIT_SUCCESS;
-      goto cleanup;
-    }
+    return (EXIT_SUCCESS);
 
   /* We don't want caching info to output when are doing ranged output */
   if (hosts_count > 1)
-    prog_data.args->sdr.quiet_cache = 1;
+    prog_data.args->common_args.quiet_cache = 1;
 
-  if ((rv = pstdout_launch (prog_data.args->common.hostname,
+  if ((rv = pstdout_launch (prog_data.args->common_args.hostname,
                             _bmc_device,
                             &prog_data)) < 0)
     {
       fprintf (stderr,
                "pstdout_launch: %s\n",
                pstdout_strerror (pstdout_errnum));
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
+      return (EXIT_FAILURE);
     }
 
-  exit_code = rv;
- cleanup:
-  return (exit_code);
+  return (rv);
 }

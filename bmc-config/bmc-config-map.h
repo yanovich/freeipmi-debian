@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _BMC_CONFIG_MAP_H
-#define _BMC_CONFIG_MAP_H
+#ifndef BMC_CONFIG_MAP_H
+#define BMC_CONFIG_MAP_H
 
 #include "bmc-config.h"
 
@@ -69,4 +69,4 @@ int alert_gateway_number (const char *string);
 
 char *alert_gateway_string (uint8_t value);
 
-#endif
+#endif /* BMC_CONFIG_MAP_H */

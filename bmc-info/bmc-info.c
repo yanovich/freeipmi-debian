@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@
 #include "tool-common.h"
 #include "tool-cmdline-common.h"
 #include "tool-hostrange-common.h"
+#include "tool-util-common.h"
 
 typedef struct channel_info
 {
@@ -48,8 +49,6 @@ typedef struct channel_info
   uint8_t session_support;
   uint32_t vendor_id;
 } channel_info_t;
-
-#define BMC_INFO_NUM_CHANNELS 8
 
 #define BMC_INFO_SYSTEM_INFO_STRING_MAX 512
 
@@ -550,7 +549,7 @@ display_get_device_guid (bmc_info_state_data_t *state_data)
   if (ipmi_cmd_get_device_guid (state_data->ipmi_ctx, obj_cmd_rs) < 0)
     {
       if (!state_data->prog_data->args->get_device_guid
-          && ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
+          && ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED
           && ipmi_check_completion_code (obj_cmd_rs,
                                          IPMI_COMP_CODE_INVALID_COMMAND) == 1)
         {
@@ -645,7 +644,8 @@ display_system_info_common (bmc_info_state_data_t *state_data,
   uint64_t val;
   uint8_t set_selector = 0;
   unsigned int string_count = 0;
-  int len;
+  unsigned int orig_flags = 0;
+  int ret, len;
   int rv = -1;
 
   assert (state_data);
@@ -679,6 +679,33 @@ display_system_info_common (bmc_info_state_data_t *state_data,
       goto cleanup;
     }
 
+  /* IPMI Workaround
+   *
+   * Bull 510 Blade
+   *
+   * The first call to retrieve the Operating System name does not
+   * return a set_selector, encoding, or string_length.  If it does
+   * not, we assume the string is empty.
+   */
+
+  if (ipmi_ctx_get_flags (state_data->ipmi_ctx, &orig_flags) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_ctx_get_flags: %s\n",
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
+      goto cleanup;
+    }
+
+  if (ipmi_ctx_set_flags (state_data->ipmi_ctx, orig_flags | IPMI_FLAGS_NO_VALID_CHECK) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+                       stderr,
+                       "ipmi_ctx_set_flags: %s\n",
+                       ipmi_ctx_errormsg (state_data->ipmi_ctx));
+      goto cleanup;
+    }
+
   if (func_cmd_first_set (state_data->ipmi_ctx,
                           IPMI_GET_SYSTEM_INFO_PARAMETER,
                           set_selector,
@@ -686,11 +713,14 @@ display_system_info_common (bmc_info_state_data_t *state_data,
                           obj_cmd_first_set_rs) < 0)
     {
       if (!state_data->prog_data->args->get_system_info
-          && ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
-          && (ipmi_check_completion_code (obj_cmd_first_set_rs,
-					  IPMI_COMP_CODE_INVALID_COMMAND) == 1
-	      || ipmi_check_completion_code (obj_cmd_first_set_rs,
-					     IPMI_COMP_CODE_GET_SYSTEM_INFO_PARAMETERS_PARAMETER_NOT_SUPPORTED) == 1))
+	  && ((ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED
+	       && (ipmi_check_completion_code (obj_cmd_first_set_rs,
+					       IPMI_COMP_CODE_INVALID_COMMAND) == 1
+		   || ipmi_check_completion_code (obj_cmd_first_set_rs,
+						  IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST) == 1))
+	      || (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
+		  && ipmi_check_completion_code (obj_cmd_first_set_rs,
+						 IPMI_COMP_CODE_GET_SYSTEM_INFO_PARAMETERS_PARAMETER_NOT_SUPPORTED) == 1)))
         {
           rv = 0;
           goto cleanup;
@@ -703,9 +733,9 @@ display_system_info_common (bmc_info_state_data_t *state_data,
       goto cleanup;
     }
   
-  if (FIID_OBJ_GET (obj_cmd_first_set_rs,
-                    "encoding",
-                    &val) < 0)
+  if ((ret = fiid_obj_get (obj_cmd_first_set_rs,
+			   "encoding",
+			   &val)) < 0)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
@@ -713,11 +743,15 @@ display_system_info_common (bmc_info_state_data_t *state_data,
                        fiid_obj_errormsg (obj_cmd_first_set_rs));
       goto cleanup;
     }
+  
+  if (!ret)
+    goto output;
+
   encoding = val;
   
-  if (FIID_OBJ_GET (obj_cmd_first_set_rs,
-                    "string_length",
-                    &val) < 0)
+  if ((ret = fiid_obj_get (obj_cmd_first_set_rs,
+			   "string_length",
+			   &val)) < 0)
     {
       pstdout_fprintf (state_data->pstate,
                        stderr,
@@ -725,6 +759,10 @@ display_system_info_common (bmc_info_state_data_t *state_data,
                        fiid_obj_errormsg (obj_cmd_first_set_rs));
       goto cleanup;
     }
+
+  if (!ret)
+    goto output;
+
   string_length = val;
 
   /* no string */
@@ -769,12 +807,14 @@ display_system_info_common (bmc_info_state_data_t *state_data,
                     obj_cmd_rs) < 0)
         {
           if (!state_data->prog_data->args->get_system_info
-              && ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
-              && (ipmi_check_completion_code (obj_cmd_first_set_rs,
-					      IPMI_COMP_CODE_INVALID_COMMAND) == 1
-		  || ipmi_check_completion_code (obj_cmd_first_set_rs,
-						 IPMI_COMP_CODE_GET_SYSTEM_INFO_PARAMETERS_PARAMETER_NOT_SUPPORTED) == 1))
-
+	      && ((ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_COMMAND_INVALID_OR_UNSUPPORTED
+		   && (ipmi_check_completion_code (obj_cmd_first_set_rs,
+						   IPMI_COMP_CODE_INVALID_COMMAND) == 1
+		       || ipmi_check_completion_code (obj_cmd_first_set_rs,
+						      IPMI_COMP_CODE_INVALID_DATA_FIELD_IN_REQUEST) == 1))
+		  || (ipmi_ctx_errnum (state_data->ipmi_ctx) == IPMI_ERR_BAD_COMPLETION_CODE
+		      && ipmi_check_completion_code (obj_cmd_first_set_rs,
+						     IPMI_COMP_CODE_GET_SYSTEM_INFO_PARAMETERS_PARAMETER_NOT_SUPPORTED) == 1)))
             {
               rv = 0;
               goto cleanup;
@@ -814,6 +854,11 @@ display_system_info_common (bmc_info_state_data_t *state_data,
 
   rv = 1;
  cleanup:
+  if (ipmi_ctx_set_flags (state_data->ipmi_ctx, orig_flags) < 0)
+    pstdout_fprintf (state_data->pstate,
+		     stderr,
+		     "ipmi_ctx_set_flags: %s\n",
+		     ipmi_ctx_errormsg (state_data->ipmi_ctx));
   fiid_obj_destroy (obj_cmd_first_set_rs);
   fiid_obj_destroy (obj_cmd_rs);
   return (rv);
@@ -944,7 +989,8 @@ get_channel_info_list (bmc_info_state_data_t *state_data, channel_info_t *channe
       goto cleanup;
     }
 
-  for (i = 0, ci = 0; i < BMC_INFO_NUM_CHANNELS; i++)
+  for (i = IPMI_CHANNEL_NUMBER_PRIMARY_IPMB, ci = 0;
+       i <= IPMI_CHANNEL_NUMBER_IMPLEMENTATION_SPECIFIC_MAX; i++)
     {
       if (ipmi_cmd_get_channel_info (state_data->ipmi_ctx,
                                      i,
@@ -1041,20 +1087,20 @@ get_channel_info_list (bmc_info_state_data_t *state_data, channel_info_t *channe
 static int
 display_channel_info (bmc_info_state_data_t *state_data)
 {
-  channel_info_t channel_info_list[BMC_INFO_NUM_CHANNELS];
+  channel_info_t channel_info_list[IPMI_CHANNEL_NUMBERS_MAX];
   int first_newline_output = 0;
   unsigned int i;
 
   assert (state_data);
 
-  memset (channel_info_list, '\0', sizeof (channel_info_t) * BMC_INFO_NUM_CHANNELS);
+  memset (channel_info_list, '\0', sizeof (channel_info_t) * IPMI_CHANNEL_NUMBERS_MAX);
   if (get_channel_info_list (state_data, channel_info_list) < 0)
     return (-1);
 
   if (!state_data->prog_data->args->get_channel_info)
     pstdout_printf (state_data->pstate, "Channel Information\n");
 
-  for (i = 0; i < BMC_INFO_NUM_CHANNELS; i++)
+  for (i = 0; i < IPMI_CHANNEL_NUMBERS_MAX; i++)
     {
       char *medium_type_str = NULL;
       char *protocol_type_str = NULL;
@@ -1067,68 +1113,103 @@ display_channel_info (bmc_info_state_data_t *state_data)
       if (IPMI_CHANNEL_MEDIUM_TYPE_IS_RESERVED (channel_info_list[i].channel_medium_type))
         continue;
 
-      if (IPMI_CHANNEL_MEDIUM_TYPE_IS_RESERVED (channel_info_list[i].channel_medium_type))
-        medium_type_str = "Reserved";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_IPMB)
-        medium_type_str = "IPMB (I2C)";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_ICMB_10)
-        medium_type_str = "ICMB v1.0";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_ICMB_09)
-        medium_type_str = "ICMB v0.9";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_LAN_802_3)
-        medium_type_str = "802.3 LAN";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_RS232)
-        medium_type_str = "Asynch. Serial/Modem (RS-232)";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_OTHER_LAN)
-        medium_type_str = "Other LAN";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_PCI_SMBUS)
-        medium_type_str = "PCI SMBus";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_SMBUS_10_11)
-        medium_type_str = "SMBus v1.0/1.1";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_SMBUS_20)
-        medium_type_str = "SMBus v2.0";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_USB_1X)
-        medium_type_str = "USB 1.x";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_USB_2X)
-        medium_type_str = "USB 2.x";
-      else if (channel_info_list[i].channel_medium_type == IPMI_CHANNEL_MEDIUM_TYPE_SYSTEM_INTERFACE)
-        medium_type_str = "System Interface (KCS, SMIC, or BT)";
-      else if (IPMI_CHANNEL_MEDIUM_TYPE_IS_OEM (channel_info_list[i].channel_medium_type))
-        medium_type_str = "OEM";
-      else
-        medium_type_str = "unknown";
+      switch (channel_info_list[i].channel_medium_type)
+	{
+	case IPMI_CHANNEL_MEDIUM_TYPE_IPMB:
+	  medium_type_str = "IPMB (I2C)";
+	  break;
+	case IPMI_CHANNEL_MEDIUM_TYPE_ICMB_10:
+	  medium_type_str = "ICMB v1.0";
+	  break;
+	case IPMI_CHANNEL_MEDIUM_TYPE_ICMB_09:
+	  medium_type_str = "ICMB v0.9";
+	  break;
+	case IPMI_CHANNEL_MEDIUM_TYPE_LAN_802_3:
+	  medium_type_str = "802.3 LAN";
+	  break;
+	case IPMI_CHANNEL_MEDIUM_TYPE_RS232:
+	  medium_type_str = "Asynch. Serial/Modem (RS-232)";
+	  break;
+	case IPMI_CHANNEL_MEDIUM_TYPE_OTHER_LAN:
+	  medium_type_str = "Other LAN";
+	  break;
+	case IPMI_CHANNEL_MEDIUM_TYPE_PCI_SMBUS:
+	  medium_type_str = "PCI SMBus";
+	  break;
+	case IPMI_CHANNEL_MEDIUM_TYPE_SMBUS_10_11:
+	  medium_type_str = "SMBus v1.0/1.1";
+	  break;
+	case IPMI_CHANNEL_MEDIUM_TYPE_SMBUS_20:
+	  medium_type_str = "SMBus v2.0";
+	  break;
+	case IPMI_CHANNEL_MEDIUM_TYPE_USB_1X:
+	  medium_type_str = "USB 1.x";
+	  break;
+	case IPMI_CHANNEL_MEDIUM_TYPE_USB_2X:
+	  medium_type_str = "USB 2.x";
+	  break;
+	case IPMI_CHANNEL_MEDIUM_TYPE_SYSTEM_INTERFACE:
+	  medium_type_str = "System Interface (KCS, SMIC, or BT)";
+	  break;
+	default:
+	  if (IPMI_CHANNEL_MEDIUM_TYPE_IS_OEM (channel_info_list[i].channel_medium_type))
+	    medium_type_str = "OEM";
+	  else
+	    medium_type_str = "unknown";
+	}
 
-      if (IPMI_CHANNEL_PROTOCOL_TYPE_IS_RESERVED (channel_info_list[i].channel_protocol_type))
-        protocol_type_str = "Reserved";
-      else if (channel_info_list[i].channel_protocol_type == IPMI_CHANNEL_PROTOCOL_TYPE_IPMB)
-        protocol_type_str = "IPMB-1.0";
-      else if (channel_info_list[i].channel_protocol_type == IPMI_CHANNEL_PROTOCOL_TYPE_ICMB_10)
-        protocol_type_str = "ICMB-1.0";
-      else if (channel_info_list[i].channel_protocol_type == IPMI_CHANNEL_PROTOCOL_TYPE_SMBUS_1X_2X)
-        protocol_type_str = "IPMI-SMBus";
-      else if (channel_info_list[i].channel_protocol_type == IPMI_CHANNEL_PROTOCOL_TYPE_KCS)
-        protocol_type_str = "KCS";
-      else if (channel_info_list[i].channel_protocol_type == IPMI_CHANNEL_PROTOCOL_TYPE_SMIC)
-        protocol_type_str = "SMIC";
-      else if (channel_info_list[i].channel_protocol_type == IPMI_CHANNEL_PROTOCOL_TYPE_BT_10)
-        protocol_type_str = "BT-10";
-      else if (channel_info_list[i].channel_protocol_type == IPMI_CHANNEL_PROTOCOL_TYPE_BT_15)
-        protocol_type_str = "BT-15";
-      else if (channel_info_list[i].channel_protocol_type == IPMI_CHANNEL_PROTOCOL_TYPE_TMODE)
-        protocol_type_str = "TMODE";
-      else if (IPMI_CHANNEL_PROTOCOL_TYPE_IS_OEM (channel_info_list[i].channel_protocol_type))
-        protocol_type_str = "OEM";
-      else
-        protocol_type_str = "unknown";
-
-      if (channel_info_list[i].session_support == IPMI_SESSION_SUPPORT_SESSION_LESS)
-        session_support_str = "session-less";
-      else if (channel_info_list[i].session_support == IPMI_SESSION_SUPPORT_SINGLE_SESSION)
-        session_support_str = "single-session";
-      else if (channel_info_list[i].session_support == IPMI_SESSION_SUPPORT_MULTI_SESSION)
-        session_support_str = "multi-session";
-      else
-        session_support_str = "session-based";
+      switch (channel_info_list[i].channel_protocol_type)
+	{
+	case IPMI_CHANNEL_PROTOCOL_TYPE_IPMB:
+	  protocol_type_str = "IPMB-1.0";
+	  break;
+	case IPMI_CHANNEL_PROTOCOL_TYPE_ICMB_10:
+	  protocol_type_str = "ICMB-1.0";
+	  break;
+	case IPMI_CHANNEL_PROTOCOL_TYPE_SMBUS_1X_2X:
+	  protocol_type_str = "IPMI-SMBus";
+	  break;
+	case IPMI_CHANNEL_PROTOCOL_TYPE_KCS:
+	  protocol_type_str = "KCS";
+	  break;
+	case IPMI_CHANNEL_PROTOCOL_TYPE_SMIC:
+	  protocol_type_str = "SMIC";
+	  break;
+	case IPMI_CHANNEL_PROTOCOL_TYPE_BT_10:
+	  protocol_type_str = "BT-10";
+	  break;
+	case IPMI_CHANNEL_PROTOCOL_TYPE_BT_15:
+	  protocol_type_str = "BT-15";
+	  break;
+	case IPMI_CHANNEL_PROTOCOL_TYPE_TMODE:
+	  protocol_type_str = "TMODE";
+	  break;
+	default:
+	  if (IPMI_CHANNEL_PROTOCOL_TYPE_IS_RESERVED (channel_info_list[i].channel_protocol_type))
+	    protocol_type_str = "Reserved";
+	  else if (IPMI_CHANNEL_PROTOCOL_TYPE_IS_OEM (channel_info_list[i].channel_protocol_type))
+	    protocol_type_str = "OEM";
+	  else
+	    protocol_type_str = "unknown";
+	}
+      
+      switch (channel_info_list[i].session_support)
+	{
+	case IPMI_SESSION_SUPPORT_SESSION_LESS:
+	  session_support_str = "session-less";
+	  break;
+	case IPMI_SESSION_SUPPORT_SINGLE_SESSION:
+	  session_support_str = "single-session";
+	  break;
+	case IPMI_SESSION_SUPPORT_MULTI_SESSION:
+	  session_support_str = "multi-session";
+	  break;
+	case IPMI_SESSION_SUPPORT_SESSION_BASED:
+	  session_support_str = "session-based";
+	  break;
+	default:
+	  session_support_str = "unknown";
+	}
         
       if (!state_data->prog_data->args->get_channel_info || first_newline_output)
         pstdout_printf (state_data->pstate, "\n");
@@ -1230,8 +1311,10 @@ _bmc_info (pstdout_state_t pstate,
 {
   bmc_info_state_data_t state_data;
   bmc_info_prog_data_t *prog_data;
-  char errmsg[IPMI_OPEN_ERRMSGLEN];
-  int exit_code = -1;
+  int exit_code = EXIT_FAILURE;
+
+  assert (pstate);
+  assert (arg);
 
   prog_data = (bmc_info_prog_data_t *)arg;
   memset (&state_data, '\0', sizeof (bmc_info_state_data_t));
@@ -1241,25 +1324,14 @@ _bmc_info (pstdout_state_t pstate,
 
   if (!(state_data.ipmi_ctx = ipmi_open (prog_data->progname,
                                          hostname,
-                                         &(prog_data->args->common),
-                                         errmsg,
-                                         IPMI_OPEN_ERRMSGLEN)))
-    {
-      pstdout_fprintf (pstate,
-                       stderr,
-                       "%s\n",
-                       errmsg);
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
+                                         &(prog_data->args->common_args),
+					 state_data.pstate)))
+    goto cleanup;
 
   if (run_cmd_args (&state_data) < 0)
-    {
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
+    goto cleanup;
 
-  exit_code = 0;
+  exit_code = EXIT_SUCCESS;
  cleanup:
   ipmi_ctx_close (state_data.ipmi_ctx);
   ipmi_ctx_destroy (state_data.ipmi_ctx);
@@ -1271,7 +1343,6 @@ main (int argc, char **argv)
 {
   bmc_info_prog_data_t prog_data;
   struct bmc_info_arguments cmd_args;
-  int exit_code;
   int hosts_count;
   int rv;
 
@@ -1282,35 +1353,22 @@ main (int argc, char **argv)
   bmc_info_argp_parse (argc, argv, &cmd_args);
   prog_data.args = &cmd_args;
 
-  if ((hosts_count = pstdout_setup (&(prog_data.args->common.hostname),
-                                    prog_data.args->hostrange.buffer_output,
-                                    prog_data.args->hostrange.consolidate_output,
-                                    prog_data.args->hostrange.fanout,
-                                    prog_data.args->hostrange.eliminate,
-                                    prog_data.args->hostrange.always_prefix)) < 0)
-    {
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
+  if ((hosts_count = pstdout_setup (&(prog_data.args->common_args.hostname),
+                                    &(prog_data.args->common_args))) < 0)
+    return (EXIT_FAILURE);
 
   if (!hosts_count)
-    {
-      exit_code = EXIT_SUCCESS;
-      goto cleanup;
-    }
+    return (EXIT_SUCCESS);
 
-  if ((rv = pstdout_launch (prog_data.args->common.hostname,
+  if ((rv = pstdout_launch (prog_data.args->common_args.hostname,
                             _bmc_info,
                             &prog_data)) < 0)
     {
       fprintf (stderr,
                "pstdout_launch: %s\n",
                pstdout_strerror (pstdout_errnum));
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
+      return (EXIT_FAILURE);
     }
 
-  exit_code = rv;
- cleanup:
-  return (exit_code);
+  return (rv);
 }

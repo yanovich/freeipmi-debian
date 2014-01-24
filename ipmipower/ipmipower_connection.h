@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_connection.h,v 1.17 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -24,8 +24,8 @@
  *  with Ipmipower.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMIPOWER_CONNECTION_H
-#define _IPMIPOWER_CONNECTION_H
+#ifndef IPMIPOWER_CONNECTION_H
+#define IPMIPOWER_CONNECTION_H
 
 #include "ipmipower.h"
 
@@ -55,4 +55,4 @@ int ipmipower_connection_hostname_index (struct ipmipower_connection *ics,
                                          unsigned int ics_len,
                                          const char *hostname);
 
-#endif /* _IPMIPOWER_CONNECTION_H */
+#endif /* IPMIPOWER_CONNECTION_H */

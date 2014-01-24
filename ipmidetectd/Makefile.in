@@ -38,8 +38,7 @@ sbin_PROGRAMS = ipmidetectd$(EXEEXT)
 subdir = ipmidetectd
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
-	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
@@ -49,6 +48,8 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_cache_dir.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_config_file.m4 \
 	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
@@ -60,12 +61,12 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
-am_ipmidetectd_OBJECTS = ipmidetectd-debug.$(OBJEXT) \
-	ipmidetectd-ipmidetectd.$(OBJEXT) \
-	ipmidetectd-ipmidetectd_config.$(OBJEXT) \
-	ipmidetectd-ipmidetectd_loop.$(OBJEXT)
+am_ipmidetectd_OBJECTS = ipmidetectd-ipmidetectd.$(OBJEXT) \
+	ipmidetectd-ipmidetectd-argp.$(OBJEXT) \
+	ipmidetectd-ipmidetectd-config.$(OBJEXT)
 ipmidetectd_OBJECTS = $(am_ipmidetectd_OBJECTS)
 ipmidetectd_DEPENDENCIES =  \
+	$(top_builddir)/common/toolcommon/libtoolcommon.la \
 	$(top_builddir)/common/miscutil/libmiscutil.la \
 	$(top_builddir)/common/portability/libportability.la \
 	$(top_builddir)/libfreeipmi/libfreeipmi.la
@@ -95,7 +96,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BMC_WATCHDOG_LOGFILE_DEFAULT = @BMC_WATCHDOG_LOGFILE_DEFAULT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -123,8 +123,6 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
 INSTALL_IPMISDRCACHEDIR = @INSTALL_IPMISDRCACHEDIR@
-INSTALL_LOGDIR = @INSTALL_LOGDIR@
-INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -134,6 +132,8 @@ IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
 IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
+IPMISELD_CACHE_DIRECTORY = @IPMISELD_CACHE_DIRECTORY@
+IPMISELD_CONFIG_FILE_DEFAULT = @IPMISELD_CONFIG_FILE_DEFAULT@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
 IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
@@ -242,26 +242,28 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ipmidetectd_CPPFLAGS = \
+	-I$(top_srcdir)/common/toolcommon \
 	-I$(top_srcdir)/common/miscutil \
 	-I$(top_srcdir)/common/portability \
+	-I$(top_builddir)/libfreeipmi/include \
 	-I$(top_srcdir)/libfreeipmi/include \
 	-D_GNU_SOURCE \
-	-D_REENTRANT
+	-D_REENTRANT \
+	-DIPMIDETECTD_LOCALSTATEDIR='"$(localstatedir)"'
 
 ipmidetectd_LDADD = \
+	$(top_builddir)/common/toolcommon/libtoolcommon.la \
 	$(top_builddir)/common/miscutil/libmiscutil.la \
 	$(top_builddir)/common/portability/libportability.la \
 	$(top_builddir)/libfreeipmi/libfreeipmi.la
 
 ipmidetectd_SOURCES = \
-	debug.c \
-	debug.h \
 	ipmidetectd.c \
 	ipmidetectd.h \
-	ipmidetectd_config.c \
-	ipmidetectd_config.h \
-	ipmidetectd_loop.c \
-	ipmidetectd_loop.h
+	ipmidetectd-argp.c \
+	ipmidetectd-argp.h \
+	ipmidetectd-config.c \
+	ipmidetectd-config.h
 
 all: all-am
 
@@ -350,10 +352,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmidetectd-debug.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmidetectd-ipmidetectd-argp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmidetectd-ipmidetectd-config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmidetectd-ipmidetectd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmidetectd-ipmidetectd_config.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipmidetectd-ipmidetectd_loop.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -379,20 +380,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
-ipmidetectd-debug.o: debug.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmidetectd-debug.o -MD -MP -MF $(DEPDIR)/ipmidetectd-debug.Tpo -c -o ipmidetectd-debug.o `test -f 'debug.c' || echo '$(srcdir)/'`debug.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmidetectd-debug.Tpo $(DEPDIR)/ipmidetectd-debug.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='debug.c' object='ipmidetectd-debug.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmidetectd-debug.o `test -f 'debug.c' || echo '$(srcdir)/'`debug.c
-
-ipmidetectd-debug.obj: debug.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmidetectd-debug.obj -MD -MP -MF $(DEPDIR)/ipmidetectd-debug.Tpo -c -o ipmidetectd-debug.obj `if test -f 'debug.c'; then $(CYGPATH_W) 'debug.c'; else $(CYGPATH_W) '$(srcdir)/debug.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmidetectd-debug.Tpo $(DEPDIR)/ipmidetectd-debug.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='debug.c' object='ipmidetectd-debug.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmidetectd-debug.obj `if test -f 'debug.c'; then $(CYGPATH_W) 'debug.c'; else $(CYGPATH_W) '$(srcdir)/debug.c'; fi`
-
 ipmidetectd-ipmidetectd.o: ipmidetectd.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmidetectd-ipmidetectd.o -MD -MP -MF $(DEPDIR)/ipmidetectd-ipmidetectd.Tpo -c -o ipmidetectd-ipmidetectd.o `test -f 'ipmidetectd.c' || echo '$(srcdir)/'`ipmidetectd.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmidetectd-ipmidetectd.Tpo $(DEPDIR)/ipmidetectd-ipmidetectd.Po
@@ -407,33 +394,33 @@ ipmidetectd-ipmidetectd.obj: ipmidetectd.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmidetectd-ipmidetectd.obj `if test -f 'ipmidetectd.c'; then $(CYGPATH_W) 'ipmidetectd.c'; else $(CYGPATH_W) '$(srcdir)/ipmidetectd.c'; fi`
 
-ipmidetectd-ipmidetectd_config.o: ipmidetectd_config.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmidetectd-ipmidetectd_config.o -MD -MP -MF $(DEPDIR)/ipmidetectd-ipmidetectd_config.Tpo -c -o ipmidetectd-ipmidetectd_config.o `test -f 'ipmidetectd_config.c' || echo '$(srcdir)/'`ipmidetectd_config.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmidetectd-ipmidetectd_config.Tpo $(DEPDIR)/ipmidetectd-ipmidetectd_config.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmidetectd_config.c' object='ipmidetectd-ipmidetectd_config.o' libtool=no @AMDEPBACKSLASH@
+ipmidetectd-ipmidetectd-argp.o: ipmidetectd-argp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmidetectd-ipmidetectd-argp.o -MD -MP -MF $(DEPDIR)/ipmidetectd-ipmidetectd-argp.Tpo -c -o ipmidetectd-ipmidetectd-argp.o `test -f 'ipmidetectd-argp.c' || echo '$(srcdir)/'`ipmidetectd-argp.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmidetectd-ipmidetectd-argp.Tpo $(DEPDIR)/ipmidetectd-ipmidetectd-argp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmidetectd-argp.c' object='ipmidetectd-ipmidetectd-argp.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmidetectd-ipmidetectd_config.o `test -f 'ipmidetectd_config.c' || echo '$(srcdir)/'`ipmidetectd_config.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmidetectd-ipmidetectd-argp.o `test -f 'ipmidetectd-argp.c' || echo '$(srcdir)/'`ipmidetectd-argp.c
 
-ipmidetectd-ipmidetectd_config.obj: ipmidetectd_config.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmidetectd-ipmidetectd_config.obj -MD -MP -MF $(DEPDIR)/ipmidetectd-ipmidetectd_config.Tpo -c -o ipmidetectd-ipmidetectd_config.obj `if test -f 'ipmidetectd_config.c'; then $(CYGPATH_W) 'ipmidetectd_config.c'; else $(CYGPATH_W) '$(srcdir)/ipmidetectd_config.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmidetectd-ipmidetectd_config.Tpo $(DEPDIR)/ipmidetectd-ipmidetectd_config.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmidetectd_config.c' object='ipmidetectd-ipmidetectd_config.obj' libtool=no @AMDEPBACKSLASH@
+ipmidetectd-ipmidetectd-argp.obj: ipmidetectd-argp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmidetectd-ipmidetectd-argp.obj -MD -MP -MF $(DEPDIR)/ipmidetectd-ipmidetectd-argp.Tpo -c -o ipmidetectd-ipmidetectd-argp.obj `if test -f 'ipmidetectd-argp.c'; then $(CYGPATH_W) 'ipmidetectd-argp.c'; else $(CYGPATH_W) '$(srcdir)/ipmidetectd-argp.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmidetectd-ipmidetectd-argp.Tpo $(DEPDIR)/ipmidetectd-ipmidetectd-argp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmidetectd-argp.c' object='ipmidetectd-ipmidetectd-argp.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmidetectd-ipmidetectd_config.obj `if test -f 'ipmidetectd_config.c'; then $(CYGPATH_W) 'ipmidetectd_config.c'; else $(CYGPATH_W) '$(srcdir)/ipmidetectd_config.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmidetectd-ipmidetectd-argp.obj `if test -f 'ipmidetectd-argp.c'; then $(CYGPATH_W) 'ipmidetectd-argp.c'; else $(CYGPATH_W) '$(srcdir)/ipmidetectd-argp.c'; fi`
 
-ipmidetectd-ipmidetectd_loop.o: ipmidetectd_loop.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmidetectd-ipmidetectd_loop.o -MD -MP -MF $(DEPDIR)/ipmidetectd-ipmidetectd_loop.Tpo -c -o ipmidetectd-ipmidetectd_loop.o `test -f 'ipmidetectd_loop.c' || echo '$(srcdir)/'`ipmidetectd_loop.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmidetectd-ipmidetectd_loop.Tpo $(DEPDIR)/ipmidetectd-ipmidetectd_loop.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmidetectd_loop.c' object='ipmidetectd-ipmidetectd_loop.o' libtool=no @AMDEPBACKSLASH@
+ipmidetectd-ipmidetectd-config.o: ipmidetectd-config.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmidetectd-ipmidetectd-config.o -MD -MP -MF $(DEPDIR)/ipmidetectd-ipmidetectd-config.Tpo -c -o ipmidetectd-ipmidetectd-config.o `test -f 'ipmidetectd-config.c' || echo '$(srcdir)/'`ipmidetectd-config.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmidetectd-ipmidetectd-config.Tpo $(DEPDIR)/ipmidetectd-ipmidetectd-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmidetectd-config.c' object='ipmidetectd-ipmidetectd-config.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmidetectd-ipmidetectd_loop.o `test -f 'ipmidetectd_loop.c' || echo '$(srcdir)/'`ipmidetectd_loop.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmidetectd-ipmidetectd-config.o `test -f 'ipmidetectd-config.c' || echo '$(srcdir)/'`ipmidetectd-config.c
 
-ipmidetectd-ipmidetectd_loop.obj: ipmidetectd_loop.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmidetectd-ipmidetectd_loop.obj -MD -MP -MF $(DEPDIR)/ipmidetectd-ipmidetectd_loop.Tpo -c -o ipmidetectd-ipmidetectd_loop.obj `if test -f 'ipmidetectd_loop.c'; then $(CYGPATH_W) 'ipmidetectd_loop.c'; else $(CYGPATH_W) '$(srcdir)/ipmidetectd_loop.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmidetectd-ipmidetectd_loop.Tpo $(DEPDIR)/ipmidetectd-ipmidetectd_loop.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmidetectd_loop.c' object='ipmidetectd-ipmidetectd_loop.obj' libtool=no @AMDEPBACKSLASH@
+ipmidetectd-ipmidetectd-config.obj: ipmidetectd-config.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ipmidetectd-ipmidetectd-config.obj -MD -MP -MF $(DEPDIR)/ipmidetectd-ipmidetectd-config.Tpo -c -o ipmidetectd-ipmidetectd-config.obj `if test -f 'ipmidetectd-config.c'; then $(CYGPATH_W) 'ipmidetectd-config.c'; else $(CYGPATH_W) '$(srcdir)/ipmidetectd-config.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ipmidetectd-ipmidetectd-config.Tpo $(DEPDIR)/ipmidetectd-ipmidetectd-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ipmidetectd-config.c' object='ipmidetectd-ipmidetectd-config.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmidetectd-ipmidetectd_loop.obj `if test -f 'ipmidetectd_loop.c'; then $(CYGPATH_W) 'ipmidetectd_loop.c'; else $(CYGPATH_W) '$(srcdir)/ipmidetectd_loop.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ipmidetectd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ipmidetectd-ipmidetectd-config.obj `if test -f 'ipmidetectd-config.c'; then $(CYGPATH_W) 'ipmidetectd-config.c'; else $(CYGPATH_W) '$(srcdir)/ipmidetectd-config.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -642,6 +629,9 @@ uninstall-am: uninstall-sbinPROGRAMS
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-sbinPROGRAMS
 
+
+$(top_builddir)/common/toolcommon/libtoolcommon.la : force-dependency-check
+	@cd `dirname $@` && $(MAKE) `basename $@`
 
 $(top_builddir)/common/miscutil/libmiscutil.la : force-dependency-check
 	@cd `dirname $@` && $(MAKE) `basename $@`

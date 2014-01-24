@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011-2012 FreeIPMI Core Team
+ * Copyright (C) 2011-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_PET_H
-#define _IPMI_PET_H
+#ifndef IPMI_PET_H
+#define IPMI_PET_H
 
 #include <freeipmi/freeipmi.h>
 
@@ -49,9 +49,8 @@ enum ipmi_pet_argp_option_keys
 
 struct ipmi_pet_arguments
 {
-  struct common_cmd_args common;
-  struct sdr_cmd_args sdr;
-  int verbose_count;
+  struct common_cmd_args common_args;
+  unsigned int verbose_count;
   int pet_acknowledge;
   char *cmd_file;
   int output_event_severity;
@@ -85,15 +84,13 @@ typedef struct ipmi_pet_state_data
   ipmi_pet_prog_data_t *prog_data;
   ipmi_ctx_t ipmi_ctx;
   char *hostname;
-  ipmi_sdr_cache_ctx_t sdr_cache_ctx;
-  ipmi_sdr_parse_ctx_t sdr_parse_ctx;
-  ipmi_sel_parse_ctx_t sel_parse_ctx;
-  ipmi_fru_parse_ctx_t fru_parse_ctx;
+  ipmi_sdr_ctx_t sdr_ctx;
+  ipmi_sel_ctx_t sel_ctx;
+  ipmi_fru_ctx_t fru_ctx;
   ipmi_interpret_ctx_t interpret_ctx;
   int output_headers;
-  struct sensor_entity_id_counts entity_id_counts;
   struct sensor_column_width column_width;
   struct ipmi_oem_data oem_data;
 } ipmi_pet_state_data_t;
 
-#endif
+#endif /* IPMI_PET_H */

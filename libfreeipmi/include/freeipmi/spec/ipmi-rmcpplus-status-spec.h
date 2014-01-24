@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  */
 
 
-#ifndef _IPMI_RMCPPLUS_STATUS_SPEC_H
-#define _IPMI_RMCPPLUS_STATUS_SPEC_H
+#ifndef IPMI_RMCPPLUS_STATUS_SPEC_H
+#define IPMI_RMCPPLUS_STATUS_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -113,5 +113,4 @@ extern "C" {
 }
 #endif
 
-#endif /* _IPMI_RMCPPLUS_STATUS_SPEC_H */
-
+#endif /* IPMI_RMCPPLUS_STATUS_SPEC_H */

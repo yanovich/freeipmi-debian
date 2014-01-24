@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@
 #include "freeipmi/spec/ipmi-slave-address-spec.h"
 #include "freeipmi/util/ipmi-util.h"
 
+#include "ipmi-network.h"
 #include "libcommon/ipmi-fiid-util.h"
 #include "libcommon/ipmi-fill-util.h"
 #include "libcommon/ipmi-md2.h"
@@ -829,63 +830,18 @@ ipmi_lan_sendto (int s,
                  const struct sockaddr *to,
                  socklen_t tolen)
 {
-  void *_buf = NULL;
-  ssize_t bytes_sent;
-  size_t _len;
-  size_t pad_len = 0;
-  ssize_t rv = -1;
-
-  if (!buf
-      || !len)
-    {
-      SET_ERRNO (EINVAL);
-      return (-1);
-    }
-
-  /*
-    Note from Table 12-8, RMCP Packet for IPMI via Ethernet footnote
-    Some LAN adapter chips may have a problem where packets of overall
-    lengths 56, 84, 112, 128, or 156 are not handled correctly. The
-    PAD byte is added as necessary to avoid these overall
-    lengths. Remote console software must use the PAD byte when
-    formatting packets to any 10/100 Ethernet device that accepts RMCP
-    packets. -- Anand Babu
-  */
-  _len = len;
-  if (_len == 56
-      || _len == 84
-      || _len == 112
-      || _len == 128
-      || _len == 156)
-    pad_len += IPMI_LAN_PKT_PAD_SIZE;
-  
-  _len += pad_len;
-  
-  if (_len < pad_len)
-    {
-      SET_ERRNO (EMSGSIZE);
-      goto cleanup;
-    }
-  
-  if (!(_buf = malloc (_len)))
-    {
-      ERRNO_TRACE (errno);
-      goto cleanup;
-    }
-  
-  memset (_buf, 0, _len);
-  memcpy (_buf, buf, len);
-  
-  if ((bytes_sent = sendto (s, _buf, _len, flags, to, tolen)) < 0)
-    {
-      ERRNO_TRACE (errno);
-      goto cleanup;
-    }
-  
-  rv = (bytes_sent - pad_len);
- cleanup:
-  free (_buf);
-  return (rv);
+  /* achu: Specification table 13-8, indicates legacy padding for IPMI 1.5, but 
+   * it appears it is specific to Ethernet 10/100 lan chips.
+   *
+   * It is so legacy at this point it is probably not worth providing.
+   * In addition, it is difficult to calculate if a pad is necessary
+   * b/c it appears the pad should be for the ethernet frame, not the
+   * IP packet.
+   *
+   * Why not just remove this function?  Leave just in case a legacy
+   * pad situation pops up and we gotta implement something.
+   */ 
+  return (ipmi_network_sendto (s, buf, len, flags, to, tolen));
 }
 
 ssize_t
@@ -896,21 +852,6 @@ ipmi_lan_recvfrom (int s,
                    struct sockaddr *from,
                    socklen_t *fromlen)
 {
-  ssize_t rv;
-
-  if (!buf
-      || !len)
-    {
-      SET_ERRNO (EINVAL);
-      return (-1);
-    }
-
-  if ((rv = recvfrom (s, buf, len, flags, from, fromlen)) < 0)
-    {
-      ERRNO_TRACE (errno);
-      return (-1);
-    }
-  
-  return (rv);
+  return (ipmi_network_recvfrom (s, buf, len, flags, from, fromlen));
 }
 

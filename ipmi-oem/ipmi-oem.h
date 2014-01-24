@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_OEM_H
-#define _IPMI_OEM_H
+#ifndef IPMI_OEM_H
+#define IPMI_OEM_H
 
 #include <freeipmi/freeipmi.h>
 
@@ -35,11 +35,9 @@ enum ipmi_sensors_argp_option_keys
 
 struct ipmi_oem_arguments
 {
-  struct common_cmd_args common;
-  struct sdr_cmd_args sdr;
-  struct hostrange_cmd_args hostrange;
+  struct common_cmd_args common_args;
   int list;
-  int verbose_count;
+  unsigned int verbose_count;
   char *oem_id;
   char *oem_command;
   char *oem_options[IPMI_OEM_MAX_ARGS];
@@ -58,8 +56,7 @@ typedef struct ipmi_oem_state_data
   ipmi_ctx_t ipmi_ctx;
   pstdout_state_t pstate;
   char *hostname;
-  ipmi_sdr_cache_ctx_t sdr_cache_ctx;
-  ipmi_sdr_parse_ctx_t sdr_parse_ctx;
+  ipmi_sdr_ctx_t sdr_ctx;
 } ipmi_oem_state_data_t;
 
-#endif
+#endif /* IPMI_OEM_H */

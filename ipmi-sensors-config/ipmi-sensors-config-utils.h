@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SENSORS_CONFIG_UTILS_H
-#define _IPMI_SENSORS_CONFIG_UTILS_H
+#ifndef IPMI_SENSORS_CONFIG_UTILS_H
+#define IPMI_SENSORS_CONFIG_UTILS_H
 
 #include "ipmi-sensors-config.h"
 
@@ -28,14 +28,10 @@ config_err_t convert_event_string (ipmi_sensors_config_state_data_t *state_data,
                                    char *event_string);
 
 config_err_t create_section_name (ipmi_sensors_config_state_data_t *state_data,
-                                  const void *sdr_record,
-                                  unsigned int sdr_record_len,
                                   char *section_name,
                                   unsigned int section_name_len);
 
-config_err_t get_sdr_record (ipmi_sensors_config_state_data_t *state_data,
-                             const char *section_name,
-                             void *sdr_record,
-                             unsigned int *sdr_record_len);
+config_err_t seek_to_sdr_record (ipmi_sensors_config_state_data_t *state_data,
+				 const char *section_name);
 
-#endif
+#endif /* IPMI_SENSORS_CONFIG_UTILS_H */

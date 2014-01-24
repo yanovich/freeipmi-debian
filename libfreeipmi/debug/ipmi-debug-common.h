@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_DEBUG_COMMON_H
-#define _IPMI_DEBUG_COMMON_H
+#ifndef IPMI_DEBUG_COMMON_H
+#define IPMI_DEBUG_COMMON_H
 
 #include <stdint.h>
 
@@ -28,21 +28,19 @@
 #define IPMI_DEBUG_MAX_PKT_LEN 65536
 
 /* Portable version of the extremely unportable Linux dprintf() */
-int ipmi_debug_dprintf (int fd, const char *fmt, ...);
+int debug_dprintf (int fd, const char *fmt, ...);
 
-int ipmi_debug_set_prefix (char *buf, unsigned int buflen, const char *prefix);
+int debug_set_prefix (char *buf, unsigned int buflen, const char *prefix);
 
-int ipmi_debug_output_str (int fd, const char *prefix, const char *str);
+int debug_output_str (int fd, const char *prefix, const char *str);
 
-int ipmi_debug_output_byte_array (int fd, const char *prefix, const uint8_t *buf, unsigned int buf_len);
+int debug_output_byte_array (int fd, const char *prefix, const uint8_t *buf, unsigned int buf_len);
 
-int ipmi_debug_dump_ipmb (int fd,
-                          const char *prefix,
-                          const uint8_t *ipmb_buf,
-                          unsigned int ipmb_buf_len,
-                          fiid_template_t tmpl_ipmb_msg_hdr,
-                          fiid_template_t tmpl_ipmb_cmd);
+int debug_dump_ipmb (int fd,
+		     const char *prefix,
+		     const uint8_t *ipmb_buf,
+		     unsigned int ipmb_buf_len,
+		     fiid_template_t tmpl_ipmb_msg_hdr,
+		     fiid_template_t tmpl_ipmb_cmd);
 
-#endif /* ipmi-debug-common.h */
-
-
+#endif /* IPMI_DEBUG_COMMON_H */

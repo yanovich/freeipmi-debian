@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ config_commit_section (pstdout_state_t pstate,
 
       if (CONFIG_IS_NON_FATAL_ERROR (this_ret))
         {
-          PSTDOUT_FPRINTF (pstate,
+          pstdout_fprintf (pstate,
                            stderr,
                            "ERROR: Section pre-commit `%s'\n",
                            section->section_name);
@@ -92,7 +92,7 @@ config_commit_section (pstdout_state_t pstate,
 	       * ignored.  We want to try to avoid this.
 	       */
 	      
-	      if (cmd_args->common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_VERY_SLOW_COMMIT)
+	      if (cmd_args->common_args.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_VERY_SLOW_COMMIT)
 		sleep (1);
 	      
 	      commit_count++;
@@ -101,25 +101,25 @@ config_commit_section (pstdout_state_t pstate,
           if (CONFIG_IS_NON_FATAL_ERROR (this_ret))
             {
               if (this_ret == CONFIG_ERR_NON_FATAL_ERROR_READ_ONLY)
-                PSTDOUT_FPRINTF (pstate,
+                pstdout_fprintf (pstate,
                                  stderr,
                                  "ERROR: Failed to commit `%s:%s': Read Only Field\n",
                                  section->section_name,
                                  kv->key->key_name);
               else if (this_ret == CONFIG_ERR_NON_FATAL_ERROR_NOT_SUPPORTED)
-                PSTDOUT_FPRINTF (pstate,
+                pstdout_fprintf (pstate,
                                  stderr,
                                  "ERROR: Failed to commit `%s:%s': Not Supported\n",
                                  section->section_name,
                                  kv->key->key_name);
               else if (this_ret == CONFIG_ERR_NON_FATAL_ERROR_INVALID_UNSUPPORTED_CONFIG)
-                PSTDOUT_FPRINTF (pstate,
+                pstdout_fprintf (pstate,
                                  stderr,
                                  "ERROR: Failed to commit `%s:%s': Invalid/Unsupported Config\n",
                                  section->section_name,
                                  kv->key->key_name);
               else
-                PSTDOUT_FPRINTF (pstate,
+                pstdout_fprintf (pstate,
                                  stderr,
                                  "ERROR: Failed to commit `%s:%s'\n",
                                  section->section_name,
@@ -129,7 +129,7 @@ config_commit_section (pstdout_state_t pstate,
         }
       else
         {
-          PSTDOUT_FPRINTF (pstate,
+          pstdout_fprintf (pstate,
                            stderr,
                            "ERROR: `%s:%s' is not writeable\n",
                            section->section_name,
@@ -148,7 +148,7 @@ config_commit_section (pstdout_state_t pstate,
 
       if (CONFIG_IS_NON_FATAL_ERROR (this_ret))
         {
-          PSTDOUT_FPRINTF (pstate,
+          pstdout_fprintf (pstate,
                            stderr,
                            "ERROR: Section post-commit `%s'\n",
                            section->section_name);
@@ -208,8 +208,8 @@ config_commit (pstdout_state_t pstate,
        * ignored.  We want to try to avoid this.
        */
 
-      if (cmd_args->common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SLOW_COMMIT
-	  || cmd_args->common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_VERY_SLOW_COMMIT)
+      if (cmd_args->common_args.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SLOW_COMMIT
+	  || cmd_args->common_args.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_VERY_SLOW_COMMIT)
 	sleep (1);
 
       s = s->next;

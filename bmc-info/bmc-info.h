@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _BMC_INFO_H
-#define _BMC_INFO_H
+#ifndef BMC_INFO_H
+#define BMC_INFO_H
 
 #include <freeipmi/freeipmi.h>
 
@@ -31,13 +31,12 @@ enum bmc_info_argp_option_keys
     GET_DEVICE_GUID_KEY = 161,
     GET_SYSTEM_INFO_KEY = 162,
     GET_CHANNEL_INFO_KEY = 163,
-    INTERPRET_OEM_DATA = 164,
+    INTERPRET_OEM_DATA_KEY = 164,
   };
 
 struct bmc_info_arguments
 {
-  struct common_cmd_args common;
-  struct hostrange_cmd_args hostrange;
+  struct common_cmd_args common_args;
   int get_device_id;
   int get_device_guid;
   int get_system_info;
@@ -58,4 +57,4 @@ typedef struct bmc_info_state_data
   pstdout_state_t pstate;
 } bmc_info_state_data_t;
 
-#endif
+#endif /* BMC_INFO_H */

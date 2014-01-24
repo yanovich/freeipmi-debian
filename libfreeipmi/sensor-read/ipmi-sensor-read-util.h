@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SENSOR_READ_UTIL_H
-#define _IPMI_SENSOR_READ_UTIL_H
+#ifndef IPMI_SENSOR_READ_UTIL_H
+#define IPMI_SENSOR_READ_UTIL_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -40,5 +40,4 @@ void sensor_read_set_sensor_read_errnum_by_errno (ipmi_sensor_read_ctx_t ctx, in
 
 void sensor_read_set_sensor_read_errnum_by_fiid_object (ipmi_sensor_read_ctx_t ctx, fiid_obj_t obj);
 
-#endif /* ipmi-sensor-read-util.h */
-
+#endif /* IPMI_SENSOR_READ_UTIL_H */

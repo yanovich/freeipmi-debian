@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_OEM_FUJITSU_H
-#define _IPMI_OEM_FUJITSU_H
+#ifndef IPMI_OEM_FUJITSU_H
+#define IPMI_OEM_FUJITSU_H
 
 #include "ipmi-oem.h"
 
@@ -38,4 +38,4 @@ int ipmi_oem_fujitsu_get_error_led (ipmi_oem_state_data_t *state_data);
 
 int ipmi_oem_fujitsu_get_sel_entry_long_text (ipmi_oem_state_data_t *state_data);
 
-#endif
+#endif /* IPMI_OEM_FUJITSU_H */

@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmi-dcmi.c,v 1.15 2010-07-27 18:01:43 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2009-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2009-2013 Lawrence Livermore National Security, LLC.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
  *  LLNL-CODE-413270
@@ -56,12 +56,15 @@
 #include "tool-common.h"
 #include "tool-cmdline-common.h"
 #include "tool-hostrange-common.h"
+#include "tool-util-common.h"
 
 #define IPMI_DCMI_ROLLING_AVERAGE_TIME_PERIOD_BUFLEN 4096
 
 #define IPMI_DCMI_MAX_RECORD_IDS_BUFLEN 1024
 
 #define IPMI_DCMI_ERROR_BUFLEN          1024
+
+#define IPMI_DCMI_TIME_BUFLEN           512
 
 /* return 1 on output success, 0 on no output, -1 on error */
 static int
@@ -575,6 +578,30 @@ _mandatory_platform_attributes (ipmi_dcmi_state_data_t *state_data)
       pstdout_printf (state_data->pstate,
                       "Baseboard temperature                              : %s\n",
                       val ? "At least 1 present" : "Not present");
+    }
+
+  /* In DCMI v1.1 */
+  if (parameter_revision >= 0x02)
+    {
+      int flag;
+
+      if ((flag = fiid_obj_get (obj_cmd_rs,
+				"temperature_monitoring.sampling_period",
+				&val)) < 0)
+        {
+          pstdout_fprintf (state_data->pstate,
+                           stderr,
+                           "fiid_obj_get: 'temperature_monitoring.sampling_period': %s\n",
+                           fiid_obj_errormsg (obj_cmd_rs));
+          goto cleanup;
+        }
+
+      if (flag)
+        {
+          pstdout_printf (state_data->pstate,
+                      "Sampling frequency for Temperature Monitoring      : Every %u Second(s)\n",
+                      val);
+        }
     }
 
   rv = 1;
@@ -1558,22 +1585,22 @@ _sensor_info_output (ipmi_dcmi_state_data_t *state_data,
           goto cleanup;
         }
 
-      if (number_of_record_ids_in_this_response != (sdr_record_ids_len / 2))
+      if (number_of_record_ids_in_this_response > (sdr_record_ids_len / 2))
         {
           pstdout_fprintf (state_data->pstate,
                            stderr,
-                           "invalid sdr_record_ids returned: %u != %u\n",
+                           "invalid sdr_record_ids returned: %u > %u\n",
                            number_of_record_ids_in_this_response,
                            (sdr_record_ids_len / 2));
           goto cleanup;
         }
 
-      for (i = 0; i < (sdr_record_ids_len / 2); i += 2)
+      for (i = 0; i < (number_of_record_ids_in_this_response * 2); i += 2)
         {
           uint16_t record_id = 0;
           
-          record_id |= sdr_record_ids[0];
-          record_id |= (sdr_record_ids[1] << 8);
+          record_id |= sdr_record_ids[i];
+          record_id |= (sdr_record_ids[i+1] << 8);
           
           pstdout_printf (state_data->pstate,
                           "%u\n",
@@ -1648,9 +1675,7 @@ _output_power_statistics (ipmi_dcmi_state_data_t *state_data,
   uint32_t statistics_reporting_time_period;
   uint8_t power_measurement;
   uint64_t val;
-  char timestr[512];
-  time_t t;
-  struct tm tm;
+  char timestr[IPMI_DCMI_TIME_BUFLEN + 1];
   int rv = -1;
 
   assert (state_data);
@@ -1776,15 +1801,22 @@ _output_power_statistics (ipmi_dcmi_state_data_t *state_data,
                   "Average Power over sampling duration : %u watts\n",
                   average_power_over_sampling_duration);
 
-  /* Posix says individual calls need not clear/set all portions of
-   * 'struct tm', thus passing 'struct tm' between functions could
-   * have issues.  So we need to memset.
-   */
-  memset (&tm, '\0', sizeof(struct tm));
+  memset (timestr, '\0', IPMI_DCMI_TIME_BUFLEN + 1);
 
-  t = time_stamp;
-  localtime_r (&t, &tm);
-  strftime (timestr, sizeof (timestr), "%m/%d/%Y - %H:%M:%S", &tm);
+  if (ipmi_timestamp_string (time_stamp,
+			     state_data->prog_data->args->common_args.utc_offset,
+			     get_timestamp_flags (&(state_data->prog_data->args->common_args),
+						  IPMI_TIMESTAMP_FLAG_DEFAULT), 
+			     "%m/%d/%Y - %H:%M:%S",
+			     timestr,
+			     IPMI_DCMI_TIME_BUFLEN) < 0)
+    {
+      pstdout_fprintf (state_data->pstate,
+		       stderr,
+		       "ipmi_timestamp_string: %s\n",
+		       strerror (errno));
+      goto cleanup;
+    }
 
   pstdout_printf (state_data->pstate,
                   "Time Stamp                           : %s\n",
@@ -2345,8 +2377,10 @@ _ipmi_dcmi (pstdout_state_t pstate,
 {
   ipmi_dcmi_state_data_t state_data;
   ipmi_dcmi_prog_data_t *prog_data;
-  char errmsg[IPMI_OPEN_ERRMSGLEN];
-  int exit_code = -1;
+  int exit_code = EXIT_FAILURE;
+
+  assert (pstate);
+  assert (arg);
 
   prog_data = (ipmi_dcmi_prog_data_t *)arg;
   memset (&state_data, '\0', sizeof (ipmi_dcmi_state_data_t));
@@ -2356,25 +2390,14 @@ _ipmi_dcmi (pstdout_state_t pstate,
 
   if (!(state_data.ipmi_ctx = ipmi_open (prog_data->progname,
                                          hostname,
-                                         &(prog_data->args->common),
-                                         errmsg,
-                                         IPMI_OPEN_ERRMSGLEN)))
-    {
-      pstdout_fprintf (pstate,
-                       stderr,
-                       "%s\n",
-                       errmsg);
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
+                                         &(prog_data->args->common_args),
+					 state_data.pstate)))
+    goto cleanup;
 
   if (run_cmd_args (&state_data) < 0)
-    {
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
+    goto cleanup;
 
-  exit_code = 0;
+  exit_code = EXIT_SUCCESS;
  cleanup:
   ipmi_ctx_close (state_data.ipmi_ctx);
   ipmi_ctx_destroy (state_data.ipmi_ctx);
@@ -2386,7 +2409,6 @@ main (int argc, char **argv)
 {
   ipmi_dcmi_prog_data_t prog_data;
   struct ipmi_dcmi_arguments cmd_args;
-  int exit_code;
   int hosts_count;
   int rv;
 
@@ -2397,35 +2419,22 @@ main (int argc, char **argv)
   ipmi_dcmi_argp_parse (argc, argv, &cmd_args);
   prog_data.args = &cmd_args;
 
-  if ((hosts_count = pstdout_setup (&(prog_data.args->common.hostname),
-                                    prog_data.args->hostrange.buffer_output,
-                                    prog_data.args->hostrange.consolidate_output,
-                                    prog_data.args->hostrange.fanout,
-                                    prog_data.args->hostrange.eliminate,
-                                    prog_data.args->hostrange.always_prefix)) < 0)
-    {
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
-    }
+  if ((hosts_count = pstdout_setup (&(prog_data.args->common_args.hostname),
+				    &(prog_data.args->common_args))) < 0)
+    return (EXIT_FAILURE);
 
   if (!hosts_count)
-    {
-      exit_code = EXIT_SUCCESS;
-      goto cleanup;
-    }
+    return (EXIT_SUCCESS);
 
-  if ((rv = pstdout_launch (prog_data.args->common.hostname,
+  if ((rv = pstdout_launch (prog_data.args->common_args.hostname,
                             _ipmi_dcmi,
                             &prog_data)) < 0)
     {
       fprintf (stderr,
                "pstdout_launch: %s\n",
                pstdout_strerror (pstdout_errnum));
-      exit_code = EXIT_FAILURE;
-      goto cleanup;
+      return (EXIT_FAILURE);
     }
 
-  exit_code = rv;
- cleanup:
-  return (exit_code);
+  return (rv);
 }

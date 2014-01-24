@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _CONFIG_TOOL_COMMON_H_
-#define _CONFIG_TOOL_COMMON_H_
+#ifndef CONFIG_TOOL_COMMON_H
+#define CONFIG_TOOL_COMMON_H
 
 #include <stdio.h>
 
@@ -70,6 +70,9 @@
 #define CONFIG_MAX_KEY_NAME_LEN                            128
 #define CONFIG_MAX_DESCRIPTION_LEN                         1024
 
+#define CONFIG_NON_FATAL_EXIT_VALUE                        1
+#define CONFIG_FATAL_EXIT_VALUE                            2
+
 #define same(a,b) (strcasecmp (a,b) == 0)
 
 typedef enum
@@ -121,12 +124,11 @@ struct config_section_str
 
 struct config_arguments
 {
-  struct common_cmd_args common;
-  struct hostrange_cmd_args hostrange;
+  struct common_cmd_args common_args;
 
   config_action_t action;
 
-  int verbose_count;
+  unsigned int verbose_count;
   char *filename;
   uint8_t lan_channel_number;
   int lan_channel_number_set;
@@ -193,4 +195,4 @@ struct config_section {
   struct config_section *next;
 };
 
-#endif /* _CONFIG_TOOL_COMMON_H_ */
+#endif /* CONFIG_TOOL_COMMON_H */

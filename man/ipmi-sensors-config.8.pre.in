@@ -75,7 +75,9 @@ See GENERAL USE below for a description on how most will want to use
 #include <@top_srcdir@/man/manpage-common-config-tool-options.man>
 #include <@top_srcdir@/man/manpage-common-config-tool-options-verbose.man>
 #include <@top_srcdir@/man/manpage-common-config-tool-options-very-verbose.man>
-#include <@top_srcdir@/man/manpage-common-sdr-options.man>
+#include <@top_srcdir@/man/manpage-common-sdr-cache-options-heading.man>
+#include <@top_srcdir@/man/manpage-common-sdr-cache-options.man>
+#include <@top_srcdir@/man/manpage-common-sdr-cache-file-directory.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-options-header.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-buffer.man>
 #include <@top_srcdir@/man/manpage-common-hostranged-consolidate.man>
@@ -93,11 +95,13 @@ See GENERAL USE below for a description on how most will want to use
 #include <@top_srcdir@/man/manpage-common-troubleshooting-heading-end.man>
 #include <@top_srcdir@/man/manpage-common-troubleshooting-outofband.man>
 #include <@top_srcdir@/man/manpage-common-troubleshooting-inband.man>
+#include <@top_srcdir@/man/manpage-common-troubleshooting-inband-outofband.man>
 #include <@top_srcdir@/man/manpage-common-workaround-heading-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-inband-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-outofband-common-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-outofband-15-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-outofband-20-text.man>
+#include <@top_srcdir@/man/manpage-common-workaround-sdr-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-extra-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-config-tool.man>
 .SH "EXAMPLES"
@@ -117,6 +121,7 @@ Show all difference between the current configuration and the sensor-data2.conf 
 .PP
 Commit all configuration values from the sensor-data1.conf file.
 .PP
+#include <@top_srcdir@/man/manpage-common-config-diagnostics.man>
 #include <@top_srcdir@/man/manpage-common-known-issues.man>
 .LP
 Event enable support has not been written for all sensors types.  If
@@ -125,7 +130,7 @@ FreeIPMI maintainers.
 
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright \(co 2008-2012 FreeIPMI Core Team.  
+Copyright \(co 2008-2013 FreeIPMI Core Team.  
 #include <@top_srcdir@/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
 freeipmi(7), bmc-config(8), ipmi-pef-config(8),

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SENSORS_OEM_QUANTA_H
-#define _IPMI_SENSORS_OEM_QUANTA_H
+#ifndef IPMI_SENSORS_OEM_QUANTA_H
+#define IPMI_SENSORS_OEM_QUANTA_H
 
 #include "ipmi-sensors.h"
 
@@ -26,10 +26,8 @@
  * return (-1) - error, cleanup and return error
  */
 int ipmi_sensors_oem_quanta_output_oem_record (ipmi_sensors_state_data_t *state_data,
-					       const void *sdr_record,
-					       unsigned int sdr_record_len,
 					       uint32_t oem_record_manufacturer_id,
 					       const uint8_t *oem_data,
 					       unsigned int oem_data_len);
 
-#endif
+#endif /* IPMI_SENSORS_OEM_QUANTA_H */

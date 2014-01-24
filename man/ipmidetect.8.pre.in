@@ -1,7 +1,7 @@
 .\"#############################################################################
 .\"$Id: ipmidetect.8.pre.in,v 1.17 2010-06-30 21:56:36 chu11 Exp $
 .\"#############################################################################
-.\"  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+.\"  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
 .\"  Copyright (C) 2007 The Regents of the University of California.
 .\"  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
 .\"  Written by Albert Chu <chu11@llnl.gov>
@@ -83,9 +83,21 @@ List nodes in newline separated list
 List nodes in space separated list
 .LP
 #include <@top_srcdir@/man/manpage-common-hostranged-text-main.man>
+.SH "DIAGNOSTICS"
+The exit value of
+.B ipmidetect
+depends on the options performed on the command line.  If the default
+output is used, the exit value will be 0 if the command succeeds
+without error.  If the --detected option is used and no undetected
+nodes have been discovered, the exit value will be 0.  If undetected
+nodes are found, the exit value will be 1.  If the --undetected option
+is used and no detected nodes have been discovered, the exit value
+will be 0.  If detected nodes are found, the exit value will be 1.  On
+errors, the exit value will be 2.
+
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH COPYRIGHT
-Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
 .br
 Copyright (C) 2007 The Regents of the University of California.
 #include <@top_srcdir@/man/manpage-common-gpl-program-text.man>

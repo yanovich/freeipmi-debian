@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SOL_PARAMETER_OEM_SPEC_H
-#define _IPMI_SOL_PARAMETER_OEM_SPEC_H
+#ifndef IPMI_SOL_CONFIGURATION_PARAMETERS_OEM_SPEC_H
+#define IPMI_SOL_CONFIGURATION_PARAMETERS_OEM_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,8 +34,18 @@ extern "C" {
 
 #define IPMI_SOL_CONFIGURATION_PARAMETER_OEM_INVENTEC_SOL_TIMEOUT 192
 
+/******************************************* 
+ * Wistron                                 *
+ *******************************************/
+
+/*
+ * Wistron / Dell Poweredge C6220
+ */
+
+#define IPMI_SOL_CONFIGURATION_PARAMETER_OEM_WISTRON_SOL_TIMEOUT  192
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _IPMI_SOL_PARAMETER_SPEC_H */
+#endif /* IPMI_SOL_CONFIGURATION_PARAMETERS_OEM_SPEC_H */

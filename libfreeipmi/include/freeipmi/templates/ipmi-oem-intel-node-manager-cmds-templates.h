@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_OEM_INTEL_NODE_MANAGER_CMDS_TEMPLATES_H
-#define _IPMI_OEM_INTEL_NODE_MANAGER_CMDS_TEMPLATES_H
+#ifndef IPMI_OEM_INTEL_NODE_MANAGER_CMDS_TEMPLATES_H
+#define IPMI_OEM_INTEL_NODE_MANAGER_CMDS_TEMPLATES_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -410,7 +410,6 @@ FIID Template: tmpl_cmd_oem_intel_node_manager_get_node_manager_capabilities_rq
     { 4,  "reserved", REQUIRED, LENGTH-FIXED }
     { 4,  "policy_trigger_type", REQUIRED, LENGTH-FIXED }
     { 4,  "policy_type", REQUIRED, LENGTH-FIXED }
-    { 8,  "policy_id", REQUIRED, LENGTH-FIXED }
 
 Get Node Manager Capabilities Response
 --------------------------------------
@@ -421,14 +420,14 @@ FIID Template: tmpl_cmd_oem_intel_node_manager_get_node_manager_capabilities_rs
     { 8,  "comp_code", REQUIRED, LENGTH-FIXED, MAKES-PACKET-SUFFICIENT }
     { 24, "manufacturer_id", REQUIRED, LENGTH-FIXED }
     { 8,  "max_concurrent_settings", REQUIRED, LENGTH-FIXED }
-    { 16, "max power_thermal", REQUIRED, LENGTH-FIXED }
+    { 16, "max_power_thermal", REQUIRED, LENGTH-FIXED }
     { 16, "min_power_thermal", REQUIRED, LENGTH-FIXED }
     { 32, "min_correction_time", REQUIRED, LENGTH-FIXED }
     { 32, "max_correction_time", REQUIRED, LENGTH-FIXED }
     { 16, "min_statistics_reporting_period", REQUIRED, LENGTH-FIXED }
     { 16, "max_statistics_reporting_period", REQUIRED, LENGTH-FIXED }
-    { 7,  "domain_limiting_scope", REQUIRED, LENGTH-FIXED }
-    { 1,  "limiting_based_on", REQUIRED, LENGTH-FIXED }
+    { 7,  "domain_limiting_scope.limiting_type", REQUIRED, LENGTH-FIXED }
+    { 1,  "domain_limiting_scope.limiting_based_on", REQUIRED, LENGTH-FIXED }
 
 Get Node Manager Version Request
 --------------------------------
@@ -556,4 +555,4 @@ FIID Template: tmpl_cmd_oem_intel_node_manager_get_node_manager_alert_destinatio
 }
 #endif
 
-#endif  /* _IPMI_OEM_CMDS_TEMPLATES_H */
+#endif /* IPMI_OEM_CMDS_TEMPLATES_H */

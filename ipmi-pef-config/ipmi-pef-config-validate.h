@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 FreeIPMI Core Team
+ * Copyright (C) 2007-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_PEF_CONFIG_VALIDATE_H
-#define _IPMI_PEF_CONFIG_VALIDATE_H
+#ifndef IPMI_PEF_CONFIG_VALIDATE_H
+#define IPMI_PEF_CONFIG_VALIDATE_H
 
 #include "ipmi-pef-config.h"
 
@@ -51,4 +51,4 @@ config_validate_t sensor_type_validate (const char *section_name,
                                         const char *value,
                                         void *arg);
 
-#endif
+#endif /* IPMI_PEF_CONFIG_VALIDATE_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1833,6 +1833,9 @@ fiid_obj_get (fiid_obj_t obj,
 
   if (field_len > 64)
     field_len = 64;
+
+  if (field_len > obj->field_data[key_index].set_field_len)
+    field_len = obj->field_data[key_index].set_field_len;
 
   byte_pos = start_bit_pos / 8;
 

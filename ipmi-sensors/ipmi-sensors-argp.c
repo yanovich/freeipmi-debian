@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@
 
 const char *argp_program_version =
   "ipmi-sensors - " PACKAGE_VERSION "\n"
-  "Copyright (C) 2003-2012 FreeIPMI Core Team\n"
+  "Copyright (C) 2003-2013 FreeIPMI Core Team\n"
   "This program is free software; you may redistribute it under the terms of\n"
   "the GNU General Public License.  This program has absolutely no warranty.";
 
@@ -68,77 +68,81 @@ static struct argp_option cmdline_options[] =
     ARGP_COMMON_OPTIONS_PRIVILEGE_LEVEL,
     ARGP_COMMON_OPTIONS_CONFIG_FILE,
     ARGP_COMMON_OPTIONS_WORKAROUND_FLAGS,
-    ARGP_COMMON_SDR_OPTIONS,
+    ARGP_COMMON_SDR_CACHE_OPTIONS,
+    ARGP_COMMON_SDR_CACHE_OPTIONS_FILE_DIRECTORY,
+    ARGP_COMMON_TIME_OPTIONS,
     ARGP_COMMON_HOSTRANGED_OPTIONS,
     ARGP_COMMON_OPTIONS_DEBUG,
     { "verbose",        VERBOSE_KEY,        0, 0,
-      "Increase verbosity in output.  May be specified multiple times.", 30},
+      "Increase verbosity in output.  May be specified multiple times.", 40},
     { "sdr-info",       SDR_INFO_KEY,       0, 0,
-      "Show sendor data repository (SDR) information.", 31},
+      "Show sendor data repository (SDR) information.", 41},
     { "quiet-readings", QUIET_READINGS_KEY,  0, 0,
-      "Do not output sensor readings or thresholds on simple output.", 32},
+      "Do not output sensor readings or thresholds on simple output.", 42},
     /* for backwards compatability */
     { "sensors",        SENSORS_KEY, "SENSORS-LIST", OPTION_HIDDEN,
-      "Show sensors by record id.  Accepts space or comma separated lists", 33},
+      "Show sensors by record id.  Accepts space or comma separated lists", 43},
     { "record-ids",     RECORD_IDS_KEY, "RECORD-IDS-LIST", 0,
-      "Show specific sensors by record id.  Accepts space or comma separated lists", 34},
+      "Show specific sensors by record id.  Accepts space or comma separated lists", 44},
     { "exclude-record-ids", EXCLUDE_RECORD_IDS_KEY, "RECORD-IDS-LIST", 0,
-      "Do not show specific sensors by record id.  Accepts space or comma separated lists", 35},
+      "Do not show specific sensors by record id.  Accepts space or comma separated lists", 45},
     /* maintain "group" options for backwards compatability */
     { "group",          GROUP_KEY,        "GROUP-NAME", OPTION_HIDDEN,
-      "Show sensors belonging to a specific group.", 36},
+      "Show sensors belonging to a specific group.", 46},
     /* maintain "group" options for backwards compatability */
     { "groups",         GROUPS_KEY,       "GROUPS-LIST", OPTION_HIDDEN,
-      "Show sensors belonging to a specific group.", 37},
+      "Show sensors belonging to a specific group.", 47},
     /* maintain "group" options for backwards compatability */
     { "exclude-groups", EXCLUDE_GROUPS_KEY, "GROUPS-LIST", OPTION_HIDDEN,
-      "Do not show sensors belonging to a specific group.", 38},
+      "Do not show sensors belonging to a specific group.", 48},
     /* maintain "group" options for backwards compatability */
     { "list-groups",    LIST_GROUPS_KEY, 0, OPTION_HIDDEN,
-      "List sensor groups.", 39},
+      "List sensor groups.", 49},
     /* for backwards compatability */
     { "sensor-type",    SENSOR_TYPE_KEY,        "SENSOR-TYPE-NAME", OPTION_HIDDEN,
-      "Show sensors of a specific type.", 40},
+      "Show sensors of a specific type.", 50},
     { "sensor-types",   SENSOR_TYPES_KEY,       "SENSOR-TYPES-LIST", 0,
-      "Show sensors of a specific type.", 41},
+      "Show sensors of a specific type.", 51},
     { "exclude-sensor-types", EXCLUDE_SENSOR_TYPES_KEY, "SENSOR-TYPES-LIST", 0,
-      "Do not show sensors of a specific type.", 42},
+      "Do not show sensors of a specific type.", 52},
     { "list-sensor-types",    LIST_SENSOR_TYPES_KEY, 0, 0,
-      "List sensor types.", 43},
+      "List sensor types.", 53},
     { "bridge-sensors", BRIDGE_SENSORS_KEY, NULL, 0,
-      "Bridge addresses to read non-BMC owned sensors.", 44},
+      "Bridge addresses to read non-BMC owned sensors.", 54},
     { "shared-sensors", SHARED_SENSORS_KEY, NULL, 0,
-      "Iterate over shared sensors in a single record.", 45},
+      "Iterate over shared sensors in a single record.", 55},
     { "interpret-oem-data", INTERPRET_OEM_DATA_KEY, NULL, 0,
-      "Attempt to interpret OEM data.", 46},
+      "Attempt to interpret OEM data.", 56},
     { "ignore-not-available-sensors", IGNORE_NOT_AVAILABLE_SENSORS_KEY, NULL, 0,
-      "Ignore not-available (i.e. N/A) sensors.", 47},
+      "Ignore not-available (i.e. N/A) sensors.", 57},
     { "ignore-unrecognized-events", IGNORE_UNRECOGNIZED_EVENTS_KEY, NULL, 0,
-      "Ignore unrecognized events (i.e. 'Unrecognized Event') in sensors output.", 48},
+      "Ignore unrecognized events (i.e. 'Unrecognized Event') in sensors output.", 58},
     { "output-event-bitmask", OUTPUT_EVENT_BITMASK_KEY, NULL, 0,
-      "Output event bitmask value instead of the string representation.", 49},
+      "Output event bitmask value instead of the string representation.", 59},
     { "output-sensor-state", OUTPUT_SENSOR_STATE_KEY, NULL, 0,
-      "Output sensor state in output.", 50},
+      "Output sensor state in output.", 60},
     { "sensor-state-config-file", SENSOR_STATE_CONFIG_FILE_KEY, "FILE", 0,
-      "Specify an alternate sensor state configuration file.", 51},
+      "Specify an alternate sensor state configuration file.", 61},
     /* ipmimonitoring legacy support */
     { "sensor-config-file", SENSOR_STATE_CONFIG_FILE_KEY, "FILE", OPTION_HIDDEN,
-      "Specify an alternate sensor state configuration  file.", 52},
+      "Specify an alternate sensor state configuration  file.", 62},
     { "entity-sensor-names", ENTITY_SENSOR_NAMES_KEY, NULL, 0,
-      "Output sensor names with entity ids and instances.", 53},
+      "Output sensor names with entity ids and instances.", 63},
+    { "output-sensor-thresholds", OUTPUT_SENSOR_THRESHOLDS_KEY, NULL, 0,
+      "Output sensor thresholds in output.", 64},
     { "no-sensor-type-output", NO_SENSOR_TYPE_OUTPUT_KEY, 0, 0,
-      "Do not show sensor type output.", 54},
+      "Do not show sensor type output.", 65},
     { "comma-separated-output", COMMA_SEPARATED_OUTPUT_KEY, 0, 0,
-      "Output fields in comma separated format.", 55},
+      "Output fields in comma separated format.", 66},
     { "no-header-output", NO_HEADER_OUTPUT_KEY, 0, 0,
-      "Do not output column headers.", 56},
+      "Do not output column headers.", 67},
     { "non-abbreviated-units", NON_ABBREVIATED_UNITS_KEY, 0, 0,
-      "Output non-abbreviated units (e.g. 'Amps' insetead of 'A').", 57},
+      "Output non-abbreviated units (e.g. 'Amps' insetead of 'A').", 68},
     { "legacy-output", LEGACY_OUTPUT_KEY, 0, 0,
-      "Output in legacy format.", 58},
+      "Output in legacy format.", 69},
     /* ipmimonitoring legacy support */
     { "ipmimonitoring-legacy-output", IPMIMONITORING_LEGACY_OUTPUT_KEY, 0, 0,
-      "Output in ipmimonitoring legacy format.", 58},
+      "Output in ipmimonitoring legacy format.", 70},
     { NULL, 0, NULL, 0, NULL, 0}
   };
 
@@ -157,11 +161,14 @@ static struct argp cmdline_config_file_argp = { cmdline_options,
 static error_t
 cmdline_parse (int key, char *arg, struct argp_state *state)
 {
-  struct ipmi_sensors_arguments *cmd_args = state->input;
+  struct ipmi_sensors_arguments *cmd_args;
   char *endptr;
   char *tok;
   int value;
-  error_t ret;
+
+  assert (state);
+  
+  cmd_args = state->input;
 
   switch (key)
     {
@@ -196,7 +203,7 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
               || value > IPMI_SDR_RECORD_ID_LAST)
             {
               fprintf (stderr, "invalid sensor record id: %d\n", value);
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           cmd_args->record_ids[cmd_args->record_ids_length] = value;
@@ -224,7 +231,7 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
               || value > IPMI_SDR_RECORD_ID_LAST)
             {
               fprintf (stderr, "invalid sensor record id: %d\n", value);
-              exit (1);
+              exit (EXIT_FAILURE);
             }
 
           cmd_args->exclude_record_ids[cmd_args->exclude_record_ids_length] = value;
@@ -241,37 +248,19 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
       break;
     case GROUPS_KEY:            /* legacy */
     case SENSOR_TYPES_KEY:
-      tok = strtok (arg, " ,");
-      while (tok && cmd_args->sensor_types_length < MAX_SENSOR_TYPES)
-        {
-          if (!strcasecmp (tok, SENSOR_PARSE_ALL_STRING))
-            {
-              cmd_args->sensor_types_length = 0;
-              break;
-            }
-          strncpy (cmd_args->sensor_types[cmd_args->sensor_types_length],
-                   tok,
-                   MAX_SENSOR_TYPES_STRING_LENGTH);
-          cmd_args->sensor_types_length++;
-          tok = strtok (NULL, " ,");
-        }
+      if (parse_sensor_types (SENSOR_PARSE_ALL_STRING,
+			      cmd_args->sensor_types,
+			      &(cmd_args->sensor_types_length),
+			      arg) < 0)
+	exit (EXIT_FAILURE);
       break;
     case EXCLUDE_GROUPS_KEY:    /* legacy */
     case EXCLUDE_SENSOR_TYPES_KEY:
-      tok = strtok (arg, " ,");
-      while (tok && cmd_args->exclude_sensor_types_length < MAX_SENSOR_TYPES)
-        {
-          if (!strcasecmp (tok, SENSOR_PARSE_NONE_STRING))
-            {
-              cmd_args->exclude_sensor_types_length = 0;
-              break;
-            }
-          strncpy (cmd_args->exclude_sensor_types[cmd_args->exclude_sensor_types_length],
-                   tok,
-                   MAX_SENSOR_TYPES_STRING_LENGTH);
-          cmd_args->exclude_sensor_types_length++;
-          tok = strtok (NULL, " ,");
-        }
+      if (parse_sensor_types (SENSOR_PARSE_NONE_STRING,
+			      cmd_args->exclude_sensor_types,
+			      &(cmd_args->exclude_sensor_types_length),
+			      arg) < 0)
+	exit (EXIT_FAILURE);
       break;
     case LIST_GROUPS_KEY:       /* legacy */
     case LIST_SENSOR_TYPES_KEY:
@@ -302,11 +291,14 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
       if (!(cmd_args->sensor_state_config_file = strdup (arg)))
         {
           perror ("strdup");
-          exit (1);
+          exit (EXIT_FAILURE);
         }
       break;
     case ENTITY_SENSOR_NAMES_KEY:
       cmd_args->entity_sensor_names = 1;
+      break;
+    case OUTPUT_SENSOR_THRESHOLDS_KEY:
+      cmd_args->output_sensor_thresholds = 1;
       break;
     case NO_SENSOR_TYPE_OUTPUT_KEY:
       cmd_args->no_sensor_type_output = 1;
@@ -333,12 +325,7 @@ cmdline_parse (int key, char *arg, struct argp_state *state)
     case ARGP_KEY_END:
       break;
     default:
-      ret = common_parse_opt (key, arg, &(cmd_args->common));
-      if (ret == ARGP_ERR_UNKNOWN)
-        ret = sdr_parse_opt (key, arg, &(cmd_args->sdr));
-      if (ret == ARGP_ERR_UNKNOWN)
-        ret = hostrange_parse_opt (key, arg, &(cmd_args->hostrange));
-      return (ret);
+      return (common_parse_opt (key, arg, &(cmd_args->common_args)));
     }
 
   return (0);
@@ -349,21 +336,21 @@ _ipmi_sensors_config_file_parse (struct ipmi_sensors_arguments *cmd_args)
 {
   struct config_file_data_ipmi_sensors config_file_data;
 
+  assert (cmd_args);
+
   memset (&config_file_data,
           '\0',
           sizeof (struct config_file_data_ipmi_sensors));
 
-  if (config_file_parse (cmd_args->common.config_file,
+  if (config_file_parse (cmd_args->common_args.config_file,
                          0,
-                         &(cmd_args->common),
-                         &(cmd_args->sdr),
-                         &(cmd_args->hostrange),
-                         CONFIG_FILE_INBAND | CONFIG_FILE_OUTOFBAND | CONFIG_FILE_SDR | CONFIG_FILE_HOSTRANGE,
+                         &(cmd_args->common_args),
+                         CONFIG_FILE_INBAND | CONFIG_FILE_OUTOFBAND | CONFIG_FILE_SDR | CONFIG_FILE_TIME | CONFIG_FILE_HOSTRANGE,
                          CONFIG_FILE_TOOL_IPMI_SENSORS,
                          &config_file_data) < 0)
     {
       fprintf (stderr, "config_file_parse: %s\n", strerror (errno));
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 
   if (config_file_data.verbose_count_count)
@@ -434,6 +421,8 @@ _ipmi_sensors_config_file_parse (struct ipmi_sensors_arguments *cmd_args)
     cmd_args->sensor_state_config_file = config_file_data.sensor_state_config_file;
   if (config_file_data.entity_sensor_names_count)
     cmd_args->entity_sensor_names = config_file_data.entity_sensor_names;
+  if (config_file_data.output_sensor_thresholds_count)
+    cmd_args->output_sensor_thresholds = config_file_data.output_sensor_thresholds;
   if (config_file_data.no_sensor_type_output_count)
     cmd_args->no_sensor_type_output = config_file_data.no_sensor_type_output;
   if (config_file_data.comma_separated_output_count)
@@ -451,22 +440,20 @@ _ipmi_sensors_config_file_parse (struct ipmi_sensors_arguments *cmd_args)
 static void
 _ipmi_sensors_args_validate (struct ipmi_sensors_arguments *cmd_args)
 {
+  assert (cmd_args);
+
   if (cmd_args->sensor_types_length)
     {
-      if (valid_sensor_types (NULL,
-                              cmd_args->sensor_types,
-                              cmd_args->sensor_types_length,
-                              1) < 0)
-        exit (1);
+      if (valid_sensor_types (cmd_args->sensor_types,
+                              cmd_args->sensor_types_length) < 0)
+        exit (EXIT_FAILURE);
     }
 
   if (cmd_args->exclude_sensor_types_length)
     {
-      if (valid_sensor_types (NULL,
-                              cmd_args->exclude_sensor_types,
-                              cmd_args->exclude_sensor_types_length,
-                              1) < 0)
-        exit (1);
+      if (valid_sensor_types (cmd_args->exclude_sensor_types,
+                              cmd_args->exclude_sensor_types_length) < 0)
+        exit (EXIT_FAILURE);
     }
 }
 
@@ -475,9 +462,12 @@ ipmi_sensors_argp_parse (int argc, char **argv, struct ipmi_sensors_arguments *c
 {
   unsigned int i;
 
-  init_common_cmd_args_operator (&(cmd_args->common));
-  init_sdr_cmd_args (&(cmd_args->sdr));
-  init_hostrange_cmd_args (&(cmd_args->hostrange));
+  assert (argc >= 0);
+  assert (argv);
+  assert (cmd_args);
+
+  init_common_cmd_args_operator (&(cmd_args->common_args));
+
   cmd_args->verbose_count = 0;
   cmd_args->sdr_info = 0;
   cmd_args->quiet_readings = 0;
@@ -515,6 +505,7 @@ ipmi_sensors_argp_parse (int argc, char **argv, struct ipmi_sensors_arguments *c
   cmd_args->output_sensor_state = 0;
   cmd_args->sensor_state_config_file = NULL;
   cmd_args->entity_sensor_names = 0;
+  cmd_args->output_sensor_thresholds = 0;
   cmd_args->no_sensor_type_output = 0;
   cmd_args->comma_separated_output = 0;
   cmd_args->no_header_output = 0;
@@ -527,7 +518,7 @@ ipmi_sensors_argp_parse (int argc, char **argv, struct ipmi_sensors_arguments *c
               argv,
               ARGP_IN_ORDER,
               NULL,
-              &(cmd_args->common));
+              &(cmd_args->common_args));
 
   _ipmi_sensors_config_file_parse (cmd_args);
 
@@ -538,10 +529,6 @@ ipmi_sensors_argp_parse (int argc, char **argv, struct ipmi_sensors_arguments *c
               NULL,
               cmd_args);
 
-  verify_common_cmd_args (&(cmd_args->common));
-  verify_sdr_cmd_args (&(cmd_args->sdr));
-  verify_hostrange_cmd_args (&(cmd_args->hostrange));
+  verify_common_cmd_args (&(cmd_args->common_args));
   _ipmi_sensors_args_validate (cmd_args);
 }
-
-

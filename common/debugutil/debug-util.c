@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,17 +54,16 @@ debug_hdr_str (uint8_t packet_type,
   char *str_prefix;
   int len;
 
-  if (!((packet_type == DEBUG_UTIL_TYPE_NONE
-         || packet_type == DEBUG_UTIL_TYPE_INBAND
-         || packet_type == DEBUG_UTIL_TYPE_IPMI_1_5
-         || packet_type == DEBUG_UTIL_TYPE_IPMI_2_0)
-        && (packet_direction == DEBUG_UTIL_DIRECTION_NONE
-            || packet_direction == DEBUG_UTIL_DIRECTION_REQUEST
-            || packet_direction == DEBUG_UTIL_DIRECTION_RESPONSE)
-        && str
-        && hdrbuf
-        && hdrbuf_len))
-    return (-1);
+  assert (packet_type == DEBUG_UTIL_TYPE_NONE
+	  || packet_type == DEBUG_UTIL_TYPE_INBAND
+	  || packet_type == DEBUG_UTIL_TYPE_IPMI_1_5
+	  || packet_type == DEBUG_UTIL_TYPE_IPMI_2_0);
+  assert (packet_direction == DEBUG_UTIL_DIRECTION_NONE
+	  || packet_direction == DEBUG_UTIL_DIRECTION_REQUEST
+	  || packet_direction == DEBUG_UTIL_DIRECTION_RESPONSE);
+  assert (str);
+  assert (hdrbuf);
+  assert (hdrbuf_len);
 
   memset (hdrbuf, '\0', hdrbuf_len);
 

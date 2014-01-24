@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,11 @@
  * 
  */
 
-#ifndef _IPMI_OEM_ARGP_H
-#define _IPMI_OEM_ARGP_H
+#ifndef IPMI_OEM_ARGP_H
+#define IPMI_OEM_ARGP_H
 
 #include "ipmi-oem.h"
 
 void ipmi_oem_argp_parse (int argc, char **argv, struct ipmi_oem_arguments *cmd_args);
 
-#endif
+#endif /* IPMI_OEM_ARGP_H */

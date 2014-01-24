@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _RMCP_CMDS_TEMPLATES_H
-#define _RMCP_CMDS_TEMPLATES_H
+#ifndef RMCP_CMDS_TEMPLATES_H
+#define RMCP_CMDS_TEMPLATES_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,4 +92,4 @@ FIID Template: tmpl_cmd_asf_presence_pong
 }
 #endif
 
-#endif  /* _RMCP_CMDS_TEMPLATES_H */
+#endif /* RMCP_CMDS_TEMPLATES_H */

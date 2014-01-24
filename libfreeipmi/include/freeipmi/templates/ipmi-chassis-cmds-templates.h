@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_CHASSIS_CMDS_TEMPLATES_H
-#define _IPMI_CHASSIS_CMDS_TEMPLATES_H
+#ifndef IPMI_CHASSIS_CMDS_TEMPLATES_H
+#define IPMI_CHASSIS_CMDS_TEMPLATES_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -571,4 +571,4 @@ FIID Template: tmpl_cmd_get_power_on_hours_counter_rs
 }
 #endif
 
-#endif  /* _IPMI_CHASSIS_CMDS_TEMPLATES_H */
+#endif /* IPMI_CHASSIS_CMDS_TEMPLATES_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _BMC_CONFIG_VALIDATE_H
-#define _BMC_CONFIG_VALIDATE_H
+#ifndef BMC_CONFIG_VALIDATE_H
+#define BMC_CONFIG_VALIDATE_H
 
 #include "bmc-config.h"
 #include "bmc-config-sections.h"
@@ -82,4 +82,4 @@ config_validate_t alert_gateway_number_validate (const char *section_name,
                                                  const char *value,
                                                  void *arg);
 
-#endif
+#endif /* BMC_CONFIG_VALIDATE_H */

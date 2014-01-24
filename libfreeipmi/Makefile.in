@@ -39,8 +39,7 @@ subdir = libfreeipmi
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/libfreeipmi.pc.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
-	$(top_srcdir)/config/ac_dont_check_for_root.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/ac_dont_check_for_root.m4 \
 	$(top_srcdir)/config/ac_freeipmi_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sel_config_file.m4 \
 	$(top_srcdir)/config/ac_freeipmi_interpret_sensor_config_file.m4 \
@@ -50,6 +49,8 @@ am__aclocal_m4_deps = $(top_srcdir)/config/ac_bmc_watchdog_logfile.m4 \
 	$(top_srcdir)/config/ac_ipmidetect_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmidetectd_config_file.m4 \
 	$(top_srcdir)/config/ac_ipmipower_config_file.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_cache_dir.m4 \
+	$(top_srcdir)/config/ac_ipmiseld_config_file.m4 \
 	$(top_srcdir)/config/ac_libipmiconsole_config_file.m4 \
 	$(top_srcdir)/config/ac_lsh_gcc_attributes.m4 \
 	$(top_srcdir)/config/acx_pthread.m4 $(top_srcdir)/configure.ac
@@ -141,14 +142,14 @@ am_libfreeipmi_la_OBJECTS = api/libfreeipmi_la-ipmi-api.lo \
 	driver/libfreeipmi_la-ipmi-openipmi-driver.lo \
 	driver/libfreeipmi_la-ipmi-sunbmc-driver.lo \
 	driver/libfreeipmi_la-ipmi-ssif-driver.lo \
-	fiid/libfreeipmi_la-fiid.lo \
-	fru-parse/libfreeipmi_la-ipmi-fru-parse.lo \
-	fru-parse/libfreeipmi_la-ipmi-fru-parse-common.lo \
-	fru-parse/libfreeipmi_la-ipmi-fru-parse-data.lo \
-	fru-parse/libfreeipmi_la-ipmi-fru-parse-util.lo \
+	fiid/libfreeipmi_la-fiid.lo fru/libfreeipmi_la-ipmi-fru.lo \
+	fru/libfreeipmi_la-ipmi-fru-common.lo \
+	fru/libfreeipmi_la-ipmi-fru-data.lo \
+	fru/libfreeipmi_la-ipmi-fru-util.lo \
 	interface/libfreeipmi_la-ipmi-ipmb-interface.lo \
 	interface/libfreeipmi_la-ipmi-kcs-interface.lo \
 	interface/libfreeipmi_la-ipmi-lan-interface.lo \
+	interface/libfreeipmi_la-ipmi-network.lo \
 	interface/libfreeipmi_la-ipmi-rmcpplus-interface.lo \
 	interface/libfreeipmi_la-rmcp-interface.lo \
 	interpret/libfreeipmi_la-ipmi-interpret.lo \
@@ -170,30 +171,34 @@ am_libfreeipmi_la_OBJECTS = api/libfreeipmi_la-ipmi-api.lo \
 	locate/libfreeipmi_la-ipmi-locate-util.lo \
 	payload/libfreeipmi_la-ipmi-sol-payload.lo \
 	record-format/libfreeipmi_la-ipmi-cipher-suite-record-format.lo \
+	record-format/libfreeipmi_la-ipmi-fru-dimmspd-record-format.lo \
 	record-format/libfreeipmi_la-ipmi-fru-information-record-format.lo \
 	record-format/libfreeipmi_la-ipmi-sdr-record-format.lo \
 	record-format/libfreeipmi_la-ipmi-sdr-oem-record-format.lo \
 	record-format/libfreeipmi_la-ipmi-sel-record-format.lo \
-	sdr-cache/libfreeipmi_la-ipmi-sdr-cache.lo \
-	sdr-cache/libfreeipmi_la-ipmi-sdr-cache-common.lo \
-	sdr-cache/libfreeipmi_la-ipmi-sdr-cache-create.lo \
-	sdr-cache/libfreeipmi_la-ipmi-sdr-cache-delete.lo \
-	sdr-cache/libfreeipmi_la-ipmi-sdr-cache-read.lo \
-	sdr-cache/libfreeipmi_la-ipmi-sdr-cache-util.lo \
-	sdr-parse/libfreeipmi_la-ipmi-sdr-parse.lo \
-	sdr-parse/libfreeipmi_la-ipmi-sdr-parse-util.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse-common.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse-string.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-dell.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-inventec.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo \
-	sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo \
+	sdr/libfreeipmi_la-ipmi-sdr.lo \
+	sdr/libfreeipmi_la-ipmi-sdr-common.lo \
+	sdr/libfreeipmi_la-ipmi-sdr-cache-create.lo \
+	sdr/libfreeipmi_la-ipmi-sdr-cache-delete.lo \
+	sdr/libfreeipmi_la-ipmi-sdr-cache-read.lo \
+	sdr/libfreeipmi_la-ipmi-sdr-oem.lo \
+	sdr/libfreeipmi_la-ipmi-sdr-parse.lo \
+	sdr/libfreeipmi_la-ipmi-sdr-parse-util.lo \
+	sdr/libfreeipmi_la-ipmi-sdr-stats.lo \
+	sdr/libfreeipmi_la-ipmi-sdr-util.lo \
+	sel/libfreeipmi_la-ipmi-sel.lo \
+	sel/libfreeipmi_la-ipmi-sel-common.lo \
+	sel/libfreeipmi_la-ipmi-sel-string.lo \
+	sel/libfreeipmi_la-ipmi-sel-string-dell.lo \
+	sel/libfreeipmi_la-ipmi-sel-string-fujitsu.lo \
+	sel/libfreeipmi_la-ipmi-sel-string-intel.lo \
+	sel/libfreeipmi_la-ipmi-sel-string-intel-node-manager.lo \
+	sel/libfreeipmi_la-ipmi-sel-string-inventec.lo \
+	sel/libfreeipmi_la-ipmi-sel-string-quanta.lo \
+	sel/libfreeipmi_la-ipmi-sel-string-sun.lo \
+	sel/libfreeipmi_la-ipmi-sel-string-supermicro.lo \
+	sel/libfreeipmi_la-ipmi-sel-string-wistron.lo \
+	sel/libfreeipmi_la-ipmi-sel-util.lo \
 	sensor-read/libfreeipmi_la-ipmi-sensor-read.lo \
 	sensor-read/libfreeipmi_la-ipmi-sensor-read-util.lo \
 	spec/libfreeipmi_la-ipmi-device-types-spec.lo \
@@ -201,6 +206,7 @@ am_libfreeipmi_la_OBJECTS = api/libfreeipmi_la-ipmi-api.lo \
 	spec/libfreeipmi_la-ipmi-fru-chassis-types-spec.lo \
 	spec/libfreeipmi_la-ipmi-fru-language-codes-spec.lo \
 	spec/libfreeipmi_la-ipmi-iana-enterprise-numbers-spec.lo \
+	spec/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.lo \
 	spec/libfreeipmi_la-ipmi-sensor-and-event-code-tables-spec.lo \
 	spec/libfreeipmi_la-ipmi-sensor-and-event-code-tables-oem-spec.lo \
 	spec/libfreeipmi_la-ipmi-sensor-types-spec.lo \
@@ -214,12 +220,13 @@ am_libfreeipmi_la_OBJECTS = api/libfreeipmi_la-ipmi-api.lo \
 	util/libfreeipmi_la-ipmi-error-util.lo \
 	util/libfreeipmi_la-ipmi-iana-enterprise-numbers-util.lo \
 	util/libfreeipmi_la-ipmi-ipmb-util.lo \
+	util/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.lo \
 	util/libfreeipmi_la-ipmi-lan-util.lo \
 	util/libfreeipmi_la-ipmi-outofband-util.lo \
 	util/libfreeipmi_la-ipmi-rmcpplus-util.lo \
 	util/libfreeipmi_la-ipmi-sensor-and-event-code-tables-util.lo \
-	util/libfreeipmi_la-ipmi-sensor-units-util.lo \
 	util/libfreeipmi_la-ipmi-sensor-util.lo \
+	util/libfreeipmi_la-ipmi-timestamp-util.lo \
 	util/libfreeipmi_la-ipmi-util.lo \
 	util/libfreeipmi_la-rmcp-util.lo
 libfreeipmi_la_OBJECTS = $(am_libfreeipmi_la_OBJECTS)
@@ -291,7 +298,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BMC_WATCHDOG_LOGFILE_DEFAULT = @BMC_WATCHDOG_LOGFILE_DEFAULT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -319,8 +325,6 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_INIT_SCRIPTS = @INSTALL_INIT_SCRIPTS@
 INSTALL_IPMISDRCACHEDIR = @INSTALL_IPMISDRCACHEDIR@
-INSTALL_LOGDIR = @INSTALL_LOGDIR@
-INSTALL_LOGROTATE_CONFIG = @INSTALL_LOGROTATE_CONFIG@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -330,6 +334,8 @@ IPMICONSOLE_CONFIG_FILE_LEGACY = @IPMICONSOLE_CONFIG_FILE_LEGACY@
 IPMIDETECTD_CONFIG_FILE_DEFAULT = @IPMIDETECTD_CONFIG_FILE_DEFAULT@
 IPMIDETECT_CONFIG_FILE_DEFAULT = @IPMIDETECT_CONFIG_FILE_DEFAULT@
 IPMIPOWER_CONFIG_FILE_LEGACY = @IPMIPOWER_CONFIG_FILE_LEGACY@
+IPMISELD_CACHE_DIRECTORY = @IPMISELD_CACHE_DIRECTORY@
+IPMISELD_CONFIG_FILE_DEFAULT = @IPMISELD_CONFIG_FILE_DEFAULT@
 IPMI_MONITORING_SDR_CACHE_DIR = @IPMI_MONITORING_SDR_CACHE_DIR@
 IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY = @IPMI_MONITORING_SENSOR_CONFIG_FILE_LEGACY@
 ISODATE = @ISODATE@
@@ -451,6 +457,7 @@ libfreeipmi_la_CPPFLAGS = \
 	-I$(top_srcdir)/common/debugutil \
 	-I$(top_srcdir)/common/miscutil \
 	-I$(top_srcdir)/common/portability \
+	-I$(top_builddir)/libfreeipmi/include \
 	-I$(top_srcdir)/libfreeipmi/include \
 	-I$(top_srcdir)/libfreeipmi \
 	-DIPMI_IPCKEY=\"$(localstatedir)/lib/$(PACKAGE_NAME)/ipckey\" \
@@ -538,17 +545,19 @@ libfreeipmi_la_SOURCES = \
 	driver/ipmi-sunbmc-driver.c \
 	driver/ipmi-ssif-driver.c \
 	fiid/fiid.c \
-	fru-parse/ipmi-fru-parse.c \
-	fru-parse/ipmi-fru-parse-common.c \
-	fru-parse/ipmi-fru-parse-common.h \
-	fru-parse/ipmi-fru-parse-data.c \
-	fru-parse/ipmi-fru-parse-defs.h \
-	fru-parse/ipmi-fru-parse-trace.h \
-	fru-parse/ipmi-fru-parse-util.c \
-	fru-parse/ipmi-fru-parse-util.h \
+	fru/ipmi-fru.c \
+	fru/ipmi-fru-common.c \
+	fru/ipmi-fru-common.h \
+	fru/ipmi-fru-data.c \
+	fru/ipmi-fru-defs.h \
+	fru/ipmi-fru-trace.h \
+	fru/ipmi-fru-util.c \
+	fru/ipmi-fru-util.h \
 	interface/ipmi-ipmb-interface.c \
 	interface/ipmi-kcs-interface.c \
 	interface/ipmi-lan-interface.c \
+	interface/ipmi-network.c \
+	interface/ipmi-network.h \
 	interface/ipmi-rmcpplus-interface.c \
 	interface/rmcp-interface.c \
 	interpret/ipmi-interpret.c \
@@ -586,50 +595,52 @@ libfreeipmi_la_SOURCES = \
 	locate/ipmi-locate-util.h \
 	payload/ipmi-sol-payload.c \
 	record-format/ipmi-cipher-suite-record-format.c \
+	record-format/ipmi-fru-dimmspd-record-format.c \
 	record-format/ipmi-fru-information-record-format.c \
 	record-format/ipmi-sdr-record-format.c \
 	record-format/ipmi-sdr-oem-record-format.c \
 	record-format/ipmi-sel-record-format.c \
-	sdr-cache/ipmi-sdr-cache.c \
-	sdr-cache/ipmi-sdr-cache-common.c \
-	sdr-cache/ipmi-sdr-cache-common.h \
-	sdr-cache/ipmi-sdr-cache-create.c \
-	sdr-cache/ipmi-sdr-cache-defs.h \
-	sdr-cache/ipmi-sdr-cache-delete.c \
-	sdr-cache/ipmi-sdr-cache-read.c \
-	sdr-cache/ipmi-sdr-cache-trace.h \
-	sdr-cache/ipmi-sdr-cache-util.c \
-	sdr-cache/ipmi-sdr-cache-util.h \
-	sdr-parse/ipmi-sdr-parse.c \
-	sdr-parse/ipmi-sdr-parse-defs.h \
-	sdr-parse/ipmi-sdr-parse-trace.h \
-	sdr-parse/ipmi-sdr-parse-util.c \
-	sdr-parse/ipmi-sdr-parse-util.h \
-	sel-parse/ipmi-sel-parse.c \
-	sel-parse/ipmi-sel-parse-common.c \
-	sel-parse/ipmi-sel-parse-common.h \
-	sel-parse/ipmi-sel-parse-defs.h \
-	sel-parse/ipmi-sel-parse-string.c \
-	sel-parse/ipmi-sel-parse-string.h \
-	sel-parse/ipmi-sel-parse-string-dell.c \
-	sel-parse/ipmi-sel-parse-string-dell.h \
-	sel-parse/ipmi-sel-parse-string-fujitsu.c \
-	sel-parse/ipmi-sel-parse-string-fujitsu.h \
-	sel-parse/ipmi-sel-parse-string-intel.c \
-	sel-parse/ipmi-sel-parse-string-intel.h \
-	sel-parse/ipmi-sel-parse-string-intel-node-manager.c \
-	sel-parse/ipmi-sel-parse-string-intel-node-manager.h \
-	sel-parse/ipmi-sel-parse-string-inventec.c \
-	sel-parse/ipmi-sel-parse-string-inventec.h \
-	sel-parse/ipmi-sel-parse-string-quanta.c \
-	sel-parse/ipmi-sel-parse-string-quanta.h \
-	sel-parse/ipmi-sel-parse-string-sun.c \
-	sel-parse/ipmi-sel-parse-string-sun.h \
-	sel-parse/ipmi-sel-parse-string-supermicro.c \
-	sel-parse/ipmi-sel-parse-string-supermicro.h \
-	sel-parse/ipmi-sel-parse-trace.h \
-	sel-parse/ipmi-sel-parse-util.c \
-	sel-parse/ipmi-sel-parse-util.h \
+	sdr/ipmi-sdr.c \
+	sdr/ipmi-sdr-common.c \
+	sdr/ipmi-sdr-common.h \
+	sdr/ipmi-sdr-cache-create.c \
+	sdr/ipmi-sdr-defs.h \
+	sdr/ipmi-sdr-cache-delete.c \
+	sdr/ipmi-sdr-cache-read.c \
+	sdr/ipmi-sdr-oem.c \
+	sdr/ipmi-sdr-parse.c \
+	sdr/ipmi-sdr-parse-util.c \
+	sdr/ipmi-sdr-stats.c \
+	sdr/ipmi-sdr-trace.h \
+	sdr/ipmi-sdr-util.c \
+	sdr/ipmi-sdr-util.h \
+	sel/ipmi-sel.c \
+	sel/ipmi-sel-common.c \
+	sel/ipmi-sel-common.h \
+	sel/ipmi-sel-defs.h \
+	sel/ipmi-sel-string.c \
+	sel/ipmi-sel-string.h \
+	sel/ipmi-sel-string-dell.c \
+	sel/ipmi-sel-string-dell.h \
+	sel/ipmi-sel-string-fujitsu.c \
+	sel/ipmi-sel-string-fujitsu.h \
+	sel/ipmi-sel-string-intel.c \
+	sel/ipmi-sel-string-intel.h \
+	sel/ipmi-sel-string-intel-node-manager.c \
+	sel/ipmi-sel-string-intel-node-manager.h \
+	sel/ipmi-sel-string-inventec.c \
+	sel/ipmi-sel-string-inventec.h \
+	sel/ipmi-sel-string-quanta.c \
+	sel/ipmi-sel-string-quanta.h \
+	sel/ipmi-sel-string-sun.c \
+	sel/ipmi-sel-string-sun.h \
+	sel/ipmi-sel-string-supermicro.c \
+	sel/ipmi-sel-string-supermicro.h \
+	sel/ipmi-sel-string-wistron.c \
+	sel/ipmi-sel-string-wistron.h \
+	sel/ipmi-sel-trace.h \
+	sel/ipmi-sel-util.c \
+	sel/ipmi-sel-util.h \
 	sensor-read/ipmi-sensor-read.c \
 	sensor-read/ipmi-sensor-read-defs.h \
 	sensor-read/ipmi-sensor-read-trace.h \
@@ -640,6 +651,7 @@ libfreeipmi_la_SOURCES = \
 	spec/ipmi-fru-chassis-types-spec.c \
 	spec/ipmi-fru-language-codes-spec.c \
 	spec/ipmi-iana-enterprise-numbers-spec.c \
+	spec/ipmi-jedec-manufacturer-identification-code-spec.c \
 	spec/ipmi-sensor-and-event-code-tables-spec.c \
 	spec/ipmi-sensor-and-event-code-tables-oem-spec.c \
 	spec/ipmi-sensor-types-spec.c \
@@ -653,12 +665,13 @@ libfreeipmi_la_SOURCES = \
 	util/ipmi-error-util.c \
 	util/ipmi-iana-enterprise-numbers-util.c \
 	util/ipmi-ipmb-util.c \
+	util/ipmi-jedec-manufacturer-identification-code-util.c \
 	util/ipmi-lan-util.c \
 	util/ipmi-outofband-util.c \
 	util/ipmi-rmcpplus-util.c \
 	util/ipmi-sensor-and-event-code-tables-util.c \
-	util/ipmi-sensor-units-util.c \
 	util/ipmi-sensor-util.c \
+	util/ipmi-timestamp-util.c \
 	util/ipmi-util.c \
 	util/rmcp-util.c
 
@@ -870,20 +883,20 @@ fiid/$(DEPDIR)/$(am__dirstamp):
 	@: > fiid/$(DEPDIR)/$(am__dirstamp)
 fiid/libfreeipmi_la-fiid.lo: fiid/$(am__dirstamp) \
 	fiid/$(DEPDIR)/$(am__dirstamp)
-fru-parse/$(am__dirstamp):
-	@$(MKDIR_P) fru-parse
-	@: > fru-parse/$(am__dirstamp)
-fru-parse/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) fru-parse/$(DEPDIR)
-	@: > fru-parse/$(DEPDIR)/$(am__dirstamp)
-fru-parse/libfreeipmi_la-ipmi-fru-parse.lo: fru-parse/$(am__dirstamp) \
-	fru-parse/$(DEPDIR)/$(am__dirstamp)
-fru-parse/libfreeipmi_la-ipmi-fru-parse-common.lo:  \
-	fru-parse/$(am__dirstamp) fru-parse/$(DEPDIR)/$(am__dirstamp)
-fru-parse/libfreeipmi_la-ipmi-fru-parse-data.lo:  \
-	fru-parse/$(am__dirstamp) fru-parse/$(DEPDIR)/$(am__dirstamp)
-fru-parse/libfreeipmi_la-ipmi-fru-parse-util.lo:  \
-	fru-parse/$(am__dirstamp) fru-parse/$(DEPDIR)/$(am__dirstamp)
+fru/$(am__dirstamp):
+	@$(MKDIR_P) fru
+	@: > fru/$(am__dirstamp)
+fru/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) fru/$(DEPDIR)
+	@: > fru/$(DEPDIR)/$(am__dirstamp)
+fru/libfreeipmi_la-ipmi-fru.lo: fru/$(am__dirstamp) \
+	fru/$(DEPDIR)/$(am__dirstamp)
+fru/libfreeipmi_la-ipmi-fru-common.lo: fru/$(am__dirstamp) \
+	fru/$(DEPDIR)/$(am__dirstamp)
+fru/libfreeipmi_la-ipmi-fru-data.lo: fru/$(am__dirstamp) \
+	fru/$(DEPDIR)/$(am__dirstamp)
+fru/libfreeipmi_la-ipmi-fru-util.lo: fru/$(am__dirstamp) \
+	fru/$(DEPDIR)/$(am__dirstamp)
 interface/$(am__dirstamp):
 	@$(MKDIR_P) interface
 	@: > interface/$(am__dirstamp)
@@ -896,6 +909,8 @@ interface/libfreeipmi_la-ipmi-kcs-interface.lo:  \
 	interface/$(am__dirstamp) interface/$(DEPDIR)/$(am__dirstamp)
 interface/libfreeipmi_la-ipmi-lan-interface.lo:  \
 	interface/$(am__dirstamp) interface/$(DEPDIR)/$(am__dirstamp)
+interface/libfreeipmi_la-ipmi-network.lo: interface/$(am__dirstamp) \
+	interface/$(DEPDIR)/$(am__dirstamp)
 interface/libfreeipmi_la-ipmi-rmcpplus-interface.lo:  \
 	interface/$(am__dirstamp) interface/$(DEPDIR)/$(am__dirstamp)
 interface/libfreeipmi_la-rmcp-interface.lo: interface/$(am__dirstamp) \
@@ -969,6 +984,9 @@ record-format/$(DEPDIR)/$(am__dirstamp):
 record-format/libfreeipmi_la-ipmi-cipher-suite-record-format.lo:  \
 	record-format/$(am__dirstamp) \
 	record-format/$(DEPDIR)/$(am__dirstamp)
+record-format/libfreeipmi_la-ipmi-fru-dimmspd-record-format.lo:  \
+	record-format/$(am__dirstamp) \
+	record-format/$(DEPDIR)/$(am__dirstamp)
 record-format/libfreeipmi_la-ipmi-fru-information-record-format.lo:  \
 	record-format/$(am__dirstamp) \
 	record-format/$(DEPDIR)/$(am__dirstamp)
@@ -981,64 +999,64 @@ record-format/libfreeipmi_la-ipmi-sdr-oem-record-format.lo:  \
 record-format/libfreeipmi_la-ipmi-sel-record-format.lo:  \
 	record-format/$(am__dirstamp) \
 	record-format/$(DEPDIR)/$(am__dirstamp)
-sdr-cache/$(am__dirstamp):
-	@$(MKDIR_P) sdr-cache
-	@: > sdr-cache/$(am__dirstamp)
-sdr-cache/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) sdr-cache/$(DEPDIR)
-	@: > sdr-cache/$(DEPDIR)/$(am__dirstamp)
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache.lo: sdr-cache/$(am__dirstamp) \
-	sdr-cache/$(DEPDIR)/$(am__dirstamp)
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache-common.lo:  \
-	sdr-cache/$(am__dirstamp) sdr-cache/$(DEPDIR)/$(am__dirstamp)
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache-create.lo:  \
-	sdr-cache/$(am__dirstamp) sdr-cache/$(DEPDIR)/$(am__dirstamp)
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache-delete.lo:  \
-	sdr-cache/$(am__dirstamp) sdr-cache/$(DEPDIR)/$(am__dirstamp)
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache-read.lo:  \
-	sdr-cache/$(am__dirstamp) sdr-cache/$(DEPDIR)/$(am__dirstamp)
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache-util.lo:  \
-	sdr-cache/$(am__dirstamp) sdr-cache/$(DEPDIR)/$(am__dirstamp)
-sdr-parse/$(am__dirstamp):
-	@$(MKDIR_P) sdr-parse
-	@: > sdr-parse/$(am__dirstamp)
-sdr-parse/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) sdr-parse/$(DEPDIR)
-	@: > sdr-parse/$(DEPDIR)/$(am__dirstamp)
-sdr-parse/libfreeipmi_la-ipmi-sdr-parse.lo: sdr-parse/$(am__dirstamp) \
-	sdr-parse/$(DEPDIR)/$(am__dirstamp)
-sdr-parse/libfreeipmi_la-ipmi-sdr-parse-util.lo:  \
-	sdr-parse/$(am__dirstamp) sdr-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/$(am__dirstamp):
-	@$(MKDIR_P) sel-parse
-	@: > sel-parse/$(am__dirstamp)
-sel-parse/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) sel-parse/$(DEPDIR)
-	@: > sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse.lo: sel-parse/$(am__dirstamp) \
-	sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse-common.lo:  \
-	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string.lo:  \
-	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-dell.lo:  \
-	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.lo:  \
-	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel.lo:  \
-	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.lo:  \
-	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-inventec.lo:  \
-	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.lo:  \
-	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo:  \
-	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo:  \
-	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
-sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo:  \
-	sel-parse/$(am__dirstamp) sel-parse/$(DEPDIR)/$(am__dirstamp)
+sdr/$(am__dirstamp):
+	@$(MKDIR_P) sdr
+	@: > sdr/$(am__dirstamp)
+sdr/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) sdr/$(DEPDIR)
+	@: > sdr/$(DEPDIR)/$(am__dirstamp)
+sdr/libfreeipmi_la-ipmi-sdr.lo: sdr/$(am__dirstamp) \
+	sdr/$(DEPDIR)/$(am__dirstamp)
+sdr/libfreeipmi_la-ipmi-sdr-common.lo: sdr/$(am__dirstamp) \
+	sdr/$(DEPDIR)/$(am__dirstamp)
+sdr/libfreeipmi_la-ipmi-sdr-cache-create.lo: sdr/$(am__dirstamp) \
+	sdr/$(DEPDIR)/$(am__dirstamp)
+sdr/libfreeipmi_la-ipmi-sdr-cache-delete.lo: sdr/$(am__dirstamp) \
+	sdr/$(DEPDIR)/$(am__dirstamp)
+sdr/libfreeipmi_la-ipmi-sdr-cache-read.lo: sdr/$(am__dirstamp) \
+	sdr/$(DEPDIR)/$(am__dirstamp)
+sdr/libfreeipmi_la-ipmi-sdr-oem.lo: sdr/$(am__dirstamp) \
+	sdr/$(DEPDIR)/$(am__dirstamp)
+sdr/libfreeipmi_la-ipmi-sdr-parse.lo: sdr/$(am__dirstamp) \
+	sdr/$(DEPDIR)/$(am__dirstamp)
+sdr/libfreeipmi_la-ipmi-sdr-parse-util.lo: sdr/$(am__dirstamp) \
+	sdr/$(DEPDIR)/$(am__dirstamp)
+sdr/libfreeipmi_la-ipmi-sdr-stats.lo: sdr/$(am__dirstamp) \
+	sdr/$(DEPDIR)/$(am__dirstamp)
+sdr/libfreeipmi_la-ipmi-sdr-util.lo: sdr/$(am__dirstamp) \
+	sdr/$(DEPDIR)/$(am__dirstamp)
+sel/$(am__dirstamp):
+	@$(MKDIR_P) sel
+	@: > sel/$(am__dirstamp)
+sel/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) sel/$(DEPDIR)
+	@: > sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-common.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-string.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-string-dell.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-string-fujitsu.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-string-intel.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-string-intel-node-manager.lo:  \
+	sel/$(am__dirstamp) sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-string-inventec.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-string-quanta.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-string-sun.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-string-supermicro.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-string-wistron.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
+sel/libfreeipmi_la-ipmi-sel-util.lo: sel/$(am__dirstamp) \
+	sel/$(DEPDIR)/$(am__dirstamp)
 sensor-read/$(am__dirstamp):
 	@$(MKDIR_P) sensor-read
 	@: > sensor-read/$(am__dirstamp)
@@ -1066,6 +1084,8 @@ spec/libfreeipmi_la-ipmi-fru-chassis-types-spec.lo:  \
 spec/libfreeipmi_la-ipmi-fru-language-codes-spec.lo:  \
 	spec/$(am__dirstamp) spec/$(DEPDIR)/$(am__dirstamp)
 spec/libfreeipmi_la-ipmi-iana-enterprise-numbers-spec.lo:  \
+	spec/$(am__dirstamp) spec/$(DEPDIR)/$(am__dirstamp)
+spec/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.lo:  \
 	spec/$(am__dirstamp) spec/$(DEPDIR)/$(am__dirstamp)
 spec/libfreeipmi_la-ipmi-sensor-and-event-code-tables-spec.lo:  \
 	spec/$(am__dirstamp) spec/$(DEPDIR)/$(am__dirstamp)
@@ -1099,6 +1119,8 @@ util/libfreeipmi_la-ipmi-iana-enterprise-numbers-util.lo:  \
 	util/$(am__dirstamp) util/$(DEPDIR)/$(am__dirstamp)
 util/libfreeipmi_la-ipmi-ipmb-util.lo: util/$(am__dirstamp) \
 	util/$(DEPDIR)/$(am__dirstamp)
+util/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.lo:  \
+	util/$(am__dirstamp) util/$(DEPDIR)/$(am__dirstamp)
 util/libfreeipmi_la-ipmi-lan-util.lo: util/$(am__dirstamp) \
 	util/$(DEPDIR)/$(am__dirstamp)
 util/libfreeipmi_la-ipmi-outofband-util.lo: util/$(am__dirstamp) \
@@ -1107,9 +1129,9 @@ util/libfreeipmi_la-ipmi-rmcpplus-util.lo: util/$(am__dirstamp) \
 	util/$(DEPDIR)/$(am__dirstamp)
 util/libfreeipmi_la-ipmi-sensor-and-event-code-tables-util.lo:  \
 	util/$(am__dirstamp) util/$(DEPDIR)/$(am__dirstamp)
-util/libfreeipmi_la-ipmi-sensor-units-util.lo: util/$(am__dirstamp) \
-	util/$(DEPDIR)/$(am__dirstamp)
 util/libfreeipmi_la-ipmi-sensor-util.lo: util/$(am__dirstamp) \
+	util/$(DEPDIR)/$(am__dirstamp)
+util/libfreeipmi_la-ipmi-timestamp-util.lo: util/$(am__dirstamp) \
 	util/$(DEPDIR)/$(am__dirstamp)
 util/libfreeipmi_la-ipmi-util.lo: util/$(am__dirstamp) \
 	util/$(DEPDIR)/$(am__dirstamp)
@@ -1230,20 +1252,22 @@ mostlyclean-compile:
 	-rm -f driver/libfreeipmi_la-ipmi-sunbmc-driver.lo
 	-rm -f fiid/libfreeipmi_la-fiid.$(OBJEXT)
 	-rm -f fiid/libfreeipmi_la-fiid.lo
-	-rm -f fru-parse/libfreeipmi_la-ipmi-fru-parse-common.$(OBJEXT)
-	-rm -f fru-parse/libfreeipmi_la-ipmi-fru-parse-common.lo
-	-rm -f fru-parse/libfreeipmi_la-ipmi-fru-parse-data.$(OBJEXT)
-	-rm -f fru-parse/libfreeipmi_la-ipmi-fru-parse-data.lo
-	-rm -f fru-parse/libfreeipmi_la-ipmi-fru-parse-util.$(OBJEXT)
-	-rm -f fru-parse/libfreeipmi_la-ipmi-fru-parse-util.lo
-	-rm -f fru-parse/libfreeipmi_la-ipmi-fru-parse.$(OBJEXT)
-	-rm -f fru-parse/libfreeipmi_la-ipmi-fru-parse.lo
+	-rm -f fru/libfreeipmi_la-ipmi-fru-common.$(OBJEXT)
+	-rm -f fru/libfreeipmi_la-ipmi-fru-common.lo
+	-rm -f fru/libfreeipmi_la-ipmi-fru-data.$(OBJEXT)
+	-rm -f fru/libfreeipmi_la-ipmi-fru-data.lo
+	-rm -f fru/libfreeipmi_la-ipmi-fru-util.$(OBJEXT)
+	-rm -f fru/libfreeipmi_la-ipmi-fru-util.lo
+	-rm -f fru/libfreeipmi_la-ipmi-fru.$(OBJEXT)
+	-rm -f fru/libfreeipmi_la-ipmi-fru.lo
 	-rm -f interface/libfreeipmi_la-ipmi-ipmb-interface.$(OBJEXT)
 	-rm -f interface/libfreeipmi_la-ipmi-ipmb-interface.lo
 	-rm -f interface/libfreeipmi_la-ipmi-kcs-interface.$(OBJEXT)
 	-rm -f interface/libfreeipmi_la-ipmi-kcs-interface.lo
 	-rm -f interface/libfreeipmi_la-ipmi-lan-interface.$(OBJEXT)
 	-rm -f interface/libfreeipmi_la-ipmi-lan-interface.lo
+	-rm -f interface/libfreeipmi_la-ipmi-network.$(OBJEXT)
+	-rm -f interface/libfreeipmi_la-ipmi-network.lo
 	-rm -f interface/libfreeipmi_la-ipmi-rmcpplus-interface.$(OBJEXT)
 	-rm -f interface/libfreeipmi_la-ipmi-rmcpplus-interface.lo
 	-rm -f interface/libfreeipmi_la-rmcp-interface.$(OBJEXT)
@@ -1286,6 +1310,8 @@ mostlyclean-compile:
 	-rm -f payload/libfreeipmi_la-ipmi-sol-payload.lo
 	-rm -f record-format/libfreeipmi_la-ipmi-cipher-suite-record-format.$(OBJEXT)
 	-rm -f record-format/libfreeipmi_la-ipmi-cipher-suite-record-format.lo
+	-rm -f record-format/libfreeipmi_la-ipmi-fru-dimmspd-record-format.$(OBJEXT)
+	-rm -f record-format/libfreeipmi_la-ipmi-fru-dimmspd-record-format.lo
 	-rm -f record-format/libfreeipmi_la-ipmi-fru-information-record-format.$(OBJEXT)
 	-rm -f record-format/libfreeipmi_la-ipmi-fru-information-record-format.lo
 	-rm -f record-format/libfreeipmi_la-ipmi-sdr-oem-record-format.$(OBJEXT)
@@ -1294,46 +1320,52 @@ mostlyclean-compile:
 	-rm -f record-format/libfreeipmi_la-ipmi-sdr-record-format.lo
 	-rm -f record-format/libfreeipmi_la-ipmi-sel-record-format.$(OBJEXT)
 	-rm -f record-format/libfreeipmi_la-ipmi-sel-record-format.lo
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache-common.$(OBJEXT)
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache-common.lo
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache-create.$(OBJEXT)
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache-create.lo
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache-delete.$(OBJEXT)
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache-delete.lo
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache-read.$(OBJEXT)
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache-read.lo
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache-util.$(OBJEXT)
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache-util.lo
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache.$(OBJEXT)
-	-rm -f sdr-cache/libfreeipmi_la-ipmi-sdr-cache.lo
-	-rm -f sdr-parse/libfreeipmi_la-ipmi-sdr-parse-util.$(OBJEXT)
-	-rm -f sdr-parse/libfreeipmi_la-ipmi-sdr-parse-util.lo
-	-rm -f sdr-parse/libfreeipmi_la-ipmi-sdr-parse.$(OBJEXT)
-	-rm -f sdr-parse/libfreeipmi_la-ipmi-sdr-parse.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-common.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-common.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-dell.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-dell.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-inventec.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-inventec.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-string.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-util.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse.$(OBJEXT)
-	-rm -f sel-parse/libfreeipmi_la-ipmi-sel-parse.lo
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-cache-create.$(OBJEXT)
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-cache-create.lo
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-cache-delete.$(OBJEXT)
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-cache-delete.lo
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-cache-read.$(OBJEXT)
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-cache-read.lo
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-common.$(OBJEXT)
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-common.lo
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-oem.$(OBJEXT)
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-oem.lo
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-parse-util.$(OBJEXT)
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-parse-util.lo
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-parse.$(OBJEXT)
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-parse.lo
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-stats.$(OBJEXT)
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-stats.lo
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-util.$(OBJEXT)
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr-util.lo
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr.$(OBJEXT)
+	-rm -f sdr/libfreeipmi_la-ipmi-sdr.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-common.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-common.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-dell.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-dell.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-fujitsu.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-fujitsu.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-intel-node-manager.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-intel-node-manager.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-intel.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-intel.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-inventec.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-inventec.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-quanta.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-quanta.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-sun.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-sun.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-supermicro.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-supermicro.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-wistron.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string-wistron.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-string.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel-util.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel-util.lo
+	-rm -f sel/libfreeipmi_la-ipmi-sel.$(OBJEXT)
+	-rm -f sel/libfreeipmi_la-ipmi-sel.lo
 	-rm -f sensor-read/libfreeipmi_la-ipmi-sensor-read-util.$(OBJEXT)
 	-rm -f sensor-read/libfreeipmi_la-ipmi-sensor-read-util.lo
 	-rm -f sensor-read/libfreeipmi_la-ipmi-sensor-read.$(OBJEXT)
@@ -1348,6 +1380,8 @@ mostlyclean-compile:
 	-rm -f spec/libfreeipmi_la-ipmi-fru-language-codes-spec.lo
 	-rm -f spec/libfreeipmi_la-ipmi-iana-enterprise-numbers-spec.$(OBJEXT)
 	-rm -f spec/libfreeipmi_la-ipmi-iana-enterprise-numbers-spec.lo
+	-rm -f spec/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.$(OBJEXT)
+	-rm -f spec/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.lo
 	-rm -f spec/libfreeipmi_la-ipmi-sensor-and-event-code-tables-oem-spec.$(OBJEXT)
 	-rm -f spec/libfreeipmi_la-ipmi-sensor-and-event-code-tables-oem-spec.lo
 	-rm -f spec/libfreeipmi_la-ipmi-sensor-and-event-code-tables-spec.$(OBJEXT)
@@ -1374,6 +1408,8 @@ mostlyclean-compile:
 	-rm -f util/libfreeipmi_la-ipmi-iana-enterprise-numbers-util.lo
 	-rm -f util/libfreeipmi_la-ipmi-ipmb-util.$(OBJEXT)
 	-rm -f util/libfreeipmi_la-ipmi-ipmb-util.lo
+	-rm -f util/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.$(OBJEXT)
+	-rm -f util/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.lo
 	-rm -f util/libfreeipmi_la-ipmi-lan-util.$(OBJEXT)
 	-rm -f util/libfreeipmi_la-ipmi-lan-util.lo
 	-rm -f util/libfreeipmi_la-ipmi-outofband-util.$(OBJEXT)
@@ -1382,10 +1418,10 @@ mostlyclean-compile:
 	-rm -f util/libfreeipmi_la-ipmi-rmcpplus-util.lo
 	-rm -f util/libfreeipmi_la-ipmi-sensor-and-event-code-tables-util.$(OBJEXT)
 	-rm -f util/libfreeipmi_la-ipmi-sensor-and-event-code-tables-util.lo
-	-rm -f util/libfreeipmi_la-ipmi-sensor-units-util.$(OBJEXT)
-	-rm -f util/libfreeipmi_la-ipmi-sensor-units-util.lo
 	-rm -f util/libfreeipmi_la-ipmi-sensor-util.$(OBJEXT)
 	-rm -f util/libfreeipmi_la-ipmi-sensor-util.lo
+	-rm -f util/libfreeipmi_la-ipmi-timestamp-util.$(OBJEXT)
+	-rm -f util/libfreeipmi_la-ipmi-timestamp-util.lo
 	-rm -f util/libfreeipmi_la-ipmi-util.$(OBJEXT)
 	-rm -f util/libfreeipmi_la-ipmi-util.lo
 	-rm -f util/libfreeipmi_la-rmcp-util.$(OBJEXT)
@@ -1449,13 +1485,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@driver/$(DEPDIR)/libfreeipmi_la-ipmi-ssif-driver.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@driver/$(DEPDIR)/libfreeipmi_la-ipmi-sunbmc-driver.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@fiid/$(DEPDIR)/libfreeipmi_la-fiid.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-common.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-data.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-util.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-data.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@interface/$(DEPDIR)/libfreeipmi_la-ipmi-ipmb-interface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@interface/$(DEPDIR)/libfreeipmi_la-ipmi-kcs-interface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@interface/$(DEPDIR)/libfreeipmi_la-ipmi-lan-interface.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@interface/$(DEPDIR)/libfreeipmi_la-ipmi-network.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@interface/$(DEPDIR)/libfreeipmi_la-ipmi-rmcpplus-interface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@interface/$(DEPDIR)/libfreeipmi_la-rmcp-interface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@interpret/$(DEPDIR)/libfreeipmi_la-ipmi-interpret-config-common.Plo@am__quote@
@@ -1477,30 +1514,34 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@locate/$(DEPDIR)/libfreeipmi_la-ipmi-locate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@payload/$(DEPDIR)/libfreeipmi_la-ipmi-sol-payload.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@record-format/$(DEPDIR)/libfreeipmi_la-ipmi-cipher-suite-record-format.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@record-format/$(DEPDIR)/libfreeipmi_la-ipmi-fru-dimmspd-record-format.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@record-format/$(DEPDIR)/libfreeipmi_la-ipmi-fru-information-record-format.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@record-format/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-oem-record-format.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@record-format/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-record-format.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@record-format/$(DEPDIR)/libfreeipmi_la-ipmi-sel-record-format.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-common.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-create.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-delete.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-read.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-util.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sdr-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse-util.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sdr-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-common.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-dell.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-intel.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-inventec.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-quanta.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-sun.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-supermicro.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-util.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-create.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-delete.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-read.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-oem.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse-util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-stats.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-dell.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-fujitsu.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-intel-node-manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-intel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-inventec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-quanta.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-sun.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-supermicro.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-wistron.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@sensor-read/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-read-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@sensor-read/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-read.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@spec/$(DEPDIR)/libfreeipmi_la-ipmi-device-types-spec.Plo@am__quote@
@@ -1508,6 +1549,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@spec/$(DEPDIR)/libfreeipmi_la-ipmi-fru-chassis-types-spec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@spec/$(DEPDIR)/libfreeipmi_la-ipmi-fru-language-codes-spec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@spec/$(DEPDIR)/libfreeipmi_la-ipmi-iana-enterprise-numbers-spec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@spec/$(DEPDIR)/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@spec/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-and-event-code-tables-oem-spec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@spec/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-and-event-code-tables-spec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@spec/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-types-spec.Plo@am__quote@
@@ -1521,12 +1563,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-error-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-iana-enterprise-numbers-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-ipmb-util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-lan-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-outofband-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-rmcpplus-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-and-event-code-tables-util.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-units-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-timestamp-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-ipmi-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@util/$(DEPDIR)/libfreeipmi_la-rmcp-util.Plo@am__quote@
 
@@ -1939,33 +1982,33 @@ fiid/libfreeipmi_la-fiid.lo: fiid/fiid.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fiid/libfreeipmi_la-fiid.lo `test -f 'fiid/fiid.c' || echo '$(srcdir)/'`fiid/fiid.c
 
-fru-parse/libfreeipmi_la-ipmi-fru-parse.lo: fru-parse/ipmi-fru-parse.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fru-parse/libfreeipmi_la-ipmi-fru-parse.lo -MD -MP -MF fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse.Tpo -c -o fru-parse/libfreeipmi_la-ipmi-fru-parse.lo `test -f 'fru-parse/ipmi-fru-parse.c' || echo '$(srcdir)/'`fru-parse/ipmi-fru-parse.c
-@am__fastdepCC_TRUE@	$(am__mv) fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse.Tpo fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fru-parse/ipmi-fru-parse.c' object='fru-parse/libfreeipmi_la-ipmi-fru-parse.lo' libtool=yes @AMDEPBACKSLASH@
+fru/libfreeipmi_la-ipmi-fru.lo: fru/ipmi-fru.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fru/libfreeipmi_la-ipmi-fru.lo -MD -MP -MF fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru.Tpo -c -o fru/libfreeipmi_la-ipmi-fru.lo `test -f 'fru/ipmi-fru.c' || echo '$(srcdir)/'`fru/ipmi-fru.c
+@am__fastdepCC_TRUE@	$(am__mv) fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru.Tpo fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fru/ipmi-fru.c' object='fru/libfreeipmi_la-ipmi-fru.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fru-parse/libfreeipmi_la-ipmi-fru-parse.lo `test -f 'fru-parse/ipmi-fru-parse.c' || echo '$(srcdir)/'`fru-parse/ipmi-fru-parse.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fru/libfreeipmi_la-ipmi-fru.lo `test -f 'fru/ipmi-fru.c' || echo '$(srcdir)/'`fru/ipmi-fru.c
 
-fru-parse/libfreeipmi_la-ipmi-fru-parse-common.lo: fru-parse/ipmi-fru-parse-common.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fru-parse/libfreeipmi_la-ipmi-fru-parse-common.lo -MD -MP -MF fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-common.Tpo -c -o fru-parse/libfreeipmi_la-ipmi-fru-parse-common.lo `test -f 'fru-parse/ipmi-fru-parse-common.c' || echo '$(srcdir)/'`fru-parse/ipmi-fru-parse-common.c
-@am__fastdepCC_TRUE@	$(am__mv) fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-common.Tpo fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-common.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fru-parse/ipmi-fru-parse-common.c' object='fru-parse/libfreeipmi_la-ipmi-fru-parse-common.lo' libtool=yes @AMDEPBACKSLASH@
+fru/libfreeipmi_la-ipmi-fru-common.lo: fru/ipmi-fru-common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fru/libfreeipmi_la-ipmi-fru-common.lo -MD -MP -MF fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-common.Tpo -c -o fru/libfreeipmi_la-ipmi-fru-common.lo `test -f 'fru/ipmi-fru-common.c' || echo '$(srcdir)/'`fru/ipmi-fru-common.c
+@am__fastdepCC_TRUE@	$(am__mv) fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-common.Tpo fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fru/ipmi-fru-common.c' object='fru/libfreeipmi_la-ipmi-fru-common.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fru-parse/libfreeipmi_la-ipmi-fru-parse-common.lo `test -f 'fru-parse/ipmi-fru-parse-common.c' || echo '$(srcdir)/'`fru-parse/ipmi-fru-parse-common.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fru/libfreeipmi_la-ipmi-fru-common.lo `test -f 'fru/ipmi-fru-common.c' || echo '$(srcdir)/'`fru/ipmi-fru-common.c
 
-fru-parse/libfreeipmi_la-ipmi-fru-parse-data.lo: fru-parse/ipmi-fru-parse-data.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fru-parse/libfreeipmi_la-ipmi-fru-parse-data.lo -MD -MP -MF fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-data.Tpo -c -o fru-parse/libfreeipmi_la-ipmi-fru-parse-data.lo `test -f 'fru-parse/ipmi-fru-parse-data.c' || echo '$(srcdir)/'`fru-parse/ipmi-fru-parse-data.c
-@am__fastdepCC_TRUE@	$(am__mv) fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-data.Tpo fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-data.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fru-parse/ipmi-fru-parse-data.c' object='fru-parse/libfreeipmi_la-ipmi-fru-parse-data.lo' libtool=yes @AMDEPBACKSLASH@
+fru/libfreeipmi_la-ipmi-fru-data.lo: fru/ipmi-fru-data.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fru/libfreeipmi_la-ipmi-fru-data.lo -MD -MP -MF fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-data.Tpo -c -o fru/libfreeipmi_la-ipmi-fru-data.lo `test -f 'fru/ipmi-fru-data.c' || echo '$(srcdir)/'`fru/ipmi-fru-data.c
+@am__fastdepCC_TRUE@	$(am__mv) fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-data.Tpo fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-data.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fru/ipmi-fru-data.c' object='fru/libfreeipmi_la-ipmi-fru-data.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fru-parse/libfreeipmi_la-ipmi-fru-parse-data.lo `test -f 'fru-parse/ipmi-fru-parse-data.c' || echo '$(srcdir)/'`fru-parse/ipmi-fru-parse-data.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fru/libfreeipmi_la-ipmi-fru-data.lo `test -f 'fru/ipmi-fru-data.c' || echo '$(srcdir)/'`fru/ipmi-fru-data.c
 
-fru-parse/libfreeipmi_la-ipmi-fru-parse-util.lo: fru-parse/ipmi-fru-parse-util.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fru-parse/libfreeipmi_la-ipmi-fru-parse-util.lo -MD -MP -MF fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-util.Tpo -c -o fru-parse/libfreeipmi_la-ipmi-fru-parse-util.lo `test -f 'fru-parse/ipmi-fru-parse-util.c' || echo '$(srcdir)/'`fru-parse/ipmi-fru-parse-util.c
-@am__fastdepCC_TRUE@	$(am__mv) fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-util.Tpo fru-parse/$(DEPDIR)/libfreeipmi_la-ipmi-fru-parse-util.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fru-parse/ipmi-fru-parse-util.c' object='fru-parse/libfreeipmi_la-ipmi-fru-parse-util.lo' libtool=yes @AMDEPBACKSLASH@
+fru/libfreeipmi_la-ipmi-fru-util.lo: fru/ipmi-fru-util.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fru/libfreeipmi_la-ipmi-fru-util.lo -MD -MP -MF fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-util.Tpo -c -o fru/libfreeipmi_la-ipmi-fru-util.lo `test -f 'fru/ipmi-fru-util.c' || echo '$(srcdir)/'`fru/ipmi-fru-util.c
+@am__fastdepCC_TRUE@	$(am__mv) fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-util.Tpo fru/$(DEPDIR)/libfreeipmi_la-ipmi-fru-util.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='fru/ipmi-fru-util.c' object='fru/libfreeipmi_la-ipmi-fru-util.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fru-parse/libfreeipmi_la-ipmi-fru-parse-util.lo `test -f 'fru-parse/ipmi-fru-parse-util.c' || echo '$(srcdir)/'`fru-parse/ipmi-fru-parse-util.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fru/libfreeipmi_la-ipmi-fru-util.lo `test -f 'fru/ipmi-fru-util.c' || echo '$(srcdir)/'`fru/ipmi-fru-util.c
 
 interface/libfreeipmi_la-ipmi-ipmb-interface.lo: interface/ipmi-ipmb-interface.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT interface/libfreeipmi_la-ipmi-ipmb-interface.lo -MD -MP -MF interface/$(DEPDIR)/libfreeipmi_la-ipmi-ipmb-interface.Tpo -c -o interface/libfreeipmi_la-ipmi-ipmb-interface.lo `test -f 'interface/ipmi-ipmb-interface.c' || echo '$(srcdir)/'`interface/ipmi-ipmb-interface.c
@@ -1987,6 +2030,13 @@ interface/libfreeipmi_la-ipmi-lan-interface.lo: interface/ipmi-lan-interface.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='interface/ipmi-lan-interface.c' object='interface/libfreeipmi_la-ipmi-lan-interface.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o interface/libfreeipmi_la-ipmi-lan-interface.lo `test -f 'interface/ipmi-lan-interface.c' || echo '$(srcdir)/'`interface/ipmi-lan-interface.c
+
+interface/libfreeipmi_la-ipmi-network.lo: interface/ipmi-network.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT interface/libfreeipmi_la-ipmi-network.lo -MD -MP -MF interface/$(DEPDIR)/libfreeipmi_la-ipmi-network.Tpo -c -o interface/libfreeipmi_la-ipmi-network.lo `test -f 'interface/ipmi-network.c' || echo '$(srcdir)/'`interface/ipmi-network.c
+@am__fastdepCC_TRUE@	$(am__mv) interface/$(DEPDIR)/libfreeipmi_la-ipmi-network.Tpo interface/$(DEPDIR)/libfreeipmi_la-ipmi-network.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='interface/ipmi-network.c' object='interface/libfreeipmi_la-ipmi-network.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o interface/libfreeipmi_la-ipmi-network.lo `test -f 'interface/ipmi-network.c' || echo '$(srcdir)/'`interface/ipmi-network.c
 
 interface/libfreeipmi_la-ipmi-rmcpplus-interface.lo: interface/ipmi-rmcpplus-interface.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT interface/libfreeipmi_la-ipmi-rmcpplus-interface.lo -MD -MP -MF interface/$(DEPDIR)/libfreeipmi_la-ipmi-rmcpplus-interface.Tpo -c -o interface/libfreeipmi_la-ipmi-rmcpplus-interface.lo `test -f 'interface/ipmi-rmcpplus-interface.c' || echo '$(srcdir)/'`interface/ipmi-rmcpplus-interface.c
@@ -2135,6 +2185,13 @@ record-format/libfreeipmi_la-ipmi-cipher-suite-record-format.lo: record-format/i
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o record-format/libfreeipmi_la-ipmi-cipher-suite-record-format.lo `test -f 'record-format/ipmi-cipher-suite-record-format.c' || echo '$(srcdir)/'`record-format/ipmi-cipher-suite-record-format.c
 
+record-format/libfreeipmi_la-ipmi-fru-dimmspd-record-format.lo: record-format/ipmi-fru-dimmspd-record-format.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT record-format/libfreeipmi_la-ipmi-fru-dimmspd-record-format.lo -MD -MP -MF record-format/$(DEPDIR)/libfreeipmi_la-ipmi-fru-dimmspd-record-format.Tpo -c -o record-format/libfreeipmi_la-ipmi-fru-dimmspd-record-format.lo `test -f 'record-format/ipmi-fru-dimmspd-record-format.c' || echo '$(srcdir)/'`record-format/ipmi-fru-dimmspd-record-format.c
+@am__fastdepCC_TRUE@	$(am__mv) record-format/$(DEPDIR)/libfreeipmi_la-ipmi-fru-dimmspd-record-format.Tpo record-format/$(DEPDIR)/libfreeipmi_la-ipmi-fru-dimmspd-record-format.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='record-format/ipmi-fru-dimmspd-record-format.c' object='record-format/libfreeipmi_la-ipmi-fru-dimmspd-record-format.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o record-format/libfreeipmi_la-ipmi-fru-dimmspd-record-format.lo `test -f 'record-format/ipmi-fru-dimmspd-record-format.c' || echo '$(srcdir)/'`record-format/ipmi-fru-dimmspd-record-format.c
+
 record-format/libfreeipmi_la-ipmi-fru-information-record-format.lo: record-format/ipmi-fru-information-record-format.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT record-format/libfreeipmi_la-ipmi-fru-information-record-format.lo -MD -MP -MF record-format/$(DEPDIR)/libfreeipmi_la-ipmi-fru-information-record-format.Tpo -c -o record-format/libfreeipmi_la-ipmi-fru-information-record-format.lo `test -f 'record-format/ipmi-fru-information-record-format.c' || echo '$(srcdir)/'`record-format/ipmi-fru-information-record-format.c
 @am__fastdepCC_TRUE@	$(am__mv) record-format/$(DEPDIR)/libfreeipmi_la-ipmi-fru-information-record-format.Tpo record-format/$(DEPDIR)/libfreeipmi_la-ipmi-fru-information-record-format.Plo
@@ -2163,145 +2220,166 @@ record-format/libfreeipmi_la-ipmi-sel-record-format.lo: record-format/ipmi-sel-r
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o record-format/libfreeipmi_la-ipmi-sel-record-format.lo `test -f 'record-format/ipmi-sel-record-format.c' || echo '$(srcdir)/'`record-format/ipmi-sel-record-format.c
 
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache.lo: sdr-cache/ipmi-sdr-cache.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr-cache/libfreeipmi_la-ipmi-sdr-cache.lo -MD -MP -MF sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache.Tpo -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache.lo `test -f 'sdr-cache/ipmi-sdr-cache.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache.c
-@am__fastdepCC_TRUE@	$(am__mv) sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache.Tpo sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr-cache/ipmi-sdr-cache.c' object='sdr-cache/libfreeipmi_la-ipmi-sdr-cache.lo' libtool=yes @AMDEPBACKSLASH@
+sdr/libfreeipmi_la-ipmi-sdr.lo: sdr/ipmi-sdr.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr/libfreeipmi_la-ipmi-sdr.lo -MD -MP -MF sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr.Tpo -c -o sdr/libfreeipmi_la-ipmi-sdr.lo `test -f 'sdr/ipmi-sdr.c' || echo '$(srcdir)/'`sdr/ipmi-sdr.c
+@am__fastdepCC_TRUE@	$(am__mv) sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr.Tpo sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr/ipmi-sdr.c' object='sdr/libfreeipmi_la-ipmi-sdr.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache.lo `test -f 'sdr-cache/ipmi-sdr-cache.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr/libfreeipmi_la-ipmi-sdr.lo `test -f 'sdr/ipmi-sdr.c' || echo '$(srcdir)/'`sdr/ipmi-sdr.c
 
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache-common.lo: sdr-cache/ipmi-sdr-cache-common.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr-cache/libfreeipmi_la-ipmi-sdr-cache-common.lo -MD -MP -MF sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-common.Tpo -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache-common.lo `test -f 'sdr-cache/ipmi-sdr-cache-common.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache-common.c
-@am__fastdepCC_TRUE@	$(am__mv) sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-common.Tpo sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-common.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr-cache/ipmi-sdr-cache-common.c' object='sdr-cache/libfreeipmi_la-ipmi-sdr-cache-common.lo' libtool=yes @AMDEPBACKSLASH@
+sdr/libfreeipmi_la-ipmi-sdr-common.lo: sdr/ipmi-sdr-common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr/libfreeipmi_la-ipmi-sdr-common.lo -MD -MP -MF sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-common.Tpo -c -o sdr/libfreeipmi_la-ipmi-sdr-common.lo `test -f 'sdr/ipmi-sdr-common.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-common.c
+@am__fastdepCC_TRUE@	$(am__mv) sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-common.Tpo sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr/ipmi-sdr-common.c' object='sdr/libfreeipmi_la-ipmi-sdr-common.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache-common.lo `test -f 'sdr-cache/ipmi-sdr-cache-common.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache-common.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr/libfreeipmi_la-ipmi-sdr-common.lo `test -f 'sdr/ipmi-sdr-common.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-common.c
 
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache-create.lo: sdr-cache/ipmi-sdr-cache-create.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr-cache/libfreeipmi_la-ipmi-sdr-cache-create.lo -MD -MP -MF sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-create.Tpo -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache-create.lo `test -f 'sdr-cache/ipmi-sdr-cache-create.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache-create.c
-@am__fastdepCC_TRUE@	$(am__mv) sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-create.Tpo sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-create.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr-cache/ipmi-sdr-cache-create.c' object='sdr-cache/libfreeipmi_la-ipmi-sdr-cache-create.lo' libtool=yes @AMDEPBACKSLASH@
+sdr/libfreeipmi_la-ipmi-sdr-cache-create.lo: sdr/ipmi-sdr-cache-create.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr/libfreeipmi_la-ipmi-sdr-cache-create.lo -MD -MP -MF sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-create.Tpo -c -o sdr/libfreeipmi_la-ipmi-sdr-cache-create.lo `test -f 'sdr/ipmi-sdr-cache-create.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-cache-create.c
+@am__fastdepCC_TRUE@	$(am__mv) sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-create.Tpo sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-create.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr/ipmi-sdr-cache-create.c' object='sdr/libfreeipmi_la-ipmi-sdr-cache-create.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache-create.lo `test -f 'sdr-cache/ipmi-sdr-cache-create.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache-create.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr/libfreeipmi_la-ipmi-sdr-cache-create.lo `test -f 'sdr/ipmi-sdr-cache-create.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-cache-create.c
 
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache-delete.lo: sdr-cache/ipmi-sdr-cache-delete.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr-cache/libfreeipmi_la-ipmi-sdr-cache-delete.lo -MD -MP -MF sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-delete.Tpo -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache-delete.lo `test -f 'sdr-cache/ipmi-sdr-cache-delete.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache-delete.c
-@am__fastdepCC_TRUE@	$(am__mv) sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-delete.Tpo sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-delete.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr-cache/ipmi-sdr-cache-delete.c' object='sdr-cache/libfreeipmi_la-ipmi-sdr-cache-delete.lo' libtool=yes @AMDEPBACKSLASH@
+sdr/libfreeipmi_la-ipmi-sdr-cache-delete.lo: sdr/ipmi-sdr-cache-delete.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr/libfreeipmi_la-ipmi-sdr-cache-delete.lo -MD -MP -MF sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-delete.Tpo -c -o sdr/libfreeipmi_la-ipmi-sdr-cache-delete.lo `test -f 'sdr/ipmi-sdr-cache-delete.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-cache-delete.c
+@am__fastdepCC_TRUE@	$(am__mv) sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-delete.Tpo sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-delete.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr/ipmi-sdr-cache-delete.c' object='sdr/libfreeipmi_la-ipmi-sdr-cache-delete.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache-delete.lo `test -f 'sdr-cache/ipmi-sdr-cache-delete.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache-delete.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr/libfreeipmi_la-ipmi-sdr-cache-delete.lo `test -f 'sdr/ipmi-sdr-cache-delete.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-cache-delete.c
 
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache-read.lo: sdr-cache/ipmi-sdr-cache-read.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr-cache/libfreeipmi_la-ipmi-sdr-cache-read.lo -MD -MP -MF sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-read.Tpo -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache-read.lo `test -f 'sdr-cache/ipmi-sdr-cache-read.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache-read.c
-@am__fastdepCC_TRUE@	$(am__mv) sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-read.Tpo sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-read.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr-cache/ipmi-sdr-cache-read.c' object='sdr-cache/libfreeipmi_la-ipmi-sdr-cache-read.lo' libtool=yes @AMDEPBACKSLASH@
+sdr/libfreeipmi_la-ipmi-sdr-cache-read.lo: sdr/ipmi-sdr-cache-read.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr/libfreeipmi_la-ipmi-sdr-cache-read.lo -MD -MP -MF sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-read.Tpo -c -o sdr/libfreeipmi_la-ipmi-sdr-cache-read.lo `test -f 'sdr/ipmi-sdr-cache-read.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-cache-read.c
+@am__fastdepCC_TRUE@	$(am__mv) sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-read.Tpo sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-read.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr/ipmi-sdr-cache-read.c' object='sdr/libfreeipmi_la-ipmi-sdr-cache-read.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache-read.lo `test -f 'sdr-cache/ipmi-sdr-cache-read.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache-read.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr/libfreeipmi_la-ipmi-sdr-cache-read.lo `test -f 'sdr/ipmi-sdr-cache-read.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-cache-read.c
 
-sdr-cache/libfreeipmi_la-ipmi-sdr-cache-util.lo: sdr-cache/ipmi-sdr-cache-util.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr-cache/libfreeipmi_la-ipmi-sdr-cache-util.lo -MD -MP -MF sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-util.Tpo -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache-util.lo `test -f 'sdr-cache/ipmi-sdr-cache-util.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache-util.c
-@am__fastdepCC_TRUE@	$(am__mv) sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-util.Tpo sdr-cache/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-cache-util.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr-cache/ipmi-sdr-cache-util.c' object='sdr-cache/libfreeipmi_la-ipmi-sdr-cache-util.lo' libtool=yes @AMDEPBACKSLASH@
+sdr/libfreeipmi_la-ipmi-sdr-oem.lo: sdr/ipmi-sdr-oem.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr/libfreeipmi_la-ipmi-sdr-oem.lo -MD -MP -MF sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-oem.Tpo -c -o sdr/libfreeipmi_la-ipmi-sdr-oem.lo `test -f 'sdr/ipmi-sdr-oem.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-oem.c
+@am__fastdepCC_TRUE@	$(am__mv) sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-oem.Tpo sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-oem.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr/ipmi-sdr-oem.c' object='sdr/libfreeipmi_la-ipmi-sdr-oem.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr-cache/libfreeipmi_la-ipmi-sdr-cache-util.lo `test -f 'sdr-cache/ipmi-sdr-cache-util.c' || echo '$(srcdir)/'`sdr-cache/ipmi-sdr-cache-util.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr/libfreeipmi_la-ipmi-sdr-oem.lo `test -f 'sdr/ipmi-sdr-oem.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-oem.c
 
-sdr-parse/libfreeipmi_la-ipmi-sdr-parse.lo: sdr-parse/ipmi-sdr-parse.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr-parse/libfreeipmi_la-ipmi-sdr-parse.lo -MD -MP -MF sdr-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse.Tpo -c -o sdr-parse/libfreeipmi_la-ipmi-sdr-parse.lo `test -f 'sdr-parse/ipmi-sdr-parse.c' || echo '$(srcdir)/'`sdr-parse/ipmi-sdr-parse.c
-@am__fastdepCC_TRUE@	$(am__mv) sdr-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse.Tpo sdr-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr-parse/ipmi-sdr-parse.c' object='sdr-parse/libfreeipmi_la-ipmi-sdr-parse.lo' libtool=yes @AMDEPBACKSLASH@
+sdr/libfreeipmi_la-ipmi-sdr-parse.lo: sdr/ipmi-sdr-parse.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr/libfreeipmi_la-ipmi-sdr-parse.lo -MD -MP -MF sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse.Tpo -c -o sdr/libfreeipmi_la-ipmi-sdr-parse.lo `test -f 'sdr/ipmi-sdr-parse.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-parse.c
+@am__fastdepCC_TRUE@	$(am__mv) sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse.Tpo sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr/ipmi-sdr-parse.c' object='sdr/libfreeipmi_la-ipmi-sdr-parse.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr-parse/libfreeipmi_la-ipmi-sdr-parse.lo `test -f 'sdr-parse/ipmi-sdr-parse.c' || echo '$(srcdir)/'`sdr-parse/ipmi-sdr-parse.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr/libfreeipmi_la-ipmi-sdr-parse.lo `test -f 'sdr/ipmi-sdr-parse.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-parse.c
 
-sdr-parse/libfreeipmi_la-ipmi-sdr-parse-util.lo: sdr-parse/ipmi-sdr-parse-util.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr-parse/libfreeipmi_la-ipmi-sdr-parse-util.lo -MD -MP -MF sdr-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse-util.Tpo -c -o sdr-parse/libfreeipmi_la-ipmi-sdr-parse-util.lo `test -f 'sdr-parse/ipmi-sdr-parse-util.c' || echo '$(srcdir)/'`sdr-parse/ipmi-sdr-parse-util.c
-@am__fastdepCC_TRUE@	$(am__mv) sdr-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse-util.Tpo sdr-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse-util.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr-parse/ipmi-sdr-parse-util.c' object='sdr-parse/libfreeipmi_la-ipmi-sdr-parse-util.lo' libtool=yes @AMDEPBACKSLASH@
+sdr/libfreeipmi_la-ipmi-sdr-parse-util.lo: sdr/ipmi-sdr-parse-util.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr/libfreeipmi_la-ipmi-sdr-parse-util.lo -MD -MP -MF sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse-util.Tpo -c -o sdr/libfreeipmi_la-ipmi-sdr-parse-util.lo `test -f 'sdr/ipmi-sdr-parse-util.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-parse-util.c
+@am__fastdepCC_TRUE@	$(am__mv) sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse-util.Tpo sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-parse-util.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr/ipmi-sdr-parse-util.c' object='sdr/libfreeipmi_la-ipmi-sdr-parse-util.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr-parse/libfreeipmi_la-ipmi-sdr-parse-util.lo `test -f 'sdr-parse/ipmi-sdr-parse-util.c' || echo '$(srcdir)/'`sdr-parse/ipmi-sdr-parse-util.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr/libfreeipmi_la-ipmi-sdr-parse-util.lo `test -f 'sdr/ipmi-sdr-parse-util.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-parse-util.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse.lo: sel-parse/ipmi-sel-parse.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse.lo `test -f 'sel-parse/ipmi-sel-parse.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse.lo' libtool=yes @AMDEPBACKSLASH@
+sdr/libfreeipmi_la-ipmi-sdr-stats.lo: sdr/ipmi-sdr-stats.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr/libfreeipmi_la-ipmi-sdr-stats.lo -MD -MP -MF sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-stats.Tpo -c -o sdr/libfreeipmi_la-ipmi-sdr-stats.lo `test -f 'sdr/ipmi-sdr-stats.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-stats.c
+@am__fastdepCC_TRUE@	$(am__mv) sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-stats.Tpo sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-stats.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr/ipmi-sdr-stats.c' object='sdr/libfreeipmi_la-ipmi-sdr-stats.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse.lo `test -f 'sel-parse/ipmi-sel-parse.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr/libfreeipmi_la-ipmi-sdr-stats.lo `test -f 'sdr/ipmi-sdr-stats.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-stats.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse-common.lo: sel-parse/ipmi-sel-parse-common.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-common.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-common.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-common.lo `test -f 'sel-parse/ipmi-sel-parse-common.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-common.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-common.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-common.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-common.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-common.lo' libtool=yes @AMDEPBACKSLASH@
+sdr/libfreeipmi_la-ipmi-sdr-util.lo: sdr/ipmi-sdr-util.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sdr/libfreeipmi_la-ipmi-sdr-util.lo -MD -MP -MF sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-util.Tpo -c -o sdr/libfreeipmi_la-ipmi-sdr-util.lo `test -f 'sdr/ipmi-sdr-util.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-util.c
+@am__fastdepCC_TRUE@	$(am__mv) sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-util.Tpo sdr/$(DEPDIR)/libfreeipmi_la-ipmi-sdr-util.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sdr/ipmi-sdr-util.c' object='sdr/libfreeipmi_la-ipmi-sdr-util.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-common.lo `test -f 'sel-parse/ipmi-sel-parse-common.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-common.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sdr/libfreeipmi_la-ipmi-sdr-util.lo `test -f 'sdr/ipmi-sdr-util.c' || echo '$(srcdir)/'`sdr/ipmi-sdr-util.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string.lo: sel-parse/ipmi-sel-parse-string.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-string.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string.lo `test -f 'sel-parse/ipmi-sel-parse-string.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-string.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-string.lo' libtool=yes @AMDEPBACKSLASH@
+sel/libfreeipmi_la-ipmi-sel.lo: sel/ipmi-sel.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel.Tpo -c -o sel/libfreeipmi_la-ipmi-sel.lo `test -f 'sel/ipmi-sel.c' || echo '$(srcdir)/'`sel/ipmi-sel.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel.c' object='sel/libfreeipmi_la-ipmi-sel.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string.lo `test -f 'sel-parse/ipmi-sel-parse-string.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel.lo `test -f 'sel/ipmi-sel.c' || echo '$(srcdir)/'`sel/ipmi-sel.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-dell.lo: sel-parse/ipmi-sel-parse-string-dell.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-string-dell.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-dell.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-dell.lo `test -f 'sel-parse/ipmi-sel-parse-string-dell.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-dell.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-dell.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-dell.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-string-dell.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-string-dell.lo' libtool=yes @AMDEPBACKSLASH@
+sel/libfreeipmi_la-ipmi-sel-common.lo: sel/ipmi-sel-common.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-common.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-common.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-common.lo `test -f 'sel/ipmi-sel-common.c' || echo '$(srcdir)/'`sel/ipmi-sel-common.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-common.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-common.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-common.c' object='sel/libfreeipmi_la-ipmi-sel-common.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-dell.lo `test -f 'sel-parse/ipmi-sel-parse-string-dell.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-dell.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-common.lo `test -f 'sel/ipmi-sel-common.c' || echo '$(srcdir)/'`sel/ipmi-sel-common.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.lo: sel-parse/ipmi-sel-parse-string-fujitsu.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.lo `test -f 'sel-parse/ipmi-sel-parse-string-fujitsu.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-fujitsu.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-string-fujitsu.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.lo' libtool=yes @AMDEPBACKSLASH@
+sel/libfreeipmi_la-ipmi-sel-string.lo: sel/ipmi-sel-string.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-string.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-string.lo `test -f 'sel/ipmi-sel-string.c' || echo '$(srcdir)/'`sel/ipmi-sel-string.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-string.c' object='sel/libfreeipmi_la-ipmi-sel-string.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-fujitsu.lo `test -f 'sel-parse/ipmi-sel-parse-string-fujitsu.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-fujitsu.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-string.lo `test -f 'sel/ipmi-sel-string.c' || echo '$(srcdir)/'`sel/ipmi-sel-string.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel.lo: sel-parse/ipmi-sel-parse-string-intel.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-intel.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel.lo `test -f 'sel-parse/ipmi-sel-parse-string-intel.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-intel.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-intel.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-intel.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-string-intel.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel.lo' libtool=yes @AMDEPBACKSLASH@
+sel/libfreeipmi_la-ipmi-sel-string-dell.lo: sel/ipmi-sel-string-dell.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-string-dell.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-dell.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-string-dell.lo `test -f 'sel/ipmi-sel-string-dell.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-dell.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-dell.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-dell.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-string-dell.c' object='sel/libfreeipmi_la-ipmi-sel-string-dell.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel.lo `test -f 'sel-parse/ipmi-sel-parse-string-intel.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-intel.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-string-dell.lo `test -f 'sel/ipmi-sel-string-dell.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-dell.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.lo: sel-parse/ipmi-sel-parse-string-intel-node-manager.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.lo `test -f 'sel-parse/ipmi-sel-parse-string-intel-node-manager.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-intel-node-manager.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-string-intel-node-manager.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.lo' libtool=yes @AMDEPBACKSLASH@
+sel/libfreeipmi_la-ipmi-sel-string-fujitsu.lo: sel/ipmi-sel-string-fujitsu.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-string-fujitsu.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-fujitsu.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-string-fujitsu.lo `test -f 'sel/ipmi-sel-string-fujitsu.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-fujitsu.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-fujitsu.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-fujitsu.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-string-fujitsu.c' object='sel/libfreeipmi_la-ipmi-sel-string-fujitsu.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-intel-node-manager.lo `test -f 'sel-parse/ipmi-sel-parse-string-intel-node-manager.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-intel-node-manager.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-string-fujitsu.lo `test -f 'sel/ipmi-sel-string-fujitsu.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-fujitsu.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-inventec.lo: sel-parse/ipmi-sel-parse-string-inventec.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-string-inventec.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-inventec.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-inventec.lo `test -f 'sel-parse/ipmi-sel-parse-string-inventec.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-inventec.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-inventec.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-inventec.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-string-inventec.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-string-inventec.lo' libtool=yes @AMDEPBACKSLASH@
+sel/libfreeipmi_la-ipmi-sel-string-intel.lo: sel/ipmi-sel-string-intel.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-string-intel.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-intel.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-string-intel.lo `test -f 'sel/ipmi-sel-string-intel.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-intel.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-intel.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-intel.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-string-intel.c' object='sel/libfreeipmi_la-ipmi-sel-string-intel.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-inventec.lo `test -f 'sel-parse/ipmi-sel-parse-string-inventec.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-inventec.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-string-intel.lo `test -f 'sel/ipmi-sel-string-intel.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-intel.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.lo: sel-parse/ipmi-sel-parse-string-quanta.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-quanta.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.lo `test -f 'sel-parse/ipmi-sel-parse-string-quanta.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-quanta.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-quanta.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-quanta.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-string-quanta.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.lo' libtool=yes @AMDEPBACKSLASH@
+sel/libfreeipmi_la-ipmi-sel-string-intel-node-manager.lo: sel/ipmi-sel-string-intel-node-manager.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-string-intel-node-manager.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-intel-node-manager.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-string-intel-node-manager.lo `test -f 'sel/ipmi-sel-string-intel-node-manager.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-intel-node-manager.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-intel-node-manager.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-intel-node-manager.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-string-intel-node-manager.c' object='sel/libfreeipmi_la-ipmi-sel-string-intel-node-manager.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-quanta.lo `test -f 'sel-parse/ipmi-sel-parse-string-quanta.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-quanta.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-string-intel-node-manager.lo `test -f 'sel/ipmi-sel-string-intel-node-manager.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-intel-node-manager.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo: sel-parse/ipmi-sel-parse-string-sun.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-sun.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo `test -f 'sel-parse/ipmi-sel-parse-string-sun.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-sun.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-sun.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-sun.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-string-sun.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo' libtool=yes @AMDEPBACKSLASH@
+sel/libfreeipmi_la-ipmi-sel-string-inventec.lo: sel/ipmi-sel-string-inventec.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-string-inventec.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-inventec.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-string-inventec.lo `test -f 'sel/ipmi-sel-string-inventec.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-inventec.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-inventec.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-inventec.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-string-inventec.c' object='sel/libfreeipmi_la-ipmi-sel-string-inventec.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-sun.lo `test -f 'sel-parse/ipmi-sel-parse-string-sun.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-sun.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-string-inventec.lo `test -f 'sel/ipmi-sel-string-inventec.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-inventec.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo: sel-parse/ipmi-sel-parse-string-supermicro.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-supermicro.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo `test -f 'sel-parse/ipmi-sel-parse-string-supermicro.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-supermicro.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-supermicro.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-string-supermicro.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-string-supermicro.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo' libtool=yes @AMDEPBACKSLASH@
+sel/libfreeipmi_la-ipmi-sel-string-quanta.lo: sel/ipmi-sel-string-quanta.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-string-quanta.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-quanta.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-string-quanta.lo `test -f 'sel/ipmi-sel-string-quanta.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-quanta.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-quanta.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-quanta.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-string-quanta.c' object='sel/libfreeipmi_la-ipmi-sel-string-quanta.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-string-supermicro.lo `test -f 'sel-parse/ipmi-sel-parse-string-supermicro.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-string-supermicro.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-string-quanta.lo `test -f 'sel/ipmi-sel-string-quanta.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-quanta.c
 
-sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo: sel-parse/ipmi-sel-parse-util.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo -MD -MP -MF sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-util.Tpo -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo `test -f 'sel-parse/ipmi-sel-parse-util.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-util.c
-@am__fastdepCC_TRUE@	$(am__mv) sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-util.Tpo sel-parse/$(DEPDIR)/libfreeipmi_la-ipmi-sel-parse-util.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel-parse/ipmi-sel-parse-util.c' object='sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo' libtool=yes @AMDEPBACKSLASH@
+sel/libfreeipmi_la-ipmi-sel-string-sun.lo: sel/ipmi-sel-string-sun.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-string-sun.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-sun.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-string-sun.lo `test -f 'sel/ipmi-sel-string-sun.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-sun.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-sun.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-sun.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-string-sun.c' object='sel/libfreeipmi_la-ipmi-sel-string-sun.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel-parse/libfreeipmi_la-ipmi-sel-parse-util.lo `test -f 'sel-parse/ipmi-sel-parse-util.c' || echo '$(srcdir)/'`sel-parse/ipmi-sel-parse-util.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-string-sun.lo `test -f 'sel/ipmi-sel-string-sun.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-sun.c
+
+sel/libfreeipmi_la-ipmi-sel-string-supermicro.lo: sel/ipmi-sel-string-supermicro.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-string-supermicro.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-supermicro.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-string-supermicro.lo `test -f 'sel/ipmi-sel-string-supermicro.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-supermicro.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-supermicro.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-supermicro.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-string-supermicro.c' object='sel/libfreeipmi_la-ipmi-sel-string-supermicro.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-string-supermicro.lo `test -f 'sel/ipmi-sel-string-supermicro.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-supermicro.c
+
+sel/libfreeipmi_la-ipmi-sel-string-wistron.lo: sel/ipmi-sel-string-wistron.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-string-wistron.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-wistron.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-string-wistron.lo `test -f 'sel/ipmi-sel-string-wistron.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-wistron.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-wistron.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-string-wistron.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-string-wistron.c' object='sel/libfreeipmi_la-ipmi-sel-string-wistron.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-string-wistron.lo `test -f 'sel/ipmi-sel-string-wistron.c' || echo '$(srcdir)/'`sel/ipmi-sel-string-wistron.c
+
+sel/libfreeipmi_la-ipmi-sel-util.lo: sel/ipmi-sel-util.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sel/libfreeipmi_la-ipmi-sel-util.lo -MD -MP -MF sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-util.Tpo -c -o sel/libfreeipmi_la-ipmi-sel-util.lo `test -f 'sel/ipmi-sel-util.c' || echo '$(srcdir)/'`sel/ipmi-sel-util.c
+@am__fastdepCC_TRUE@	$(am__mv) sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-util.Tpo sel/$(DEPDIR)/libfreeipmi_la-ipmi-sel-util.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sel/ipmi-sel-util.c' object='sel/libfreeipmi_la-ipmi-sel-util.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sel/libfreeipmi_la-ipmi-sel-util.lo `test -f 'sel/ipmi-sel-util.c' || echo '$(srcdir)/'`sel/ipmi-sel-util.c
 
 sensor-read/libfreeipmi_la-ipmi-sensor-read.lo: sensor-read/ipmi-sensor-read.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sensor-read/libfreeipmi_la-ipmi-sensor-read.lo -MD -MP -MF sensor-read/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-read.Tpo -c -o sensor-read/libfreeipmi_la-ipmi-sensor-read.lo `test -f 'sensor-read/ipmi-sensor-read.c' || echo '$(srcdir)/'`sensor-read/ipmi-sensor-read.c
@@ -2351,6 +2429,13 @@ spec/libfreeipmi_la-ipmi-iana-enterprise-numbers-spec.lo: spec/ipmi-iana-enterpr
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='spec/ipmi-iana-enterprise-numbers-spec.c' object='spec/libfreeipmi_la-ipmi-iana-enterprise-numbers-spec.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o spec/libfreeipmi_la-ipmi-iana-enterprise-numbers-spec.lo `test -f 'spec/ipmi-iana-enterprise-numbers-spec.c' || echo '$(srcdir)/'`spec/ipmi-iana-enterprise-numbers-spec.c
+
+spec/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.lo: spec/ipmi-jedec-manufacturer-identification-code-spec.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT spec/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.lo -MD -MP -MF spec/$(DEPDIR)/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.Tpo -c -o spec/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.lo `test -f 'spec/ipmi-jedec-manufacturer-identification-code-spec.c' || echo '$(srcdir)/'`spec/ipmi-jedec-manufacturer-identification-code-spec.c
+@am__fastdepCC_TRUE@	$(am__mv) spec/$(DEPDIR)/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.Tpo spec/$(DEPDIR)/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='spec/ipmi-jedec-manufacturer-identification-code-spec.c' object='spec/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o spec/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-spec.lo `test -f 'spec/ipmi-jedec-manufacturer-identification-code-spec.c' || echo '$(srcdir)/'`spec/ipmi-jedec-manufacturer-identification-code-spec.c
 
 spec/libfreeipmi_la-ipmi-sensor-and-event-code-tables-spec.lo: spec/ipmi-sensor-and-event-code-tables-spec.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT spec/libfreeipmi_la-ipmi-sensor-and-event-code-tables-spec.lo -MD -MP -MF spec/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-and-event-code-tables-spec.Tpo -c -o spec/libfreeipmi_la-ipmi-sensor-and-event-code-tables-spec.lo `test -f 'spec/ipmi-sensor-and-event-code-tables-spec.c' || echo '$(srcdir)/'`spec/ipmi-sensor-and-event-code-tables-spec.c
@@ -2443,6 +2528,13 @@ util/libfreeipmi_la-ipmi-ipmb-util.lo: util/ipmi-ipmb-util.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o util/libfreeipmi_la-ipmi-ipmb-util.lo `test -f 'util/ipmi-ipmb-util.c' || echo '$(srcdir)/'`util/ipmi-ipmb-util.c
 
+util/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.lo: util/ipmi-jedec-manufacturer-identification-code-util.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT util/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.lo -MD -MP -MF util/$(DEPDIR)/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.Tpo -c -o util/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.lo `test -f 'util/ipmi-jedec-manufacturer-identification-code-util.c' || echo '$(srcdir)/'`util/ipmi-jedec-manufacturer-identification-code-util.c
+@am__fastdepCC_TRUE@	$(am__mv) util/$(DEPDIR)/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.Tpo util/$(DEPDIR)/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='util/ipmi-jedec-manufacturer-identification-code-util.c' object='util/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o util/libfreeipmi_la-ipmi-jedec-manufacturer-identification-code-util.lo `test -f 'util/ipmi-jedec-manufacturer-identification-code-util.c' || echo '$(srcdir)/'`util/ipmi-jedec-manufacturer-identification-code-util.c
+
 util/libfreeipmi_la-ipmi-lan-util.lo: util/ipmi-lan-util.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT util/libfreeipmi_la-ipmi-lan-util.lo -MD -MP -MF util/$(DEPDIR)/libfreeipmi_la-ipmi-lan-util.Tpo -c -o util/libfreeipmi_la-ipmi-lan-util.lo `test -f 'util/ipmi-lan-util.c' || echo '$(srcdir)/'`util/ipmi-lan-util.c
 @am__fastdepCC_TRUE@	$(am__mv) util/$(DEPDIR)/libfreeipmi_la-ipmi-lan-util.Tpo util/$(DEPDIR)/libfreeipmi_la-ipmi-lan-util.Plo
@@ -2471,19 +2563,19 @@ util/libfreeipmi_la-ipmi-sensor-and-event-code-tables-util.lo: util/ipmi-sensor-
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o util/libfreeipmi_la-ipmi-sensor-and-event-code-tables-util.lo `test -f 'util/ipmi-sensor-and-event-code-tables-util.c' || echo '$(srcdir)/'`util/ipmi-sensor-and-event-code-tables-util.c
 
-util/libfreeipmi_la-ipmi-sensor-units-util.lo: util/ipmi-sensor-units-util.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT util/libfreeipmi_la-ipmi-sensor-units-util.lo -MD -MP -MF util/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-units-util.Tpo -c -o util/libfreeipmi_la-ipmi-sensor-units-util.lo `test -f 'util/ipmi-sensor-units-util.c' || echo '$(srcdir)/'`util/ipmi-sensor-units-util.c
-@am__fastdepCC_TRUE@	$(am__mv) util/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-units-util.Tpo util/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-units-util.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='util/ipmi-sensor-units-util.c' object='util/libfreeipmi_la-ipmi-sensor-units-util.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o util/libfreeipmi_la-ipmi-sensor-units-util.lo `test -f 'util/ipmi-sensor-units-util.c' || echo '$(srcdir)/'`util/ipmi-sensor-units-util.c
-
 util/libfreeipmi_la-ipmi-sensor-util.lo: util/ipmi-sensor-util.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT util/libfreeipmi_la-ipmi-sensor-util.lo -MD -MP -MF util/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-util.Tpo -c -o util/libfreeipmi_la-ipmi-sensor-util.lo `test -f 'util/ipmi-sensor-util.c' || echo '$(srcdir)/'`util/ipmi-sensor-util.c
 @am__fastdepCC_TRUE@	$(am__mv) util/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-util.Tpo util/$(DEPDIR)/libfreeipmi_la-ipmi-sensor-util.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='util/ipmi-sensor-util.c' object='util/libfreeipmi_la-ipmi-sensor-util.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o util/libfreeipmi_la-ipmi-sensor-util.lo `test -f 'util/ipmi-sensor-util.c' || echo '$(srcdir)/'`util/ipmi-sensor-util.c
+
+util/libfreeipmi_la-ipmi-timestamp-util.lo: util/ipmi-timestamp-util.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT util/libfreeipmi_la-ipmi-timestamp-util.lo -MD -MP -MF util/$(DEPDIR)/libfreeipmi_la-ipmi-timestamp-util.Tpo -c -o util/libfreeipmi_la-ipmi-timestamp-util.lo `test -f 'util/ipmi-timestamp-util.c' || echo '$(srcdir)/'`util/ipmi-timestamp-util.c
+@am__fastdepCC_TRUE@	$(am__mv) util/$(DEPDIR)/libfreeipmi_la-ipmi-timestamp-util.Tpo util/$(DEPDIR)/libfreeipmi_la-ipmi-timestamp-util.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='util/ipmi-timestamp-util.c' object='util/libfreeipmi_la-ipmi-timestamp-util.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o util/libfreeipmi_la-ipmi-timestamp-util.lo `test -f 'util/ipmi-timestamp-util.c' || echo '$(srcdir)/'`util/ipmi-timestamp-util.c
 
 util/libfreeipmi_la-ipmi-util.lo: util/ipmi-util.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfreeipmi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT util/libfreeipmi_la-ipmi-util.lo -MD -MP -MF util/$(DEPDIR)/libfreeipmi_la-ipmi-util.Tpo -c -o util/libfreeipmi_la-ipmi-util.lo `test -f 'util/ipmi-util.c' || echo '$(srcdir)/'`util/ipmi-util.c
@@ -2509,16 +2601,15 @@ clean-libtool:
 	-rm -rf debug/.libs debug/_libs
 	-rm -rf driver/.libs driver/_libs
 	-rm -rf fiid/.libs fiid/_libs
-	-rm -rf fru-parse/.libs fru-parse/_libs
+	-rm -rf fru/.libs fru/_libs
 	-rm -rf interface/.libs interface/_libs
 	-rm -rf interpret/.libs interpret/_libs
 	-rm -rf libcommon/.libs libcommon/_libs
 	-rm -rf locate/.libs locate/_libs
 	-rm -rf payload/.libs payload/_libs
 	-rm -rf record-format/.libs record-format/_libs
-	-rm -rf sdr-cache/.libs sdr-cache/_libs
-	-rm -rf sdr-parse/.libs sdr-parse/_libs
-	-rm -rf sel-parse/.libs sel-parse/_libs
+	-rm -rf sdr/.libs sdr/_libs
+	-rm -rf sel/.libs sel/_libs
 	-rm -rf sensor-read/.libs sensor-read/_libs
 	-rm -rf spec/.libs spec/_libs
 	-rm -rf util/.libs util/_libs
@@ -2775,8 +2866,8 @@ distclean-generic:
 	-rm -f driver/$(am__dirstamp)
 	-rm -f fiid/$(DEPDIR)/$(am__dirstamp)
 	-rm -f fiid/$(am__dirstamp)
-	-rm -f fru-parse/$(DEPDIR)/$(am__dirstamp)
-	-rm -f fru-parse/$(am__dirstamp)
+	-rm -f fru/$(DEPDIR)/$(am__dirstamp)
+	-rm -f fru/$(am__dirstamp)
 	-rm -f interface/$(DEPDIR)/$(am__dirstamp)
 	-rm -f interface/$(am__dirstamp)
 	-rm -f interpret/$(DEPDIR)/$(am__dirstamp)
@@ -2789,12 +2880,10 @@ distclean-generic:
 	-rm -f payload/$(am__dirstamp)
 	-rm -f record-format/$(DEPDIR)/$(am__dirstamp)
 	-rm -f record-format/$(am__dirstamp)
-	-rm -f sdr-cache/$(DEPDIR)/$(am__dirstamp)
-	-rm -f sdr-cache/$(am__dirstamp)
-	-rm -f sdr-parse/$(DEPDIR)/$(am__dirstamp)
-	-rm -f sdr-parse/$(am__dirstamp)
-	-rm -f sel-parse/$(DEPDIR)/$(am__dirstamp)
-	-rm -f sel-parse/$(am__dirstamp)
+	-rm -f sdr/$(DEPDIR)/$(am__dirstamp)
+	-rm -f sdr/$(am__dirstamp)
+	-rm -f sel/$(DEPDIR)/$(am__dirstamp)
+	-rm -f sel/$(am__dirstamp)
 	-rm -f sensor-read/$(DEPDIR)/$(am__dirstamp)
 	-rm -f sensor-read/$(am__dirstamp)
 	-rm -f spec/$(DEPDIR)/$(am__dirstamp)
@@ -2811,7 +2900,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-recursive
-	-rm -rf api/$(DEPDIR) cmds/$(DEPDIR) debug/$(DEPDIR) driver/$(DEPDIR) fiid/$(DEPDIR) fru-parse/$(DEPDIR) interface/$(DEPDIR) interpret/$(DEPDIR) libcommon/$(DEPDIR) locate/$(DEPDIR) payload/$(DEPDIR) record-format/$(DEPDIR) sdr-cache/$(DEPDIR) sdr-parse/$(DEPDIR) sel-parse/$(DEPDIR) sensor-read/$(DEPDIR) spec/$(DEPDIR) util/$(DEPDIR)
+	-rm -rf api/$(DEPDIR) cmds/$(DEPDIR) debug/$(DEPDIR) driver/$(DEPDIR) fiid/$(DEPDIR) fru/$(DEPDIR) interface/$(DEPDIR) interpret/$(DEPDIR) libcommon/$(DEPDIR) locate/$(DEPDIR) payload/$(DEPDIR) record-format/$(DEPDIR) sdr/$(DEPDIR) sel/$(DEPDIR) sensor-read/$(DEPDIR) spec/$(DEPDIR) util/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -2857,7 +2946,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-recursive
-	-rm -rf api/$(DEPDIR) cmds/$(DEPDIR) debug/$(DEPDIR) driver/$(DEPDIR) fiid/$(DEPDIR) fru-parse/$(DEPDIR) interface/$(DEPDIR) interpret/$(DEPDIR) libcommon/$(DEPDIR) locate/$(DEPDIR) payload/$(DEPDIR) record-format/$(DEPDIR) sdr-cache/$(DEPDIR) sdr-parse/$(DEPDIR) sel-parse/$(DEPDIR) sensor-read/$(DEPDIR) spec/$(DEPDIR) util/$(DEPDIR)
+	-rm -rf api/$(DEPDIR) cmds/$(DEPDIR) debug/$(DEPDIR) driver/$(DEPDIR) fiid/$(DEPDIR) fru/$(DEPDIR) interface/$(DEPDIR) interpret/$(DEPDIR) libcommon/$(DEPDIR) locate/$(DEPDIR) payload/$(DEPDIR) record-format/$(DEPDIR) sdr/$(DEPDIR) sel/$(DEPDIR) sensor-read/$(DEPDIR) spec/$(DEPDIR) util/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

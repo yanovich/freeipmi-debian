@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SENSORS_H
-#define _IPMI_SENSORS_H
+#ifndef IPMI_SENSORS_H
+#define IPMI_SENSORS_H
 
 #include <freeipmi/freeipmi.h>
 
@@ -51,20 +51,19 @@ enum ipmi_sensors_argp_option_keys
     OUTPUT_SENSOR_STATE_KEY = 169,
     SENSOR_STATE_CONFIG_FILE_KEY = 170,
     ENTITY_SENSOR_NAMES_KEY = 171,
-    NO_SENSOR_TYPE_OUTPUT_KEY = 172,
-    COMMA_SEPARATED_OUTPUT_KEY = 173,
-    NO_HEADER_OUTPUT_KEY = 174,
-    NON_ABBREVIATED_UNITS_KEY = 175,
-    LEGACY_OUTPUT_KEY = 176,
-    IPMIMONITORING_LEGACY_OUTPUT_KEY = 177,
+    OUTPUT_SENSOR_THRESHOLDS_KEY = 172,
+    NO_SENSOR_TYPE_OUTPUT_KEY = 173,
+    COMMA_SEPARATED_OUTPUT_KEY = 174,
+    NO_HEADER_OUTPUT_KEY = 175,
+    NON_ABBREVIATED_UNITS_KEY = 176,
+    LEGACY_OUTPUT_KEY = 177,
+    IPMIMONITORING_LEGACY_OUTPUT_KEY = 178,
   };
 
 struct ipmi_sensors_arguments
 {
-  struct common_cmd_args common;
-  struct sdr_cmd_args sdr;
-  struct hostrange_cmd_args hostrange;
-  int verbose_count;
+  struct common_cmd_args common_args;
+  unsigned int verbose_count;
   int sdr_info;
   int quiet_readings;
   unsigned int record_ids[MAX_SENSOR_RECORD_IDS];
@@ -85,6 +84,7 @@ struct ipmi_sensors_arguments
   int output_sensor_state;
   char *sensor_state_config_file;
   int entity_sensor_names;
+  int output_sensor_thresholds;
   int no_sensor_type_output;
   int comma_separated_output;
   int no_header_output;
@@ -113,15 +113,13 @@ typedef struct ipmi_sensors_state_data
   ipmi_ctx_t ipmi_ctx;
   pstdout_state_t pstate;
   char *hostname;
-  ipmi_sdr_cache_ctx_t sdr_cache_ctx;
-  ipmi_sdr_parse_ctx_t sdr_parse_ctx;
+  ipmi_sdr_ctx_t sdr_ctx;
   ipmi_sensor_read_ctx_t sensor_read_ctx;
   ipmi_interpret_ctx_t interpret_ctx;
   int output_headers;
-  struct sensor_entity_id_counts entity_id_counts;
   struct sensor_column_width column_width;
   struct ipmi_oem_data oem_data;
   struct ipmi_sensors_interpret_oem_data_intel_node_manager intel_node_manager;
 } ipmi_sensors_state_data_t;
 
-#endif
+#endif /* IPMI_SENSORS_H */

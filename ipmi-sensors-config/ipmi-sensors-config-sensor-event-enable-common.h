@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  */
 
 
-#ifndef _IPMI_SENSORS_CONFIG_SENSOR_EVENT_ENABLE_COMMON_H_
-#define _IPMI_SENSORS_CONFIG_SENSOR_EVENT_ENABLE_COMMON_H_
+#ifndef IPMI_SENSORS_CONFIG_SENSOR_EVENT_ENABLE_COMMON_H
+#define IPMI_SENSORS_CONFIG_SENSOR_EVENT_ENABLE_COMMON_H
 
 #include "ipmi-sensors-config.h"
 #include "ipmi-sensors-config-sections.h"
@@ -40,8 +40,6 @@ config_err_t sensor_event_enable_enable_scanning_on_this_sensor_commit (const ch
                                                                         void *arg);
 
 int setup_sensor_event_enable_fields (ipmi_sensors_config_state_data_t *state_data,
-                                      const void *sdr_record,
-                                      unsigned int sdr_record_len,
                                       struct config_section *section);
 
-#endif /* _IPMI_SENSORS_CONFIG_SENSOR_EVENT_ENABLE_COMMON_H_ */
+#endif /* IPMI_SENSORS_CONFIG_SENSOR_EVENT_ENABLE_COMMON_H */

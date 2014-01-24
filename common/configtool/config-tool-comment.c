@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include <assert.h>
 
 #include "config-tool-comment.h"
+#include "config-tool-utils.h"
 
 #include "freeipmi-portability.h"
 #include "pstdout.h"
@@ -132,9 +133,9 @@ config_section_comments (pstdout_state_t pstate,
   if (!(inbuf = strdup (in)))
     goto cleanup;
 
-  PSTDOUT_FPRINTF (pstate,
-                   fp,
-                   "#\n");
+  config_pstdout_fprintf (pstate,
+			  fp,
+			  "#\n");
 
   /* XXX: assume no overrun */
   snprintf (section_name_buf,
@@ -147,13 +148,13 @@ config_section_comments (pstdout_state_t pstate,
                        buf,
                        FORMAT_COMMENT_BUFLEN) < 0)
     goto cleanup;
-  PSTDOUT_FPRINTF (pstate,
-                   fp,
-                   "%s",
-                   buf);
-  PSTDOUT_FPRINTF (pstate,
-                   fp,
-                   "#\n");
+  config_pstdout_fprintf (pstate,
+			  fp,
+			  "%s",
+			  buf);
+  config_pstdout_fprintf (pstate,
+			  fp,
+			  "#\n");
 
   tok = strtok_r (inbuf, "\n", &tokbuf);
   while (tok)
@@ -163,13 +164,13 @@ config_section_comments (pstdout_state_t pstate,
                            buf,
                            FORMAT_COMMENT_BUFLEN) < 0)
         goto cleanup;
-      PSTDOUT_FPRINTF (pstate,
-                       fp,
-                       "%s",
-                       buf);
-      PSTDOUT_FPRINTF (pstate,
-                       fp,
-                       "#\n");
+      config_pstdout_fprintf (pstate,
+			      fp,
+			      "%s",
+			      buf);
+      config_pstdout_fprintf (pstate,
+			      fp,
+			      "#\n");
 
       tok = strtok_r (NULL, "\n", &tokbuf);
     }

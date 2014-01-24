@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _CONFIG_TOOL_VALIDATE_H_
-#define _CONFIG_TOOL_VALIDATE_H_
+#ifndef CONFIG_TOOL_VALIDATE_H
+#define CONFIG_TOOL_VALIDATE_H
 
 #include <stdio.h>
 
@@ -77,4 +77,4 @@ config_validate_t config_mac_address_validate (const char *section_name,
                                                const char *value,
                                                void *arg);
 
-#endif /* _CONFIG_TOOL_VALIDATE_H_ */
+#endif /* CONFIG_TOOL_VALIDATE_H */

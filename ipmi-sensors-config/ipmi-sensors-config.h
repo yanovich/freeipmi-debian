@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 FreeIPMI Core Team
+ * Copyright (C) 2008-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_SENSORS_CONFIG_H
-#define _IPMI_SENSORS_CONFIG_H
+#ifndef IPMI_SENSORS_CONFIG_H
+#define IPMI_SENSORS_CONFIG_H
 
 #include <stdint.h>
 #include <freeipmi/freeipmi.h>
@@ -39,7 +39,6 @@
 struct ipmi_sensors_config_arguments
 {
   struct config_arguments config_args;
-  struct sdr_cmd_args sdr;
 };
 
 typedef struct ipmi_sensors_config_prog_data
@@ -55,8 +54,7 @@ typedef struct ipmi_sensors_config_state_data
   ipmi_ctx_t ipmi_ctx;
   pstdout_state_t pstate;
   struct config_section *sections;
-  ipmi_sdr_cache_ctx_t sdr_cache_ctx;
-  ipmi_sdr_parse_ctx_t sdr_parse_ctx;
+  ipmi_sdr_ctx_t sdr_ctx;
 } ipmi_sensors_config_state_data_t;
 
-#endif
+#endif /* IPMI_SENSORS_CONFIG_H */

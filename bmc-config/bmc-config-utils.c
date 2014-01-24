@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,9 +43,9 @@ load_lan_channel_numbers (bmc_config_state_data_t *state_data)
   if ((ret = ipmi_get_channel_numbers (state_data->ipmi_ctx,
                                        IPMI_CHANNEL_MEDIUM_TYPE_LAN_802_3,
                                        state_data->lan_channel_numbers,
-                                       CHANNEL_NUMBERS_MAX)) < 0)
+                                       IPMI_CHANNEL_NUMBERS_MAX)) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_get_channel_numbers: %s\n",
@@ -69,9 +69,9 @@ load_serial_channel_numbers (bmc_config_state_data_t *state_data)
   if ((ret = ipmi_get_channel_numbers (state_data->ipmi_ctx,
                                        IPMI_CHANNEL_MEDIUM_TYPE_RS232,
                                        state_data->serial_channel_numbers,
-                                       CHANNEL_NUMBERS_MAX)) < 0)
+                                       IPMI_CHANNEL_NUMBERS_MAX)) < 0)
     {
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_get_channel_numbers: %s\n",
@@ -94,7 +94,7 @@ _sol_channel_number_save (bmc_config_state_data_t *state_data,
   int found = 0;
 
   assert (state_data);
-  assert (state_data->sol_channel_numbers_count < CHANNEL_NUMBERS_MAX);
+  assert (state_data->sol_channel_numbers_count <= IPMI_CHANNEL_NUMBERS_MAX);
 
   for (i = 0; i < state_data->sol_channel_numbers_count; i++)
     {
@@ -128,7 +128,7 @@ _get_sol_channel_number_for_channel (bmc_config_state_data_t *state_data,
 
   assert (state_data);
 
-  if (state_data->prog_data->args->config_args.common.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SOL_CHANNEL_ASSUME_LAN_CHANNEL)
+  if (state_data->prog_data->args->config_args.common_args.section_specific_workaround_flags & IPMI_PARSE_SECTION_SPECIFIC_WORKAROUND_FLAGS_SOL_CHANNEL_ASSUME_LAN_CHANNEL)
     {
       _sol_channel_number_save (state_data, lan_channel_number, lan_channel_number);
       goto out;
@@ -159,7 +159,7 @@ _get_sol_channel_number_for_channel (bmc_config_state_data_t *state_data,
           goto out;
         }
 
-      if (state_data->prog_data->args->config_args.common.debug)
+      if (state_data->prog_data->args->config_args.common_args.debug)
         pstdout_fprintf (state_data->pstate,
                          stderr,
                          "ipmi_cmd_get_sol_configuration_parameters_sol_payload_channel: %s\n",

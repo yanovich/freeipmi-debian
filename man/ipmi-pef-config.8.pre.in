@@ -100,6 +100,7 @@ Community String on Channels 1 and 3 respectively.
 #include <@top_srcdir@/man/manpage-common-troubleshooting-heading-end.man>
 #include <@top_srcdir@/man/manpage-common-troubleshooting-outofband.man>
 #include <@top_srcdir@/man/manpage-common-troubleshooting-inband.man>
+#include <@top_srcdir@/man/manpage-common-troubleshooting-inband-outofband.man>
 #include <@top_srcdir@/man/manpage-common-workaround-heading-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-inband-text.man>
 #include <@top_srcdir@/man/manpage-common-workaround-outofband-common-text.man>
@@ -124,10 +125,11 @@ Show all difference between the current configuration and the pef-data2.conf fil
 .PP
 Commit all configuration values from the pef-data1.conf file.
 .PP
+#include <@top_srcdir@/man/manpage-common-config-diagnostics.man>
 #include <@top_srcdir@/man/manpage-common-known-issues.man>
 #include <@top_srcdir@/man/manpage-common-reporting-bugs.man>
 .SH "COPYRIGHT"
-Copyright \(co 2007-2012 FreeIPMI Core Team.  
+Copyright \(co 2007-2013 FreeIPMI Core Team.  
 #include <@top_srcdir@/man/manpage-common-gpl-program-text.man>
 .SH "SEE ALSO"
 freeipmi(7), bmc-config(8), ipmi-sensors-config(8),

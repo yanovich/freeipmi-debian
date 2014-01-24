@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_CHANNEL_UTIL_H
-#define _IPMI_CHANNEL_UTIL_H
+#ifndef IPMI_CHANNEL_UTIL_H
+#define IPMI_CHANNEL_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,4 +44,4 @@ int ipmi_get_channel_numbers (ipmi_ctx_t ctx,
 }
 #endif
 
-#endif /* ipmi-channel-util.h */
+#endif /* IPMI_CHANNEL_UTIL_H */

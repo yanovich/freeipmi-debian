@@ -1,7 +1,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_error.h,v 1.4 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2003-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -26,7 +26,7 @@
 /*****************************************************************************\
  *  $Id: ipmipower_error.h,v 1.4 2010-02-08 22:02:31 chu11 Exp $
  *****************************************************************************
- *  Copyright (C) 2007-2012 Lawrence Livermore National Security, LLC.
+ *  Copyright (C) 2007-2013 Lawrence Livermore National Security, LLC.
  *  Copyright (C) 2006-2007 The Regents of the University of California.
  *  Produced at Lawrence Livermore National Laboratory (cf, DISCLAIMER).
  *  Written by Albert Chu <chu11@llnl.gov>
@@ -49,8 +49,8 @@
  *  with Ipmiconsole.  If not, see <http://www.gnu.org/licenses/>.
 \*****************************************************************************/
 
-#ifndef _IPMIPOWER_ERROR_H
-#define _IPMIPOWER_ERROR_H
+#ifndef IPMIPOWER_ERROR_H
+#define IPMIPOWER_ERROR_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -68,7 +68,7 @@
     char __err[IPMIPOWER_ERROR_BUFLEN];                                         \
     int __len = 0;                                                              \
     memset (__err, '\0', IPMIPOWER_ERROR_BUFLEN);                               \
-    if (cmd_args.common.debug)                                                  \
+    if (cmd_args.common_args.debug)                                             \
       __len = snprintf (__err,                                                  \
                         IPMIPOWER_ERROR_BUFLEN,                                 \
                         "(%s, %s, %d): ",                                       \
@@ -91,7 +91,7 @@
   do {                                                                          \
     char __err[IPMIPOWER_ERROR_BUFLEN];                                         \
     int __len = 0;                                                              \
-    if (cmd_args.common.debug)                                                  \
+    if (cmd_args.common_args.debug)                                             \
       {                                                                         \
         memset (__err, '\0', IPMIPOWER_ERROR_BUFLEN);                           \
         __len = snprintf (__err,                                                \
@@ -121,4 +121,4 @@ void ipmipower_debug (const char *fmt, ...);
 
 char * __error_msg_create (const char *fmt, ...);
 
-#endif /* _IPMIPOWER_ERROR_H */
+#endif /* IPMIPOWER_ERROR_H */

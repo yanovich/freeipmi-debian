@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_EVENT_READING_TYPE_CODE_OEM_SPEC_H
-#define _IPMI_EVENT_READING_TYPE_CODE_OEM_SPEC_H
+#ifndef IPMI_EVENT_READING_TYPE_CODE_OEM_SPEC_H
+#define IPMI_EVENT_READING_TYPE_CODE_OEM_SPEC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +41,23 @@ extern "C" {
 
 /* achu: names taken from code, are correct names? */
 #define IPMI_EVENT_READING_TYPE_CODE_OEM_DELL_OEM_DIAGNOSTIC_EVENT_DATA 0x7E
+
+/*
+ * Dell Poweredge R720
+ */
+
+#define IPMI_EVENT_READING_TYPE_CODE_OEM_DELL_FAILURE                   0x8A
+
+/*******************************************
+ * HP                                      *
+ *******************************************/
+
+/*
+ * HP Proliant DL160 G8
+ */
+
+#define IPMI_EVENT_READING_TYPE_CODE_OEM_HP_UID_LIGHT                  0x70
+#define IPMI_EVENT_READING_TYPE_CODE_OEM_HP_HEALTH_LED                 0x71
 
 /*******************************************
  * Intel                                   *
@@ -142,6 +159,10 @@ extern "C" {
  * Supermicro X8SIE
  * Supermicro X9SCA-F-O (X9SCA_F_O)
  * Supermicro H8DGU-F (H8DGU_F)
+ * Supermicro X9DRi-F (X9DRI_F)
+ * Supermicro X9DRI-LN4F+ (X9DRI_LN4F_PLUS)
+ * Supermicro X9SPU-F-O (X9SPU_F_O)
+ * Supermicro X9SCM-iiF (X9SCM_IIF)
  */
 
 /* achu: not official names, named based on use context */
@@ -151,6 +172,4 @@ extern "C" {
 }
 #endif
 
-#endif /* ipmi-event-reading-type-code-oem-spec.h */
-
-
+#endif /* IPMI_EVENT_READING_TYPE_CODE_OEM_SPEC_H */

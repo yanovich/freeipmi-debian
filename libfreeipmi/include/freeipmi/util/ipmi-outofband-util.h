@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2012 FreeIPMI Core Team
+ * Copyright (C) 2003-2013 FreeIPMI Core Team
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef _IPMI_OUTOFBAND_UTIL_H
-#define _IPMI_OUTOFBAND_UTIL_H    1
+#ifndef IPMI_OUTOFBAND_UTIL_H
+#define IPMI_OUTOFBAND_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,6 +88,4 @@ int ipmi_check_open_session_maximum_privilege (uint8_t privilege_level,
 }
 #endif
 
-#endif /* ipmi-outofband-util.h */
-
-
+#endif /* IPMI_OUTOFBAND_UTIL_H */
