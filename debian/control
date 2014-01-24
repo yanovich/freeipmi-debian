@@ -78,7 +78,7 @@ Description: GNU IPMI - IPMI node detection tool
  .
  This package contains a tool and a daemon for detecting IPMI nodes.
 
-Package: libfreeipmi12
+Package: libfreeipmi15
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-common (= ${source:Version})
@@ -93,7 +93,7 @@ Description: GNU IPMI - libraries
 Package: libfreeipmi-dev
 Section: libdevel
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libfreeipmi12 (= ${binary:Version}), freeipmi-common (= ${source:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfreeipmi15 (= ${binary:Version}), freeipmi-common (= ${source:Version})
 Description: GNU IPMI - development package
  FreeIPMI is a collection of Intelligent Platform Management IPMI
  system software. It provides in-band and out-of-band software and a
@@ -126,7 +126,7 @@ Description: GNU IPMI - ipmidetect development package
  .
  This is the development package for libipmidetect.
 
-Package: libipmimonitoring5
+Package: libipmimonitoring5a
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, freeipmi-common (= ${source:Version})
@@ -141,7 +141,7 @@ Description: GNU IPMI - Sensor monitoring library
 Package: libipmimonitoring-dev
 Section: libdevel
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libipmimonitoring5 (= ${binary:Version}), freeipmi-common (= ${source:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libipmimonitoring5a (= ${binary:Version}), freeipmi-common (= ${source:Version})
 Description: GNU IPMI - ipmimonitoring development package
  FreeIPMI is a collection of Intelligent Platform Management IPMI
  system software. It provides in-band and out-of-band software and a
