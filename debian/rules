@@ -4,7 +4,7 @@
 # --fail-missing for dh_install
 # --link-doc for dh_installdocs
 %:
-	dh $@ --with autotools_dev --fail-missing --link-doc=freeipmi-common
+	dh $@ --parallel --with autotools_dev --fail-missing --link-doc=freeipmi-common
 
 override_dh_auto_configure:
 	: # suppress multiarch support for now
